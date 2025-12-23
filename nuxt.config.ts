@@ -36,10 +36,44 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "@vueuse/motion/nuxt",
     "@nuxtjs/sitemap",
+    "@nuxtjs/turnstile",
   ],
+
+  turnstile: {
+    siteKey:
+      process.env.NUXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA",
+  },
 
   site: {
     url: "https://maryestherbingo.com",
+  },
+
+  runtimeConfig: {
+    // Private keys (server-only)
+    turnstileSecretKey:
+      process.env.TURNSTILE_SECRET_KEY || "1x0000000000000000000000000000000AA", // Test key
+    emailApiKey: process.env.EMAIL_API_KEY,
+    adminToken: process.env.ADMIN_TOKEN || "change-me-in-prod",
+
+    // Public keys (client-side)
+    public: {
+      turnstileSiteKey:
+        process.env.NUXT_PUBLIC_TURNSTILE_SITE_KEY ||
+        "1x00000000000000000000AA", // Test key
+    },
+  },
+
+  nitro: {
+    storage: {
+      db: {
+        driver: "fs",
+        base: "./.data/db",
+      },
+      cache: {
+        driver: "fs",
+        base: "./.data/cache",
+      },
+    },
   },
 
   googleFonts: {

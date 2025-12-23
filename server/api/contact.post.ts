@@ -5,8 +5,8 @@ const contactSchema = z.object({
   name: z.string().min(2).max(100),
   email: z.string().email(),
   message: z.string().min(10).max(1000),
-  // Honeypot field - should be empty
-  website: z.string().optional(),
+  website: z.string().optional(), // Honeypot
+  turnstileToken: z.string().optional(), // Turnstile token
 });
 
 // Simple in-memory rate limiter
@@ -22,14 +22,13 @@ export default defineEventHandler(async (event) => {
   // Cleanup old entries
   if (Math.random() < 0.01) rateLimit.clear();
 
-  if (userRequests >= MAX_REQUESTS) {
+  if (rateLimitResult.limited) {
     throw createError({
       statusCode: 429,
-      statusMessage: "Too many requests. Please try again later.",
+      statusMessage: "Too many requests",
+      message: `Please try again in ${rateLimitResult.retryAfter} seconds.`,
     });
   }
-  rateLimit.set(ip, userRequests + 1);
-  setTimeout(() => rateLimit.delete(ip), RATE_LIMIT_WINDOW);
 
   // 2. Read & Validate Body
   const body = await readBody(event);
@@ -43,7 +42,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 3. Spam Check (Honeypot)
+  // 3. Honeypot Check
   if (result.data.website) {
     return { success: true, message: "Message sent" };
   }
