@@ -12,9 +12,8 @@
         <p
           class="text-xl md:text-2xl text-primary-100 max-w-3xl mx-auto font-light leading-relaxed"
         >
-          {{ BUSINESS_INFO.name }} is more than just a bingo hall. We are a
-          volunteer-driven organization dedicated to raising funds for vital
-          local charities.
+          {{ BUSINESS_INFO.name }} is a volunteer-supported organization
+          dedicated to assisting local community partners.
         </p>
       </div>
     </section>
@@ -26,8 +25,8 @@
             Supporting Our Community
           </h2>
           <p class="text-slate-600 max-w-2xl mx-auto text-lg">
-            A portion of our proceeds goes directly to supporting vital local
-            organizations. When you play with us, the whole community wins.
+            We are community-focused. Participation supports local organizations
+            and initiatives in our area.
           </p>
         </div>
 
@@ -91,13 +90,13 @@
             Powered by Volunteers
           </h2>
           <p class="text-slate-600 text-lg mb-8 leading-relaxed">
-            Our friendly staff is comprised largely of volunteers who are
+            Our friendly team is comprised largely of volunteers who are
             passionate about their community. Their dedication allows us to
-            maximize the contributions we make to our partner charities.
+            effectively support our partner organizations.
           </p>
           <div class="bg-white p-6 rounded-xl border-l-4 border-gold shadow-sm">
             <p class="text-primary-800 font-medium italic">
-              "Every card you buy contributes to a safer, healthier, and more
+              "Community involvement helps build a safer, healthier, and more
               vibrant Mary Esther."
             </p>
           </div>
@@ -114,34 +113,34 @@ import { BUSINESS_INFO } from "~/utils/business";
 
 useSeoMeta({
   title: "About Us | Mary Esther Bingo",
-  description: `Learn about ${BUSINESS_INFO.name}, our mission, and the local charities we support like Brain Injury Connection and Fire Rescue.`,
+  description: `Learn about ${BUSINESS_INFO.name}, our mission, and the local community organizations we support.`,
 });
 
 const charities = [
   {
     name: "Brain Injury Connection",
     description:
-      "Supporting individuals and families affected by brain injuries through education, advocacy, and community resources.",
+      "Supporting individuals and families affected by brain injuries through education and community resources.",
   },
   {
     name: "Mary Esther Fire Rescue",
     description:
-      "Helping our local heroes provide emergency services, fire prevention, and safety education to our community.",
+      "Helping our local heroes provide emergency services and safety education to our community.",
   },
   {
     name: "Emerald Coast Foundation",
     description:
-      "Dedicated to supporting children and youth in Northwest Florida through various charitable initiatives.",
+      "Dedicated to supporting children and youth in Northwest Florida through various initiatives.",
   },
   {
     name: "Okaloosa Walton Homeless Continuum",
     description:
-      "Working to end homelessness in our region through coordinated community efforts and support services.",
+      "Working to support homelessness initiatives in our region through coordinated community efforts.",
   },
   {
     name: "Eleanor J. Johnson Youth Center",
     description:
-      "Providing a safe and nurturing environment for after-school and summer programs for local youth.",
+      "Providing a supportive environment for after-school and summer programs for local youth.",
   },
 ];
 </script>

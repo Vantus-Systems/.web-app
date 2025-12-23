@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { readJson, writeJson } from "../utils/storage";
 
 const contactSchema = z.object({
   name: z.string().min(2).max(100),
@@ -8,8 +9,7 @@ const contactSchema = z.object({
   website: z.string().optional(),
 });
 
-// Simple in-memory rate limiter (for demo purposes)
-// In production, use Redis or Nuxt Security module
+// Simple in-memory rate limiter
 const rateLimit = new Map<string, number>();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const MAX_REQUESTS = 3;
@@ -17,10 +17,9 @@ const MAX_REQUESTS = 3;
 export default defineEventHandler(async (event) => {
   // 1. Rate Limiting
   const ip = getRequestHeader(event, "x-forwarded-for") || "unknown";
-  // const now = Date.now();
   const userRequests = rateLimit.get(ip) || 0;
 
-  // Cleanup old entries (simplistic garbage collection)
+  // Cleanup old entries
   if (Math.random() < 0.01) rateLimit.clear();
 
   if (userRequests >= MAX_REQUESTS) {
@@ -46,13 +45,22 @@ export default defineEventHandler(async (event) => {
 
   // 3. Spam Check (Honeypot)
   if (result.data.website) {
-    // Silently fail for bots
     return { success: true, message: "Message sent" };
   }
 
-  // 4. Send Email (Stub)
-  // In production: await sendEmail({ to: 'info@maryestherbingo.com', ... })
-  // console.log('Sending email from:', result.data.email);
+  // 4. Save Message
+  const messages = await readJson("messages.json", []);
+  const newMessage = {
+    id: Date.now().toString(),
+    ...result.data,
+    date: new Date().toISOString(),
+    read: false,
+  };
+  // Remove honeypot field if present in result.data (zod doesn't remove unknown keys unless stripped, but we defined it as optional)
+  delete (newMessage as any).website;
+
+  messages.unshift(newMessage);
+  await writeJson("messages.json", messages);
 
   return {
     success: true,

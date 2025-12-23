@@ -1,17 +1,14 @@
-export default defineEventHandler((_event) => {
-  // In production, this would read from a database, Redis, or a config file updated by an admin.
-  // For now, we simulate a "posted" jackpot that is consistent for the session or controlled via config.
+import { readJson } from "../utils/storage";
 
-  // Example: Read from runtime config if available, or static fallback
-  const baseJackpot = 2500;
-
-  // We can add a small deterministic variation based on the day of year to make it look "live" but consistent
-  // or just return the static value as requested in Option B.
-  // Option B: Static but clearly labeled.
+export default defineEventHandler(async (_event) => {
+  const jackpotData = await readJson("jackpot.json", {
+    value: 2500,
+    lastUpdated: new Date().toISOString(),
+  });
 
   return {
-    value: baseJackpot,
-    lastUpdated: new Date().toISOString(),
+    value: jackpotData.value,
+    lastUpdated: jackpotData.lastUpdated,
     currency: "USD",
   };
 });

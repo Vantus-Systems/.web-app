@@ -19,7 +19,7 @@
           class="inline-block bg-primary-800/80 backdrop-blur-sm px-4 py-2 rounded-full mb-6 border border-gold/30"
         >
           <span class="text-gold font-bold tracking-wider text-sm uppercase"
-            >Volunteer-Run • 100% Charity Support</span
+            >Volunteer-Supported • Community Focused</span
           >
         </div>
         <h1
@@ -27,14 +27,14 @@
         >
           <span
             class="text-transparent bg-clip-text bg-gradient-to-r from-gold-300 via-gold-100 to-gold-400"
-            >PLAY FOR CASH</span
+            >PLAY FOR PRIZES</span
           ><br />
           SUPPORT THE COMMUNITY
         </h1>
         <p
           class="text-xl md:text-2xl text-primary-100 mb-10 max-w-2xl mx-auto font-light"
         >
-          Northwest Florida's Premier Bingo Destination. Join us for high-stakes
+          Northwest Florida's Premier Bingo Destination. Join us for exciting
           games, comfortable seating, and a friendly atmosphere.
         </p>
         <div
@@ -159,7 +159,7 @@
 </template>
 
 <script setup lang="ts">
-import { Trophy, Utensils, Heart } from "lucide-vue-next";
+import { Trophy, Tablet, Heart } from "lucide-vue-next";
 import { useJackpotStore } from "~/stores/jackpot";
 import BaseButton from "~/components/ui/BaseButton.vue";
 import BaseCard from "~/components/ui/BaseCard.vue";
@@ -170,7 +170,7 @@ const jackpotStore = useJackpotStore();
 useSeoMeta({
   title: "Mary Esther Bingo | Premier Charity Bingo Hall in FL",
   description:
-    "Play high-stakes bingo at Mary Esther Bingo in Florida. Volunteer-run charity hall with daily jackpots, electronic bingo, and full-service buffet. Join us today!",
+    "Play bingo at Mary Esther Bingo in Florida. Volunteer-supported charity hall with daily jackpots and a friendly atmosphere. Join us today!",
 });
 
 useHead({
@@ -232,19 +232,19 @@ const features = [
   {
     title: "Daily Games",
     description:
-      "Join us every day for Morning, Matinee, and Evening sessions. There is always a game starting soon!",
+      "Sessions are scheduled throughout the day, offering multiple opportunities to join the game.",
     icon: Trophy,
   },
   {
-    title: "Full Service Buffet",
+    title: "Electronic Play",
     description:
-      "Enjoy a culinary experience while you play. Our Great Buffet offers delicious dining options for every taste.",
-    icon: Utensils,
+      "Experience modern gameplay with our state-of-the-art electronic terminals, offering a convenient way to play multiple cards.",
+    icon: Tablet,
   },
   {
-    title: "Charity Support",
+    title: "Community Focused",
     description:
-      "Playing here helps the community. We are a volunteer-run organization supporting local charities like Brain Injury Connection and Mary Esther Fire Rescue.",
+      "We are a volunteer-supported organization dedicated to assisting local community partners and organizations.",
     icon: Heart,
   },
 ];

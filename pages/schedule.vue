@@ -6,7 +6,7 @@
           Daily Schedule
         </h1>
         <p class="text-slate-600 max-w-2xl mx-auto text-lg">
-          Join us for Morning, Matinee, and Evening sessions.
+          Sessions are scheduled throughout the day.
         </p>
       </div>
 
@@ -24,7 +24,7 @@
             <h2
               class="text-2xl md:text-3xl font-heading font-bold text-white mb-2"
             >
-              Doors Open {{ BUSINESS_INFO.hours }}
+              Doors Typically Open 10:00 AM
             </h2>
             <p class="text-gold font-medium tracking-wide uppercase text-sm">
               Seven Days A Week
@@ -40,17 +40,17 @@
                 <th
                   class="p-6 font-heading font-bold text-lg border-b border-primary-100"
                 >
-                  Session Name
+                  Session Info
                 </th>
                 <th
                   class="p-6 font-heading font-bold text-lg border-b border-primary-100"
                 >
-                  Start Time
+                  Typical Start
                 </th>
                 <th
                   class="p-6 font-heading font-bold text-lg border-b border-primary-100 hidden md:table-cell"
                 >
-                  Details
+                  General Details
                 </th>
               </tr>
             </thead>
@@ -89,19 +89,14 @@
         <div
           class="p-8 bg-slate-50 border-t border-slate-200 text-center flex flex-col items-center"
         >
-          <p class="text-slate-500 mb-6 italic text-sm">
-            Schedule is subject to change during holidays and special events.
-            Please call
-            <a
-              :href="`tel:${BUSINESS_INFO.contact.phone.replace(/\D/g, '')}`"
-              class="text-primary-600 hover:underline"
-              >{{ BUSINESS_INFO.contact.phone }}</a
-            >
-            for the latest updates.
+          <p class="text-slate-500 mb-6 italic text-sm max-w-2xl">
+            Times and features may vary. Closing time is dependent on the day’s
+            activities. Availability and offerings are subject to change without
+            notice. Please contact us for the most current information.
           </p>
           <BaseButton variant="gold" class="gap-2 shadow-lg shadow-gold/20">
             <Download class="w-4 h-4" />
-            Download Monthly Program
+            Download Program
           </BaseButton>
         </div>
       </div>
@@ -116,29 +111,38 @@ import { BUSINESS_INFO } from "~/utils/business";
 
 useSeoMeta({
   title: "Schedule | Mary Esther Bingo",
-  description: `Check our daily bingo schedule at ${BUSINESS_INFO.name}. Morning, matinee, and evening sessions available every day.`,
+  description: `View our general schedule at ${BUSINESS_INFO.name}. Sessions are offered daily.`,
 });
 
 const sessions = [
   {
     name: "Doors Open",
-    time: "10:00 AM",
-    details: "Ticket sales begin. Breakfast/Lunch available at concession.",
+    time: "Typically 10:00 AM",
+    details: "Doors generally open in the morning for ticket sales.",
   },
   {
-    name: "Matinee Session",
-    time: "11:30 AM",
-    details: "Early bird games followed by main matinee program.",
+    name: "Daytime Sessions",
+    time: "Late Morning",
+    details:
+      "Gameplay generally begins shortly after doors open. Jackpot-style games may be featured.",
+  },
+  {
+    name: "Afternoon Play",
+    time: "Afternoon",
+    details:
+      "Progressive or special daytime games are commonly offered later in the afternoon.",
   },
   {
     name: "Evening Session",
-    time: "6:00 PM",
-    details: "Our most popular session. Progressive jackpots active.",
+    time: "Early Evening",
+    details:
+      "Evening session sales usually begin in the late afternoon. Sessions often conclude later in the night.",
   },
   {
-    name: "Late Night Speed",
-    time: "Approx 10:00 PM",
-    details: "Fast-paced games until closing (approx 12:30 AM).",
+    name: "Late Night",
+    time: "Following Evening",
+    details:
+      "Additional fast-paced or shorter-format games may be offered following evening sessions.",
   },
 ];
 </script>
