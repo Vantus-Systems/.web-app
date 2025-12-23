@@ -2,38 +2,107 @@
   <div class="bg-slate-50 min-h-screen py-20">
     <div class="container mx-auto px-4">
       <div class="text-center mb-16">
-        <h1 class="text-4xl md:text-5xl text-primary-900 mb-4">Daily Schedule</h1>
+        <h1 class="text-4xl md:text-5xl text-primary-900 mb-4">
+          Daily Schedule
+        </h1>
         <p class="text-slate-600 max-w-2xl mx-auto text-lg">
-          Join us for Morning, Matinee, and Evening sessions. Doors open early!
+          Join us for Morning, Matinee, and Evening sessions.
         </p>
       </div>
 
-      <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
-        <div class="bg-gold-400/10 p-6 text-center border-b border-gold/20">
-          <h2 class="text-2xl font-bold text-primary-900">Doors Open Daily at 10:00 AM</h2>
+      <div
+        class="max-w-4xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100"
+      >
+        <!-- Header Banner -->
+        <div
+          class="bg-primary-900 p-8 text-center border-b-4 border-gold relative overflow-hidden"
+        >
+          <div
+            class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1596706062103-3a7b95399c71?q=80&w=2000&auto=format&fit=crop')] opacity-10 bg-cover bg-center"
+          ></div>
+          <div class="relative z-10">
+            <h2
+              class="text-2xl md:text-3xl font-heading font-bold text-white mb-2"
+            >
+              Doors Open {{ BUSINESS_INFO.hours }}
+            </h2>
+            <p class="text-gold font-medium tracking-wide uppercase text-sm">
+              Seven Days A Week
+            </p>
+          </div>
         </div>
+
+        <!-- Schedule Table -->
         <div class="overflow-x-auto">
-          <table class="w-full text-left">
+          <table class="w-full text-left border-collapse">
             <thead>
-              <tr class="bg-primary-900 text-white">
-                <th class="p-6 font-heading font-bold text-lg">Session</th>
-                <th class="p-6 font-heading font-bold text-lg">Approximate Start Time</th>
+              <tr class="bg-primary-50 text-primary-900">
+                <th
+                  class="p-6 font-heading font-bold text-lg border-b border-primary-100"
+                >
+                  Session Name
+                </th>
+                <th
+                  class="p-6 font-heading font-bold text-lg border-b border-primary-100"
+                >
+                  Start Time
+                </th>
+                <th
+                  class="p-6 font-heading font-bold text-lg border-b border-primary-100 hidden md:table-cell"
+                >
+                  Details
+                </th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-              <tr v-for="session in sessions" :key="session.name" class="hover:bg-primary-50 transition-colors">
-                <td class="p-6 font-bold text-primary-900 text-xl">{{ session.name }}</td>
-                <td class="p-6 text-slate-600 text-lg font-medium">{{ session.time }}</td>
+              <tr
+                v-for="session in sessions"
+                :key="session.name"
+                class="hover:bg-gold/5 transition-colors group"
+              >
+                <td class="p-6">
+                  <span
+                    class="font-bold text-primary-900 text-xl block group-hover:text-primary-700 transition-colors"
+                    >{{ session.name }}</span
+                  >
+                  <span class="md:hidden text-sm text-slate-500 mt-1 block">{{
+                    session.details
+                  }}</span>
+                </td>
+                <td
+                  class="p-6 text-primary-800 text-lg font-mono font-medium whitespace-nowrap"
+                >
+                  <div class="flex items-center gap-2">
+                    <Clock class="w-4 h-4 text-gold" />
+                    {{ session.time }}
+                  </div>
+                </td>
+                <td class="p-6 text-slate-600 hidden md:table-cell">
+                  {{ session.details }}
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
-        <div class="p-8 bg-primary-50 border-t border-primary-100 text-center">
-            <p class="text-slate-600 mb-6 italic">Schedule is subject to change during holidays and special events.</p>
-            <BaseButton variant="outline" class="gap-2">
-                <Download class="w-4 h-4" />
-                Download Monthly Program
-            </BaseButton>
+
+        <!-- Footer / Download -->
+        <div
+          class="p-8 bg-slate-50 border-t border-slate-200 text-center flex flex-col items-center"
+        >
+          <p class="text-slate-500 mb-6 italic text-sm">
+            Schedule is subject to change during holidays and special events.
+            Please call
+            <a
+              :href="`tel:${BUSINESS_INFO.contact.phone.replace(/\D/g, '')}`"
+              class="text-primary-600 hover:underline"
+              >{{ BUSINESS_INFO.contact.phone }}</a
+            >
+            for the latest updates.
+          </p>
+          <BaseButton variant="gold" class="gap-2 shadow-lg shadow-gold/20">
+            <Download class="w-4 h-4" />
+            Download Monthly Program
+          </BaseButton>
         </div>
       </div>
     </div>
@@ -41,26 +110,35 @@
 </template>
 
 <script setup lang="ts">
-import { Download } from 'lucide-vue-next';
-import BaseButton from '~/components/ui/BaseButton.vue';
+import { Download, Clock } from "lucide-vue-next";
+import BaseButton from "~/components/ui/BaseButton.vue";
+import { BUSINESS_INFO } from "~/utils/business";
 
 useSeoMeta({
-  title: 'Schedule | Mary Esther Bingo',
-  description: 'Check our daily bingo schedule. Morning, matinee, and evening sessions available every day.',
+  title: "Schedule | Mary Esther Bingo",
+  description: `Check our daily bingo schedule at ${BUSINESS_INFO.name}. Morning, matinee, and evening sessions available every day.`,
 });
 
 const sessions = [
   {
-    name: 'Matinee Session',
-    time: '11:30 AM - 12:00 PM'
+    name: "Doors Open",
+    time: "10:00 AM",
+    details: "Ticket sales begin. Breakfast/Lunch available at concession.",
   },
   {
-    name: 'Evening Session',
-    time: '6:00 PM'
+    name: "Matinee Session",
+    time: "11:30 AM",
+    details: "Early bird games followed by main matinee program.",
   },
   {
-    name: 'Late Night',
-    time: 'Until approx 12:30 AM - 1:00 AM'
-  }
+    name: "Evening Session",
+    time: "6:00 PM",
+    details: "Our most popular session. Progressive jackpots active.",
+  },
+  {
+    name: "Late Night Speed",
+    time: "Approx 10:00 PM",
+    details: "Fast-paced games until closing (approx 12:30 AM).",
+  },
 ];
 </script>

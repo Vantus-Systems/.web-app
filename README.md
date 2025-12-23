@@ -1,75 +1,66 @@
-# Nuxt Minimal Starter
+# Mary Esther Bingo
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Official website for Mary Esther Bingo, a premier entertainment venue in Florida. This project is built with **Nuxt 3**, **Tailwind CSS**, and **Pinia** to deliver a "Fortune 10000" quality digital experience.
+
+## Features
+
+- **High-End Design:** Custom Emerald & Gold theme using Tailwind CSS.
+- **Performance:** Optimized images (`@nuxt/image`) and fonts (`@nuxtjs/google-fonts`).
+- **State Management:** Pinia for managing global state (e.g., Progressive Jackpot ticker).
+- **SEO & Accessibility:** Full Schema.org integration, semantic HTML, and ARIA compliance.
+- **Forms:** Contact form validation using VeeValidate and Zod.
+- **Data:** Centralized business configuration for easy updates.
+
+## Tech Stack
+
+- **Framework:** [Nuxt 3](https://nuxt.com/)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+- **Icons:** [Lucide Vue](https://lucide.dev/)
+- **Animation:** [VueUse Motion](https://motion.vueuse.org/)
+- **Validation:** [Zod](https://zod.dev/) & [VeeValidate](https://vee-validate.logaretm.com/)
 
 ## Setup
 
-Make sure to install dependencies:
+1. **Install Dependencies:**
+   ```bash
+   npm install
+   ```
+
+2. **Development Server:**
+   ```bash
+   npm run dev
+   ```
+   Visit `http://localhost:3000`.
+
+3. **Linting & Type Checking:**
+   ```bash
+   npm run lint
+   npm run typecheck
+   ```
+
+4. **Build for Production:**
+   ```bash
+   npm run build
+   ```
+
+## Project Structure
+
+- `assets/`: Global styles and images.
+- `components/`: Reusable Vue components (UI kit).
+- `layouts/`: Page layouts (Navigation, Footer).
+- `pages/`: Application routes (Home, Schedule, Pricing, etc.).
+- `stores/`: Pinia stores (Jackpot logic).
+- `utils/`: Constants and helper functions (`constants.ts`).
+
+## Deployment
+
+This application can be deployed to any node-compatible hosting service (Vercel, Netlify, DigitalOcean, etc.).
 
 ```bash
-# npm
-npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-# npm
 npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
+node .output/server/index.mjs
 ```
 
-Locally preview production build:
+## License
 
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+Copyright © 2024 Mary Esther Bingo. All rights reserved.

@@ -1,69 +1,106 @@
 <template>
   <div>
-    <!-- Hero -->
-    <section class="bg-primary-900 text-white py-24 relative overflow-hidden">
-      <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-gold rounded-full opacity-10 blur-3xl"></div>
-      <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 bg-primary-500 rounded-full opacity-20 blur-3xl"></div>
-
+    <!-- Hero/Intro -->
+    <section class="bg-primary-900 text-white py-20 relative overflow-hidden">
+      <div
+        class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=2940&auto=format&fit=crop')] opacity-10 bg-cover bg-center"
+      ></div>
       <div class="container mx-auto px-4 relative z-10 text-center">
-        <h1 class="text-4xl md:text-6xl font-heading font-bold mb-6">About Mary Esther Bingo</h1>
-        <p class="text-xl text-primary-100 max-w-3xl mx-auto font-light">
-          More than just a bingo hall. We are a community hub dedicated to entertainment and giving back.
+        <h1 class="text-4xl md:text-6xl font-heading font-bold mb-6">
+          Our Community Mission
+        </h1>
+        <p
+          class="text-xl md:text-2xl text-primary-100 max-w-3xl mx-auto font-light leading-relaxed"
+        >
+          {{ BUSINESS_INFO.name }} is more than just a bingo hall. We are a
+          volunteer-driven organization dedicated to raising funds for vital
+          local charities.
         </p>
       </div>
     </section>
 
-    <!-- Mission & Story -->
-    <section class="py-20 bg-white">
+    <section class="py-24 bg-white">
       <div class="container mx-auto px-4">
-        <div class="flex flex-col md:flex-row gap-16 items-center">
-          <div class="md:w-1/2">
-             <div class="relative">
-                <div class="absolute -inset-4 bg-gold/20 rounded-2xl transform rotate-3"></div>
-                <NuxtImg src="https://images.unsplash.com/photo-1526614180703-827d23e761f4?q=80&w=2835&auto=format&fit=crop" class="relative rounded-2xl shadow-xl w-full" />
-             </div>
+        <div class="text-center mb-16">
+          <h2 class="text-3xl md:text-5xl text-primary-900 mb-4">
+            Supporting Our Community
+          </h2>
+          <p class="text-slate-600 max-w-2xl mx-auto text-lg">
+            A portion of our proceeds goes directly to supporting vital local
+            organizations. When you play with us, the whole community wins.
+          </p>
+        </div>
+
+        <!-- Charity Logos Grid (Visual representation) -->
+        <div
+          class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 items-center justify-items-center mb-20 opacity-80"
+        >
+          <div
+            v-for="(charity, index) in charities"
+            :key="index"
+            class="w-full flex justify-center grayscale hover:grayscale-0 transition-all duration-300 transform hover:scale-105"
+          >
+            <div
+              class="bg-slate-50 p-6 rounded-xl border border-slate-100 w-full h-32 flex items-center justify-center text-center shadow-sm"
+            >
+              <span
+                class="font-bold text-primary-800 leading-tight text-sm md:text-base"
+                >{{ charity.name }}</span
+              >
+            </div>
           </div>
-          <div class="md:w-1/2 space-y-6">
-            <h2 class="text-3xl font-bold text-primary-900">A Tradition of Fun & Philanthropy</h2>
-            <p class="text-slate-600 leading-relaxed text-lg">
-              Mary Esther Bingo has been a staple of the Mary Esther community for years. We strive to provide a safe, comfortable, and exciting environment for players of all levels.
+        </div>
+
+        <!-- Detailed Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <BaseCard
+            v-for="(charity, index) in charities"
+            :key="index"
+            class="text-center hover:shadow-xl transition-shadow duration-300 border-t-4 border-t-gold"
+          >
+            <div
+              class="w-20 h-20 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-6 text-primary-700"
+            >
+              <HeartHandshake class="w-10 h-10" />
+            </div>
+            <h3 class="text-xl font-bold text-primary-900 mb-3">
+              {{ charity.name }}
+            </h3>
+            <p class="text-slate-600 leading-relaxed text-sm">
+              {{ charity.description }}
             </p>
-            <p class="text-slate-600 leading-relaxed text-lg">
-              Our facility features state-of-the-art electronic bingo machines, spacious seating, and a full-service snack bar. But what truly sets us apart is our commitment to our community.
-            </p>
-          </div>
+          </BaseCard>
         </div>
       </div>
     </section>
 
-    <!-- Charity Support -->
-    <section class="py-20 bg-slate-50">
-      <div class="container mx-auto px-4">
-        <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-5xl text-primary-900 mb-4">Supporting Our Community</h2>
-          <p class="text-slate-600 max-w-2xl mx-auto text-lg">
-            A portion of our proceeds goes directly to supporting vital local organizations.
+    <!-- Volunteer Section -->
+    <section class="py-20 bg-slate-50 border-t border-slate-200">
+      <div
+        class="container mx-auto px-4 flex flex-col md:flex-row items-center gap-12"
+      >
+        <div class="md:w-1/2">
+          <NuxtImg
+            src="https://images.unsplash.com/photo-1559027615-cd4628902d4a?q=80&w=2000&auto=format&fit=crop"
+            alt="Volunteers working together"
+            class="rounded-3xl shadow-xl w-full"
+          />
+        </div>
+        <div class="md:w-1/2">
+          <h2 class="text-3xl font-bold text-primary-900 mb-6">
+            Powered by Volunteers
+          </h2>
+          <p class="text-slate-600 text-lg mb-8 leading-relaxed">
+            Our friendly staff is comprised largely of volunteers who are
+            passionate about their community. Their dedication allows us to
+            maximize the contributions we make to our partner charities.
           </p>
-        </div>
-
-        <!-- Charity Logos Grid -->
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 items-center justify-items-center mb-16 opacity-80">
-           <!-- Placeholders for Logos - Using text for now but styled as logos -->
-           <div v-for="(charity, index) in charities" :key="index" class="w-full flex justify-center grayscale hover:grayscale-0 transition-all duration-300">
-              <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 w-full h-32 flex items-center justify-center text-center">
-                 <span class="font-bold text-primary-800 leading-tight">{{ charity.name }}</span>
-              </div>
-           </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <BaseCard v-for="(charity, index) in charities" :key="index" class="text-center hover:shadow-xl transition-shadow duration-300">
-            <div class="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6 text-primary-700">
-              <HeartHandshake class="w-10 h-10" />
-            </div>
-            <h3 class="text-xl font-bold text-primary-900 mb-3">{{ charity.name }}</h3>
-            <p class="text-slate-600">{{ charity.description }}</p>
-          </BaseCard>
+          <div class="bg-white p-6 rounded-xl border-l-4 border-gold shadow-sm">
+            <p class="text-primary-800 font-medium italic">
+              "Every card you buy contributes to a safer, healthier, and more
+              vibrant Mary Esther."
+            </p>
+          </div>
         </div>
       </div>
     </section>
@@ -71,34 +108,40 @@
 </template>
 
 <script setup lang="ts">
-import { HeartHandshake } from 'lucide-vue-next';
-import BaseCard from '~/components/ui/BaseCard.vue';
+import { HeartHandshake } from "lucide-vue-next";
+import BaseCard from "~/components/ui/BaseCard.vue";
+import { BUSINESS_INFO } from "~/utils/business";
 
 useSeoMeta({
-  title: 'About Us | Mary Esther Bingo',
-  description: 'Learn about Mary Esther Bingo, our mission, and the local charities we support like Brain Injury Connection and Fire Rescue.',
+  title: "About Us | Mary Esther Bingo",
+  description: `Learn about ${BUSINESS_INFO.name}, our mission, and the local charities we support like Brain Injury Connection and Fire Rescue.`,
 });
 
 const charities = [
   {
-    name: 'Brain Injury Connection',
-    description: 'Supporting individuals and families affected by brain injuries through education, advocacy, and community resources.'
+    name: "Brain Injury Connection",
+    description:
+      "Supporting individuals and families affected by brain injuries through education, advocacy, and community resources.",
   },
   {
-    name: 'Mary Esther Fire Rescue',
-    description: 'Helping our local heroes provide emergency services, fire prevention, and safety education to our community.'
+    name: "Mary Esther Fire Rescue",
+    description:
+      "Helping our local heroes provide emergency services, fire prevention, and safety education to our community.",
   },
   {
-    name: 'Emerald Coast Foundation',
-    description: 'Dedicated to supporting children and youth in Northwest Florida through various charitable initiatives.'
+    name: "Emerald Coast Foundation",
+    description:
+      "Dedicated to supporting children and youth in Northwest Florida through various charitable initiatives.",
   },
   {
-    name: 'Okaloosa Walton Homeless Continuum',
-    description: 'Working to end homelessness in our region through coordinated community efforts and support services.'
+    name: "Okaloosa Walton Homeless Continuum",
+    description:
+      "Working to end homelessness in our region through coordinated community efforts and support services.",
   },
   {
-    name: 'Eleanor J. Johnson Youth Center',
-    description: 'Providing a safe and nurturing environment for after-school and summer programs for local youth.'
-  }
+    name: "Eleanor J. Johnson Youth Center",
+    description:
+      "Providing a safe and nurturing environment for after-school and summer programs for local youth.",
+  },
 ];
 </script>

@@ -7,7 +7,10 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx",
+    "lint:fix": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx --fix",
+    "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
     "@pinia/nuxt": "^0.11.3",
@@ -26,8 +29,19 @@
   },
   "devDependencies": {
     "@nuxt/image": "^2.0.0",
+    "@nuxtjs/eslint-config-typescript": "^12.1.0",
+    "@nuxtjs/eslint-module": "^4.1.0",
     "@nuxtjs/google-fonts": "^3.2.0",
+    "@nuxtjs/sitemap": "^7.5.0",
     "@nuxtjs/tailwindcss": "^6.14.0",
-    "sass": "^1.97.1"
+    "@typescript-eslint/eslint-plugin": "^8.50.1",
+    "@typescript-eslint/parser": "^8.50.1",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "prettier": "^3.7.4",
+    "sass": "^1.97.1",
+    "typescript": "^5.9.3",
+    "vue-tsc": "^3.2.1"
   }
 }
