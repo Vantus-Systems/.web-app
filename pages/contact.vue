@@ -96,6 +96,11 @@
               </p>
             </div>
 
+            <!-- Turnstile Widget -->
+            <div class="flex justify-center">
+              <NuxtTurnstile v-model="turnstileToken" />
+            </div>
+
             <BaseButton
               type="submit"
               class="w-full py-4 text-lg"
@@ -221,6 +226,7 @@ const [name] = defineField("name");
 const [email] = defineField("email");
 const [message] = defineField("message");
 const honeypot = ref("");
+const turnstileToken = ref("");
 
 const isSubmitting = ref(false);
 const successMessage = ref("");
@@ -237,11 +243,13 @@ const onSubmit = handleSubmit(async (values) => {
       body: {
         ...values,
         website: honeypot.value,
+        turnstileToken: turnstileToken.value,
       },
     });
 
     successMessage.value = response.message || "Message sent successfully!";
     resetForm();
+    turnstileToken.value = ""; // Reset token
   } catch (error: any) {
     console.error("Submission error", error);
     errorMessage.value =

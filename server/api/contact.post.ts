@@ -4,33 +4,21 @@ const contactSchema = z.object({
   name: z.string().min(2).max(100),
   email: z.string().email(),
   message: z.string().min(10).max(1000),
-  // Honeypot field - should be empty
-  website: z.string().optional(),
+  website: z.string().optional(), // Honeypot
+  turnstileToken: z.string().optional(), // Turnstile token
 });
 
-// Simple in-memory rate limiter (for demo purposes)
-// In production, use Redis or Nuxt Security module
-const rateLimit = new Map<string, number>();
-const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
-const MAX_REQUESTS = 3;
-
 export default defineEventHandler(async (event) => {
-  // 1. Rate Limiting
-  const ip = getRequestHeader(event, "x-forwarded-for") || "unknown";
-  // const now = Date.now();
-  const userRequests = rateLimit.get(ip) || 0;
+  // 1. Storage-based Rate Limiting (Global, persistent)
+  const rateLimitResult = await useRateLimit(event, 5, 300); // 5 requests per 5 minutes
 
-  // Cleanup old entries (simplistic garbage collection)
-  if (Math.random() < 0.01) rateLimit.clear();
-
-  if (userRequests >= MAX_REQUESTS) {
+  if (rateLimitResult.limited) {
     throw createError({
       statusCode: 429,
-      statusMessage: "Too many requests. Please try again later.",
+      statusMessage: "Too many requests",
+      message: `Please try again in ${rateLimitResult.retryAfter} seconds.`,
     });
   }
-  rateLimit.set(ip, userRequests + 1);
-  setTimeout(() => rateLimit.delete(ip), RATE_LIMIT_WINDOW);
 
   // 2. Read & Validate Body
   const body = await readBody(event);
@@ -44,15 +32,36 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 3. Spam Check (Honeypot)
+  // 3. Honeypot Check
   if (result.data.website) {
-    // Silently fail for bots
+    // Silently success for bots
     return { success: true, message: "Message sent" };
   }
 
-  // 4. Send Email (Stub)
-  // In production: await sendEmail({ to: 'info@maryestherbingo.com', ... })
-  // console.log('Sending email from:', result.data.email);
+  // 4. Turnstile Verification
+  if (result.data.turnstileToken) {
+    const turnstile = await verifyTurnstileToken(result.data.turnstileToken);
+    if (!turnstile.success) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Invalid captcha",
+      });
+    }
+  }
+
+  // 5. Send Email via Service
+  const emailResult = await sendEmail({
+    to: "info@maryestherbingo.com", // In prod, use env var
+    subject: `New Contact from ${result.data.name}`,
+    text: `Email: ${result.data.email}\n\nMessage:\n${result.data.message}`,
+  });
+
+  if (!emailResult.success) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: "Failed to send message",
+    });
+  }
 
   return {
     success: true,

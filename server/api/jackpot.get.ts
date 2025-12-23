@@ -1,17 +1,17 @@
-export default defineEventHandler((_event) => {
-  // In production, this would read from a database, Redis, or a config file updated by an admin.
-  // For now, we simulate a "posted" jackpot that is consistent for the session or controlled via config.
+export default defineEventHandler(async (_event) => {
+  // Read from Nitro storage (simulating DB/Redis)
+  const storage = useStorage("db");
+  const jackpot = await storage.getItem("jackpot");
 
-  // Example: Read from runtime config if available, or static fallback
-  const baseJackpot = 2500;
+  // Fallback to default if not set
+  if (!jackpot) {
+    return {
+      value: 2500,
+      lastUpdated: new Date().toISOString(),
+      currency: "USD",
+      isDefault: true,
+    };
+  }
 
-  // We can add a small deterministic variation based on the day of year to make it look "live" but consistent
-  // or just return the static value as requested in Option B.
-  // Option B: Static but clearly labeled.
-
-  return {
-    value: baseJackpot,
-    lastUpdated: new Date().toISOString(),
-    currency: "USD",
-  };
+  return jackpot;
 });
