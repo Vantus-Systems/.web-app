@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { readJson, writeJson } from "../utils/storage";
 
 const contactSchema = z.object({
   name: z.string().min(2).max(100),
@@ -8,9 +9,18 @@ const contactSchema = z.object({
   turnstileToken: z.string().optional(), // Turnstile token
 });
 
+// Simple in-memory rate limiter
+const rateLimit = new Map<string, number>();
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const MAX_REQUESTS = 3;
+
 export default defineEventHandler(async (event) => {
-  // 1. Storage-based Rate Limiting (Global, persistent)
-  const rateLimitResult = await useRateLimit(event, 5, 300); // 5 requests per 5 minutes
+  // 1. Rate Limiting
+  const ip = getRequestHeader(event, "x-forwarded-for") || "unknown";
+  const userRequests = rateLimit.get(ip) || 0;
+
+  // Cleanup old entries
+  if (Math.random() < 0.01) rateLimit.clear();
 
   if (rateLimitResult.limited) {
     throw createError({
@@ -34,34 +44,22 @@ export default defineEventHandler(async (event) => {
 
   // 3. Honeypot Check
   if (result.data.website) {
-    // Silently success for bots
     return { success: true, message: "Message sent" };
   }
 
-  // 4. Turnstile Verification
-  if (result.data.turnstileToken) {
-    const turnstile = await verifyTurnstileToken(result.data.turnstileToken);
-    if (!turnstile.success) {
-      throw createError({
-        statusCode: 400,
-        statusMessage: "Invalid captcha",
-      });
-    }
-  }
+  // 4. Save Message
+  const messages = await readJson("messages.json", []);
+  const newMessage = {
+    id: Date.now().toString(),
+    ...result.data,
+    date: new Date().toISOString(),
+    read: false,
+  };
+  // Remove honeypot field if present in result.data (zod doesn't remove unknown keys unless stripped, but we defined it as optional)
+  delete (newMessage as any).website;
 
-  // 5. Send Email via Service
-  const emailResult = await sendEmail({
-    to: "info@maryestherbingo.com", // In prod, use env var
-    subject: `New Contact from ${result.data.name}`,
-    text: `Email: ${result.data.email}\n\nMessage:\n${result.data.message}`,
-  });
-
-  if (!emailResult.success) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Failed to send message",
-    });
-  }
+  messages.unshift(newMessage);
+  await writeJson("messages.json", messages);
 
   return {
     success: true,

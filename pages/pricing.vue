@@ -7,7 +7,7 @@
         </h1>
         <p class="text-slate-600 max-w-2xl mx-auto text-lg">
           Choose your way to play. We offer both paper and electronic bingo
-          machines.
+          options.
         </p>
       </div>
 
@@ -76,9 +76,8 @@
                 <ScrollText class="w-5 h-5" /> Traditional Paper
               </h3>
               <p class="text-slate-600">
-                Perfect for purists who love the dauber action. Manage your own
-                cards and feel the excitement as you mark off the winning
-                numbers.
+                Perfect for players who enjoy the traditional experience. Manage
+                your own cards and follow the game as numbers are called.
               </p>
             </div>
             <div>
@@ -88,8 +87,8 @@
                 <Tablet class="w-5 h-5" /> Tech-Assist Terminals
               </h3>
               <p class="text-slate-600">
-                Play more cards with ease! Our luxury "Traveler" handheld units
-                automatically daub your numbers, so you never miss a win.
+                Play multiple cards with ease! Our luxury handheld units assist
+                with tracking numbers during the game.
               </p>
             </div>
           </div>
@@ -120,7 +119,7 @@ import BaseButton from "~/components/ui/BaseButton.vue";
 useSeoMeta({
   title: "Pricing | Mary Esther Bingo",
   description:
-    "Affordable bingo packs for everyone. Check out our starter packs, high-roller options, and electronic bingo machine pricing.",
+    "View our bingo packs and pricing options. We offer both paper and electronic play formats.",
 });
 
 const packs = [
@@ -132,31 +131,31 @@ const packs = [
     features: [
       "Standard Paper Cards",
       "Access to Regular Games",
-      "Perfect for Beginners",
+      "Standard Format",
     ],
   },
   {
-    name: "Electronic Bundle",
+    name: "Tech-Assist Bundle",
     price: 50,
     description: "Enhanced play experience",
     popular: true,
     features: [
       "Tech-Assist Terminal Rental",
       "Multiple Card Faces",
-      "Automated Daubing",
-      "Increased Winning Chances",
+      "Automated Tracking",
+      "Expanded Play Options",
     ],
   },
   {
-    name: "High Roller VIP",
+    name: "Premier Access",
     price: 100,
-    description: "Maximize your winning potential",
+    description: "Extended gameplay features",
     popular: false,
     features: [
       "Maximum Electronic Cards",
       "Premium Paper Pack Included",
       "All Progressive Games",
-      "Best Value Per Card",
+      "Best Value Option",
     ],
   },
 ];

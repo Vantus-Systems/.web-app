@@ -37,6 +37,7 @@
               <input
                 id="name"
                 v-model="name"
+                name="name"
                 type="text"
                 class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-slate-50"
                 :class="{ 'border-red-500': errors.name }"
@@ -56,6 +57,7 @@
               <input
                 id="email"
                 v-model="email"
+                name="email"
                 type="email"
                 class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-slate-50"
                 :class="{ 'border-red-500': errors.email }"
@@ -75,6 +77,7 @@
               <textarea
                 id="message"
                 v-model="message"
+                name="message"
                 rows="4"
                 class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-slate-50"
                 :class="{ 'border-red-500': errors.message }"

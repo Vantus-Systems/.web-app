@@ -14,13 +14,13 @@ export const BUSINESS_INFO = {
     phonePlain: "8502264359",
     email: "info@maryestherbingo.com", // Placeholder
   },
-  hours: "Daily 10:00 AM – 12:30 AM",
+  hours: "Open Daily from 10:00 AM",
   social: {
     facebook: "https://facebook.com", // Placeholder
   },
   meta: {
     description:
-      "Premier bingo hall in Mary Esther, FL. High stakes jackpots, daily games, and charity support. Join the fun at 481 Mary Esther Blvd!",
+      "Premier bingo hall in Mary Esther, FL. Exciting jackpots, daily games, and community support. Join the fun at 481 Mary Esther Blvd!",
     themeColor: "#064e3b", // Emerald 900
     url: "https://maryestherbingo.com", // Production URL placeholder
   },
