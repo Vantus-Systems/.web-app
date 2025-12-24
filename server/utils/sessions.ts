@@ -1,8 +1,8 @@
-import fs from 'fs';
-import path from 'path';
-import crypto from 'crypto';
+import fs from "fs";
+import path from "path";
+import crypto from "crypto";
 
-const SESSIONS_FILE = path.resolve(process.cwd(), 'server/data/sessions.json');
+const SESSIONS_FILE = path.resolve(process.cwd(), "server/data/sessions.json");
 
 export interface Session {
   token: string;
@@ -22,7 +22,7 @@ function ensureSessionsFile() {
 function getSessions(): Session[] {
   ensureSessionsFile();
   try {
-    const data = fs.readFileSync(SESSIONS_FILE, 'utf-8');
+    const data = fs.readFileSync(SESSIONS_FILE, "utf-8");
     return JSON.parse(data);
   } catch {
     return [];
@@ -34,35 +34,37 @@ function saveSessions(sessions: Session[]) {
 }
 
 export const createSession = (userId: string): string => {
-  const token = crypto.randomBytes(32).toString('hex');
+  const token = crypto.randomBytes(32).toString("hex");
   const sessions = getSessions();
 
   // Clean up expired sessions while we're at it
   const now = Date.now();
-  const validSessions = sessions.filter(s => s.expires > now);
+  const validSessions = sessions.filter((s) => s.expires > now);
 
   validSessions.push({
     token,
     userId,
-    expires: now + SESSION_DURATION
+    expires: now + SESSION_DURATION,
   });
 
   saveSessions(validSessions);
   return token;
 };
 
-export const getServerSession = async (token: string): Promise<Session | undefined> => {
-  const sessions = await getSessions();
-  const tokenBuffer = Buffer.from(token, 'utf-8');
-
-export const getSession = (token: string): Session | undefined => {
+/**
+ * Find a session by token using a timing-safe comparison.
+ * Named explicitly `getSessionByToken` to avoid clashing with other packages' `getSession` exports.
+ */
+export const getSessionByToken = (token: string): Session | undefined => {
   const sessions = getSessions();
-  const tokenBuffer = Buffer.from(token, 'utf-8');
-  const session = sessions.find(s => {
-    const sessionTokenBuffer = Buffer.from(s.token, 'utf-8');
+  const tokenBuffer = Buffer.from(token, "utf-8");
+  const session = sessions.find((s) => {
+    const sessionTokenBuffer = Buffer.from(s.token, "utf-8");
     // crypto.timingSafeEqual throws if lengths differ, so check length first
-    return sessionTokenBuffer.length === tokenBuffer.length &&
-      crypto.timingSafeEqual(sessionTokenBuffer, tokenBuffer);
+    return (
+      sessionTokenBuffer.length === tokenBuffer.length &&
+      crypto.timingSafeEqual(sessionTokenBuffer, tokenBuffer)
+    );
   });
 
   if (session && session.expires > Date.now()) {
@@ -71,20 +73,24 @@ export const getSession = (token: string): Session | undefined => {
   return undefined;
 };
 
-  if (session && session.expires > Date.now()) {
-    return session;
-  }
-  return undefined;
+export const getServerSession = (token: string): Session | undefined => {
+  return getSessionByToken(token);
 };
 
 export const deleteSession = (token: string) => {
   let sessions = getSessions();
-import crypto from 'crypto'; // Ensure crypto is imported at the top
-
-sessions = sessions.filter(s =>
-  typeof s.token === 'string' &&
-  s.token.length === token.length &&
-  !crypto.timingSafeEqual(Buffer.from(s.token, 'utf-8'), Buffer.from(token, 'utf-8'))
-);
+  sessions = sessions.filter((s) => {
+    try {
+      if (typeof s.token !== "string" || s.token.length !== token.length)
+        return true; // keep if lengths differ
+      return !crypto.timingSafeEqual(
+        Buffer.from(s.token, "utf-8"),
+        Buffer.from(token, "utf-8"),
+      );
+    } catch {
+      // If timingSafeEqual throws for any reason, conservatively keep the session
+      return true;
+    }
+  });
   saveSessions(sessions);
 };

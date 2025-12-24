@@ -7,6 +7,9 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
+    "start": "serve -s .output/public",
+    
+    "start:server": "node .output/server/index.mjs",
     "postinstall": "nuxt prepare",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx",
     "lint:fix": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx --fix",
@@ -26,6 +29,8 @@
     "vue": "^3.5.26",
     "vue-router": "^4.6.4",
     "zod": "^3.24.1"
+    ,
+    "serve": "^14.1.2"
   },
   "devDependencies": {
     "@nuxt/image": "^2.0.0",

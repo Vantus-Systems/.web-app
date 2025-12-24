@@ -42,6 +42,10 @@ export default defineNuxtConfig({
     url: "https://maryestherbingo.com",
   },
 
+  sitemap: {
+    zeroRuntime: true,
+  },
+
   googleFonts: {
     families: {
       Inter: [400, 500, 600, 700],

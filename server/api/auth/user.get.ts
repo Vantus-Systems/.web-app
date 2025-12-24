@@ -1,27 +1,27 @@
-export default defineEventHandler((event) => {
+import { getCookie, createError } from "h3";
+import { getServerSession } from "../../utils/sessions";
+import { getUserById } from "../../utils/users";
+
+export default defineEventHandler(async (event) => {
   const token = getCookie(event, "auth_token");
-import crypto from 'crypto';
+  if (!token)
+    throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
 
-export default defineEventHandler((event) => {
-  const token = getCookie(event, "auth_token");
-  const expected = "valid_token";
-  // Ensure both are strings and compare length before using timingSafeEqual
-  if (typeof token === 'string' && Buffer.byteLength(token, 'utf-8') === Buffer.byteLength(expected, 'utf-8')) {
-    const tokenBuf = Buffer.from(token, 'utf-8');
-    const expectedBuf = Buffer.from(expected, 'utf-8');
-    if (crypto.timingSafeEqual(tokenBuf, expectedBuf)) {
-      return { user: { username: "admin" } };
-    }
-  }
+  const session = await getServerSession(token);
+  if (!session)
+    throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
 
-  throw createError({
-    statusCode: 401,
-    statusMessage: "Unauthorized",
-  });
-});
+  const user = getUserById(session.userId);
+  if (!user)
+    throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
 
-  throw createError({
-    statusCode: 401,
-    statusMessage: "Unauthorized",
-  });
+  // Return a safe user object (omit password/salt)
+  return {
+    user: {
+      id: user.id,
+      username: user.username,
+      name: user.name,
+      role: user.role,
+    },
+  };
 });

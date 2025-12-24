@@ -1,14 +1,13 @@
-import { H3Event } from 'h3';
-import { getServerSession } from './sessions';
-import { getUserById, type User } from './users';
+import { H3Event, getCookie, createError } from "h3";
+import { getServerSession } from "./sessions";
 
-export const requireAuth = (event: H3Event) => {
-  const authToken = getCookie(event, 'auth_token');
+export const requireAuth = async (event: H3Event) => {
+  const authToken = getCookie(event, "auth_token");
 
   if (!authToken) {
     throw createError({
       statusCode: 401,
-      statusMessage: 'Unauthorized: No token provided',
+      statusMessage: "Unauthorized: No token provided",
     });
   }
 
@@ -16,7 +15,7 @@ export const requireAuth = (event: H3Event) => {
   if (!session) {
     throw createError({
       statusCode: 401,
-      statusMessage: 'Unauthorized',
+      statusMessage: "Unauthorized",
     });
   }
 };
