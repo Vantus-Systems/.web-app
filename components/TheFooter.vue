@@ -15,7 +15,7 @@
           </div>
           <p class="text-primary-100 text-sm leading-relaxed">
             Experience the thrill of the game at Florida's premier bingo
-            destination. High stakes, community focus, and endless fun.
+            destination. Exciting gameplay, community focus, and endless fun.
           </p>
         </div>
 
@@ -66,10 +66,10 @@
 
         <div>
           <h3 class="text-gold font-bold mb-4 uppercase tracking-wider text-sm">
-            Legal & Trust
+            Guidelines
           </h3>
           <p class="text-primary-100 text-sm mb-4">
-            Must be 18+ to play. Please play responsibly.
+            Age requirements apply. Please play responsibly.
           </p>
           <ul class="space-y-2">
             <li>
@@ -99,7 +99,9 @@
           &copy; {{ new Date().getFullYear() }} {{ BUSINESS_INFO.name }}. All
           rights reserved.
         </p>
-        <p class="mt-2 md:mt-0 text-xs">Volunteer-run • 100% Charity Support</p>
+        <p class="mt-2 md:mt-0 text-xs">
+          Volunteer-Supported • Community Focused
+        </p>
       </div>
     </div>
   </footer>
