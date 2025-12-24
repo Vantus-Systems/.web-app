@@ -10,7 +10,7 @@ Official website for Mary Esther Bingo, a premier entertainment venue in Florida
 - **SEO & Accessibility:** Full Schema.org integration, semantic HTML, and ARIA compliance.
 - **Forms:** Contact form validation using Zod with server-side rate limiting and spam protection.
 - **Data:** Centralized business configuration for easy updates (`utils/business.ts`).
-- **Authentication:** Admin portal with session-based authentication and secure password hashing.
+- **Authentication:** Admin portal with session-based authentication. Note: the project includes a demo password-only login endpoint (`server/api/auth/login.post.ts`) that accepts the hardcoded password `admin123` for convenience; proper user-based auth is implemented in `server/utils/users.ts` (PBKDF2 hashes) and should be used in production.
 - **Real-time Updates:** Jackpot ticker refreshes every 5 minutes.
 
 ## Tech Stack
@@ -42,9 +42,12 @@ Official website for Mary Esther Bingo, a premier entertainment venue in Florida
    npm run typecheck
    ```
 
-4. **Build for Production:**
+4. **Build & Preview:**
    ```bash
    npm run build
+   npm run preview   # quick preview of the production build
+   # or run the built server directly
+   node .output/server/index.mjs
    ```
 
 ## Project Structure
@@ -63,11 +66,11 @@ Official website for Mary Esther Bingo, a premier entertainment venue in Florida
 
 ## Admin Portal
 
-The application includes an admin portal at `/admin/login` with the following default credentials:
-- **Username:** `admin`
-- **Password:** `admin123`
+The application includes an admin portal at `/admin/login`. Authentication now uses **username + password**:
 
-**⚠️ IMPORTANT:** Change the default admin password immediately in production.
+- Login accepts `{ username, password }` and verifies credentials using `server/utils/users.ts` (`getUserByUsername()` + `verifyPassword()`).
+- On success, the server sets a session cookie `auth_token` (httpOnly) and a client-visible `admin_auth` flag cookie for client-side navigation guards.
+- A default admin account exists for initial setup; credentials are `admin` / `admin123` (created by `server/utils/users.ts` when `server/data/users.json` is missing). Change this password immediately in production.
 
 ### Admin Features
 - User management (create/update users with roles: admin/mic)
@@ -96,11 +99,11 @@ The application includes an admin portal at `/admin/login` with the following de
 
 ## Authentication & Security
 
-- **Sessions:** Token-based sessions stored in `server/data/sessions.json`
-- **Cookies:** `auth_token` (httpOnly) and `auth_flag` (client-visible)
-- **Password Hashing:** PBKDF2 with 100,000 iterations, SHA-512
-- **Rate Limiting:** Login attempts and contact form submissions are rate-limited
-- **Spam Protection:** Honeypot field in contact form
+- **Sessions:** Token-based sessions stored in `server/data/sessions.json`.
+- **Cookies:** Server sets `auth_token` (httpOnly) for server sessions; the admin UI sets a client-only `admin_auth` cookie to gate client-side navigation to `/admin/*`.
+- **Password Hashing:** PBKDF2 (100,000 iterations, SHA-512) used by `server/utils/users.ts`.
+- **Rate Limiting:** Login attempts and contact form submissions are rate-limited (in-memory maps).
+- **Spam Protection:** Contact form contains a honeypot field `website` to reduce bot spam.
 
 ## Data Persistence
 
@@ -115,20 +118,25 @@ The application uses JSON files for data storage:
 
 ## Verification & Testing
 
-The project includes Playwright-based verification scripts:
+The project includes Playwright-based verification scripts (Python). These scripts expect a running dev server at `http://localhost:3000` and will capture screenshots (saved to `verification/` or the project root).
+
+Install Playwright and the browsers (Python):
 
 ```bash
-# Verify homepage routes
+python3 -m pip install --user playwright
+python3 -m playwright install
+```
+
+Run the scripts (after starting the dev server):
+
+```bash
+npm run dev
 python3 verify_homepage.py
-
-# Verify admin functionality
 python3 verification/verify_admin.py
-
-# Verify new features
 python3 verification/verify_new_features.py
 ```
 
-These scripts require a running dev server and will capture screenshots in the project root.
+Note: these scripts require Python 3.8+ and Playwright; if you change the admin auth flow, update the verification scripts accordingly.
 
 ## Deployment
 
@@ -141,9 +149,9 @@ node .output/server/index.mjs
 
 For production:
 1. Set `NODE_ENV=production`
-2. Change default admin password
-3. Ensure `server/data/` directory is writable
-4. Configure proper environment variables if needed
+2. Replace the demo login in `server/api/auth/login.post.ts` with a secure username/password flow (use `getUserByUsername()` + `verifyPassword()`); rotate default credentials
+3. Ensure `server/data/` directory is writable and persistent across deploys
+4. Configure secrets and environment variables as needed (e.g., secure cookie flags depend on `NODE_ENV`) 
 
 ## Development Workflow
 
@@ -164,6 +172,12 @@ For production:
    - Use `readJson`/`writeJson` from `server/utils/storage.ts` for data operations
    - Update verification scripts if needed
 
+## Notes & Troubleshooting
+
+- Demo login: `server/api/auth/login.post.ts` uses a hardcoded password for demo use; replace before production and ensure sessions are created with the user's id.
+- Playwright scripts assume the admin login flow and page structure; update them if you change auth or UI.
+- Storage: `server/data/` is file-backed and lacks concurrency protections; avoid concurrent writes in production unless migrated to a proper DB.
+
 ## License
 
-Copyright © 2024 Mary Esther Bingo. All rights reserved.
+Copyright © 2025 Mary Esther Bingo. All rights reserved.

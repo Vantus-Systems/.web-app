@@ -16,7 +16,7 @@ Architecture & important patterns
 - Data persistence: Simple JSON files in `server/data/` read/written via `server/utils/storage.ts`. Be mindful that these are single-process files (no DB transactions/concurrency safeguards).
 - Authentication:
   - Login creates a session token stored in `server/data/sessions.json` via `createSession()`.
-  - Cookie names: `auth_token` (httpOnly, server-only) and `auth_flag` (client-visible flag). Check `server/api/auth/login.post.ts`.
+  - Cookie names: `auth_token` (httpOnly, server-only) and `admin_auth` (client-visible flag). Check `server/api/auth/login.post.ts`. 
   - Default admin: When `server/data/users.json` is empty, the code creates a default admin `admin/admin123` (see `server/utils/users.ts`) — change in prod.
 
 API conventions and examples

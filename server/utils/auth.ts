@@ -1,7 +1,8 @@
 import { H3Event, getCookie, createError } from "h3";
 import { getServerSession } from "./sessions";
+import { getUserById } from "./users";
 
-export const requireAuth = async (event: H3Event) => {
+export const requireAuth = (event: H3Event) => {
   const authToken = getCookie(event, "auth_token");
 
   if (!authToken) {
@@ -11,11 +12,22 @@ export const requireAuth = async (event: H3Event) => {
     });
   }
 
-  const session = await getServerSession(authToken);
+  const session = getServerSession(authToken);
   if (!session) {
     throw createError({
       statusCode: 401,
-      statusMessage: "Unauthorized",
+      statusMessage: "Unauthorized: Invalid or expired token",
     });
   }
+
+  const user = getUserById(session.userId);
+  if (!user) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: "Unauthorized: User not found",
+    });
+  }
+
+  // Attach user to context for downstream use
+  (event as any).context.user = user;
 };

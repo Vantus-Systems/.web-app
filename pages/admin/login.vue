@@ -12,6 +12,18 @@
         <input type="hidden" name="remember" value="true" />
         <div class="rounded-md shadow-sm -space-y-px">
           <div>
+            <label for="username" class="sr-only">Username</label>
+            <input
+              id="username"
+              v-model="username"
+              name="username"
+              type="text"
+              required
+              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-gold-500 focus:border-gold-500 focus:z-10 sm:text-sm"
+              placeholder="Username"
+            />
+          </div>
+          <div>
             <label for="password" class="sr-only">Password</label>
             <input
               id="password"
@@ -19,8 +31,8 @@
               name="password"
               type="password"
               required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-gold-500 focus:border-gold-500 focus:z-10 sm:text-sm"
-              placeholder="Enter Admin Password"
+              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-gold-500 focus:border-gold-500 focus:z-10 sm:text-sm"
+              placeholder="Password"
             />
           </div>
         </div>
@@ -47,6 +59,7 @@
 </template>
 
 <script setup lang="ts">
+const username = ref("admin");
 const password = ref("");
 const error = ref("");
 const isLoading = ref(false);
@@ -60,11 +73,11 @@ const handleLogin = async () => {
   try {
     const { error: apiError } = await useFetch("/api/auth/login", {
       method: "POST",
-      body: { password: password.value },
+      body: { username: username.value, password: password.value },
     });
 
     if (apiError.value) {
-      error.value = "Invalid password";
+      error.value = "Invalid username or password";
     } else {
       // Store a simple token/flag
       const authCookie = useCookie("admin_auth");
