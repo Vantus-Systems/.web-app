@@ -10,7 +10,7 @@
               M
             </div>
             <span class="text-xl font-heading font-bold text-white">
-              {{ BUSINESS_INFO.name }}
+              {{ BUSINESS_INFO?.name }}
             </span>
           </div>
           <p class="text-primary-100 text-sm leading-relaxed">
@@ -35,7 +35,7 @@
           </ul>
         </div>
 
-        <div>
+        <div v-if="BUSINESS_INFO?.address">
           <h3 class="text-gold font-bold mb-4 uppercase tracking-wider text-sm">
             Contact Us
           </h3>
@@ -96,7 +96,7 @@
         class="border-t border-primary-900 pt-8 text-center text-primary-300 text-sm flex flex-col md:flex-row justify-between items-center"
       >
         <p>
-          &copy; {{ new Date().getFullYear() }} {{ BUSINESS_INFO.name }}. All
+          &copy; {{ new Date().getFullYear() }} {{ BUSINESS_INFO?.name }}. All
           rights reserved.
         </p>
         <p class="mt-2 md:mt-0 text-xs">
@@ -109,7 +109,10 @@
 
 <script setup lang="ts">
 import { MapPin, Phone, Clock } from "lucide-vue-next";
-import { BUSINESS_INFO } from "~/utils/business";
+import { useBusiness } from "~/composables/useBusiness";
+
+const { business: BUSINESS_INFO, fetchBusiness } = useBusiness();
+await fetchBusiness();
 
 const links = [
   { name: "Home", path: "/" },

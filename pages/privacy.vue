@@ -82,7 +82,10 @@
 </template>
 
 <script setup lang="ts">
-import { BUSINESS_INFO } from "~/utils/business";
+import { useBusiness } from "~/composables/useBusiness";
+
+const { business: BUSINESS_INFO, fetchBusiness } = useBusiness();
+await fetchBusiness();
 
 useSeoMeta({
   title: "Privacy Policy",

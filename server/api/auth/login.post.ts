@@ -1,90 +1,48 @@
-import { z } from "zod";
-import { setCookie, createError, readBody, getRequestIP } from "h3";
-import { getUserByUsername, verifyPassword } from "../../utils/users";
-import { createSession } from "../../utils/sessions";
+import { defineEventHandler, readBody, createError, setCookie } from 'h3'
+import { authService } from '@server/services/auth.service'
+import { randomBytes } from 'crypto'
+import { z } from 'zod'
 
 const loginSchema = z.object({
-  username: z.string().min(1),
-  password: z.string().min(1),
-});
-
-// Simple memory-based rate limiting keyed by IP
-const loginAttempts = new Map<string, { count: number; reset: number }>();
-const MAX_ATTEMPTS = 5;
-const BLOCK_DURATION = 15 * 60 * 1000; // 15 minutes
+  username: z.string(),
+  password: z.string(),
+})
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event);
+  const body = await readBody(event)
+  const { username, password } = loginSchema.parse(body)
 
-  const result = loginSchema.safeParse(body);
-  if (!result.success) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Invalid input",
-      data: result.error.errors,
-    });
+  const user = await authService.getUserByUsername(username)
+  if (!user) {
+    throw createError({ statusCode: 401, message: 'Invalid credentials' })
   }
 
-  const { username, password } = result.data;
-
-  // Rate limiting by IP
-  const ip = getRequestIP(event) || "unknown";
-  const now = Date.now();
-  const attempt = loginAttempts.get(ip);
-
-  if (attempt) {
-    if (now > attempt.reset) {
-      loginAttempts.delete(ip);
-    } else if (attempt.count >= MAX_ATTEMPTS) {
-      throw createError({
-        statusCode: 429,
-        statusMessage: "Too many login attempts. Please try again later.",
-      });
-    }
+  const valid = await authService.verifyPassword(password, user.password_hash)
+  if (!valid) {
+    throw createError({ statusCode: 401, message: 'Invalid credentials' })
   }
 
-  // Lookup user and verify password
-  const user = getUserByUsername(username);
-  if (!user || !verifyPassword(password, user.passwordHash, user.salt)) {
-    const current = loginAttempts.get(ip) || {
-      count: 0,
-      reset: now + BLOCK_DURATION,
-    };
-    current.count++;
-    loginAttempts.set(ip, current);
+  // Create session
+  const ip = event.node.req.socket.remoteAddress
+  const userAgent = event.node.req.headers['user-agent']
+  const { token, expiresAt } = await authService.createSession(user.id, ip, userAgent)
 
-    throw createError({
-      statusCode: 401,
-      statusMessage: "Invalid username or password",
-    });
-  }
-
-  // Clear rate limit for this IP on success
-  loginAttempts.delete(ip);
-
-  // Create session token (file-backed sessions)
-  const token = createSession(user.id);
-
-  // Set auth token (httpOnly)
-  setCookie(event, "auth_token", token, {
+  // Set cookies
+  setCookie(event, 'auth_token', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 60 * 60 * 24, // 1 day
-    path: "/",
-    sameSite: "lax",
-  });
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    expires: expiresAt,
+  })
 
-  // Set client-visible admin flag cookie (used by client-side navigation guard)
-  setCookie(event, "admin_auth", "1", {
-    httpOnly: false,
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 60 * 60 * 24,
-    path: "/",
-    sameSite: "lax",
-  });
+  // Set CSRF token cookie (readable by JS)
+  const csrfToken = randomBytes(16).toString('hex')
+  setCookie(event, 'csrf_token', csrfToken, {
+    httpOnly: false, // JS needs to read this
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    expires: expiresAt,
+  })
 
-  return {
-    success: true,
-    user: { username: user.username, name: user.name, role: user.role },
-  };
-});
+  return { success: true, user: { id: user.id, username: user.username, role: user.role } }
+})

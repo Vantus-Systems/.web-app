@@ -197,7 +197,11 @@ import { Download, Clock } from "lucide-vue-next";
 import { computed } from "vue";
 import BaseButton from "~/components/ui/BaseButton.vue";
 import DailySpecials from "~/components/DailySpecials.vue";
-import { BUSINESS_INFO } from "~/utils/business";
+import { useBusiness } from "~/composables/useBusiness";
+
+const { business: BUSINESS_INFO, fetchBusiness, schedule: sessions, fetchSchedule } = useBusiness();
+await fetchBusiness();
+await fetchSchedule();
 
 interface Session {
   name: string;
@@ -208,10 +212,6 @@ interface Session {
 
 useSeoMeta({
   title: "Schedule | Mary Esther Bingo",
-  description: `View our general schedule at ${BUSINESS_INFO.name}. Sessions are offered daily.`,
+  description: `View our general schedule at ${BUSINESS_INFO.value.name}. Sessions are offered daily.`,
 });
-
-const { data: sessionsData } = await useFetch<Session[]>("/api/schedule");
-
-const sessions = computed(() => sessionsData.value || []);
 </script>
