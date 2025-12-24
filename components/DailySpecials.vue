@@ -135,7 +135,8 @@
                 v-else
                 class="text-sm text-primary-300 border-l-4 border-primary-600 pl-4 py-2"
               >
-                🎯 Mary Esther Bingo • Fort Walton Beach's exclusive daily-session venue
+                🎯 Mary Esther Bingo • Fort Walton Beach's exclusive
+                daily-session venue
               </p>
             </div>
 
@@ -175,7 +176,11 @@
               </div>
 
               <p class="text-xs text-center text-primary-300 italic">
-                🔒 Secure parking • Professional staff • Family-friendly<sup class="text-red-400">*</sup> <span class="text-xs">18+</span>
+                🔒 Secure parking • Professional staff • Family-friendly<sup
+                  class="text-red-400"
+                  >*</sup
+                >
+                <span class="text-xs">18+</span>
               </p>
             </div>
           </div>
