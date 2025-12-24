@@ -63,6 +63,12 @@ export const getSession = (token: string): Session | undefined => {
 
 export const deleteSession = (token: string) => {
   let sessions = getSessions();
-  sessions = sessions.filter(s => s.token !== token);
+import crypto from 'crypto'; // Ensure crypto is imported at the top
+
+sessions = sessions.filter(s =>
+  typeof s.token === 'string' &&
+  s.token.length === token.length &&
+  !crypto.timingSafeEqual(Buffer.from(s.token, 'utf-8'), Buffer.from(token, 'utf-8'))
+);
   saveSessions(sessions);
 };
