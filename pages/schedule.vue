@@ -114,35 +114,5 @@ useSeoMeta({
   description: `View our general schedule at ${BUSINESS_INFO.name}. Sessions are offered daily.`,
 });
 
-const sessions = [
-  {
-    name: "Doors Open",
-    time: "Typically 10:00 AM",
-    details: "Doors generally open in the morning for ticket sales.",
-  },
-  {
-    name: "Daytime Sessions",
-    time: "Late Morning",
-    details:
-      "Gameplay generally begins shortly after doors open. Jackpot-style games may be featured.",
-  },
-  {
-    name: "Afternoon Play",
-    time: "Afternoon",
-    details:
-      "Progressive or special daytime games are commonly offered later in the afternoon.",
-  },
-  {
-    name: "Evening Session",
-    time: "Early Evening",
-    details:
-      "Evening session sales usually begin in the late afternoon. Sessions often conclude later in the night.",
-  },
-  {
-    name: "Late Night",
-    time: "Following Evening",
-    details:
-      "Additional fast-paced or shorter-format games may be offered following evening sessions.",
-  },
-];
+const { data: sessions } = await useFetch("/api/schedule");
 </script>

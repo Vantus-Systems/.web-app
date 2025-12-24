@@ -181,6 +181,28 @@
                 </form>
               </div>
 
+              <!-- Schedule Tab (JSON Editor) -->
+              <div v-if="currentTab === 'schedule'">
+                <p class="mb-4 text-sm text-gray-600">
+                  Edit the schedule JSON directly to update the daily schedule.
+                </p>
+                <form @submit.prevent="saveSchedule">
+                  <textarea
+                    v-model="scheduleJsonString"
+                    rows="15"
+                    class="font-mono text-sm w-full border border-gray-300 rounded p-4 bg-gray-50"
+                  ></textarea>
+                  <div class="flex justify-end mt-4">
+                    <button
+                      type="submit"
+                      class="bg-gold text-primary-900 px-4 py-2 rounded font-bold hover:bg-gold-600"
+                    >
+                      Save Schedule
+                    </button>
+                  </div>
+                </form>
+              </div>
+
               <!-- Messages Tab -->
               <div v-if="currentTab === 'messages'">
                 <div
@@ -232,6 +254,7 @@ const tabs = [
   { id: "business", name: "Business Info" },
   { id: "jackpot", name: "Jackpot" },
   { id: "pricing", name: "Pricing" },
+  { id: "schedule", name: "Schedule" },
   { id: "messages", name: "Messages" },
 ];
 const currentTab = ref("business");
@@ -244,6 +267,8 @@ const businessData = ref<any>({});
 const jackpotData = ref<any>({});
 const pricingData = ref<any>({});
 const pricingJsonString = ref("");
+const scheduleData = ref<any>([]);
+const scheduleJsonString = ref("");
 const messagesData = ref<any[]>([]);
 
 const pending = ref(true);
@@ -252,10 +277,11 @@ const pending = ref(true);
 const loadData = async () => {
   pending.value = true;
   try {
-    const [biz, jack, price, msgs] = await Promise.all([
+    const [biz, jack, price, sched, msgs] = await Promise.all([
       $fetch("/api/business"),
       $fetch("/api/jackpot"),
       $fetch("/api/pricing"),
+      $fetch("/api/schedule"),
       $fetch("/api/admin/messages").catch(() => []), // Handle error if auth fails or empty
     ]);
 
@@ -263,6 +289,8 @@ const loadData = async () => {
     jackpotData.value = jack;
     pricingData.value = price;
     pricingJsonString.value = JSON.stringify(price, null, 2);
+    scheduleData.value = sched;
+    scheduleJsonString.value = JSON.stringify(sched, null, 2);
     messagesData.value = msgs;
   } catch (e) {
     console.error("Failed to load data", e);
@@ -296,6 +324,17 @@ const savePricing = async () => {
     await $fetch("/api/admin/pricing", { method: "POST", body: parsed });
     pricingData.value = parsed;
     alert("Pricing Updated!");
+  } catch {
+    alert("Invalid JSON format!");
+  }
+};
+
+const saveSchedule = async () => {
+  try {
+    const parsed = JSON.parse(scheduleJsonString.value);
+    await $fetch("/api/admin/schedule", { method: "POST", body: parsed });
+    scheduleData.value = parsed;
+    alert("Schedule Updated!");
   } catch {
     alert("Invalid JSON format!");
   }
