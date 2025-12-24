@@ -1,5 +1,5 @@
 import { H3Event } from 'h3';
-import { getSession } from './sessions';
+import { getServerSession } from './sessions';
 import { getUserById, type User } from './users';
 
 export const requireAuth = async (event: H3Event) => {
@@ -12,7 +12,7 @@ export const requireAuth = async (event: H3Event) => {
     });
   }
 
-  const session = await getSession(authToken);
+  const session = await getServerSession(authToken);
   if (!session) {
     throw createError({
       statusCode: 401,

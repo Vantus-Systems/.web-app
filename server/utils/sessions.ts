@@ -37,7 +37,7 @@ export const createSession = async (userId: string): Promise<string> => {
   return token;
 };
 
-export const getSession = async (token: string): Promise<Session | undefined> => {
+export const getServerSession = async (token: string): Promise<Session | undefined> => {
   const sessions = await getSessions();
   const tokenBuffer = Buffer.from(token, 'utf-8');
 
