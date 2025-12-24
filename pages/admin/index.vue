@@ -11,7 +11,7 @@
             </div>
             <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
               <button
-                v-for="tab in tabs"
+                v-for="tab in visibleTabs"
                 :key="tab.id"
                 :class="[
                   currentTab === tab.id
@@ -25,7 +25,8 @@
               </button>
             </div>
           </div>
-          <div class="flex items-center">
+          <div class="flex items-center space-x-4">
+            <span v-if="user" class="text-gray-300 text-sm">Hello, {{ user.name }} ({{ user.role }})</span>
             <button
               class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
               @click="logout"
@@ -58,6 +59,88 @@
 
             <!-- Tab Content -->
             <div v-else class="bg-white shadow rounded-lg p-6">
+
+              <!-- Users Tab -->
+              <div v-if="currentTab === 'users' && isAdmin">
+                <div class="flex justify-end mb-4">
+                    <button @click="openUserModal()" class="bg-gold text-primary-900 px-4 py-2 rounded font-bold hover:bg-gold-600">
+                        Add New User
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr>
+                                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                                <th class="px-6 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr v-for="u in usersData" :key="u.id">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ u.name }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ u.username }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <span :class="u.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                                        {{ u.role === 'mic' ? 'MIC' : 'Admin' }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button @click="openUserModal(u)" class="text-indigo-600 hover:text-indigo-900 mr-4">Edit</button>
+                                    <button v-if="u.id !== user?.id" @click="deleteUser(u.id)" class="text-red-600 hover:text-red-900">Delete</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- User Modal -->
+                <div v-if="showUserModal" class="fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" @click="closeUserModal"></div>
+                        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+                            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                    {{ editingUser ? 'Edit User' : 'Add New User' }}
+                                </h3>
+                                <div class="mt-4 space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Name</label>
+                                        <input v-model="userForm.name" type="text" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Username</label>
+                                        <input v-model="userForm.username" type="text" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Role</label>
+                                        <select v-model="userForm.role" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                                            <option value="admin">Admin</option>
+                                            <option value="mic">MIC</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Password {{ editingUser ? '(Leave blank to keep current)' : '' }}</label>
+                                        <input v-model="userForm.password" type="password" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                <button type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-gold text-base font-medium text-primary-900 hover:bg-gold-600 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm" @click="saveUser">
+                                    Save
+                                </button>
+                                <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" @click="closeUserModal">
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              </div>
+
               <!-- Business Info Tab -->
               <div v-if="currentTab === 'business'">
                 <form class="space-y-6" @submit.prevent="saveBusinessInfo">
@@ -228,16 +311,7 @@ definePageMeta({
 });
 
 const router = useRouter();
-const tabs = [
-  { id: "business", name: "Business Info" },
-  { id: "jackpot", name: "Jackpot" },
-  { id: "pricing", name: "Pricing" },
-  { id: "messages", name: "Messages" },
-];
-const currentTab = ref("business");
-const currentTabName = computed(
-  () => tabs.find((t) => t.id === currentTab.value)?.name,
-);
+const user = ref<any>(null);
 
 // Data refs
 const businessData = ref<any>({});
@@ -245,33 +319,90 @@ const jackpotData = ref<any>({});
 const pricingData = ref<any>({});
 const pricingJsonString = ref("");
 const messagesData = ref<any[]>([]);
-
+const usersData = ref<any[]>([]);
 const pending = ref(true);
+
+// User Management State
+const showUserModal = ref(false);
+const editingUser = ref<any>(null);
+const userForm = ref({
+    name: '',
+    username: '',
+    role: 'mic',
+    password: ''
+});
+
+const isAdmin = computed(() => user.value?.role === 'admin');
+
+const tabs = computed(() => {
+    const baseTabs = [
+        { id: "business", name: "Business Info" },
+        { id: "jackpot", name: "Jackpot" },
+        { id: "pricing", name: "Pricing" },
+        { id: "messages", name: "Messages" },
+    ];
+    if (isAdmin.value) {
+        return [{ id: "users", name: "Users" }, ...baseTabs];
+    }
+    return baseTabs;
+});
+
+const visibleTabs = computed(() => tabs.value);
+
+const currentTab = ref("business");
+const currentTabName = computed(
+  () => tabs.value.find((t) => t.id === currentTab.value)?.name || "Dashboard",
+);
 
 // Fetch all data
 const loadData = async () => {
   pending.value = true;
   try {
-    const [biz, jack, price, msgs] = await Promise.all([
+    // Fetch user info first
+    user.value = await $fetch('/api/auth/user');
+
+    // Set default tab based on role if needed
+    if (user.value.role === 'admin' && currentTab.value === 'business') {
+        currentTab.value = 'users';
+    }
+
+    const promises: Promise<any>[] = [
       $fetch("/api/business"),
       $fetch("/api/jackpot"),
       $fetch("/api/pricing"),
-      $fetch("/api/admin/messages").catch(() => []), // Handle error if auth fails or empty
-    ]);
+      $fetch("/api/admin/messages").catch(() => []),
+    ];
 
-    businessData.value = biz;
-    jackpotData.value = jack;
-    pricingData.value = price;
-    pricingJsonString.value = JSON.stringify(price, null, 2);
-    messagesData.value = msgs;
-  } catch (e) {
+    if (user.value.role === 'admin') {
+        promises.push($fetch("/api/admin/users").catch(() => []));
+    }
+
+    const results = await Promise.all(promises);
+
+    businessData.value = results[0];
+    jackpotData.value = results[1];
+    pricingData.value = results[2];
+    pricingJsonString.value = JSON.stringify(results[2], null, 2);
+    messagesData.value = results[3];
+
+    if (user.value.role === 'admin') {
+        usersData.value = results[4];
+    }
+
+  } catch (e: any) {
     console.error("Failed to load data", e);
+    if (e.response?.status === 401) {
+        router.push('/admin/login');
+    }
   } finally {
     pending.value = false;
   }
 };
 
 onMounted(loadData);
+
+// Watch for tab changes to fetch data if needed (though we load all upfront for simplicity here)
+// If we had pagination we would fetch on demand.
 
 // Save Handlers
 const saveBusinessInfo = async () => {
@@ -303,8 +434,69 @@ const savePricing = async () => {
 
 const logout = async () => {
   await $fetch("/api/auth/logout", { method: "POST" });
-  const authCookie = useCookie("admin_auth");
-  authCookie.value = null;
-  router.push("/admin/login");
+  window.location.href = "/admin/login"; // Full reload to clear state
+};
+
+// User Management Functions
+const openUserModal = (u: any = null) => {
+    if (u) {
+        editingUser.value = u;
+        userForm.value = {
+            name: u.name,
+            username: u.username,
+            role: u.role,
+            password: ''
+        };
+    } else {
+        editingUser.value = null;
+        userForm.value = {
+            name: '',
+            username: '',
+            role: 'mic',
+            password: ''
+        };
+    }
+    showUserModal.value = true;
+};
+
+const closeUserModal = () => {
+    showUserModal.value = false;
+    editingUser.value = null;
+    userForm.value = { name: '', username: '', role: 'mic', password: '' };
+};
+
+const saveUser = async () => {
+    try {
+        const body: any = { ...userForm.value };
+        if (editingUser.value) {
+            body.id = editingUser.value.id;
+        }
+
+        const { user: savedUser } = await $fetch('/api/admin/users', {
+            method: 'POST',
+            body
+        });
+
+        if (editingUser.value) {
+            const index = usersData.value.findIndex(u => u.id === savedUser.id);
+            if (index !== -1) usersData.value[index] = savedUser;
+        } else {
+            usersData.value.push(savedUser);
+        }
+
+        closeUserModal();
+    } catch (e: any) {
+        alert(e.data?.statusMessage || "Failed to save user");
+    }
+};
+
+const deleteUser = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this user?")) return;
+    try {
+        await $fetch(`/api/admin/users?id=${id}`, { method: 'DELETE' });
+        usersData.value = usersData.value.filter(u => u.id !== id);
+    } catch (e: any) {
+        alert(e.data?.statusMessage || "Failed to delete user");
+    }
 };
 </script>

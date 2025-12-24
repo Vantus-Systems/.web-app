@@ -38,8 +38,6 @@ export default defineEventHandler(async (event) => {
       message: `Please try again in ${retryAfter} seconds.`,
     });
   }
-  rateLimit.set(ip, userRequests + 1);
-  setTimeout(() => rateLimit.delete(ip), RATE_LIMIT_WINDOW);
 
   userLimit.count++;
   rateLimit.set(ip, userLimit);
@@ -71,7 +69,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // 4. Save Message
-  const messages = await readJson("messages.json", []);
+  const messages: any[] = await readJson("messages.json", []);
   const newMessage = {
     id: Date.now().toString(),
     ...result.data,
