@@ -51,9 +51,9 @@ export const createSession = (userId: string): string => {
   return token;
 };
 
-export const getSession = (token: string): Session | undefined => {
-  const sessions = getSessions();
-import crypto from 'crypto'; // Ensure crypto is imported at the top of your file
+export const getServerSession = async (token: string): Promise<Session | undefined> => {
+  const sessions = await getSessions();
+  const tokenBuffer = Buffer.from(token, 'utf-8');
 
 export const getSession = (token: string): Session | undefined => {
   const sessions = getSessions();
