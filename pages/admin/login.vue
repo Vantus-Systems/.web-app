@@ -11,18 +11,6 @@
       <form class="mt-8 space-y-6" @submit.prevent="handleLogin">
         <input type="hidden" name="remember" value="true" />
         <div class="rounded-md shadow-sm -space-y-px">
-          <div class="mb-4">
-             <label for="username" class="sr-only">Username</label>
-             <input
-               id="username"
-               v-model="username"
-               name="username"
-               type="text"
-               required
-               class="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-gold-500 focus:border-gold-500 focus:z-10 sm:text-sm"
-               placeholder="Username"
-             />
-          </div>
           <div>
             <label for="password" class="sr-only">Password</label>
             <input
@@ -31,8 +19,8 @@
               name="password"
               type="password"
               required
-              class="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-gold-500 focus:border-gold-500 focus:z-10 sm:text-sm"
-              placeholder="Password"
+              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-gold-500 focus:border-gold-500 focus:z-10 sm:text-sm"
+              placeholder="Enter Admin Password"
             />
           </div>
         </div>
@@ -59,12 +47,12 @@
 </template>
 
 <script setup lang="ts">
-const username = ref("");
 const password = ref("");
 const error = ref("");
 const isLoading = ref(false);
 const router = useRouter();
 
+// Simple auth check
 const handleLogin = async () => {
   isLoading.value = true;
   error.value = "";
@@ -72,23 +60,18 @@ const handleLogin = async () => {
   try {
     const { error: apiError } = await useFetch("/api/auth/login", {
       method: "POST",
-      body: { username: username.value, password: password.value },
+      body: { password: password.value },
     });
 
     if (apiError.value) {
-        if (apiError.value.statusCode === 401) {
-            error.value = "Invalid username or password";
-        } else {
-            error.value = apiError.value.statusMessage || "An error occurred";
-        }
+      error.value = "Invalid password";
     } else {
-      // Successful login - cookie is set by server
-      // Force refresh to ensure middleware picks up the cookie if navigating
-      // But standard router push should work if cookie is set.
-      // Wait a moment for cookie to be set? Usually not needed.
-      window.location.href = "/admin";
+      // Store a simple token/flag
+      const authCookie = useCookie("admin_auth");
+      authCookie.value = "true";
+      router.push("/admin");
     }
-  } catch (e) {
+  } catch {
     error.value = "An error occurred";
   } finally {
     isLoading.value = false;
