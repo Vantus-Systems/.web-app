@@ -1,27 +1,32 @@
 [
   {
     "name": "Doors Open",
-    "time": "Typically 10:00 AM",
-    "details": "Doors generally open in the morning for ticket sales."
+    "time": "10:00 AM",
+    "pricing": "Pay-as-you-go: $1 / machine · 3 for $2 · 5 for $3",
+    "details": "Doors open for ticket sales. Play-as-you-go electronic games available: $1 per machine, 3 for $2, 5 for $3."
   },
   {
     "name": "Daytime Sessions",
-    "time": "Late Morning",
-    "details": "Gameplay generally begins shortly after doors open. Jackpot-style games may be featured."
+    "time": "10:30 AM",
+    "pricing": "$11 / machine · 2 for $22 · Paper: 1/$1 or 6 for $5",
+    "details": "Bingo session begins. Standard session pricing: $11 per machine, 2 machines for $22 (includes all 6-packs and double actions). Paper cards: 1 card $1, 6 cards for $5."
   },
   {
     "name": "Afternoon Play",
-    "time": "Afternoon",
-    "details": "Progressive or special daytime games are commonly offered later in the afternoon."
+    "time": "12:30 PM - 5:00 PM",
+    "pricing": "From $1 / machine · 4 for $3 · Paper games $1/card or 6 for $5",
+    "details": "Pricing continues at $1 per machine or 4 machines for $3. Special games like Letter X, Lucky Seven, and Treasure Hunt available ($1 per card or 6 for $5)."
   },
   {
     "name": "Evening Session",
-    "time": "Early Evening",
-    "details": "Evening session sales usually begin in the late afternoon. Sessions often conclude later in the night."
+    "time": "5:15 PM - 7:30 PM",
+    "pricing": "$11 / machine · 2 for $22 · Progressive daub tickets",
+    "details": "Session sales begin. Evening session at 7:30 PM: $11 per machine or 2 for $22. Daub tickets with progressive jackpot play during second half of session. Pull tabs (horse races) available all day."
   },
   {
-    "name": "Late Night",
-    "time": "Following Evening",
-    "details": "Additional fast-paced or shorter-format games may be offered following evening sessions."
+    "name": "Late Night Program",
+    "time": "After 10:00 PM",
+    "pricing": "Pay-as-you-go: $1 / machine · 3 for $2 · 5 for $3",
+    "details": "Pay-as-you-go games: $1 per machine, 3 for $2, 5 for $3. Fast-paced and shorter-format games. Session may continue until 10-11 PM."
   }
 ]

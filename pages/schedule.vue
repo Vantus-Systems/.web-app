@@ -28,91 +28,116 @@
             class="hidden md:block absolute left-8 top-24 bottom-0 w-0.5 bg-gradient-to-b from-gold-400 to-gold-200 opacity-30"
           ></div>
 
-          <!-- Session Card -->
+          <!-- Session Card (Premium) -->
           <div
-            class="relative bg-white border-2 border-slate-200 rounded-3xl p-8 md:p-10 shadow-lg hover:shadow-2xl hover:border-gold-300 hover:-translate-y-2 transition-all duration-500 group overflow-hidden"
+            class="relative bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden"
           >
-            <!-- Background Gradient on Hover -->
+            <!-- Pricing chip (top-right) -->
+            <div class="absolute -top-3 -right-3 z-10">
+              <div
+                v-if="session.pricing"
+                class="inline-flex items-center gap-2 bg-gradient-to-br from-gold-500 to-gold-600 text-white px-4 py-2 rounded-full shadow-lg text-sm font-black"
+              >
+                <svg
+                  class="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 1v22" />
+                  <path d="M17 5H9a4 4 0 1 0 0 8h8a4 4 0 1 1 0 8H7" />
+                </svg>
+                <span class="text-xs opacity-80">From</span>
+                <span class="text-sm">{{ session.pricing }}</span>
+              </div>
+            </div>
+
+            <!-- Decorative background -->
             <div
-              class="absolute inset-0 bg-gradient-to-br from-gold-50/0 to-gold-100/0 group-hover:from-gold-50/50 group-hover:to-gold-100/30 transition-all duration-500 rounded-3xl"
+              class="absolute inset-0 bg-gradient-to-br from-gold-50/0 to-gold-100/0 group-hover:from-gold-50/40 group-hover:to-gold-100/20 rounded-3xl transition-all duration-500"
             ></div>
 
-            <div
-              class="relative z-10 flex flex-col md:flex-row gap-6 md:gap-8 items-start md:items-center"
-            >
-              <!-- Icon Circle -->
-              <div
-                class="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-primary-900 to-primary-700 rounded-full flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"
-              >
-                <Clock
-                  class="w-8 h-8 md:w-10 md:h-10 text-gold-300"
-                  :stroke-width="2.5"
-                />
+            <div class="relative z-10 grid md:grid-cols-6 gap-6 items-center">
+              <div class="md:col-span-1 flex items-center">
+                <div
+                  class="w-16 h-16 rounded-full bg-gradient-to-br from-primary-900 to-primary-700 flex items-center justify-center shadow-xl transform transition-transform duration-300 group-hover:scale-105"
+                >
+                  <Clock class="w-8 h-8 text-gold-300" :stroke-width="2.5" />
+                </div>
               </div>
 
-              <!-- Content -->
-              <div class="flex-1 space-y-3">
-                <div class="flex items-start justify-between flex-wrap gap-4">
-                  <div>
-                    <h3
-                      class="text-2xl md:text-3xl font-black text-primary-900 mb-2 group-hover:text-primary-700 transition-colors"
-                    >
-                      {{ session.name }}
-                    </h3>
-                    <div
-                      class="inline-flex items-center gap-2 bg-primary-100 px-4 py-2 rounded-full text-primary-900 font-bold"
-                    >
-                      <svg
-                        class="w-4 h-4 text-gold-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                      <span class="text-base">{{ session.time }}</span>
-                    </div>
-                  </div>
+              <div class="md:col-span-4">
+                <h3
+                  class="text-2xl md:text-3xl font-black text-primary-900 mb-2"
+                >
+                  {{ session.name }}
+                </h3>
 
-                  <!-- Session Number Badge -->
+                <div class="flex items-center gap-3 flex-wrap">
                   <div
-                    class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-gold-500 to-gold-600 text-white rounded-full flex items-center justify-center font-black text-lg shadow-lg"
+                    class="inline-flex items-center gap-2 bg-primary-100 px-4 py-2 rounded-full text-primary-900 font-bold text-sm"
                   >
-                    {{ idx + 1 }}
+                    <svg
+                      class="w-4 h-4 text-gold-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <span class="text-sm">{{ session.time }}</span>
                   </div>
-                </div>
 
-                <p class="text-lg text-slate-700 leading-relaxed">
-                  {{ session.details }}
-                </p>
-
-                <!-- Quick Action Tags -->
-                <div class="flex flex-wrap gap-2 pt-2">
                   <span
                     v-if="idx === 0"
-                    class="inline-flex items-center gap-1 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold"
+                    class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-sm font-semibold"
                   >
-                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                    <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
                     Opens First
                   </span>
+
                   <span
                     v-if="idx === Math.floor(sessions.length / 2)"
-                    class="inline-flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold"
+                    class="inline-flex items-center gap-1 bg-blue-50 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold"
                   >
                     ⭐ Peak Hours
                   </span>
+
                   <span
                     v-if="idx === sessions.length - 1"
-                    class="inline-flex items-center gap-1 bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold"
+                    class="inline-flex items-center gap-1 bg-purple-50 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold"
                   >
                     🌙 Night Owl Friendly
                   </span>
                 </div>
+
+                <p class="text-slate-700 mt-3 leading-relaxed">
+                  {{ session.details }}
+                </p>
+              </div>
+
+              <div
+                class="md:col-span-1 flex md:flex-col items-center justify-end gap-4"
+              >
+                <div
+                  class="hidden md:flex w-14 h-14 rounded-full bg-gradient-to-br from-gold-500 to-gold-600 text-white flex items-center justify-center font-black shadow-lg text-lg"
+                >
+                  {{ idx + 1 }}
+                </div>
+
+                <NuxtLink to="/pricing" class="block">
+                  <BaseButton variant="outline" class="text-sm px-4 py-2"
+                    >View Pricing</BaseButton
+                  >
+                </NuxtLink>
               </div>
             </div>
           </div>
@@ -155,12 +180,21 @@
           </div>
         </div>
       </div>
+
+      <!-- Fine print -->
+      <p
+        class="text-center text-sm text-slate-500 italic mt-6 max-w-3xl mx-auto"
+      >
+        *Family-friendly — 18+. Valid photo ID may be required for entry and
+        prize claims.
+      </p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { Download, Clock } from "lucide-vue-next";
+import { computed } from "vue";
 import BaseButton from "~/components/ui/BaseButton.vue";
 import DailySpecials from "~/components/DailySpecials.vue";
 import { useBusiness } from "~/composables/useBusiness";
@@ -168,6 +202,13 @@ import { useBusiness } from "~/composables/useBusiness";
 const { business: BUSINESS_INFO, fetchBusiness, schedule: sessions, fetchSchedule } = useBusiness();
 await fetchBusiness();
 await fetchSchedule();
+
+interface Session {
+  name: string;
+  time: string;
+  details: string;
+  pricing?: string;
+}
 
 useSeoMeta({
   title: "Schedule | Mary Esther Bingo",
