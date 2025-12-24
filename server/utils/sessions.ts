@@ -53,7 +53,23 @@ export const createSession = (userId: string): string => {
 
 export const getSession = (token: string): Session | undefined => {
   const sessions = getSessions();
-  const session = sessions.find(s => s.token === token);
+import crypto from 'crypto'; // Ensure crypto is imported at the top of your file
+
+export const getSession = (token: string): Session | undefined => {
+  const sessions = getSessions();
+  const tokenBuffer = Buffer.from(token, 'utf-8');
+  const session = sessions.find(s => {
+    const sessionTokenBuffer = Buffer.from(s.token, 'utf-8');
+    // crypto.timingSafeEqual throws if lengths differ, so check length first
+    return sessionTokenBuffer.length === tokenBuffer.length &&
+      crypto.timingSafeEqual(sessionTokenBuffer, tokenBuffer);
+  });
+
+  if (session && session.expires > Date.now()) {
+    return session;
+  }
+  return undefined;
+};
 
   if (session && session.expires > Date.now()) {
     return session;
