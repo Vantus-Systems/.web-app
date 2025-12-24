@@ -75,7 +75,7 @@
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  {{ highlight?.time ?? "Sessions daily from 10 AM" }}
+                  {{ highlight?.time ?? "Bingo daily starting at 10:30 AM" }}
                 </span>
               </div>
 
@@ -135,9 +135,7 @@
                 v-else
                 class="text-sm text-primary-300 border-l-4 border-primary-600 pl-4 py-2"
               >
-                🎯 Mary Esther Bingo • Fort Walton Beach's exclusive
-                daily-session venue<br />
-                Nearest competitors: Crestview, Pensacola, Panama City
+                🎯 Mary Esther Bingo • Fort Walton Beach's exclusive daily-session venue
               </p>
             </div>
 
@@ -154,7 +152,7 @@
                 >
                   200+
                 </p>
-                <p class="text-sm text-primary-200">Players join us nightly</p>
+                <p class="text-sm text-primary-200">players join us daily</p>
               </div>
 
               <div class="flex flex-col gap-3">
@@ -177,7 +175,7 @@
               </div>
 
               <p class="text-xs text-center text-primary-300 italic">
-                🔒 Secure parking • Professional staff • Family-friendly
+                🔒 Secure parking • Professional staff • Family-friendly<sup class="text-red-400">*</sup> <span class="text-xs">18+</span>
               </p>
             </div>
           </div>

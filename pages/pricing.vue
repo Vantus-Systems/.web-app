@@ -741,7 +741,14 @@ useSeoMeta({
     "View our session prices, machine bundles, and special game rates. Affordable entertainment daily!",
 });
 
-const { data: pricing, pending } = await useFetch("/api/pricing");
+interface Pricing {
+  faqs: {
+    question: string;
+    answer: string;
+  }[];
+}
+
+const { data: pricing, pending } = await useFetch<Pricing>("/api/pricing");
 </script>
 
 <style scoped>
