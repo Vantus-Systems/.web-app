@@ -4,6 +4,6 @@ import { requireAuth } from "~/server/utils/auth";
 export default defineEventHandler(async (event) => {
   requireAuth(event);
   const body = await readBody(event);
-  await writeJson("jackpot.json", body);
+  await writeJson("business.json", body);
   return { success: true };
 });

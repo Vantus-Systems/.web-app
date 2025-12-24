@@ -5,8 +5,8 @@ const contactSchema = z.object({
   name: z.string().min(2).max(100),
   email: z.string().email(),
   message: z.string().min(10).max(1000),
-  website: z.string().optional(), // Honeypot
-  turnstileToken: z.string().optional(), // Turnstile token
+  // Honeypot field - should be empty
+  website: z.string().optional(),
 });
 
 // Simple in-memory rate limiter
@@ -38,6 +38,8 @@ export default defineEventHandler(async (event) => {
       message: `Please try again in ${retryAfter} seconds.`,
     });
   }
+  rateLimit.set(ip, userRequests + 1);
+  setTimeout(() => rateLimit.delete(ip), RATE_LIMIT_WINDOW);
 
   userLimit.count++;
   rateLimit.set(ip, userLimit);
@@ -63,7 +65,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 3. Honeypot Check
+  // 3. Spam Check (Honeypot)
   if (result.data.website) {
     return { success: true, message: "Message sent" };
   }
