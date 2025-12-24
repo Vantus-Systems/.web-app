@@ -1,25 +1,21 @@
-export default defineEventHandler((event) => {
-  const token = getCookie(event, "auth_token");
-import crypto from 'crypto';
+import { requireAuth } from '../../utils/auth';
 
-export default defineEventHandler((event) => {
-  const token = getCookie(event, "auth_token");
-  const expected = "valid_token";
-  // Ensure both are strings and compare length before using timingSafeEqual
-  if (typeof token === 'string' && Buffer.byteLength(token, 'utf-8') === Buffer.byteLength(expected, 'utf-8')) {
-    const tokenBuf = Buffer.from(token, 'utf-8');
-    const expectedBuf = Buffer.from(expected, 'utf-8');
-    if (crypto.timingSafeEqual(tokenBuf, expectedBuf)) {
-      return { user: { username: "admin" } };
-    }
+export default defineEventHandler(async (event) => {
+  await requireAuth(event);
+
+  const user = event.context.user;
+
+  if (user) {
+    return {
+      user: {
+        username: user.username,
+        role: user.role,
+        name: user.name
+      }
+    };
   }
 
-  throw createError({
-    statusCode: 401,
-    statusMessage: "Unauthorized",
-  });
-});
-
+  // Should be caught by requireAuth, but just in case
   throw createError({
     statusCode: 401,
     statusMessage: "Unauthorized",
