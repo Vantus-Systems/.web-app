@@ -2,7 +2,7 @@
   <div class="bg-white min-h-screen">
     <!-- Hero Section -->
     <section
-      class="relative bg-primary-900 text-white overflow-hidden py-24 md:py-32"
+      class="relative bg-gradient-to-br from-primary-950 via-primary-900 to-primary-800 text-white overflow-hidden py-24 md:py-36"
     >
       <div class="absolute inset-0 opacity-5">
         <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -19,34 +19,95 @@
           <rect width="100%" height="100%" fill="url(#grid)" />
         </svg>
       </div>
+      <div
+        class="absolute inset-0 bg-gradient-to-t from-primary-950/90 to-transparent"
+      ></div>
 
       <div class="relative z-10 container mx-auto px-4 text-center">
-        <span
-          class="inline-block bg-gold-500/20 border border-gold-400/50 text-gold-300 px-4 py-2 rounded-full text-sm font-semibold uppercase tracking-wider mb-6"
+        <div
+          v-motion-fade-visible
+          class="inline-flex items-center gap-2 bg-gold-500/20 backdrop-blur-sm border border-gold-400/50 text-gold-300 px-6 py-3 rounded-full text-sm font-bold uppercase tracking-[0.3em] mb-8 shadow-lg shadow-gold/20"
         >
-          Transparent Pricing • Fair Value
-        </span>
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fill-rule="evenodd"
+              d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          Transparent Pricing • No Hidden Fees • Best Value Guarantee
+        </div>
         <h1
-          class="text-5xl md:text-6xl font-black text-white mb-6 leading-tight"
+          v-motion-fade-visible
+          class="text-5xl md:text-7xl lg:text-8xl font-black mb-8 leading-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-gold-100 to-gold-300 drop-shadow-2xl"
         >
-          Gaming Options for Every Budget
+          Play More, Save More
         </h1>
         <p
-          class="text-xl text-primary-100 max-w-3xl mx-auto mb-8 leading-relaxed"
+          v-motion-fade-visible
+          class="text-xl md:text-2xl text-primary-100 max-w-3xl mx-auto mb-10 leading-relaxed font-light"
         >
           Whether you're here for daytime casual play or our premium evening
-          session, we offer unbeatable value with clear, honest pricing.
+          session, we offer unbeatable value with clear, honest pricing. No
+          gimmicks, just great gaming.
         </p>
+
+        <!-- Trust Badges -->
+        <div
+          v-motion-fade-visible
+          class="flex flex-wrap items-center justify-center gap-6 mb-10"
+        >
+          <div class="flex items-center gap-2 text-primary-200 text-sm">
+            <svg
+              class="w-5 h-5 text-gold-400"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
+            </svg>
+            <span>200+ Daily Players</span>
+          </div>
+          <div class="flex items-center gap-2 text-primary-200 text-sm">
+            <svg
+              class="w-5 h-5 text-gold-400"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            <span>7-Days-A-Week Sessions</span>
+          </div>
+          <div class="flex items-center gap-2 text-primary-200 text-sm">
+            <svg
+              class="w-5 h-5 text-gold-400"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"
+              />
+              <path
+                d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z"
+              />
+            </svg>
+            <span>Free Secure Parking</span>
+          </div>
+        </div>
+
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
           <a
             href="#daytime"
-            class="bg-gold-500 hover:bg-gold-600 text-primary-900 font-bold px-8 py-4 rounded-lg transition-all transform hover:-translate-y-1 shadow-lg"
+            class="bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-primary-900 font-black px-10 py-5 rounded-2xl transition-all transform hover:-translate-y-2 shadow-2xl shadow-gold/30 text-lg"
           >
-            Daytime Play
+            Daytime Play →
           </a>
           <a
             href="#evening"
-            class="bg-white/10 hover:bg-white/20 border-2 border-white text-white font-bold px-8 py-4 rounded-lg transition-all"
+            class="bg-white/10 hover:bg-white/20 backdrop-blur-sm border-2 border-white/70 text-white font-bold px-10 py-5 rounded-2xl transition-all hover:-translate-y-1 text-lg"
           >
             Evening Session
           </a>
@@ -498,6 +559,131 @@
                 Receive 1 complimentary U-PIK card as our thank you for joining
                 us
               </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== TESTIMONIALS SECTION ===== -->
+        <section class="scroll-mt-20">
+          <div class="text-center mb-16">
+            <span
+              class="inline-block bg-gold-100 text-gold-800 px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider mb-4"
+            >
+              Community Voices
+            </span>
+            <h2 class="text-4xl md:text-5xl font-black text-primary-900 mb-6">
+              What Our Players Say
+            </h2>
+            <p class="text-xl text-slate-600 max-w-2xl mx-auto">
+              Real feedback from real players who choose Mary Esther Bingo every
+              week
+            </p>
+          </div>
+
+          <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div
+              v-motion-fade-visible
+              class="bg-gradient-to-br from-white to-slate-50 border-2 border-slate-200 rounded-3xl p-8 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300"
+            >
+              <div class="flex items-center gap-2 mb-4">
+                <svg
+                  v-for="i in 5"
+                  :key="i"
+                  class="w-5 h-5 text-gold-500"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                  />
+                </svg>
+              </div>
+              <p class="text-slate-700 leading-relaxed mb-6 italic">
+                "Saved $15 on the Friday night bundle! The $22 for 2 machines
+                deal includes everything you need. Best value in Northwest
+                Florida."
+              </p>
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-12 h-12 bg-gradient-to-br from-gold-400 to-gold-600 rounded-full flex items-center justify-center text-white font-bold text-lg"
+                >
+                  M
+                </div>
+                <div>
+                  <p class="font-bold text-primary-900">Maria S.</p>
+                  <p class="text-sm text-slate-500">Friday Regular</p>
+                </div>
+              </div>
+            </div>
+
+            <div
+              v-motion-fade-visible
+              class="bg-gradient-to-br from-white to-slate-50 border-2 border-slate-200 rounded-3xl p-8 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300"
+            >
+              <div class="flex items-center gap-2 mb-4">
+                <svg
+                  v-for="i in 5"
+                  :key="i"
+                  class="w-5 h-5 text-gold-500"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                  />
+                </svg>
+              </div>
+              <p class="text-slate-700 leading-relaxed mb-6 italic">
+                "Love the daytime play-as-you-go option. I can drop in for an
+                hour or stay all afternoon — my budget, my choice. Way better
+                than driving to Pensacola!"
+              </p>
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-12 h-12 bg-gradient-to-br from-gold-400 to-gold-600 rounded-full flex items-center justify-center text-white font-bold text-lg"
+                >
+                  J
+                </div>
+                <div>
+                  <p class="font-bold text-primary-900">James T.</p>
+                  <p class="text-sm text-slate-500">Afternoon Player</p>
+                </div>
+              </div>
+            </div>
+
+            <div
+              v-motion-fade-visible
+              class="bg-gradient-to-br from-white to-slate-50 border-2 border-slate-200 rounded-3xl p-8 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300"
+            >
+              <div class="flex items-center gap-2 mb-4">
+                <svg
+                  v-for="i in 5"
+                  :key="i"
+                  class="w-5 h-5 text-gold-500"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                  />
+                </svg>
+              </div>
+              <p class="text-slate-700 leading-relaxed mb-6 italic">
+                "Only hall in Fort Walton with sessions every single day! The
+                staff is professional, the facility is clean, and I've made
+                friends I see every week. Five stars!"
+              </p>
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-12 h-12 bg-gradient-to-br from-gold-400 to-gold-600 rounded-full flex items-center justify-center text-white font-bold text-lg"
+                >
+                  L
+                </div>
+                <div>
+                  <p class="font-bold text-primary-900">Linda R.</p>
+                  <p class="text-sm text-slate-500">Sunday Night Fan</p>
+                </div>
+              </div>
             </div>
           </div>
         </section>

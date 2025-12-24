@@ -12,6 +12,7 @@ Official website for Mary Esther Bingo, a premier entertainment venue in Florida
 - **Data:** Centralized business configuration for easy updates (`utils/business.ts`).
 - **Authentication:** Admin portal with session-based authentication. Note: the project includes a demo password-only login endpoint (`server/api/auth/login.post.ts`) that accepts the hardcoded password `admin123` for convenience; proper user-based auth is implemented in `server/utils/users.ts` (PBKDF2 hashes) and should be used in production.
 - **Real-time Updates:** Jackpot ticker refreshes every 5 minutes.
+- **Daily Specials:** Mary Esther Bingo is the only Fort Walton hall running session every day, and we highlight the hero specials with time-based offers and nearby halls (Crestview, Pensacola, Panama City).
 
 ## Tech Stack
 
@@ -85,6 +86,7 @@ The application includes an admin portal at `/admin/login`. Authentication now u
 - `GET /api/jackpot` - Current jackpot value
 - `GET /api/schedule` - Schedule data
 - `GET /api/pricing` - Pricing information
+- `GET /api/specials` - Daily specials (Fort Walton time zone, hero note, and weekly offers)
 - `POST /api/contact` - Contact form submission (with rate limiting)
 
 ### Admin Endpoints (Require authentication)
@@ -95,6 +97,7 @@ The application includes an admin portal at `/admin/login`. Authentication now u
 - `POST /api/admin/jackpot` - Update jackpot value
 - `POST /api/admin/schedule` - Update schedule
 - `POST /api/admin/pricing` - Update pricing
+- `POST /api/admin/specials` - Update the daily specials hero content
 - `GET /api/admin/messages` - List contact messages
 
 ## Authentication & Security
@@ -115,6 +118,7 @@ The application uses JSON files for data storage:
 - `server/data/jackpot.json` - Jackpot value
 - `server/data/schedule.json` - Schedule data
 - `server/data/pricing.json` - Pricing data
+- `server/data/specials.json` - Daily specials hero + weekly offerings and timezone metadata
 
 ## Verification & Testing
 
@@ -135,6 +139,8 @@ python3 verify_homepage.py
 python3 verification/verify_admin.py
 python3 verification/verify_new_features.py
 ```
+
+`verification/verify_new_features.py` now confirms the Daily Specials hero loads on the homepage.
 
 Note: these scripts require Python 3.8+ and Playwright; if you change the admin auth flow, update the verification scripts accordingly.
 

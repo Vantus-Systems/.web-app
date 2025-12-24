@@ -30,11 +30,19 @@ def verify_admin(page):
     page.screenshot(path="verification/admin_pricing.png")
     print("Admin pricing page verified.")
 
+def verify_daily_specials(page):
+    page.goto("http://localhost:3000")
+    page.wait_for_selector("text=Daily Specials")
+    assert page.is_visible("text=Daily Specials")
+    page.screenshot(path="verification/daily_specials.png", full_page=True)
+    print("Daily specials verified on the homepage.")
+
 with sync_playwright() as p:
     browser = p.chromium.launch()
     page = browser.new_page()
 
     try:
+        verify_daily_specials(page)
         verify_pricing(page)
         verify_admin(page)
     except Exception as e:

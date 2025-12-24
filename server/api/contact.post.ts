@@ -10,7 +10,11 @@ const contactSchema = z.object({
 });
 
 // Simple in-memory rate limiter
-const rateLimit = new Map<string, number>();
+interface RateLimitData {
+  count: number;
+  resetTime: number;
+}
+const rateLimit = new Map<string, RateLimitData>();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const MAX_REQUESTS = 3;
 
@@ -64,15 +68,15 @@ export default defineEventHandler(async (event) => {
   }
 
   // 4. Save Message
-  const messages = await readJson("messages.json", []);
+  const messages = await readJson("messages.json", [] as any[]);
   const newMessage = {
     id: Date.now().toString(),
-    ...result.data,
+    name: result.data.name,
+    email: result.data.email,
+    message: result.data.message,
     date: new Date().toISOString(),
     read: false,
   };
-  // Remove honeypot field if present in result.data (zod doesn't remove unknown keys unless stripped, but we defined it as optional)
-  delete (newMessage as any).website;
 
   messages.unshift(newMessage);
   await writeJson("messages.json", messages);

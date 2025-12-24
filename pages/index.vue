@@ -84,6 +84,9 @@
       </div>
     </div>
 
+    <!-- Daily Specials Full-Width Hero -->
+    <DailySpecials />
+
     <!-- Features Grid -->
     <section class="py-24 bg-slate-50">
       <div class="container mx-auto px-4">
@@ -163,6 +166,7 @@ import { Trophy, Tablet, Heart } from "lucide-vue-next";
 import { useJackpotStore } from "~/stores/jackpot";
 import BaseButton from "~/components/ui/BaseButton.vue";
 import BaseCard from "~/components/ui/BaseCard.vue";
+import DailySpecials from "~/components/DailySpecials.vue";
 import { BUSINESS_INFO } from "~/utils/business";
 
 const jackpotStore = useJackpotStore();

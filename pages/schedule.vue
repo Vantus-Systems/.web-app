@@ -1,103 +1,158 @@
 <template>
-  <div class="bg-slate-50 min-h-screen py-20">
-    <div class="container mx-auto px-4">
+  <div class="bg-slate-50 min-h-screen">
+    <!-- Daily Specials Full-Width Hero -->
+    <DailySpecials />
+
+    <div class="container mx-auto px-4 py-20">
       <div class="text-center mb-16">
-        <h1 class="text-4xl md:text-5xl text-primary-900 mb-4">
+        <h1 class="text-4xl md:text-6xl font-black text-primary-900 mb-4">
           Daily Schedule
         </h1>
-        <p class="text-slate-600 max-w-2xl mx-auto text-lg">
-          Sessions are scheduled throughout the day.
+        <p class="text-slate-600 max-w-2xl mx-auto text-xl font-light">
+          Every session is an opportunity for excitement, community, and
+          winning.
         </p>
       </div>
 
-      <div
-        class="max-w-4xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100"
-      >
-        <!-- Header Banner -->
+      <!-- Timeline-Style Session Cards -->
+      <div class="max-w-5xl mx-auto space-y-6">
         <div
-          class="bg-primary-900 p-8 text-center border-b-4 border-gold relative overflow-hidden"
+          v-for="(session, idx) in sessions"
+          :key="session.name"
+          v-motion-fade-visible
+          class="group relative"
         >
+          <!-- Timeline Line (desktop) -->
           <div
-            class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1596706062103-3a7b95399c71?q=80&w=2000&auto=format&fit=crop')] opacity-10 bg-cover bg-center"
+            v-if="idx < sessions.length - 1"
+            class="hidden md:block absolute left-8 top-24 bottom-0 w-0.5 bg-gradient-to-b from-gold-400 to-gold-200 opacity-30"
           ></div>
-          <div class="relative z-10">
-            <h2
-              class="text-2xl md:text-3xl font-heading font-bold text-white mb-2"
+
+          <!-- Session Card -->
+          <div
+            class="relative bg-white border-2 border-slate-200 rounded-3xl p-8 md:p-10 shadow-lg hover:shadow-2xl hover:border-gold-300 hover:-translate-y-2 transition-all duration-500 group overflow-hidden"
+          >
+            <!-- Background Gradient on Hover -->
+            <div
+              class="absolute inset-0 bg-gradient-to-br from-gold-50/0 to-gold-100/0 group-hover:from-gold-50/50 group-hover:to-gold-100/30 transition-all duration-500 rounded-3xl"
+            ></div>
+
+            <div
+              class="relative z-10 flex flex-col md:flex-row gap-6 md:gap-8 items-start md:items-center"
             >
-              Doors Typically Open 10:00 AM
-            </h2>
-            <p class="text-gold font-medium tracking-wide uppercase text-sm">
-              Seven Days A Week
-            </p>
+              <!-- Icon Circle -->
+              <div
+                class="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-primary-900 to-primary-700 rounded-full flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"
+              >
+                <Clock
+                  class="w-8 h-8 md:w-10 md:h-10 text-gold-300"
+                  :stroke-width="2.5"
+                />
+              </div>
+
+              <!-- Content -->
+              <div class="flex-1 space-y-3">
+                <div class="flex items-start justify-between flex-wrap gap-4">
+                  <div>
+                    <h3
+                      class="text-2xl md:text-3xl font-black text-primary-900 mb-2 group-hover:text-primary-700 transition-colors"
+                    >
+                      {{ session.name }}
+                    </h3>
+                    <div
+                      class="inline-flex items-center gap-2 bg-primary-100 px-4 py-2 rounded-full text-primary-900 font-bold"
+                    >
+                      <svg
+                        class="w-4 h-4 text-gold-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <span class="text-base">{{ session.time }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Session Number Badge -->
+                  <div
+                    class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-gold-500 to-gold-600 text-white rounded-full flex items-center justify-center font-black text-lg shadow-lg"
+                  >
+                    {{ idx + 1 }}
+                  </div>
+                </div>
+
+                <p class="text-lg text-slate-700 leading-relaxed">
+                  {{ session.details }}
+                </p>
+
+                <!-- Quick Action Tags -->
+                <div class="flex flex-wrap gap-2 pt-2">
+                  <span
+                    v-if="idx === 0"
+                    class="inline-flex items-center gap-1 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold"
+                  >
+                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                    Opens First
+                  </span>
+                  <span
+                    v-if="idx === Math.floor(sessions.length / 2)"
+                    class="inline-flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold"
+                  >
+                    ⭐ Peak Hours
+                  </span>
+                  <span
+                    v-if="idx === sessions.length - 1"
+                    class="inline-flex items-center gap-1 bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold"
+                  >
+                    🌙 Night Owl Friendly
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
 
-        <!-- Schedule Table -->
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-primary-50 text-primary-900">
-                <th
-                  class="p-6 font-heading font-bold text-lg border-b border-primary-100"
-                >
-                  Session Info
-                </th>
-                <th
-                  class="p-6 font-heading font-bold text-lg border-b border-primary-100"
-                >
-                  Typical Start
-                </th>
-                <th
-                  class="p-6 font-heading font-bold text-lg border-b border-primary-100 hidden md:table-cell"
-                >
-                  General Details
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-              <tr
-                v-for="session in sessions"
-                :key="session.name"
-                class="hover:bg-gold/5 transition-colors group"
-              >
-                <td class="p-6">
-                  <span
-                    class="font-bold text-primary-900 text-xl block group-hover:text-primary-700 transition-colors"
-                    >{{ session.name }}</span
-                  >
-                  <span class="md:hidden text-sm text-slate-500 mt-1 block">{{
-                    session.details
-                  }}</span>
-                </td>
-                <td
-                  class="p-6 text-primary-800 text-lg font-mono font-medium whitespace-nowrap"
-                >
-                  <div class="flex items-center gap-2">
-                    <Clock class="w-4 h-4 text-gold" />
-                    {{ session.time }}
-                  </div>
-                </td>
-                <td class="p-6 text-slate-600 hidden md:table-cell">
-                  {{ session.details }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Footer / Download -->
+      <!-- Footer CTA Card -->
+      <div
+        class="max-w-5xl mx-auto mt-16 bg-gradient-to-br from-primary-900 to-primary-800 rounded-3xl p-8 md:p-12 text-center text-white shadow-2xl relative overflow-hidden"
+      >
         <div
-          class="p-8 bg-slate-50 border-t border-slate-200 text-center flex flex-col items-center"
-        >
-          <p class="text-slate-500 mb-6 italic text-sm max-w-2xl">
-            Times and features may vary. Closing time is dependent on the day’s
-            activities. Availability and offerings are subject to change without
-            notice. Please contact us for the most current information.
+          class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1596706062103-3a7b95399c71?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center opacity-5"
+        ></div>
+        <div class="relative z-10">
+          <h3 class="text-3xl md:text-4xl font-black mb-4">
+            Ready to Join the Fun?
+          </h3>
+          <p class="text-xl text-primary-100 mb-8 max-w-2xl mx-auto">
+            Times and features may vary. Closing time depends on daily
+            activities. Contact us for the most current information.
           </p>
-          <BaseButton variant="gold" class="gap-2 shadow-lg shadow-gold/20">
-            <Download class="w-4 h-4" />
-            Download Program
-          </BaseButton>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <NuxtLink to="/pricing">
+              <BaseButton
+                variant="gold"
+                class="gap-2 shadow-xl shadow-gold/30 text-lg px-8 py-4"
+              >
+                <Download class="w-5 h-5" />
+                View Pricing & Bundles
+              </BaseButton>
+            </NuxtLink>
+            <NuxtLink to="/contact">
+              <BaseButton
+                variant="outline"
+                class="border-2 border-white text-white hover:bg-white/10 text-lg px-8 py-4"
+              >
+                Get Directions
+              </BaseButton>
+            </NuxtLink>
+          </div>
         </div>
       </div>
     </div>
@@ -107,6 +162,7 @@
 <script setup lang="ts">
 import { Download, Clock } from "lucide-vue-next";
 import BaseButton from "~/components/ui/BaseButton.vue";
+import DailySpecials from "~/components/DailySpecials.vue";
 import { BUSINESS_INFO } from "~/utils/business";
 
 useSeoMeta({

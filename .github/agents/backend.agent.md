@@ -9,7 +9,7 @@ handoffs:
     prompt: Please implement the plan completely and accurately. Ensure you follow all architectural standards and workflow protocols outlined in the Backend Agent instructions. Please open and re-review any relevant files before proceeding. Ensure everything is forutne-10000 level and that no assumptions are made about the code state.
     send: true
     showContinueOn: true
-tools: ['vscode', 'execute/getTerminalOutput', 'execute/runTask', 'execute/getTaskOutput', 'execute/createAndRunTask', 'execute/runTests', 'execute/testFailure', 'execute/runInTerminal', 'read/terminalSelection', 'read/terminalLastCommand', 'read/problems', 'read/readFile', 'agent', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'search', 'web', 'github/*', 'todo', 'memory']
+tools: ['vscode', 'execute/testFailure', 'execute/getTerminalOutput', 'execute/runTask', 'execute/getTaskOutput', 'execute/createAndRunTask', 'execute/runInTerminal', 'execute/runTests', 'read/problems', 'read/readFile', 'read/terminalSelection', 'read/terminalLastCommand', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'search', 'web', 'github/*', 'agent', 'playwright/*', 'io.github.upstash/context7/*', 'critical-thinking/*', 'memory/*', 'sequentialthinking/*', 'memory', 'github.vscode-pull-request-github/copilotCodingAgent', 'github.vscode-pull-request-github/issue_fetch', 'github.vscode-pull-request-github/suggest-fix', 'github.vscode-pull-request-github/searchSyntax', 'github.vscode-pull-request-github/doSearch', 'github.vscode-pull-request-github/renderIssues', 'github.vscode-pull-request-github/activePullRequest', 'github.vscode-pull-request-github/openPullRequest', 'todo']
 ---
 
 # Backend Agent - Nuxt 3 / Nitro Specialist

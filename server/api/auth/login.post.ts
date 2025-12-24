@@ -46,7 +46,10 @@ export default defineEventHandler(async (event) => {
   // Lookup user and verify password
   const user = getUserByUsername(username);
   if (!user || !verifyPassword(password, user.passwordHash, user.salt)) {
-    const current = loginAttempts.get(ip) || { count: 0, reset: now + BLOCK_DURATION };
+    const current = loginAttempts.get(ip) || {
+      count: 0,
+      reset: now + BLOCK_DURATION,
+    };
     current.count++;
     loginAttempts.set(ip, current);
 
@@ -80,5 +83,8 @@ export default defineEventHandler(async (event) => {
     sameSite: "lax",
   });
 
-  return { success: true, user: { username: user.username, name: user.name, role: user.role } };
+  return {
+    success: true,
+    user: { username: user.username, name: user.name, role: user.role },
+  };
 });
