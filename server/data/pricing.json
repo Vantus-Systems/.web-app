@@ -1,3 +1,190 @@
 {
-  "test": true
+  "daytime": {
+    "sessions": [
+      {
+        "name": "Morning Play",
+        "timeRange": "10:30 AM – 12:30 PM",
+        "icon": "sun",
+        "machines": [
+          {
+            "description": "1 Machine",
+            "price": "$1",
+            "type": "individual"
+          },
+          {
+            "description": "3 Machines",
+            "price": "$2",
+            "type": "bundle",
+            "savings": "Save $1"
+          },
+          {
+            "description": "5 Machines",
+            "price": "$3",
+            "type": "bundle",
+            "savings": "Save $2"
+          }
+        ],
+        "paperRules": {
+          "minSpend": "$1",
+          "minPaperCards": 1,
+          "description": "Spend $1+ to receive 1 free paper card"
+        },
+        "paperRulesAdvanced": {
+          "minSpendAdvanced": "$2+",
+          "maxPaperCards": "Unlimited",
+          "description": "Spend $2 or more to receive as many paper cards as you'd like"
+        }
+      },
+      {
+        "name": "Afternoon Play",
+        "timeRange": "12:30 PM – 7:30 PM",
+        "icon": "clock",
+        "machines": [
+          {
+            "description": "1 Machine",
+            "price": "$1",
+            "type": "individual"
+          },
+          {
+            "description": "4 Machines",
+            "price": "$3",
+            "type": "bundle",
+            "savings": "Save $1"
+          }
+        ],
+        "paperRules": {
+          "minSpend": "$1",
+          "minPaperCards": 1,
+          "description": "Spend $1+ to receive 1 free paper card"
+        },
+        "paperRulesAdvanced": {
+          "minSpendAdvanced": "$2+",
+          "maxPaperCards": "Unlimited",
+          "description": "Spend $2 or more to receive as many paper cards as you'd like"
+        }
+      }
+    ],
+    "paperOnlyGames": {
+      "regular_bingo": [
+        {
+          "name": "Regular Bingo",
+          "cards": "3 Cards",
+          "price": "$0.25"
+        },
+        {
+          "name": "Regular Bingo",
+          "cards": "6 Cards",
+          "price": "$0.50"
+        }
+      ],
+      "specials": [
+        {
+          "name": "Double Actions",
+          "cards": "1 Card",
+          "price": "$1"
+        },
+        {
+          "name": "Double Actions",
+          "cards": "3 Cards",
+          "price": "$2"
+        },
+        {
+          "name": "Speedy Coveralls",
+          "cards": "1 Card",
+          "price": "$1"
+        },
+        {
+          "name": "Speedy Coveralls",
+          "cards": "3 Cards",
+          "price": "$2"
+        }
+      ]
+    }
+  },
+  "evening": {
+    "startTime": "7:30 PM",
+    "scheduleNote": "Join us nightly for premium gaming experience with all-inclusive bundles.",
+    "valueProposition": "2 Machines for $22 includes 6-packs, double actions, and letter X papers!",
+    "machines": [
+      {
+        "description": "1 Machine",
+        "price": "$11",
+        "type": "individual",
+        "included": []
+      },
+      {
+        "description": "2 Machines (Best Value)",
+        "price": "$22",
+        "type": "bundle",
+        "included": ["Six-packs", "Double actions", "Letter X papers"],
+        "badge": "BEST VALUE",
+        "savings": "Premium inclusions"
+      }
+    ],
+    "specialPapers": [
+      {
+        "name": "Odd/Even, Cover All, Lucky Seven, Treasure Hunt",
+        "optionOne": "1 Card - $1",
+        "optionTwo": "6 Cards - $5 (per card type)",
+        "note": "Cannot mix & match paper cards for these games",
+        "color": "gold"
+      },
+      {
+        "name": "Progressive Daub Ticket",
+        "description": "Played second half of session • Requires session buy-in to participate",
+        "priceNote": "Included with machine play",
+        "frequency": "Drawn daily"
+      },
+      {
+        "name": "Pull Tabs (Horse Races/Row Games)",
+        "description": "Available throughout most operating hours",
+        "availability": "Daily"
+      }
+    ]
+  },
+  "sunday": {
+    "title": "Sunday Night Exclusives",
+    "note": "In addition to standard session pricing above",
+    "specials": [
+      {
+        "name": "Speedy",
+        "optionOne": "1 Card - $1",
+        "optionTwo": "3 Cards - $2",
+        "description": "Fast-paced favorite"
+      },
+      {
+        "name": "Super 3 & U-PIK",
+        "optionOne": "1 Card - $1",
+        "optionTwo": "6 Cards - $5",
+        "description": "Premium Sunday games",
+        "upikNote": "Every player receives 1 FREE U-PIK card every night they play session!"
+      }
+    ]
+  },
+  "faqs": [
+    {
+      "question": "What's included in the 2 Machines for $22 bundle?",
+      "answer": "Six-packs, double actions, and letter X papers are all included, giving you the best value for your play session."
+    },
+    {
+      "question": "Do I get free paper cards with machine play?",
+      "answer": "Yes! Spend at least $1 on machines to receive 1 free paper card. Spend $2 or more to get as many paper cards as you'd like for each game."
+    },
+    {
+      "question": "Can I mix & match papers for special games?",
+      "answer": "No. Papers for Odd/Even, Cover All, Lucky Seven, and Treasure Hunt cannot be mixed. Purchase complete sets (1 card for $1 or 6 cards for $5)."
+    },
+    {
+      "question": "What's the Progressive Daub Ticket?",
+      "answer": "A special nighttime game played in the second half of session. You must buy into session (machines or papers) to be eligible to play."
+    },
+    {
+      "question": "Do I get a free U-PIK card every time I play?",
+      "answer": "Yes! Every night you play session, you receive 1 free U-PIK card as our way of saying thank you for playing with us."
+    },
+    {
+      "question": "What time does evening session start?",
+      "answer": "Session starts at approximately 7:30 PM every night. Daytime pay-as-you-go games run from 10:30 AM until 7:30 PM."
+    }
+  ]
 }
