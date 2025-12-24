@@ -2,11 +2,11 @@ import { requireAuth } from '../../utils/auth';
 import { getUsers, saveUsers } from '../../utils/users';
 
 export default defineEventHandler(async (event) => {
-  await requireAuth(event);
+  requireAuth(event);
 
   // Only admins can delete users
   const currentUser = event.context.user;
-  if (!currentUser || currentUser.role !== 'admin') {
+  if (currentUser.role !== 'admin') {
     throw createError({
         statusCode: 403,
         statusMessage: "Forbidden: Only admins can manage users",
@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 400, statusMessage: "Cannot delete your own account" });
   }
 
-  let users = await getUsers();
+  let users = getUsers();
   const initialLength = users.length;
   users = users.filter(u => u.id !== id);
 
@@ -32,6 +32,6 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 404, statusMessage: "User not found" });
   }
 
-  await saveUsers(users);
+  saveUsers(users);
   return { success: true };
 });
