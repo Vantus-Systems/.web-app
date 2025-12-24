@@ -22,14 +22,31 @@ export default defineEventHandler(async (event) => {
   // Cleanup old entries
   if (Math.random() < 0.01) rateLimit.clear();
 
-  if (userRequests >= MAX_REQUESTS) {
+  // If no record or expired, reset
+  if (!userLimit || now > userLimit.resetTime) {
+    userLimit = { count: 0, resetTime: now + RATE_LIMIT_WINDOW };
+  }
+
+  if (userLimit.count >= MAX_REQUESTS) {
+    const retryAfter = Math.ceil((userLimit.resetTime - now) / 1000);
     throw createError({
       statusCode: 429,
-      statusMessage: "Too many requests. Please try again later.",
+      statusMessage: "Too many requests",
+      message: `Please try again in ${retryAfter} seconds.`,
     });
   }
-  rateLimit.set(ip, userRequests + 1);
-  setTimeout(() => rateLimit.delete(ip), RATE_LIMIT_WINDOW);
+
+  userLimit.count++;
+  rateLimit.set(ip, userLimit);
+
+  // Cleanup old entries occasionally
+  if (Math.random() < 0.01) {
+    for (const [key, data] of rateLimit.entries()) {
+      if (now > data.resetTime) {
+        rateLimit.delete(key);
+      }
+    }
+  }
 
   // 2. Read & Validate Body
   const body = await readBody(event);

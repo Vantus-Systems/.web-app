@@ -42,6 +42,7 @@
       <div v-if="pending" class="flex justify-center py-20">
         <div class="animate-spin h-12 w-12 border-4 border-gold-500 border-t-transparent rounded-full"></div>
       </div>
+    </div>
 
       <div v-else class="space-y-24">
 
