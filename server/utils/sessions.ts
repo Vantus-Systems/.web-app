@@ -1,5 +1,8 @@
+import fs from 'fs';
+import path from 'path';
 import crypto from 'crypto';
-import { readJson, writeJson } from './storage';
+
+const SESSIONS_FILE = path.resolve(process.cwd(), 'server/data/sessions.json');
 
 export interface Session {
   token: string;
@@ -7,23 +10,34 @@ export interface Session {
   expires: number; // timestamp
 }
 
-const SESSIONS_FILENAME = 'sessions.json';
 // 24 hours in milliseconds
 const SESSION_DURATION = 24 * 60 * 60 * 1000;
 
-async function getSessions(): Promise<Session[]> {
-  return readJson<Session[]>(SESSIONS_FILENAME, []);
+function ensureSessionsFile() {
+  if (!fs.existsSync(SESSIONS_FILE)) {
+    fs.writeFileSync(SESSIONS_FILE, JSON.stringify([], null, 2));
+  }
 }
 
-async function saveSessions(sessions: Session[]) {
-  await writeJson(SESSIONS_FILENAME, sessions);
+function getSessions(): Session[] {
+  ensureSessionsFile();
+  try {
+    const data = fs.readFileSync(SESSIONS_FILE, 'utf-8');
+    return JSON.parse(data);
+  } catch {
+    return [];
+  }
 }
 
-export const createSession = async (userId: string): Promise<string> => {
+function saveSessions(sessions: Session[]) {
+  fs.writeFileSync(SESSIONS_FILE, JSON.stringify(sessions, null, 2));
+}
+
+export const createSession = (userId: string): string => {
   const token = crypto.randomBytes(32).toString('hex');
-  const sessions = await getSessions();
+  const sessions = getSessions();
 
-  // Clean up expired sessions
+  // Clean up expired sessions while we're at it
   const now = Date.now();
   const validSessions = sessions.filter(s => s.expires > now);
 
@@ -33,36 +47,44 @@ export const createSession = async (userId: string): Promise<string> => {
     expires: now + SESSION_DURATION
   });
 
-  await saveSessions(validSessions);
+  saveSessions(validSessions);
   return token;
 };
 
-export const getSession = async (token: string): Promise<Session | undefined> => {
-  const sessions = await getSessions();
-  const tokenBuffer = Buffer.from(token, 'utf-8');
+export const getSession = (token: string): Session | undefined => {
+  const sessions = getSessions();
+import crypto from 'crypto'; // Ensure crypto is imported at the top of your file
 
+export const getSession = (token: string): Session | undefined => {
+  const sessions = getSessions();
+  const tokenBuffer = Buffer.from(token, 'utf-8');
   const session = sessions.find(s => {
     const sessionTokenBuffer = Buffer.from(s.token, 'utf-8');
-    if (sessionTokenBuffer.length !== tokenBuffer.length) return false;
-    return crypto.timingSafeEqual(sessionTokenBuffer, tokenBuffer);
+    // crypto.timingSafeEqual throws if lengths differ, so check length first
+    return sessionTokenBuffer.length === tokenBuffer.length &&
+      crypto.timingSafeEqual(sessionTokenBuffer, tokenBuffer);
   });
 
   if (session && session.expires > Date.now()) {
     return session;
   }
-
   return undefined;
 };
 
-export const deleteSession = async (token: string) => {
-  let sessions = await getSessions();
-  const tokenBuffer = Buffer.from(token, 'utf-8');
+  if (session && session.expires > Date.now()) {
+    return session;
+  }
+  return undefined;
+};
 
-  sessions = sessions.filter(s => {
-    const sessionTokenBuffer = Buffer.from(s.token, 'utf-8');
-    if (sessionTokenBuffer.length !== tokenBuffer.length) return true; // keep mismatching tokens
-    return !crypto.timingSafeEqual(sessionTokenBuffer, tokenBuffer); // remove matching token
-  });
+export const deleteSession = (token: string) => {
+  let sessions = getSessions();
+import crypto from 'crypto'; // Ensure crypto is imported at the top
 
-  await saveSessions(sessions);
+sessions = sessions.filter(s =>
+  typeof s.token === 'string' &&
+  s.token.length === token.length &&
+  !crypto.timingSafeEqual(Buffer.from(s.token, 'utf-8'), Buffer.from(token, 'utf-8'))
+);
+  saveSessions(sessions);
 };
