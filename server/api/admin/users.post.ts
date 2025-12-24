@@ -1,13 +1,22 @@
 import { requireAuth } from '../../utils/auth';
 import { getUsers, saveUsers, hashPassword, type User, getUserByUsername } from '../../utils/users';
 import crypto from 'crypto';
+import { z } from 'zod';
+
+const userSchema = z.object({
+  id: z.string().optional(),
+  username: z.string().min(1),
+  password: z.string().optional(),
+  name: z.string().min(1),
+  role: z.enum(['admin', 'mic']),
+});
 
 export default defineEventHandler(async (event) => {
-  requireAuth(event);
+  await requireAuth(event);
 
   // Only admins can manage users
   const currentUser = event.context.user;
-  if (currentUser.role !== 'admin') {
+  if (!currentUser || currentUser.role !== 'admin') {
     throw createError({
         statusCode: 403,
         statusMessage: "Forbidden: Only admins can manage users",
@@ -15,16 +24,19 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = await readBody(event);
-  const { id, username, password, name, role } = body;
 
-  if (!username || !name || !role) {
+  const result = userSchema.safeParse(body);
+  if (!result.success) {
     throw createError({
       statusCode: 400,
-      statusMessage: "Missing required fields (username, name, role)",
+      statusMessage: "Invalid input",
+      data: result.error.errors,
     });
   }
 
-  const users = getUsers();
+  const { id, username, password, name, role } = result.data;
+
+  const users = await getUsers();
 
   if (id) {
     // Update existing user
@@ -39,7 +51,9 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 409, statusMessage: "Username already exists" });
     }
 
-    const user = users[userIndex]; if (!user) throw createError({statusCode: 500, statusMessage: 'Internal Error'});
+    const user = users[userIndex];
+    if (!user) throw createError({statusCode: 500, statusMessage: 'Internal Error'});
+
     user.username = username;
     user.name = name;
     user.role = role;
@@ -51,7 +65,7 @@ export default defineEventHandler(async (event) => {
     }
 
     users[userIndex] = user;
-    saveUsers(users);
+    await saveUsers(users);
     return { success: true, user: { id: user.id, username: user.username, name: user.name, role: user.role } };
 
   } else {
@@ -60,7 +74,9 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 400, statusMessage: "Password is required for new users" });
     }
 
-    if (getUserByUsername(username)) {
+    // Check if username exists (using the helper is async)
+    const existingUser = await getUserByUsername(username);
+    if (existingUser) {
         throw createError({ statusCode: 409, statusMessage: "Username already exists" });
     }
 
@@ -75,7 +91,7 @@ export default defineEventHandler(async (event) => {
     };
 
     users.push(newUser);
-    saveUsers(users);
+    await saveUsers(users);
     return { success: true, user: { id: newUser.id, username: newUser.username, name: newUser.name, role: newUser.role } };
   }
 });
