@@ -10,24 +10,45 @@ const contactSchema = z.object({
 });
 
 // Simple in-memory rate limiter
-const rateLimit = new Map<string, number>();
+interface RateLimitData {
+  count: number;
+  resetTime: number;
+}
+const rateLimit = new Map<string, RateLimitData>();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const MAX_REQUESTS = 3;
 
 export default defineEventHandler(async (event) => {
   // 1. Rate Limiting
   const ip = getRequestHeader(event, "x-forwarded-for") || "unknown";
-  const userRequests = rateLimit.get(ip) || 0;
+  const now = Date.now();
 
-  // Cleanup old entries
-  if (Math.random() < 0.01) rateLimit.clear();
+  let userLimit = rateLimit.get(ip);
 
-  if (rateLimitResult.limited) {
+  // If no record or expired, reset
+  if (!userLimit || now > userLimit.resetTime) {
+    userLimit = { count: 0, resetTime: now + RATE_LIMIT_WINDOW };
+  }
+
+  if (userLimit.count >= MAX_REQUESTS) {
+    const retryAfter = Math.ceil((userLimit.resetTime - now) / 1000);
     throw createError({
       statusCode: 429,
       statusMessage: "Too many requests",
-      message: `Please try again in ${rateLimitResult.retryAfter} seconds.`,
+      message: `Please try again in ${retryAfter} seconds.`,
     });
+  }
+
+  userLimit.count++;
+  rateLimit.set(ip, userLimit);
+
+  // Cleanup old entries occasionally
+  if (Math.random() < 0.01) {
+    for (const [key, data] of rateLimit.entries()) {
+      if (now > data.resetTime) {
+        rateLimit.delete(key);
+      }
+    }
   }
 
   // 2. Read & Validate Body
