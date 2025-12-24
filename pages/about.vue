@@ -109,11 +109,14 @@
 <script setup lang="ts">
 import { HeartHandshake } from "lucide-vue-next";
 import BaseCard from "~/components/ui/BaseCard.vue";
-import { BUSINESS_INFO } from "~/utils/business";
+import { useBusiness } from "~/composables/useBusiness";
+
+const { business: BUSINESS_INFO, fetchBusiness } = useBusiness();
+await fetchBusiness();
 
 useSeoMeta({
   title: "About Us | Mary Esther Bingo",
-  description: `Learn about ${BUSINESS_INFO.name}, our mission, and the local community organizations we support.`,
+  description: `Learn about ${BUSINESS_INFO.value.name}, our mission, and the local community organizations we support.`,
 });
 
 const charities = [

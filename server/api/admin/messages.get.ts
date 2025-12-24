@@ -1,8 +1,11 @@
-import { readJson } from "~/server/utils/storage";
-import { requireAuth } from "~/server/utils/auth";
+import { defineEventHandler, createError, getQuery } from 'h3'
+import { contactService } from '@server/services/contact.service'
 
 export default defineEventHandler(async (event) => {
-  requireAuth(event);
-  const messages = await readJson("messages.json", []);
-  return messages;
-});
+  if (!event.context.user) {
+    throw createError({ statusCode: 401, message: 'Unauthorized' })
+  }
+
+  const messages = await contactService.list()
+  return messages
+})

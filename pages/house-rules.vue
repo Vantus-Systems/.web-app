@@ -120,10 +120,13 @@
 </template>
 
 <script setup lang="ts">
-import { BUSINESS_INFO } from "~/utils/business";
+import { useBusiness } from "~/composables/useBusiness";
+
+const { business: BUSINESS_INFO, fetchBusiness } = useBusiness();
+await fetchBusiness();
 
 useSeoMeta({
   title: "House Rules | Mary Esther Bingo",
-  description: `Operational policies and guidelines for ${BUSINESS_INFO.name}.`,
+  description: `Operational policies and guidelines for ${BUSINESS_INFO.value.name}.`,
 });
 </script>

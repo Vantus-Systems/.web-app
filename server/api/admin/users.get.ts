@@ -1,24 +1,19 @@
-import { requireAuth } from "../../utils/auth";
-import { getUsers, type User } from "../../utils/users";
+import { defineEventHandler, createError, readBody } from 'h3'
+import prisma from '@server/db/client'
 
-export default defineEventHandler((event) => {
-  requireAuth(event);
-
-  // Only admins can list users
-  const currentUser = event.context.user;
-  if (currentUser.role !== "admin") {
-    throw createError({
-      statusCode: 403,
-      statusMessage: "Forbidden: Only admins can view users",
-    });
+export default defineEventHandler(async (event) => {
+  if (!event.context.user || event.context.user.role !== 'admin') {
+    throw createError({ statusCode: 403, message: 'Forbidden' })
   }
 
-  const users = getUsers();
-  // Return users without sensitive data
-  return users.map((u: User) => ({
-    id: u.id,
-    username: u.username,
-    name: u.name,
-    role: u.role,
-  }));
-});
+  const users = await prisma.user.findMany({
+    select: {
+      id: true,
+      username: true,
+      role: true,
+      last_login_at: true,
+    }
+  })
+
+  return users
+})

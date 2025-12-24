@@ -1,43 +1,26 @@
-import { requireAuth } from "../../utils/auth";
-import { getUsers, saveUsers } from "../../utils/users";
+import { defineEventHandler, createError, readBody } from 'h3'
+import prisma from '@server/db/client'
 
-export default defineEventHandler((event) => {
-  requireAuth(event);
-
-  // Only admins can delete users
-  const currentUser = event.context.user;
-  if (currentUser.role !== "admin") {
-    throw createError({
-      statusCode: 403,
-      statusMessage: "Forbidden: Only admins can manage users",
-    });
+export default defineEventHandler(async (event) => {
+  if (!event.context.user || event.context.user.role !== 'admin') {
+    throw createError({ statusCode: 403, message: 'Forbidden' })
   }
 
-  const query = getQuery(event);
-  const id = query.id as string;
+  const body = await readBody(event)
+  const { id } = body
 
   if (!id) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "User ID is required",
-    });
+    throw createError({ statusCode: 400, message: 'Missing id' })
   }
 
-  if (id === currentUser.id) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Cannot delete your own account",
-    });
+  // Prevent deleting self?
+  if (id === event.context.user.id) {
+     throw createError({ statusCode: 400, message: 'Cannot delete yourself' })
   }
 
-  let users = getUsers();
-  const initialLength = users.length;
-  users = users.filter((u) => u.id !== id);
+  await prisma.user.delete({
+    where: { id }
+  })
 
-  if (users.length === initialLength) {
-    throw createError({ statusCode: 404, statusMessage: "User not found" });
-  }
-
-  saveUsers(users);
-  return { success: true };
-});
+  return { success: true }
+})
