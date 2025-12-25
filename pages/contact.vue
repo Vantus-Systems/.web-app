@@ -201,6 +201,9 @@ import { useForm } from "vee-validate";
 // Lightweight adapter so Zod schemas can be used for validation without
 // requiring the optional `@vee-validate/zod` package.
 import * as z from "zod";
+import { MapPin, Phone, Clock } from "lucide-vue-next";
+import BaseButton from "~/components/ui/BaseButton.vue";
+import { useBusiness } from "~/composables/useBusiness";
 
 function toTypedSchema<T extends z.ZodTypeAny>(schema: T) {
   return (values: Record<string, unknown>) => {
@@ -217,9 +220,6 @@ function toTypedSchema<T extends z.ZodTypeAny>(schema: T) {
     return errors;
   };
 }
-import { MapPin, Phone, Clock } from "lucide-vue-next";
-import BaseButton from "~/components/ui/BaseButton.vue";
-import { useBusiness } from "~/composables/useBusiness";
 
 const { business: BUSINESS_INFO, fetchBusiness } = useBusiness();
 await fetchBusiness();

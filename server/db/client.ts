@@ -1,8 +1,8 @@
-// eslint-disable-next-line import/default
-import pkg from "@prisma/client";
+// Prisma client stub
+// The app primarily uses JSON-backed storage (settingsService)
+// Admin/auth features that require Prisma will need schema configuration
 
-const { PrismaClient } = pkg;
+// For now, export null to prevent module load errors
+// Services should check for null before using
 
-const prisma = new PrismaClient();
-
-export default prisma;
+export default null;
