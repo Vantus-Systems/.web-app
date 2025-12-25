@@ -1,217 +1,204 @@
-<template>
-  <div class="bg-slate-50 min-h-screen">
-    <!-- Daily Specials Full-Width Hero -->
-    <DailySpecials />
-
-    <div class="container mx-auto px-4 py-20">
-      <div class="text-center mb-16">
-        <h1 class="text-4xl md:text-6xl font-black text-primary-900 mb-4">
-          Daily Schedule
-        </h1>
-        <p class="text-slate-600 max-w-2xl mx-auto text-xl font-light">
-          Every session is an opportunity for excitement, community, and
-          winning.
-        </p>
-      </div>
-
-      <!-- Timeline-Style Session Cards -->
-      <div class="max-w-5xl mx-auto space-y-6">
-        <div
-          v-for="(session, idx) in sessions"
-          :key="session.name"
-          v-motion-fade-visible
-          class="group relative"
-        >
-          <!-- Timeline Line (desktop) -->
-          <div
-            v-if="idx < sessions.length - 1"
-            class="hidden md:block absolute left-8 top-24 bottom-0 w-0.5 bg-gradient-to-b from-gold-400 to-gold-200 opacity-30"
-          ></div>
-
-          <!-- Session Card (Premium) -->
-          <div
-            class="relative bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden"
-          >
-            <!-- Pricing chip (top-right) -->
-            <div class="absolute -top-3 -right-3 z-10">
-              <div
-                v-if="session.pricing"
-                class="inline-flex items-center gap-2 bg-gradient-to-br from-gold-500 to-gold-600 text-white px-4 py-2 rounded-full shadow-lg text-sm font-black"
-              >
-                <svg
-                  class="w-4 h-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M12 1v22" />
-                  <path d="M17 5H9a4 4 0 1 0 0 8h8a4 4 0 1 1 0 8H7" />
-                </svg>
-                <span class="text-xs opacity-80">From</span>
-                <span class="text-sm">{{ session.pricing }}</span>
-              </div>
-            </div>
-
-            <!-- Decorative background -->
-            <div
-              class="absolute inset-0 bg-gradient-to-br from-gold-50/0 to-gold-100/0 group-hover:from-gold-50/40 group-hover:to-gold-100/20 rounded-3xl transition-all duration-500"
-            ></div>
-
-            <div class="relative z-10 grid md:grid-cols-6 gap-6 items-center">
-              <div class="md:col-span-1 flex items-center">
-                <div
-                  class="w-16 h-16 rounded-full bg-gradient-to-br from-primary-900 to-primary-700 flex items-center justify-center shadow-xl transform transition-transform duration-300 group-hover:scale-105"
-                >
-                  <Clock class="w-8 h-8 text-gold-300" :stroke-width="2.5" />
-                </div>
-              </div>
-
-              <div class="md:col-span-4">
-                <h3
-                  class="text-2xl md:text-3xl font-black text-primary-900 mb-2"
-                >
-                  {{ session.name }}
-                </h3>
-
-                <div class="flex items-center gap-3 flex-wrap">
-                  <div
-                    class="inline-flex items-center gap-2 bg-primary-100 px-4 py-2 rounded-full text-primary-900 font-bold text-sm"
-                  >
-                    <svg
-                      class="w-4 h-4 text-gold-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <span class="text-sm">{{ session.time }}</span>
-                  </div>
-
-                  <span
-                    v-if="idx === 0"
-                    class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-sm font-semibold"
-                  >
-                    <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
-                    Opens First
-                  </span>
-
-                  <span
-                    v-if="idx === Math.floor(sessions.length / 2)"
-                    class="inline-flex items-center gap-1 bg-blue-50 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold"
-                  >
-                    ⭐ Peak Hours
-                  </span>
-
-                  <span
-                    v-if="idx === sessions.length - 1"
-                    class="inline-flex items-center gap-1 bg-purple-50 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold"
-                  >
-                    🌙 Night Owl Friendly
-                  </span>
-                </div>
-
-                <p class="text-slate-700 mt-3 leading-relaxed">
-                  {{ session.details }}
-                </p>
-              </div>
-
-              <div
-                class="md:col-span-1 flex md:flex-col items-center justify-end gap-4"
-              >
-                <div
-                  class="hidden md:flex w-14 h-14 rounded-full bg-gradient-to-br from-gold-500 to-gold-600 text-white flex items-center justify-center font-black shadow-lg text-lg"
-                >
-                  {{ idx + 1 }}
-                </div>
-
-                <NuxtLink to="/pricing" class="block">
-                  <BaseButton variant="outline" class="text-sm px-4 py-2"
-                    >View Pricing</BaseButton
-                  >
-                </NuxtLink>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Footer CTA Card -->
-      <div
-        class="max-w-5xl mx-auto mt-16 bg-gradient-to-br from-primary-900 to-primary-800 rounded-3xl p-8 md:p-12 text-center text-white shadow-2xl relative overflow-hidden"
-      >
-        <div
-          class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1596706062103-3a7b95399c71?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center opacity-5"
-        ></div>
-        <div class="relative z-10">
-          <h3 class="text-3xl md:text-4xl font-black mb-4">
-            Ready to Join the Fun?
-          </h3>
-          <p class="text-xl text-primary-100 mb-8 max-w-2xl mx-auto">
-            Times and features may vary. Closing time depends on daily
-            activities. Contact us for the most current information.
-          </p>
-          <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <NuxtLink to="/pricing">
-              <BaseButton
-                variant="gold"
-                class="gap-2 shadow-xl shadow-gold/30 text-lg px-8 py-4"
-              >
-                <Download class="w-5 h-5" />
-                View Pricing & Bundles
-              </BaseButton>
-            </NuxtLink>
-            <NuxtLink to="/contact">
-              <BaseButton
-                variant="outline"
-                class="border-2 border-white text-white hover:bg-white/10 text-lg px-8 py-4"
-              >
-                Get Directions
-              </BaseButton>
-            </NuxtLink>
-          </div>
-        </div>
-      </div>
-
-      <!-- Fine print -->
-      <p
-        class="text-center text-sm text-slate-500 italic mt-6 max-w-3xl mx-auto"
-      >
-        *Family-friendly — 18+. Valid photo ID may be required for entry and
-        prize claims.
-      </p>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { Download, Clock } from "lucide-vue-next";
-import { computed } from "vue";
-import BaseButton from "~/components/ui/BaseButton.vue";
-import DailySpecials from "~/components/DailySpecials.vue";
-import { useBusiness } from "~/composables/useBusiness";
+import { ref, computed } from 'vue'
+import { Calendar, Filter, ChevronRight, ChevronLeft, Download, Clock } from 'lucide-vue-next'
+import { useBusiness } from '~/composables/useBusiness'
 
-const { business: BUSINESS_INFO, fetchBusiness, schedule: sessions, fetchSchedule } = useBusiness();
-await fetchBusiness();
-await fetchSchedule();
+const {
+  business: BUSINESS_INFO,
+  fetchBusiness,
+  schedule: scheduleRef,
+  fetchSchedule,
+} = useBusiness()
 
-interface Session {
-  name: string;
-  time: string;
-  details: string;
-  pricing?: string;
+await fetchBusiness()
+await fetchSchedule()
+
+const sessions = computed(() => (scheduleRef.value as any[]) || [])
+
+const days = [
+  { id: 'today', label: 'Today', date: 'Dec 25' },
+  { id: 'tomorrow', label: 'Tomorrow', date: 'Dec 26' },
+  { id: 'friday', label: 'Friday', date: 'Dec 27' },
+  { id: 'saturday', label: 'Saturday', date: 'Dec 28' },
+  { id: 'sunday', label: 'Sunday', date: 'Dec 29' }
+]
+
+const activeDay = ref('today')
+const activeFilter = ref('All')
+const filters = ['All', 'Morning', 'Afternoon', 'Evening', 'Late Night']
+
+const filteredSessions = computed(() => {
+  let filtered = sessions.value
+  
+  if (activeFilter.value !== 'All') {
+    filtered = filtered.filter(s => s.category === activeFilter.value)
+  }
+  
+  return filtered
+})
+
+const selectDay = (dayId: string) => {
+  activeDay.value = dayId
 }
 
 useSeoMeta({
   title: "Schedule | Mary Esther Bingo",
   description: `View our general schedule at ${BUSINESS_INFO.value.name}. Sessions are offered daily.`,
-});
+})
 </script>
+
+<template>
+  <div class="bg-white min-h-screen font-sans selection:bg-primary-100">
+    <!-- High-Fidelity Hero Section -->
+    <div class="relative h-[45vh] min-h-[450px] flex items-center justify-center overflow-hidden bg-slate-900">
+      <div class="absolute inset-0 z-0">
+        <img 
+          src="https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&q=80&w=2000" 
+          class="w-full h-full object-cover opacity-40 scale-105 animate-slow-zoom"
+          alt="Luxury Bingo Hall"
+        />
+        <div class="absolute inset-0 bg-gradient-to-b from-slate-900/60 via-slate-900/40 to-white"></div>
+      </div>
+
+      <div class="container mx-auto px-4 relative z-10 text-center">
+        <div class="inline-flex items-center gap-2 bg-gold-500/20 backdrop-blur-md border border-gold-500/30 px-4 py-2 rounded-full mb-6">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-gold-500"></span>
+          </span>
+          <span class="text-xs font-black uppercase tracking-widest text-gold-100">Live Schedule</span>
+        </div>
+        <h1 class="text-5xl md:text-8xl font-black text-white mb-6 tracking-tighter">
+          Plan Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-gold-300 to-gold-500">Winning</span> Visit
+        </h1>
+        <p class="text-slate-200 max-w-2xl mx-auto text-lg md:text-xl font-medium opacity-90">
+          Experience the gold standard of bingo. Browse our curated sessions and reserve your place at the table.
+        </p>
+      </div>
+    </div>
+
+    <div class="container mx-auto px-4 -mt-20 relative z-20 pb-32">
+      <!-- Smart Calendar Ribbon -->
+      <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 p-2 mb-12 max-w-4xl mx-auto">
+        <div class="flex items-center overflow-x-auto no-scrollbar gap-2">
+          <button 
+            v-for="day in days" 
+            :key="day.id"
+            @click="selectDay(day.id)"
+            :class="[
+              'flex-1 min-w-[120px] py-4 px-6 rounded-2xl transition-all duration-300 flex flex-col items-center gap-1',
+              activeDay === day.id 
+                ? 'bg-primary-900 text-white shadow-xl shadow-primary-900/20 scale-105 z-10' 
+                : 'hover:bg-slate-50 text-slate-500'
+            ]"
+          >
+            <span class="text-xs font-black uppercase tracking-widest opacity-60">{{ day.label }}</span>
+            <span class="text-lg font-black">{{ day.date }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Smart Filtering -->
+      <div class="flex flex-col md:flex-row items-center justify-between gap-8 mb-12 max-w-5xl mx-auto">
+        <div class="flex items-center gap-3 overflow-x-auto no-scrollbar pb-2 md:pb-0">
+          <button 
+            v-for="filter in filters" 
+            :key="filter"
+            @click="activeFilter = filter"
+            :class="[
+              'px-6 py-2 rounded-full text-sm font-black transition-all border',
+              activeFilter === filter 
+                ? 'bg-slate-900 text-white border-slate-900 shadow-lg' 
+                : 'bg-white text-slate-500 border-slate-200 hover:border-slate-400'
+            ]"
+          >
+            {{ filter }}
+          </button>
+        </div>
+        
+        <div class="hidden md:flex items-center gap-2 text-slate-400 text-sm font-bold">
+          <Filter class="w-4 h-4" />
+          <span>Showing {{ filteredSessions.length }} sessions for {{ days.find(d => d.id === activeDay)?.label }}</span>
+        </div>
+      </div>
+
+      <!-- Event Cards Grid -->
+      <div class="max-w-5xl mx-auto space-y-8">
+        <TransitionGroup 
+          name="list" 
+          tag="div" 
+          class="space-y-8"
+        >
+          <ScheduleEventCard 
+            v-for="(session, idx) in filteredSessions" 
+            :key="session.name"
+            :session="session"
+            :index="idx"
+          />
+        </TransitionGroup>
+
+        <!-- Empty State -->
+        <div v-if="filteredSessions.length === 0" class="text-center py-20 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
+          <Calendar class="w-12 h-12 text-slate-300 mx-auto mb-4" />
+          <h3 class="text-xl font-black text-slate-900 mb-2">No sessions found</h3>
+          <p class="text-slate-500">Try adjusting your filters or selecting another day.</p>
+          <button @click="activeFilter = 'All'" class="mt-6 text-primary-600 font-black hover:underline">Clear all filters</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conversion Footer -->
+    <div class="bg-slate-900 py-24 relative overflow-hidden">
+      <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+      <div class="container mx-auto px-4 relative z-10 text-center">
+        <h2 class="text-4xl md:text-6xl font-black text-white mb-8 tracking-tighter">
+          Ready to Join the <span class="text-gold-400">Action?</span>
+        </h2>
+        <p class="text-slate-400 max-w-2xl mx-auto text-xl mb-12 font-medium">
+          Our premium sessions fill up fast. Secure your preferred seat today and experience the ultimate bingo atmosphere.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-6">
+          <NuxtLink to="/contact" class="w-full sm:w-auto px-10 py-5 rounded-2xl bg-gold-500 text-primary-900 font-black text-lg hover:bg-gold-400 transition-all shadow-2xl shadow-gold-500/20">
+            Book a Group Reservation
+          </NuxtLink>
+          <NuxtLink to="/pricing" class="w-full sm:w-auto px-10 py-5 rounded-2xl bg-white/10 text-white font-black text-lg hover:bg-white/20 transition-all backdrop-blur-md border border-white/10">
+            View Pricing & Bundles
+          </NuxtLink>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fine print -->
+    <p class="text-center text-sm text-slate-400 italic py-12 max-w-3xl mx-auto">
+      *Family-friendly — 18+. Valid photo ID may be required for entry and prize claims. Closing time depends on daily activities.
+    </p>
+  </div>
+</template>
+
+<style scoped>
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.5s ease;
+}
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+@keyframes slow-zoom {
+  0% { transform: scale(1.05); }
+  100% { transform: scale(1.15); }
+}
+.animate-slow-zoom {
+  animation: slow-zoom 20s infinite alternate ease-in-out;
+}
+</style>

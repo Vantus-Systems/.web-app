@@ -1,5 +1,8 @@
-import { PrismaClient } from '@prisma/client'
+// eslint-disable-next-line import/default
+import pkg from "@prisma/client";
 
-const prisma = new PrismaClient()
+const { PrismaClient } = pkg;
 
-export default prisma
+const prisma = new PrismaClient();
+
+export default prisma;

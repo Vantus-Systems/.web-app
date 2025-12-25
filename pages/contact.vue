@@ -153,10 +153,12 @@
                 <div>
                   <p class="font-bold text-lg mb-1">Phone Number</p>
                   <a
+                    v-if="BUSINESS_INFO.contact?.phonePlain"
                     :href="`tel:${BUSINESS_INFO.contact.phonePlain}`"
                     class="text-primary-100 hover:text-white transition-colors"
-                    >{{ BUSINESS_INFO.contact.phone }}</a
+                    >{{ BUSINESS_INFO.contact?.phone }}</a
                   >
+                  <span v-else class="text-primary-100">N/A</span>
                 </div>
               </li>
               <li class="flex items-start gap-4">
@@ -196,8 +198,25 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useForm } from "vee-validate";
-import { toTypedSchema } from "@vee-validate/zod";
+// Lightweight adapter so Zod schemas can be used for validation without
+// requiring the optional `@vee-validate/zod` package.
 import * as z from "zod";
+
+function toTypedSchema<T extends z.ZodTypeAny>(schema: T) {
+  return (values: Record<string, unknown>) => {
+    const result = schema.safeParse(values);
+    if (result.success) return true;
+
+    const errors: Record<string, string> = {};
+    for (const issue of result.error.issues) {
+      const path = issue.path.length ? String(issue.path[0]) : "_form";
+      if (!errors[path]) {
+        errors[path] = issue.message;
+      }
+    }
+    return errors;
+  };
+}
 import { MapPin, Phone, Clock } from "lucide-vue-next";
 import BaseButton from "~/components/ui/BaseButton.vue";
 import { useBusiness } from "~/composables/useBusiness";

@@ -185,12 +185,11 @@ if (BUSINESS_INFO.value.name) {
     script: [
       {
         type: "application/ld+json",
-        children: JSON.stringify({
+        innerHTML: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "LocalBusiness",
           name: BUSINESS_INFO.value.name,
-          image:
-            "https://images.unsplash.com/photo-1757689216934-8c7907b44a28", // Example image
+          image: "https://images.unsplash.com/photo-1757689216934-8c7907b44a28", // Example image
           "@id": BUSINESS_INFO.value.meta?.url,
           url: BUSINESS_INFO.value.meta?.url,
           telephone: BUSINESS_INFO.value.contact?.phone,

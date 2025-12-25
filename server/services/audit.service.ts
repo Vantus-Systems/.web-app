@@ -1,12 +1,12 @@
-import prisma from '@server/db/client'
+import prisma from "@server/db/client";
 
 export const auditService = {
-  async log(data: {
-    actorUserId?: string
-    action: string
-    entity: string
-    before?: any
-    after?: any
+  log(data: {
+    actorUserId?: string;
+    action: string;
+    entity: string;
+    before?: any;
+    after?: any;
   }) {
     return prisma.auditLog.create({
       data: {
@@ -16,6 +16,6 @@ export const auditService = {
         before: data.before,
         after: data.after,
       },
-    })
+    });
   },
-}
+};

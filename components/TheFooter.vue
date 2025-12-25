@@ -49,12 +49,15 @@
                 {{ BUSINESS_INFO.address.zip }}</span
               >
             </li>
-            <li class="flex items-center space-x-3">
+            <li
+              v-if="BUSINESS_INFO?.contact?.phonePlain || BUSINESS_INFO?.contact?.phone"
+              class="flex items-center space-x-3"
+            >
               <Phone class="w-5 h-5 text-gold shrink-0" aria-hidden="true" />
               <a
-                :href="`tel:${BUSINESS_INFO.contact.phonePlain}`"
+                :href="BUSINESS_INFO?.contact?.phonePlain ? `tel:${BUSINESS_INFO.contact.phonePlain}` : undefined"
                 class="hover:text-white"
-                >{{ BUSINESS_INFO.contact.phone }}</a
+                >{{ BUSINESS_INFO?.contact?.phone }}</a
               >
             </li>
             <li class="flex items-center space-x-3">

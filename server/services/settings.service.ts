@@ -1,31 +1,38 @@
-import prisma from '@server/db/client'
-import { auditService } from '@server/services/audit.service'
+import { readFile, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const dataDir = join(dirname(fileURLToPath(import.meta.url)), "..", "data");
+
+const resolveDataPath = (key: string) => join(dataDir, `${key}.json`);
+
+const readSettingFile = async <T = unknown>(key: string): Promise<T | null> => {
+  try {
+    const contents = await readFile(resolveDataPath(key), "utf-8");
+    return JSON.parse(contents) as T;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+};
+
+const writeSettingFile = async (key: string, value: any) => {
+  await writeFile(
+    resolveDataPath(key),
+    JSON.stringify(value, null, 2) + "\n",
+    "utf-8",
+  );
+  return value;
+};
 
 export const settingsService = {
-  async get(key: string) {
-    const setting = await prisma.siteSetting.findUnique({
-      where: { key },
-    })
-    return setting?.value || null
+  get(key: string) {
+    return readSettingFile(key);
   },
 
-  async set(key: string, value: any, actorUserId: string) {
-    const current = await this.get(key)
-
-    const updated = await prisma.siteSetting.upsert({
-      where: { key },
-      update: { value },
-      create: { key, value },
-    })
-
-    await auditService.log({
-      actorUserId,
-      action: 'UPDATE',
-      entity: `settings:${key}`,
-      before: current,
-      after: value,
-    })
-
-    return updated.value
+  set(key: string, value: any) {
+    return writeSettingFile(key, value);
   },
-}
+};

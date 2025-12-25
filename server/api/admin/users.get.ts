@@ -1,9 +1,9 @@
-import { defineEventHandler, createError, readBody } from 'h3'
-import prisma from '@server/db/client'
+import { defineEventHandler, createError } from "h3";
+import prisma from "@server/db/client";
 
 export default defineEventHandler(async (event) => {
-  if (!event.context.user || event.context.user.role !== 'admin') {
-    throw createError({ statusCode: 403, message: 'Forbidden' })
+  if (!event.context.user || event.context.user.role !== "admin") {
+    throw createError({ statusCode: 403, message: "Forbidden" });
   }
 
   const users = await prisma.user.findMany({
@@ -12,8 +12,8 @@ export default defineEventHandler(async (event) => {
       username: true,
       role: true,
       last_login_at: true,
-    }
-  })
+    },
+  });
 
-  return users
-})
+  return users;
+});
