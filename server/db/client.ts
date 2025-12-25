@@ -1,8 +1,12 @@
-// Prisma client stub
-// The app primarily uses JSON-backed storage (settingsService)
-// Admin/auth features that require Prisma will need schema configuration
+// server/db/client.ts
+import { PrismaClient } from "@prisma/client";
 
-// For now, export null to prevent module load errors
-// Services should check for null before using
+const globalForPrisma = globalThis as unknown as {
+  prisma?: PrismaClient;
+};
 
-export default null;
+const prisma = globalForPrisma.prisma ?? new PrismaClient();
+
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+
+export default prisma;

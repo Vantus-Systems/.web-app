@@ -1,38 +1,18 @@
-import { readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
-
-// Use process.cwd() to ensure we're relative to the project root
-const dataDir = join(process.cwd(), "server", "data");
-
-const resolveDataPath = (key: string) => join(dataDir, `${key}.json`);
-
-const readSettingFile = async <T = unknown>(key: string): Promise<T | null> => {
-  try {
-    const contents = await readFile(resolveDataPath(key), "utf-8");
-    return JSON.parse(contents) as T;
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      return null;
-    }
-    throw error;
-  }
-};
-
-const writeSettingFile = async (key: string, value: any) => {
-  await writeFile(
-    resolveDataPath(key),
-    JSON.stringify(value, null, 2) + "\n",
-    "utf-8",
-  );
-  return value;
-};
+// server/services/settings.service.ts
+import prisma from "@server/db/client";
 
 export const settingsService = {
-  get(key: string) {
-    return readSettingFile(key);
+  async get<T = unknown>(key: string): Promise<T | null> {
+    const row = await prisma.setting.findUnique({ where: { key } });
+    return (row?.value as T) ?? null;
   },
 
-  set(key: string, value: any) {
-    return writeSettingFile(key, value);
+  async set<T = unknown>(key: string, value: T): Promise<T> {
+    await prisma.setting.upsert({
+      where: { key },
+      create: { key, value: value as any },
+      update: { value: value as any },
+    });
+    return value;
   },
 };

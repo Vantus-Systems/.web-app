@@ -13,7 +13,9 @@ const {
 await fetchBusiness();
 await fetchSchedule();
 
-const sessions = computed(() => (Array.isArray(scheduleRef.value) ? scheduleRef.value : []));
+const sessions = computed(() =>
+  Array.isArray(scheduleRef.value) ? scheduleRef.value : [],
+);
 
 const days = [
   { id: "today", label: "Today", date: "Dec 25", dayOfWeek: "Wed" },
