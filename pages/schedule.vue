@@ -13,28 +13,37 @@ const {
 await fetchBusiness();
 await fetchSchedule();
 
-const sessions = computed(() => (scheduleRef.value as any[]) || []);
+const sessions = computed(() => (Array.isArray(scheduleRef.value) ? scheduleRef.value : []));
 
 const days = [
-  { id: "today", label: "Today", date: "Dec 25" },
-  { id: "tomorrow", label: "Tomorrow", date: "Dec 26" },
-  { id: "friday", label: "Friday", date: "Dec 27" },
-  { id: "saturday", label: "Saturday", date: "Dec 28" },
-  { id: "sunday", label: "Sunday", date: "Dec 29" },
+  { id: "today", label: "Today", date: "Dec 25", dayOfWeek: "Wed" },
+  { id: "tomorrow", label: "Tomorrow", date: "Dec 26", dayOfWeek: "Thu" },
+  { id: "friday", label: "Friday", date: "Dec 27", dayOfWeek: "Fri" },
+  { id: "saturday", label: "Saturday", date: "Dec 28", dayOfWeek: "Sat" },
+  { id: "sunday", label: "Sunday", date: "Dec 29", dayOfWeek: "Sun" },
 ];
 
 const activeDay = ref("today");
 const activeFilter = ref("All");
-const filters = ["All", "Morning", "Afternoon", "Evening", "Late Night"];
+const filters = ["All", "Morning", "Afternoon", "Evening"];
 
 const filteredSessions = computed(() => {
-  let filtered = sessions.value;
+  const currentDay = days.find((d) => d.id === activeDay.value);
+  const dayOfWeek = currentDay?.dayOfWeek || "Mon";
+
+  let filtered = sessions.value.filter((s) =>
+    s.availableDays.includes(dayOfWeek),
+  );
 
   if (activeFilter.value !== "All") {
     filtered = filtered.filter((s) => s.category === activeFilter.value);
   }
 
   return filtered;
+});
+
+const activeDayOfWeek = computed(() => {
+  return days.find((d) => d.id === activeDay.value)?.dayOfWeek || "Mon";
 });
 
 const selectDay = (dayId: string) => {
@@ -95,7 +104,7 @@ useSeoMeta({
           class="text-slate-200 max-w-2xl mx-auto text-lg md:text-xl font-medium opacity-90"
         >
           Experience the gold standard of bingo. Browse our curated sessions and
-          reserve your place at the table.
+          plan your winning visit.
         </p>
       </div>
     </div>
@@ -164,9 +173,10 @@ useSeoMeta({
         <TransitionGroup name="list" tag="div" class="space-y-8">
           <ScheduleEventCard
             v-for="(session, idx) in filteredSessions"
-            :key="session.name"
+            :key="session.id"
             :session="session"
             :index="idx"
+            :active-day-of-week="activeDayOfWeek"
           />
         </TransitionGroup>
 

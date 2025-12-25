@@ -39,9 +39,8 @@
           v-motion-fade-visible
           class="text-xl md:text-2xl text-primary-100 max-w-3xl mx-auto mb-10 leading-relaxed font-light"
         >
-          From casual daytime play to premium evening sessions — clear, honest
-          pricing with zero surprises. Every machine, every paper, every game
-          explained.
+          One main session at 7:30 PM every night. Daytime pay-as-you-go games
+          from 10:30 AM. Clear, honest pricing with zero surprises.
         </p>
 
         <!-- Trust Badges -->
@@ -114,16 +113,16 @@
           <div class="text-center mb-16">
             <span
               class="text-gold-600 font-bold uppercase tracking-widest text-sm"
-              >☀️ 10:00 AM – 7:30 PM</span
+              >☀️ 10:30 AM – 7:30 PM</span
             >
             <h2
               class="text-4xl md:text-5xl font-black text-primary-900 mt-4 mb-6"
             >
-              Pay-As-You-Go Gaming
+              Daytime Pay-As-You-Go
             </h2>
             <p class="text-xl text-slate-600 max-w-3xl mx-auto">
-              Flexible, affordable gaming windows. Play for 30 minutes or 4
-              hours — no commitment required.
+              Flexible, affordable gaming windows. Pay only for the machines you
+              want to play. Super 6 Jackpots ($250) start at 12 PM!
             </p>
           </div>
 
@@ -136,15 +135,15 @@
                 <div class="text-4xl">☀️</div>
                 <div>
                   <h3 class="text-2xl font-bold text-primary-900">
-                    Early Bird
+                    Morning Play
                   </h3>
                   <p class="text-amber-700 font-semibold">
-                    10:00 AM – 10:30 AM
+                    10:30 AM – 12:30 PM
                   </p>
                 </div>
               </div>
               <p class="text-amber-700 mb-8">
-                Doors open. Electronic machines available.
+                Doors open at 10 AM. Bingo starts at 10:30 AM.
               </p>
 
               <h4 class="font-bold text-primary-900 text-lg mb-4">
@@ -190,7 +189,7 @@
               </div>
             </div>
 
-            <!-- Main Session Window -->
+            <!-- Afternoon Window -->
             <div
               class="bg-gradient-to-br from-slate-50 to-blue-50 border-2 border-slate-200 rounded-3xl p-8 md:p-12"
             >
@@ -198,15 +197,15 @@
                 <div class="text-4xl">🕐</div>
                 <div>
                   <h3 class="text-2xl font-bold text-primary-900">
-                    Daytime Session
+                    Afternoon Play
                   </h3>
                   <p class="text-slate-700 font-semibold">
-                    10:30 AM – 12:30 PM
+                    12:30 PM – 7:30 PM
                   </p>
                 </div>
               </div>
               <p class="text-slate-700 mb-8">
-                Main daytime bingo session with full game stack.
+                Pay-as-you-go games continue until the main session.
               </p>
 
               <h4 class="font-bold text-primary-900 text-lg mb-4">
@@ -244,65 +243,46 @@
             </div>
           </div>
 
-          <!-- Afternoon Window -->
+          <!-- Daytime Jackpots -->
           <div
             class="bg-gradient-to-br from-purple-50 to-violet-50 border-2 border-purple-200 rounded-3xl p-8 md:p-12 mb-16"
           >
             <div class="flex items-center gap-3 mb-6">
-              <div class="text-4xl">🎮</div>
+              <div class="text-4xl">💰</div>
               <div>
                 <h3 class="text-2xl font-bold text-primary-900">
-                  Afternoon Power Play
+                  Daytime Jackpots & Progressives
                 </h3>
-                <p class="text-purple-700 font-semibold">12:30 PM – 5:15 PM</p>
+                <p class="text-purple-700 font-semibold">
+                  Big wins all day long!
+                </p>
               </div>
             </div>
-            <p class="text-purple-700 mb-8 font-medium">
-              Special games: Letter X • Lucky Seven • Treasure Hunt
-            </p>
 
             <div class="grid md:grid-cols-2 gap-8">
-              <div>
-                <h4 class="font-bold text-primary-900 text-lg mb-4">
-                  Machine Play
+              <div class="bg-white rounded-2xl p-6 border border-purple-100">
+                <h4 class="font-bold text-primary-900 text-lg mb-2">
+                  Super 6 Jackpots
                 </h4>
-                <div class="space-y-3">
-                  <div
-                    class="flex justify-between items-center p-3 bg-white rounded-lg"
-                  >
-                    <span class="font-medium text-slate-700">1 Machine</span>
-                    <span class="font-bold text-primary-900">$1</span>
-                  </div>
-                  <div
-                    class="flex justify-between items-center p-3 bg-white rounded-lg"
-                  >
-                    <span class="font-medium text-slate-700">4 Machines</span>
-                    <span class="font-bold text-gold-600">$3</span>
-                  </div>
-                </div>
+                <p class="text-slate-600 text-sm mb-4">
+                  Played at the top of each hour starting at 12 PM.
+                </p>
+                <div class="text-3xl font-black text-purple-600">$250</div>
               </div>
 
-              <div>
-                <h4 class="font-bold text-primary-900 text-lg mb-4">
-                  Special Games
+              <div class="bg-white rounded-2xl p-6 border border-purple-100">
+                <h4 class="font-bold text-primary-900 text-lg mb-2">
+                  Bingo Babes Progressive
                 </h4>
-                <div class="space-y-3">
-                  <div
-                    class="flex justify-between items-center p-3 bg-white rounded-lg"
-                  >
-                    <span class="font-medium text-slate-700">1 Card</span>
-                    <span class="font-bold text-primary-900">$1</span>
-                  </div>
-                  <div
-                    class="flex justify-between items-center p-3 bg-white rounded-lg"
-                  >
-                    <span class="font-medium text-slate-700">6-Card Set</span>
-                    <span class="font-bold text-gold-600">$5</span>
-                  </div>
-                  <p class="text-xs text-slate-500 italic mt-2">
-                    ⚠️ No mixing cards between game types
-                  </p>
+                <p class="text-slate-600 text-sm mb-4">
+                  Played after the 4 PM Super 6 Jackpot game.
+                </p>
+                <div class="text-3xl font-black text-purple-600">
+                  $200 Guaranteed
                 </div>
+                <p class="text-xs text-purple-500 mt-1">
+                  + Chance at the Progressive Jackpot
+                </p>
               </div>
             </div>
           </div>
@@ -364,16 +344,16 @@
           <div class="text-center mb-16">
             <span
               class="text-gold-600 font-bold uppercase tracking-widest text-sm"
-              >🌙 Premium Evening</span
+              >🌙 7:30 PM Main Session</span
             >
             <h2
               class="text-4xl md:text-5xl font-black text-primary-900 mt-4 mb-6"
             >
-              Evening Bingo Session
+              Nightly Bingo Session
             </h2>
             <p class="text-xl text-slate-600 max-w-3xl mx-auto">
-              Our flagship evening session with all-inclusive machine bundles,
-              specialty games, and premium jackpots.
+              Our flagship nightly session with all-inclusive machine bundles,
+              specialty games, and the Hornet Progressive.
             </p>
           </div>
 
@@ -439,7 +419,7 @@
                 Single Machine
               </h4>
               <p class="text-slate-600 mb-8">
-                One machine entry for the evening session
+                One machine entry for the 7:30 PM session
               </p>
               <div class="text-5xl font-black text-gold-600 mb-4">$11</div>
               <button
@@ -478,7 +458,7 @@
           >
             <div class="bg-primary-900 text-white p-8">
               <h3 class="text-2xl font-bold">
-                ✏️ Additional Paper Games & Add-Ons
+                ✏️ Session-Only Specialty Games
               </h3>
             </div>
             <div class="p-8 md:p-12 space-y-8">
@@ -486,7 +466,7 @@
                 <h4
                   class="text-xl font-bold text-primary-900 mb-6 pb-3 border-b-2 border-primary-300"
                 >
-                  Odd/Even • Lucky Seven • Treasure Hunt • Cover All
+                  Odd/Even • Lucky Seven • Treasure Hunt • Cover All • Letter X
                 </h4>
                 <div class="grid md:grid-cols-2 gap-6">
                   <div
@@ -516,11 +496,11 @@
                   class="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-6"
                 >
                   <h4 class="text-lg font-bold text-blue-900 mb-2">
-                    💻 Progressive Daub Ticket
+                    🐝 Hornet Progressive Daub Ticket
                   </h4>
                   <p class="text-blue-800 text-sm">
-                    Played during second half of session. Requires session entry
-                    to participate.
+                    Played after the Letter X game. $250 Guaranteed prize with a
+                    chance at the progressive jackpot.
                   </p>
                 </div>
                 <div
@@ -530,7 +510,8 @@
                     🐴 Pull Tabs (Horse Races)
                   </h4>
                   <p class="text-purple-800 text-sm">
-                    Available throughout most operating hours.
+                    Sold the majority of the time we are open. Also known as row
+                    games.
                   </p>
                 </div>
               </div>
@@ -567,11 +548,11 @@
                   <p class="font-bold text-primary-900">
                     Good Neighbor Session
                   </p>
-                  <p class="text-sm text-slate-600">5× Pull Tabs</p>
+                  <p class="text-sm text-slate-600">5× Pull Tabs Consolation</p>
                 </div>
                 <div class="bg-white rounded p-3 border-l-4 border-red-500">
                   <p class="font-bold text-primary-900">Neighbor Send-Out</p>
-                  <p class="text-sm text-slate-600">$250 Jackpot</p>
+                  <p class="text-sm text-slate-600">$250 Jackpot Winners</p>
                 </div>
               </div>
             </div>
@@ -589,7 +570,7 @@
                 <div class="bg-white rounded p-3 border-l-4 border-blue-500">
                   <p class="font-bold text-primary-900">Bonus Machine</p>
                   <p class="text-sm text-slate-600">
-                    1 free machine with session
+                    1 free machine with session buy-in
                   </p>
                 </div>
               </div>
@@ -629,11 +610,11 @@
                   <p class="font-bold text-primary-900">
                     Good Neighbor Session
                   </p>
-                  <p class="text-sm text-slate-600">5× Pull Tabs</p>
+                  <p class="text-sm text-slate-600">5× Pull Tabs Consolation</p>
                 </div>
                 <div class="bg-white rounded p-3 border-l-4 border-violet-500">
                   <p class="font-bold text-primary-900">Neighbor Send-Out</p>
-                  <p class="text-sm text-slate-600">$250 Jackpot</p>
+                  <p class="text-sm text-slate-600">$250 Jackpot Winners</p>
                 </div>
               </div>
             </div>
@@ -668,12 +649,14 @@
               <h3 class="text-2xl font-bold text-primary-900 mb-4">Saturday</h3>
               <div class="space-y-3">
                 <div class="bg-white rounded p-3 border-l-4 border-pink-500">
-                  <p class="font-bold text-primary-900">Dynamic Special</p>
-                  <p class="text-sm text-slate-600">Variable based on season</p>
+                  <p class="font-bold text-primary-900">Alternating Specials</p>
+                  <p class="text-sm text-slate-600">
+                    AYCP Paper or Premium Bundles
+                  </p>
                 </div>
                 <div class="bg-white rounded p-3 border-l-4 border-pink-500">
                   <p class="text-xs text-pink-700 italic">
-                    Check our website or call for details
+                    Check with hall for current promotion
                   </p>
                 </div>
               </div>

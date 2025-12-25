@@ -1,39 +1,92 @@
 <script setup lang="ts">
-import { Clock, Calendar, Info, TrendingUp } from "lucide-vue-next";
+import { Clock, Calendar, Info, TrendingUp, Star, Zap, Moon, Sun } from "lucide-vue-next";
 
 interface Session {
+  id: string;
   name: string;
-  time: string;
-  pricing: string;
-  details: string;
-  vibe?: string[];
-  jackpot?: string;
-  category?: string;
-  status?: string;
+  category: string;
+  startTime: string;
+  endTime: string;
+  gameType: string;
+  description: string;
+  vibe: string[];
+  pricing: {
+    machines?: string;
+    paper?: string;
+    type: string;
+    [key: string]: any;
+  };
+  jackpot: string;
+  status: string;
+  eligibility: string;
+  availableDays: string[];
+  games?: { number: number; name: string; detail?: string }[];
+  bonuses?: Record<string, any>;
+  specials?: Record<string, string>;
 }
 
 const props = defineProps<{
   session: Session;
   index: number;
+  activeDayOfWeek?: string;
 }>();
 
-const categoryColors = {
-  Morning: "from-orange-500 to-amber-500",
-  Afternoon: "from-blue-500 to-indigo-500",
-  Evening: "from-purple-600 to-fuchsia-600",
-  "Late Night": "from-slate-800 to-slate-900",
+const currentSpecial = computed(() => {
+  if (!props.session.specials || !props.activeDayOfWeek) return null;
+  return props.session.specials[props.activeDayOfWeek] || props.session.specials[props.activeDayOfWeek.substring(0, 3)];
+});
+
+const categoryStyles = {
+  Morning: {
+    gradient: "from-orange-500 via-amber-500 to-orange-600",
+    bg: "bg-orange-50/50",
+    border: "border-orange-100",
+    text: "text-orange-600",
+    icon: Sun,
+    accent: "bg-orange-100 text-orange-700",
+  },
+  Afternoon: {
+    gradient: "from-blue-500 via-indigo-500 to-blue-600",
+    bg: "bg-blue-50/50",
+    border: "border-blue-100",
+    text: "text-blue-600",
+    icon: Zap,
+    accent: "bg-blue-100 text-blue-700",
+  },
+  Evening: {
+    gradient: "from-purple-600 via-fuchsia-600 to-purple-700",
+    bg: "bg-purple-50/50",
+    border: "border-purple-100",
+    text: "text-purple-600",
+    icon: Star,
+    accent: "bg-purple-100 text-purple-700",
+  },
+  "Late Night": {
+    gradient: "from-slate-800 via-slate-900 to-black",
+    bg: "bg-slate-50/50",
+    border: "border-slate-200",
+    text: "text-slate-800",
+    icon: Moon,
+    accent: "bg-slate-200 text-slate-800",
+  },
 };
 
-const colorClass = computed(
+const style = computed(
   () =>
-    categoryColors[props.session.category as keyof typeof categoryColors] ||
-    "from-gold-500 to-gold-600",
+    categoryStyles[props.session.category as keyof typeof categoryStyles] ||
+    categoryStyles.Evening,
 );
 
+const formatPricing = (pricing: any) => {
+  if (typeof pricing === "string") return pricing;
+  if (pricing.machines) return `Machines: ${pricing.machines}`;
+  if (pricing.sessionBuyIn) return `Buy-in: ${pricing.sessionBuyIn.twoMachines}`;
+  return "See pricing page for details";
+};
+
 const addToCalendar = () => {
-  // Mock functionality for "Add to Calendar"
   const text = encodeURIComponent(`Bingo: ${props.session.name}`);
-  const details = encodeURIComponent(props.session.details);
+  const details = encodeURIComponent(props.session.description);
   const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${text}&details=${details}`;
   window.open(url, "_blank");
 };
@@ -41,122 +94,226 @@ const addToCalendar = () => {
 
 <template>
   <div
-    class="group relative bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-1"
+    class="group relative bg-white border rounded-[2rem] overflow-hidden transition-all duration-500 hover:shadow-[0_32px_64px_-12px_rgba(0,0,0,0.1)] hover:-translate-y-2"
+    :class="[style.border]"
   >
-    <!-- Status Badge -->
-    <div v-if="session.status" class="absolute top-4 right-4 z-20">
-      <div
-        class="flex items-center gap-2 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full border border-slate-100 shadow-sm"
-      >
-        <span class="relative flex h-2 w-2">
-          <span
-            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
-          ></span>
-          <span
-            class="relative inline-flex rounded-full h-2 w-2 bg-green-500"
-          ></span>
-        </span>
-        <span
-          class="text-[10px] font-black uppercase tracking-wider text-slate-600"
-          >{{ session.status }}</span
-        >
-      </div>
-    </div>
+    <!-- Category Glow -->
+    <div
+      class="absolute -inset-2 opacity-0 group-hover:opacity-10 transition-opacity duration-700 blur-3xl"
+      :class="[style.gradient.replace('from-', 'bg-')]"
+    ></div>
 
-    <div class="flex flex-col md:flex-row">
-      <!-- Time Section -->
+    <div class="flex flex-col lg:flex-row relative z-10">
+      <!-- Time & Category Sidebar -->
       <div
         :class="[
-          colorClass,
-          'md:w-48 flex flex-col items-center justify-center p-8 text-white bg-gradient-to-br relative overflow-hidden',
+          style.gradient,
+          'lg:w-64 flex flex-col items-center justify-center p-10 text-white bg-gradient-to-br relative overflow-hidden',
         ]"
       >
         <div
           class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"
         ></div>
-        <Clock class="w-6 h-6 mb-2 opacity-80" />
-        <div class="text-3xl font-black tracking-tighter">
-          {{ session.time.split(" ")[0] }}
-        </div>
-        <div class="text-sm font-bold opacity-90 uppercase">
-          {{ session.time.split(" ")[1] }}
+
+        <component :is="style.icon" class="w-8 h-8 mb-4 opacity-80" />
+
+        <div class="text-center">
+          <div class="text-4xl font-black tracking-tighter mb-1">
+            {{ session.startTime.split(" ")[0] }}
+          </div>
+          <div class="text-sm font-black opacity-80 uppercase tracking-[0.2em]">
+            {{ session.startTime.split(" ")[1] }}
+          </div>
+          <div class="mt-4 h-px w-8 bg-white/30 mx-auto"></div>
+          <div class="mt-4 text-[10px] font-black uppercase tracking-[0.3em]">
+            {{ session.category }}
+          </div>
         </div>
       </div>
 
-      <!-- Content Section -->
-      <div class="flex-1 p-6 md:p-8 flex flex-col justify-between relative">
+      <!-- Main Content Area -->
+      <div class="flex-1 p-8 lg:p-12 flex flex-col justify-between bg-white">
         <div>
-          <div class="flex flex-wrap gap-2 mb-4">
-            <span
-              v-for="tag in session.vibe"
-              :key="tag"
-              class="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded bg-slate-100 text-slate-500 border border-slate-200"
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div class="flex flex-wrap gap-2">
+              <span
+                v-for="tag in session.vibe"
+                :key="tag"
+                class="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border transition-colors"
+                :class="[style.accent, style.border]"
+              >
+                {{ tag }}
+              </span>
+            </div>
+
+            <div
+              class="flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-full border border-green-100"
             >
-              {{ tag }}
-            </span>
+              <span class="relative flex h-2 w-2">
+                <span
+                  class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
+                ></span>
+                <span
+                  class="relative inline-flex rounded-full h-2 w-2 bg-green-500"
+                ></span>
+              </span>
+              <span
+                class="text-[10px] font-black uppercase tracking-widest text-green-700"
+                >Live Status</span
+              >
+            </div>
           </div>
 
           <h3
-            class="text-2xl md:text-3xl font-black text-slate-900 mb-3 group-hover:text-primary-600 transition-colors"
+            class="text-3xl lg:text-4xl font-black text-slate-900 mb-4 tracking-tight group-hover:text-primary-600 transition-colors"
           >
             {{ session.name }}
           </h3>
 
-          <p
-            class="text-slate-500 leading-relaxed mb-6 font-medium line-clamp-2"
-          >
-            {{ session.details }}
+          <p class="text-slate-500 text-lg leading-relaxed mb-8 font-medium">
+            {{ session.description }}
           </p>
 
+          <!-- Daily Special Highlight -->
           <div
-            class="flex flex-wrap items-center gap-6 text-sm font-bold text-slate-400"
+            v-if="currentSpecial"
+            class="mb-8 p-6 rounded-2xl border-2 border-dashed flex items-start gap-4 transition-all duration-300 group-hover:border-solid"
+            :class="[style.bg, style.border]"
           >
-            <div class="flex items-center gap-2">
-              <TrendingUp class="w-4 h-4 text-gold-500" />
-              <span
-                >Est. Jackpot:
-                <span class="text-slate-900">{{ session.jackpot }}</span></span
-              >
+            <div
+              class="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0"
+            >
+              <Star class="w-6 h-6 text-gold-500 animate-pulse" />
             </div>
-            <div class="flex items-center gap-2">
-              <Info class="w-4 h-4 text-primary-500" />
-              <span>{{ session.pricing }}</span>
+            <div>
+              <div
+                class="text-[10px] font-black uppercase tracking-[0.2em] text-gold-600 mb-1"
+              >
+                Today's Special Promotion
+              </div>
+              <div class="text-slate-900 font-black text-lg leading-tight">
+                {{ currentSpecial }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Session Details Grid -->
+          <div class="grid md:grid-cols-2 gap-8 mb-10">
+            <div class="space-y-4">
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-10 h-10 rounded-xl flex items-center justify-center"
+                  :class="[style.bg]"
+                >
+                  <TrendingUp class="w-5 h-5" :class="[style.text]" />
+                </div>
+                <div>
+                  <div
+                    class="text-[10px] font-black uppercase tracking-widest text-slate-400"
+                  >
+                    Estimated Jackpot
+                  </div>
+                  <div class="text-lg font-black text-slate-900">
+                    {{ session.jackpot }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-10 h-10 rounded-xl flex items-center justify-center"
+                  :class="[style.bg]"
+                >
+                  <Info class="w-5 h-5" :class="[style.text]" />
+                </div>
+                <div>
+                  <div
+                    class="text-[10px] font-black uppercase tracking-widest text-slate-400"
+                  >
+                    Pricing Model
+                  </div>
+                  <div class="text-lg font-black text-slate-900">
+                    {{ formatPricing(session.pricing) }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sunday Bonuses -->
+              <div v-if="session.bonuses" class="pt-4 space-y-3">
+                <div
+                  v-if="session.bonuses.freeDinner"
+                  class="flex items-center gap-2 text-emerald-600 font-bold text-sm"
+                >
+                  <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                  Complimentary Dinner Included
+                </div>
+                <div
+                  v-if="session.bonuses.multipleJackpots"
+                  class="flex items-center gap-2 text-gold-600 font-bold text-sm"
+                >
+                  <div class="w-2 h-2 rounded-full bg-gold-500"></div>
+                  {{ session.bonuses.multipleJackpots }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Game Stack Preview (if available) -->
+            <div
+              v-if="session.games"
+              class="bg-slate-50 rounded-2xl p-6 border border-slate-100"
+            >
+              <div
+                class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4"
+              >
+                Featured Game Stack
+              </div>
+              <div class="space-y-2">
+                <div
+                  v-for="game in session.games.slice(0, 3)"
+                  :key="game.number"
+                  class="flex items-center justify-between text-sm"
+                >
+                  <span class="font-bold text-slate-700"
+                    >{{ game.number }}. {{ game.name }}</span
+                  >
+                  <span v-if="game.detail" class="text-xs text-slate-400">{{
+                    game.detail
+                  }}</span>
+                </div>
+                <div
+                  v-if="session.games.length > 3"
+                  class="text-[10px] font-black text-primary-600 uppercase tracking-widest pt-2"
+                >
+                  + {{ session.games.length - 3 }} More Games
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
+        <!-- Action Bar -->
         <div
-          class="mt-8 pt-6 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4"
+          class="pt-8 border-t border-slate-100 flex flex-wrap items-center justify-between gap-6"
         >
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-4">
             <button
-              class="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-primary-600 transition-all"
-              title="Add to Calendar"
+              class="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-slate-50 text-slate-500 font-bold text-sm transition-all"
               @click="addToCalendar"
             >
-              <Calendar class="w-5 h-5" />
+              <Calendar class="w-4 h-4" />
+              Add to Calendar
             </button>
           </div>
 
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-4">
             <NuxtLink
               to="/contact"
-              class="px-6 py-3 rounded-xl bg-primary-900 text-white font-black text-sm hover:bg-primary-800 transition-all shadow-lg shadow-primary-900/20 flex items-center gap-2 group/btn"
+              class="px-8 py-4 rounded-2xl bg-slate-900 text-white font-black text-sm hover:bg-primary-900 transition-all shadow-xl shadow-slate-900/10 flex items-center gap-3 group/btn"
             >
-              Reserve Seat
-              <svg
+              Contact Us
+              <ChevronRight
                 class="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M17 8l4 4m0 0l-4 4m4-4H3"
-                />
-              </svg>
+              />
             </NuxtLink>
           </div>
         </div>
@@ -164,3 +321,4 @@ const addToCalendar = () => {
     </div>
   </div>
 </template>
+

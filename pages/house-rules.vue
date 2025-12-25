@@ -38,7 +38,7 @@
                 regulations. Identification may be requested.
               </li>
               <li>
-                <strong>Seating:</strong> Seating is generally reserved for
+                <strong>Seating:</strong> Seating is first-come, first-served for
                 active players. Guests may be asked to vacate seats during peak
                 times if not participating.
               </li>

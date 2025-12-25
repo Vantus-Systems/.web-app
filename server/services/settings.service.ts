@@ -1,8 +1,8 @@
 import { readFile, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 
-const dataDir = join(dirname(fileURLToPath(import.meta.url)), "..", "data");
+// Use process.cwd() to ensure we're relative to the project root
+const dataDir = join(process.cwd(), "server", "data");
 
 const resolveDataPath = (key: string) => join(dataDir, `${key}.json`);
 
