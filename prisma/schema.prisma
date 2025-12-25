@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // recommended for production
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  admin
+  mic
+}
+
+model user {
+  id            String    @id @default(uuid())
+  username      String    @unique
+  password_hash String
+  role          UserRole  @default(admin)
+  last_login_at DateTime?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  sessions      session[]
+  audit_logs    auditLog[] @relation("AuditActor")
+
+  @@map("users")
+}
+
+model session {
+  // your code uses: findUnique({ where: { token_hash }})
+  token_hash String   @id
+  user_id    String
+  expires_at DateTime
+  ip         String?
+  user_agent String?
+  created_at DateTime @default(now())
+
+  user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@map("sessions")
+}
+
+model contactMessage {
+  id         String   @id @default(uuid())
+  name       String
+  email      String
+  message    String
+  status     String   @default("NEW")
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([created_at])
+  @@map("contact_messages")
+}
+
+model auditLog {
+  id            String   @id @default(uuid())
+  actor_user_id String?
+  action        String
+  entity        String
+  before        Json?
+  after         Json?
+  created_at    DateTime @default(now())
+
+  actor user? @relation("AuditActor", fields: [actor_user_id], references: [id], onDelete: SetNull)
+
+  @@index([created_at])
+  @@index([actor_user_id])
+  @@map("audit_logs")
+}
+
+model setting {
+  // Used to store business/jackpot/pricing/schedule/specials as JSON
+  key        String   @id
+  value      Json
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("settings")
+}

@@ -67,7 +67,8 @@
                         >Phone</label
                       >
                       <input
-                        v-model="businessData.phone"
+                        v-if="businessData.contact"
+                        v-model="businessData.contact.phone"
                         type="text"
                         class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                       />
@@ -77,7 +78,8 @@
                         >Email</label
                       >
                       <input
-                        v-model="businessData.email"
+                        v-if="businessData.contact"
+                        v-model="businessData.contact.email"
                         type="email"
                         class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                       />
@@ -87,7 +89,8 @@
                         >Address</label
                       >
                       <input
-                        v-model="businessData.address"
+                        v-if="businessData.address"
+                        v-model="businessData.address.full"
                         type="text"
                         class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                       />
@@ -97,7 +100,8 @@
                         >Map Embed URL</label
                       >
                       <input
-                        v-model="businessData.mapUrl"
+                        v-if="businessData.address"
+                        v-model="businessData.address.mapLink"
                         type="text"
                         class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                       />
@@ -128,7 +132,7 @@
                         <span class="text-gray-500 sm:text-sm">$</span>
                       </div>
                       <input
-                        v-model="jackpotData.amount"
+                        v-model="jackpotData.value"
                         type="number"
                         step="0.01"
                         class="focus:ring-gold-500 focus:border-gold-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md p-2"
@@ -222,11 +226,11 @@
                         <div class="flex items-center justify-between">
                           <h3 class="text-sm font-medium">{{ msg.name }}</h3>
                           <p class="text-sm text-gray-500">
-                            {{ new Date(msg.timestamp).toLocaleString() }}
+                            {{ new Date(msg.created_at).toLocaleString() }}
                           </p>
                         </div>
                         <p class="text-sm text-gray-500">
-                          {{ msg.email }} | {{ msg.phone }}
+                          {{ msg.email }}
                         </p>
                         <p class="text-sm text-gray-800 mt-2">
                           {{ msg.message }}

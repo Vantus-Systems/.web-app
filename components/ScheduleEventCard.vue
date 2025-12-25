@@ -1,5 +1,14 @@
 <script setup lang="ts">
-import { Clock, Calendar, Info, TrendingUp, Star, Zap, Moon, Sun } from "lucide-vue-next";
+import {
+  Calendar,
+  Info,
+  TrendingUp,
+  Star,
+  Zap,
+  Moon,
+  Sun,
+  ChevronRight,
+} from "lucide-vue-next";
 
 interface Session {
   id: string;
@@ -33,7 +42,10 @@ const props = defineProps<{
 
 const currentSpecial = computed(() => {
   if (!props.session.specials || !props.activeDayOfWeek) return null;
-  return props.session.specials[props.activeDayOfWeek] || props.session.specials[props.activeDayOfWeek.substring(0, 3)];
+  return (
+    props.session.specials[props.activeDayOfWeek] ||
+    props.session.specials[props.activeDayOfWeek.substring(0, 3)]
+  );
 });
 
 const categoryStyles = {
@@ -80,7 +92,8 @@ const style = computed(
 const formatPricing = (pricing: any) => {
   if (typeof pricing === "string") return pricing;
   if (pricing.machines) return `Machines: ${pricing.machines}`;
-  if (pricing.sessionBuyIn) return `Buy-in: ${pricing.sessionBuyIn.twoMachines}`;
+  if (pricing.sessionBuyIn)
+    return `Buy-in: ${pricing.sessionBuyIn.twoMachines}`;
   return "See pricing page for details";
 };
 
@@ -321,4 +334,3 @@ const addToCalendar = () => {
     </div>
   </div>
 </template>
-

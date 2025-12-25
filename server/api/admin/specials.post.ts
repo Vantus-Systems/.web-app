@@ -1,0 +1,35 @@
+// server/api/admin/specials.post.ts
+import { defineEventHandler, createError, readBody } from "h3";
+import { z } from "zod";
+import { settingsService } from "@server/services/settings.service";
+import { auditService } from "@server/services/audit.service";
+
+const specialsSchema = z
+  .object({
+    heroNote: z.string().optional(),
+    weekly: z.array(z.any()).optional(),
+    meta: z.any().optional(),
+  })
+  .passthrough();
+
+export default defineEventHandler(async (event) => {
+  if (!event.context.user || event.context.user.role !== "admin") {
+    throw createError({ statusCode: 403, message: "Forbidden" });
+  }
+
+  const body = await readBody(event);
+  const parsed = specialsSchema.parse(body);
+  const before = await settingsService.get("specials");
+
+  await settingsService.set("specials", parsed);
+
+  await auditService.log({
+    actorUserId: event.context.user.id,
+    action: "UPDATE_SETTING",
+    entity: "setting:specials",
+    before,
+    after: parsed,
+  });
+
+  return { success: true };
+});

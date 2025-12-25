@@ -14,8 +14,10 @@ type SpecialsResponse = {
   heroNote?: string;
   weekly?: SpecialDay[];
   today?: SpecialDay | null;
-  timezone?: string;
-  location?: string;
+  meta?: {
+    timezone?: string;
+    location?: string;
+  };
 };
 
 export const useSpecialsStore = defineStore("specials", () => {
@@ -36,8 +38,8 @@ export const useSpecialsStore = defineStore("specials", () => {
       weekly.value = data.weekly ?? [];
       today.value = data.today ?? null;
       heroNote.value = data.heroNote ?? "";
-      location.value = data.location ?? "";
-      timezone.value = data.timezone ?? "America/Chicago";
+      location.value = data.meta?.location ?? "";
+      timezone.value = data.meta?.timezone ?? "America/Chicago";
     } catch (err) {
       console.error("Failed to fetch daily specials:", err);
       error.value = "Unable to load daily specials right now.";

@@ -199,9 +199,7 @@
                   <h3 class="text-2xl font-bold text-primary-900">
                     Afternoon Play
                   </h3>
-                  <p class="text-slate-700 font-semibold">
-                    12:30 PM – 7:30 PM
-                  </p>
+                  <p class="text-slate-700 font-semibold">12:30 PM – 7:30 PM</p>
                 </div>
               </div>
               <p class="text-slate-700 mb-8">
