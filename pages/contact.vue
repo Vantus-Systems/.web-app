@@ -123,7 +123,7 @@
         </div>
 
         <!-- Info & Map -->
-        <div class="space-y-8">
+        <div v-if="BUSINESS_INFO.address" class="space-y-8">
           <!-- Contact Details Card -->
           <div
             class="bg-primary-900 text-white p-8 md:p-10 rounded-3xl shadow-xl"
@@ -200,7 +200,10 @@ import { toTypedSchema } from "@vee-validate/zod";
 import * as z from "zod";
 import { MapPin, Phone, Clock } from "lucide-vue-next";
 import BaseButton from "~/components/ui/BaseButton.vue";
-import { BUSINESS_INFO } from "~/utils/business";
+import { useBusiness } from "~/composables/useBusiness";
+
+const { business: BUSINESS_INFO, fetchBusiness } = useBusiness();
+await fetchBusiness();
 
 useSeoMeta({
   title: "Contact",
@@ -235,7 +238,7 @@ const onSubmit = handleSubmit(async (values) => {
   errorMessage.value = "";
 
   try {
-    const response = await $fetch("/api/contact", {
+    await $fetch("/api/contact", {
       method: "POST",
       body: {
         ...values,
@@ -243,7 +246,7 @@ const onSubmit = handleSubmit(async (values) => {
       },
     });
 
-    successMessage.value = response.message || "Message sent successfully!";
+    successMessage.value = "Message sent successfully!";
     resetForm();
   } catch (error: any) {
     console.error("Submission error", error);

@@ -117,7 +117,7 @@
 
     <div class="container mx-auto px-4 py-20">
       <!-- Loading State -->
-      <div v-if="pending" class="flex justify-center py-20">
+      <div v-if="!pricing" class="flex justify-center py-20">
         <div
           class="animate-spin h-12 w-12 border-4 border-gold-500 border-t-transparent rounded-full"
         ></div>
@@ -735,13 +735,15 @@
 </template>
 
 <script setup lang="ts">
+import { useBusiness } from "~/composables/useBusiness";
 useSeoMeta({
   title: "Pricing & Sessions | Mary Esther Bingo",
   description:
     "View our session prices, machine bundles, and special game rates. Affordable entertainment daily!",
 });
 
-const { data: pricing, pending } = await useFetch("/api/pricing");
+const { pricing, fetchPricing } = useBusiness();
+await fetchPricing();
 </script>
 
 <style scoped>

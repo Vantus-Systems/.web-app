@@ -1,14 +1,7 @@
-import { readJson } from "../utils/storage";
+import { defineEventHandler } from 'h3'
+import { settingsService } from '@server/services/settings.service'
 
-export default defineEventHandler(async (_event) => {
-  const jackpotData = await readJson("jackpot.json", {
-    value: 2500,
-    lastUpdated: new Date().toISOString(),
-  });
-
-  return {
-    value: jackpotData.value,
-    lastUpdated: jackpotData.lastUpdated,
-    currency: "USD",
-  };
-});
+export default defineEventHandler(async () => {
+  const data = await settingsService.get('jackpot')
+  return data || {}
+})

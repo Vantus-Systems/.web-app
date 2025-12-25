@@ -127,7 +127,7 @@
     </section>
 
     <!-- Location CTA -->
-    <section class="py-20 bg-white">
+    <section v-if="BUSINESS_INFO.address" class="py-20 bg-white">
       <div class="container mx-auto px-4">
         <div
           class="bg-primary-900 rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row"
@@ -167,9 +167,11 @@ import { useJackpotStore } from "~/stores/jackpot";
 import BaseButton from "~/components/ui/BaseButton.vue";
 import BaseCard from "~/components/ui/BaseCard.vue";
 import DailySpecials from "~/components/DailySpecials.vue";
-import { BUSINESS_INFO } from "~/utils/business";
+import { useBusiness } from "~/composables/useBusiness";
 
 const jackpotStore = useJackpotStore();
+const { business: BUSINESS_INFO, fetchBusiness } = useBusiness();
+await fetchBusiness();
 
 useSeoMeta({
   title: "Mary Esther Bingo | Premier Charity Bingo Hall in FL",
@@ -177,52 +179,56 @@ useSeoMeta({
     "Play bingo at Mary Esther Bingo in Florida. Volunteer-supported charity hall with daily jackpots and a friendly atmosphere. Join us today!",
 });
 
-useHead({
-  script: [
-    {
-      type: "application/ld+json",
-      children: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "LocalBusiness",
-        name: BUSINESS_INFO.name,
-        image: "https://images.unsplash.com/photo-1757689216934-8c7907b44a28", // Example image
-        "@id": BUSINESS_INFO.meta.url,
-        url: BUSINESS_INFO.meta.url,
-        telephone: BUSINESS_INFO.contact.phone,
-        address: {
-          "@type": "PostalAddress",
-          streetAddress: BUSINESS_INFO.address.street,
-          addressLocality: BUSINESS_INFO.address.city,
-          addressRegion: BUSINESS_INFO.address.state,
-          postalCode: BUSINESS_INFO.address.zip,
-          addressCountry: "US",
-        },
-        geo: {
-          "@type": "GeoCoordinates",
-          latitude: 30.416569, // Approximate from map link
-          longitude: -86.662126,
-        },
-        openingHoursSpecification: [
-          {
-            "@type": "OpeningHoursSpecification",
-            dayOfWeek: [
-              "Monday",
-              "Tuesday",
-              "Wednesday",
-              "Thursday",
-              "Friday",
-              "Saturday",
-              "Sunday",
-            ],
-            opens: "10:00",
-            closes: "00:30",
+// JSON-LD requires business info to be available
+if (BUSINESS_INFO.value.name) {
+  useHead({
+    script: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          name: BUSINESS_INFO.value.name,
+          image:
+            "https://images.unsplash.com/photo-1757689216934-8c7907b44a28", // Example image
+          "@id": BUSINESS_INFO.value.meta?.url,
+          url: BUSINESS_INFO.value.meta?.url,
+          telephone: BUSINESS_INFO.value.contact?.phone,
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: BUSINESS_INFO.value.address?.street,
+            addressLocality: BUSINESS_INFO.value.address?.city,
+            addressRegion: BUSINESS_INFO.value.address?.state,
+            postalCode: BUSINESS_INFO.value.address?.zip,
+            addressCountry: "US",
           },
-        ],
-        priceRange: "$",
-      }),
-    },
-  ],
-});
+          geo: {
+            "@type": "GeoCoordinates",
+            latitude: 30.416569, // Approximate from map link
+            longitude: -86.662126,
+          },
+          openingHoursSpecification: [
+            {
+              "@type": "OpeningHoursSpecification",
+              dayOfWeek: [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday",
+              ],
+              opens: "10:00",
+              closes: "00:30",
+            },
+          ],
+          priceRange: "$",
+        }),
+      },
+    ],
+  });
+}
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat("en-US", {

@@ -1,6 +1,7 @@
-import { readJson } from "~/server/utils/storage";
+import { defineEventHandler } from 'h3'
+import { settingsService } from '@server/services/settings.service'
 
 export default defineEventHandler(async () => {
-  const data = await readJson("schedule.json", []);
-  return data;
-});
+  const data = await settingsService.get('schedule')
+  return data || {}
+})
