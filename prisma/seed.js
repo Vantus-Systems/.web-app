@@ -22,8 +22,8 @@ async function main() {
 
       await prisma.setting.upsert({
         where: { key },
-        update: { value },
-        create: { key, value },
+        update: { value: JSON.stringify(value) },
+        create: { key, value: JSON.stringify(value) },
       });
       console.log(`Seeded ${key}`);
     } catch (e) {

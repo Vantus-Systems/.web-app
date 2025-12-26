@@ -3,20 +3,15 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql" // recommended for production
+  provider = "sqlite" // local development
   url      = env("DATABASE_URL")
-}
-
-enum UserRole {
-  admin
-  mic
 }
 
 model user {
   id            String    @id @default(uuid())
   username      String    @unique
   password_hash String
-  role          UserRole  @default(admin)
+  role          String    @default("admin") // "admin" or "mic"
   last_login_at DateTime?
   created_at    DateTime  @default(now())
   updated_at    DateTime  @updatedAt
@@ -60,8 +55,8 @@ model auditLog {
   actor_user_id String?
   action        String
   entity        String
-  before        Json?
-  after         Json?
+  before        String? // JSON string
+  after         String? // JSON string
   created_at    DateTime @default(now())
 
   actor user? @relation("AuditActor", fields: [actor_user_id], references: [id], onDelete: SetNull)
@@ -74,7 +69,7 @@ model auditLog {
 model setting {
   // Used to store business/jackpot/pricing/schedule/specials as JSON
   key        String   @id
-  value      Json
+  value      String   // JSON string
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 

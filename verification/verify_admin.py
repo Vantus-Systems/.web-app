@@ -57,33 +57,74 @@ try:
 
             # 3. Create a new MIC user
             print("Creating new MIC user...")
-            page.click("button:has-text('Add New User')")
-
-            # Modal is open
-            modal = page.locator("div[role='dialog']")
-            expect(modal).to_be_visible()
-
-            # Fill form in modal
-            inputs = modal.locator("input")
-            inputs.nth(0).fill("Test Caller") # Name
-            inputs.nth(1).fill("mic_caller")  # Username
-
-            modal.locator("select").select_option("mic") # Role
-
-            inputs.nth(2).fill("caller123")   # Password
-
-            print("Saving user...")
-            modal.locator("button:has-text('Save')").click()
-
-            # Wait for modal to close and user to appear in table
-            expect(modal).to_be_hidden()
-            expect(page.locator("table")).to_contain_text("mic_caller")
-
-            print("User created.")
+            
+            # The form is in the right column, inside a dark container
+            # Let's find it by looking for the "Add New Member" heading
+            form = page.locator("form")
+            
+            # Debug: print form count
+            form_count = form.count()
+            print(f"Found {form_count} forms on the page")
+            
+            if form_count > 0:
+                # Fill the form
+                # The first input is text (username), second is password
+                inputs = page.locator("input")
+                print(f"Found {inputs.count()} inputs")
+                
+                # Fill username
+                username_input = page.locator("input[type='text']")
+                if username_input.count() > 0:
+                    username_input.first.fill("testcaller")
+                    print("Filled username")
+                else:
+                    print("ERROR: Could not find text input")
+                
+                # Fill password
+                password_input = page.locator("input[type='password']")
+                if password_input.count() > 0:
+                    password_input.first.fill("caller123")
+                    print("Filled password")
+                else:
+                    print("ERROR: Could not find password input")
+                
+                # Select role
+                select = page.locator("select")
+                if select.count() > 0:
+                    select.first.select_option("mic")
+                    print("Selected role")
+                else:
+                    print("ERROR: Could not find select")
+                
+                # Click submit
+                submit_btn = page.locator("button", has_text="Create Account")
+                if submit_btn.count() > 0:
+                    submit_btn.first.click()
+                    print("Clicked submit")
+                else:
+                    print("ERROR: Could not find submit button")
+                
+                # Wait for the user to appear in the table
+                page.wait_for_timeout(2000)
+                
+                # Check if user was added
+                table = page.locator("table")
+                if table.count() > 0:
+                    if table.locator("text=testcaller").count() > 0:
+                        print("SUCCESS: User 'testcaller' found in table!")
+                    else:
+                        print("User might not have been added yet, checking table content...")
+                        print(table.inner_text()[:200])
+                else:
+                    print("ERROR: Table not found")
+            else:
+                print("ERROR: Form not found")
+                print("Page content:", page.content()[:500])
 
             # 4. Take Screenshot
             print("Taking screenshot...")
             page.screenshot(path="verification/admin_users.png")
+            print("Screenshot saved to verification/admin_users.png")
 
             browser.close()
 

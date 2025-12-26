@@ -57,46 +57,25 @@ Official website for Mary Esther Bingo, a premier entertainment venue in Florida
    - `npm run preview` and `node .output/server/index.mjs` will run the server runtime and make API routes available (unlike `serve -s .output/public` which only serves static files and will not expose server APIs).
    - In production builds the server may set the session cookie `auth_token` with the `Secure` attribute (meaning it will only be sent over HTTPS). For local development over plain HTTP either use `npm run dev` or use the provided convenience script `npm run start:local` which starts the built server with `NODE_ENV=development` and loads `.env` so cookies are set without `Secure` and will work on `http://localhost:3000`.
 
-### Local database setup (new)
+### Local database setup (SQLite)
 
-- After cloning, a simple setup flow is:
-
+- After cloning, `npm install` automatically provisions the SQLite database before anything else runs:
   ```bash
-  npm install
-  npm run postinstall   # runs DB setup (if necessary), generates Prisma client, prepares Nuxt
-  npm run generate
-  npm run start
+  npm install        # postinstall runs setup-db.js + nuxt prepare
+  npm run dev
   ```
 
-- What happens during `postinstall`:
-  - If a valid `DATABASE_URL` is already present, Prisma schema will be pushed and seeds applied.
-  - If no `DATABASE_URL` is found and Docker is available (and accessible by your user), the script will start a local Postgres container (default name `med-postgres`) and configure `DATABASE_URL` in `.env` for you, then push the Prisma schema and run the seed.
-  - The setup step is skipped in CI environments (`CI=true`) or when `SKIP_DB_SETUP=true`.
+- The `postinstall` workflow (and the standalone `npm run setup:db`) does the following:
+  - Uses `scripts/setup-db.js` to ensure a `DATABASE_URL` value exists, defaulting to the absolute `file://.../med.db` path via Node's `pathToFileURL`. The script logs the resolved URL so you can confirm which file is being targeted.
+  - Runs `npx prisma generate` to refresh the Prisma client.
+  - Runs `npx prisma db push --accept-data-loss` so the SQLite schema matches `prisma/schema.prisma`.
+  - Runs `npx prisma db seed` to load the out-of-the-box admin user + configuration JSON.
+  - Runs `nuxt prepare` (from the `postinstall` hook) so Nuxt is ready for dev/build commands without needing extra setup.
 
-- Environment configuration / advanced options:
-  - `POSTGRES_IMAGE` - override the image used to provision Postgres (default: `postgres:15-alpine`).
-  - `POSTGRES_CONTAINER` - override the container name (default: `med-postgres`).
-  - `DB_PROVISION_TIMEOUT_MS` - how long the script waits for Postgres readiness (default: `120000` ms).
-  - `DB_PROVISION_INTERVAL_MS` - polling interval while waiting for readiness (default: `2000` ms).
-
-- Manual commands & verification:
-  - `npm run setup:db` or `npm run db:setup` to run the provisioning script by hand.
-  - `npm run check:db` to verify your app can connect to the DB (runs a simple Prisma query).
-
-- Troubleshooting:
-  - If you see `permission denied while trying to connect to the Docker daemon socket`, fix it by adding your user to the docker group and re-login:
-    ```bash
-    sudo usermod -aG docker $USER
-    # then log out & back in, or run:
-    newgrp docker
-    ```
-  - If provisioning times out, inspect the container with:
-    ```bash
-    docker logs med-postgres --tail 50
-    docker inspect med-postgres
-    ```
-
-- If you don't want automatic DB provisioning, set `SKIP_DB_SETUP=true` in your environment.
+- Manual helpers:
+  - `npm run setup:db` or `npm run db:setup` re-runs the provisioning script if you ever delete `med.db` or want to reset the schema.
+  - `npm run check:db` runs `scripts/check-db.js`, which attempts a simple Prisma query against `DATABASE_URL` to prove connectivity.
+  - `npm run prisma:studio` opens the Prisma Studio database browser for inspection after setup completes.
 
 ## Project Structure
 

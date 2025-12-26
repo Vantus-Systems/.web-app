@@ -13,8 +13,8 @@ export const auditService = {
         actor_user_id: data.actorUserId,
         action: data.action,
         entity: data.entity,
-        before: data.before,
-        after: data.after,
+        before: data.before ? JSON.stringify(data.before) : null,
+        after: data.after ? JSON.stringify(data.after) : null,
       },
     });
   },

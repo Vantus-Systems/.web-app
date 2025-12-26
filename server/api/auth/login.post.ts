@@ -10,18 +10,22 @@ const loginSchema = z.object({
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
+  console.log("[login] Attempting login for:", body.username);
   const { username, password } = loginSchema.parse(body);
 
   const user = await authService.getUserByUsername(username);
   if (!user) {
+    console.log("[login] User not found:", username);
     throw createError({ statusCode: 401, message: "Invalid credentials" });
   }
 
   const valid = await authService.verifyPassword(password, user.password_hash);
   if (!valid) {
+    console.log("[login] Invalid password for:", username);
     throw createError({ statusCode: 401, message: "Invalid credentials" });
   }
 
+  console.log("[login] Success for:", username);
   // Create session
   const ip = event.node.req.socket.remoteAddress;
   const userAgent = event.node.req.headers["user-agent"];
