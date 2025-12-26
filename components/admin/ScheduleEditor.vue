@@ -175,10 +175,21 @@
                 </div>
 
                  <!-- Details -->
-                 <label class="block">
-                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Description</span>
-                    <textarea v-model="editingSession.description" rows="3" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:border-gold focus:ring-gold"></textarea>
-                </label>
+                 <div class="grid grid-cols-1 gap-6">
+                    <label class="block">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Description</span>
+                        <textarea v-model="editingSession.description" rows="3" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:border-gold focus:ring-gold"></textarea>
+                    </label>
+
+                    <label class="block">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Linked Program</span>
+                        <select v-model="editingSession.programSlug" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:border-gold focus:ring-gold">
+                            <option value="">-- No Linked Program --</option>
+                            <option v-for="p in programs" :key="p.slug" :value="p.slug">{{ p.name }}</option>
+                        </select>
+                        <p class="text-xs text-slate-400 mt-1">If selected, the schedule card will display the interactive program table.</p>
+                    </label>
+                </div>
 
                 <div class="grid grid-cols-2 gap-6">
                      <label class="block">
@@ -214,7 +225,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import BaseCard from '~/components/ui/BaseCard.vue';
 import BaseButton from '~/components/ui/BaseButton.vue';
 import { Plus, Trash2, X } from 'lucide-vue-next';
@@ -228,6 +239,15 @@ const emit = defineEmits(['update:modelValue', 'save']);
 
 const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const editingSession = ref<any>(null);
+const programs = ref<any[]>([]);
+
+onMounted(async () => {
+    try {
+        programs.value = await $fetch('/api/admin/programs');
+    } catch (e) {
+        console.error('Failed to load programs', e);
+    }
+});
 
 // Get sessions that occur on a specific day
 const getSessionsForDay = (day: string) => {
@@ -267,6 +287,7 @@ const addNewSession = (day: string) => {
         vibe: ["Fun"],
         pricing: {},
         specials: {},
+        programSlug: "",
     };
 };
 

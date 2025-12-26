@@ -488,6 +488,8 @@ import PricingEditor from '~/components/admin/PricingEditor.vue';
 import ScheduleEditor from '~/components/admin/ScheduleEditor.vue';
 import ProgressiveEditor from '~/components/admin/ProgressiveEditor.vue';
 import W2GGenerator from '~/components/admin/W2GGenerator.vue';
+import PatternEditor from '~/components/admin/PatternEditor.vue';
+import ProgramEditor from '~/components/admin/ProgramEditor.vue';
 
 definePageMeta({
   middleware: ["auth"],
@@ -499,6 +501,8 @@ const tabs = [
   { id: "progressives", name: "Progressives" },
   { id: "pricing", name: "Pricing" },
   { id: "schedule", name: "Schedule" },
+  { id: "patterns", name: "Patterns" },
+  { id: "programs", name: "Programs" },
   { id: "messages", name: "Messages" },
   { id: "users", name: "Users" },
 ];

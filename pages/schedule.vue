@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { Calendar, Filter } from "lucide-vue-next";
+import { ref, computed, watch } from "vue";
+import { Calendar, Filter, Clock } from "lucide-vue-next";
 import { useBusiness } from "~/composables/useBusiness";
+import { useScheduleClock } from "~/composables/useScheduleClock";
 
 const {
   business: BUSINESS_INFO,
@@ -9,6 +10,8 @@ const {
   schedule: scheduleRef,
   fetchSchedule,
 } = useBusiness();
+
+const { chicagoTime, mode, customDate, customTime, initCustom, getStatus } = useScheduleClock();
 
 await fetchBusiness();
 await fetchSchedule();
@@ -25,7 +28,21 @@ type Day = {
 };
 
 const days = computed<Day[]>(() => {
-  const now = new Date();
+  // Use chicagoTime.dateStr (YYYY-MM-DD) as reference for "Today" if in Now mode?
+  // But typically "Today" means the user's today, or the business's today.
+  // Let's stick to the business timezone "today".
+
+  // Use a date object based on chicagoTime reference for the strip
+  // If "Time Travel", we anchor the strip around the custom date?
+  // For simplicity, let's keep "Today" as actual Today, but allow picking other days.
+  // Unless "Time Travel" is active, then we might want to shift context.
+
+  // Actually, existing code uses `new Date()` (client local).
+  // Let's respect `chicagoTime` for "Today" calculation.
+
+  const refDateStr = mode.value === 'custom' && customDate.value ? customDate.value : new Date().toLocaleDateString("en-CA", { timeZone: "America/Chicago" });
+  const refDate = new Date(refDateStr);
+
   const dateFmt = new Intl.DateTimeFormat(undefined, {
     month: "short",
     day: "2-digit",
@@ -34,12 +51,21 @@ const days = computed<Day[]>(() => {
   const weekdayLong = new Intl.DateTimeFormat(undefined, { weekday: "long" });
 
   return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(now);
-    d.setDate(now.getDate() + i);
+    const d = new Date(refDate);
+    d.setDate(refDate.getDate() + i);
 
-    const id = i === 0 ? "today" : d.toISOString().slice(0, 10);
-    const label =
-      i === 0 ? "Today" : i === 1 ? "Tomorrow" : weekdayLong.format(d);
+    // If mode is custom, "Today" label might be confusing if it's not actually today.
+    // Let's just use "Day 1", "Day 2" or just dates if custom.
+    // Or keep logic: if i==0 and mode=='now', use "Today".
+
+    const id = d.toISOString().slice(0, 10);
+    let label = weekdayLong.format(d);
+
+    if (mode.value === 'now') {
+        if (i === 0) label = "Today";
+        else if (i === 1) label = "Tomorrow";
+    }
+
     const dayOfWeek = weekdayShort.format(d);
 
     return {
@@ -51,7 +77,26 @@ const days = computed<Day[]>(() => {
   });
 });
 
-const activeDay = ref("today");
+const activeDay = ref("today"); // or the ISO string
+
+// Initialize activeDay
+watch([() => days.value, mode], () => {
+    if (mode.value === 'custom' && customDate.value) {
+        activeDay.value = customDate.value;
+    } else {
+        // If "today" is in the list, select it, otherwise first one
+        if (days.value.length > 0) activeDay.value = days.value[0].id;
+    }
+}, { immediate: true });
+
+const selectDay = (dayId: string) => {
+  activeDay.value = dayId;
+  // If in custom mode, maybe update customDate?
+  if (mode.value === 'custom') {
+      customDate.value = dayId;
+  }
+};
+
 const activeFilter = ref("All");
 const filters = ["All", "Morning", "Afternoon", "Evening"];
 
@@ -67,6 +112,13 @@ const filteredSessions = computed(() => {
     filtered = filtered.filter((s) => s.category === activeFilter.value);
   }
 
+  // Sort by start time
+  filtered.sort((a, b) => {
+      const ta = parseInt(a.startTime.replace(":",""));
+      const tb = parseInt(b.startTime.replace(":",""));
+      return ta - tb;
+  });
+
   return filtered;
 });
 
@@ -74,9 +126,29 @@ const activeDayOfWeek = computed(() => {
   return days.value.find((d) => d.id === activeDay.value)?.dayOfWeek || "Mon";
 });
 
-const selectDay = (dayId: string) => {
-  activeDay.value = dayId;
+// Program Fetching
+const programCache = ref<Record<string, any>>({});
+const fetchPrograms = async () => {
+    const slugs = new Set<string>();
+    filteredSessions.value.forEach(s => {
+        if (s.programSlug) slugs.add(s.programSlug);
+    });
+
+    for (const slug of slugs) {
+        if (!programCache.value[slug]) {
+            try {
+                const prog = await $fetch(`/api/programs/${slug}`);
+                programCache.value[slug] = prog;
+            } catch (e) {
+                console.error(`Failed to fetch program ${slug}`, e);
+            }
+        }
+    }
 };
+
+watch(filteredSessions, () => {
+    fetchPrograms();
+}, { immediate: true });
 
 useSeoMeta({
   title: "Schedule | Mary Esther Bingo",
@@ -138,6 +210,45 @@ useSeoMeta({
     </div>
 
     <div class="container mx-auto px-4 -mt-20 relative z-20 pb-32">
+
+      <!-- Time Travel Controls -->
+      <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-4 mb-8 max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="p-2 bg-emerald-50 rounded-lg text-emerald-600">
+            <Clock class="w-5 h-5" />
+          </div>
+          <div>
+            <div class="text-xs font-bold uppercase tracking-widest text-slate-400">Current Time (Chicago)</div>
+            <div class="text-lg font-black text-slate-900">
+              {{ chicagoTime.dayOfWeek }} {{ chicagoTime.dateStr }}
+              <span class="text-emerald-600">{{ Math.floor(chicagoTime.minutes / 60).toString().padStart(2,'0') }}:{{ (chicagoTime.minutes % 60).toString().padStart(2,'0') }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 bg-slate-50 p-1 rounded-xl">
+           <button
+            @click="mode = 'now'"
+            class="px-4 py-2 rounded-lg text-sm font-bold transition-all"
+            :class="mode === 'now' ? 'bg-white text-emerald-900 shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700'"
+          >
+            Live Now
+          </button>
+          <button
+            @click="initCustom(); mode = 'custom'"
+            class="px-4 py-2 rounded-lg text-sm font-bold transition-all"
+            :class="mode === 'custom' ? 'bg-white text-emerald-900 shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700'"
+          >
+            Time Travel
+          </button>
+        </div>
+
+        <div v-if="mode === 'custom'" class="flex items-center gap-2 animate-in fade-in slide-in-from-right-4 duration-300">
+          <input type="date" v-model="customDate" class="px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none" />
+          <input type="time" v-model="customTime" class="px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none" />
+        </div>
+      </div>
+
       <!-- Smart Calendar Ribbon -->
       <div
         class="bg-white rounded-3xl shadow-2xl border border-slate-100 p-2 mb-12 max-w-4xl mx-auto"
@@ -205,6 +316,8 @@ useSeoMeta({
             :session="session"
             :index="idx"
             :active-day-of-week="activeDayOfWeek"
+            :program="session.programSlug ? programCache[session.programSlug] : undefined"
+            :status="getStatus(session)"
           />
         </TransitionGroup>
 
