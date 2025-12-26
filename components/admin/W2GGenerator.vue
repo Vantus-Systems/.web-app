@@ -130,11 +130,11 @@
             </div>
         </div>
 
-        <!-- Signature Pad (Mock) -->
+        <!-- Signature Pad -->
         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Player Signature</label>
-             <div class="h-32 bg-white border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center relative group">
-                 <p class="text-slate-400 group-hover:opacity-0 transition-opacity">Sign Here (Touch/Mouse)</p>
+             <div class="h-32 bg-white border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center relative group touch-none" ref="padContainer">
+                 <p v-if="!hasSignature" class="text-slate-400 group-hover:opacity-0 transition-opacity absolute pointer-events-none">Sign Here (Touch/Mouse)</p>
                  <canvas ref="signatureCanvas" class="absolute inset-0 w-full h-full cursor-crosshair"></canvas>
              </div>
              <button @click="clearSignature" class="text-xs text-red-500 font-bold mt-2 hover:text-red-700">Clear Signature</button>
@@ -148,11 +148,55 @@
 
       </div>
     </BaseCard>
+
+    <!-- Hidden Printable Area -->
+    <div v-if="isPrinting" class="print-only fixed inset-0 bg-white z-[100] p-8 overflow-y-auto">
+        <div class="max-w-3xl mx-auto border-2 border-black p-8">
+            <div class="text-center mb-8 border-b-2 border-black pb-4">
+                <h1 class="text-2xl font-bold uppercase">Form W-2G</h1>
+                <p class="text-sm font-bold">Certain Gambling Winnings</p>
+                <p class="text-xs">OMB No. 1545-0238</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div class="border border-black p-2">
+                    <label class="block text-xs font-bold">Payer's Name</label>
+                    <p>Mary Esther Bingo</p>
+                </div>
+                <div class="border border-black p-2">
+                    <label class="block text-xs font-bold">Gross Winnings</label>
+                    <p>{{ formatCurrency(perPlayerPayout) }}</p>
+                </div>
+                 <div class="border border-black p-2 col-span-2">
+                    <label class="block text-xs font-bold">Winner's Name & Address</label>
+                    <p>{{ player.name }}</p>
+                    <p>{{ player.address }}</p>
+                    <p>{{ player.city }}, {{ player.state }} {{ player.zip }}</p>
+                </div>
+                <div class="border border-black p-2">
+                    <label class="block text-xs font-bold">Winner's TIN</label>
+                    <p>{{ player.ssn }}</p>
+                </div>
+                 <div class="border border-black p-2">
+                    <label class="block text-xs font-bold">Date Won</label>
+                    <p>{{ new Date().toLocaleDateString() }}</p>
+                </div>
+                 <div class="border border-black p-2 col-span-2">
+                    <label class="block text-xs font-bold">Signature</label>
+                    <img v-if="signatureDataUrl" :src="signatureDataUrl" class="h-12 mt-2" />
+                </div>
+            </div>
+
+            <div class="mt-8 text-center text-xs">
+                <p>Under penalties of perjury, I declare that, to the best of my knowledge and belief, the name, address, and taxpayer identification number that I have furnished correctly identify me as the recipient of this payment and any payments from identical wagers, and that no other person is entitled to any part of these payments.</p>
+            </div>
+        </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import BaseCard from '~/components/ui/BaseCard.vue';
 import BaseButton from '~/components/ui/BaseButton.vue';
 
@@ -160,6 +204,16 @@ const totalPayout = ref(0);
 const numWinners = ref(1);
 const idImage = ref<string | null>(null);
 const signatureCanvas = ref<HTMLCanvasElement | null>(null);
+const padContainer = ref<HTMLDivElement | null>(null);
+const hasSignature = ref(false);
+const isPrinting = ref(false);
+const signatureDataUrl = ref<string | null>(null);
+
+// Drawing state
+let isDrawing = false;
+let ctx: CanvasRenderingContext2D | null = null;
+let lastX = 0;
+let lastY = 0;
 
 const player = ref({
     name: '',
@@ -206,25 +260,123 @@ const handleFileUpload = (event: Event) => {
     }
 };
 
-// Simple Signature Logic
+// Signature Logic
+const resizeCanvas = () => {
+    if (!signatureCanvas.value || !padContainer.value) return;
+    const rect = padContainer.value.getBoundingClientRect();
+    signatureCanvas.value.width = rect.width;
+    signatureCanvas.value.height = rect.height;
+
+    // Reset ctx props after resize
+    if(ctx) {
+         ctx.lineJoin = 'round';
+         ctx.lineCap = 'round';
+         ctx.lineWidth = 2;
+    }
+};
+
+const getPos = (e: MouseEvent | TouchEvent) => {
+    if (!signatureCanvas.value) return { x: 0, y: 0 };
+    const rect = signatureCanvas.value.getBoundingClientRect();
+    const clientX = 'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : (e as MouseEvent).clientY;
+    return {
+        x: clientX - rect.left,
+        y: clientY - rect.top
+    };
+};
+
+const startDrawing = (e: MouseEvent | TouchEvent) => {
+    isDrawing = true;
+    const pos = getPos(e);
+    lastX = pos.x;
+    lastY = pos.y;
+    hasSignature.value = true;
+};
+
+const draw = (e: MouseEvent | TouchEvent) => {
+    if (!isDrawing || !ctx) return;
+    e.preventDefault(); // Prevent scrolling on touch
+    const pos = getPos(e);
+
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+
+    lastX = pos.x;
+    lastY = pos.y;
+};
+
+const stopDrawing = () => {
+    isDrawing = false;
+};
+
 const clearSignature = () => {
-    if(!signatureCanvas.value) return;
-    const ctx = signatureCanvas.value.getContext('2d');
-    if(ctx) ctx.clearRect(0,0, signatureCanvas.value.width, signatureCanvas.value.height);
-}
+    if(!signatureCanvas.value || !ctx) return;
+    ctx.clearRect(0,0, signatureCanvas.value.width, signatureCanvas.value.height);
+    hasSignature.value = false;
+};
 
 onMounted(() => {
-    // Init canvas drawing listeners if needed (skipping full implementation for brevity, assuming standard canvas logic)
-    // For now, it's a placeholder visual.
+    if (signatureCanvas.value) {
+        ctx = signatureCanvas.value.getContext('2d');
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Mouse Events
+        signatureCanvas.value.addEventListener('mousedown', startDrawing);
+        signatureCanvas.value.addEventListener('mousemove', draw);
+        signatureCanvas.value.addEventListener('mouseup', stopDrawing);
+        signatureCanvas.value.addEventListener('mouseout', stopDrawing);
+
+        // Touch Events
+        signatureCanvas.value.addEventListener('touchstart', startDrawing, { passive: false });
+        signatureCanvas.value.addEventListener('touchmove', draw, { passive: false });
+        signatureCanvas.value.addEventListener('touchend', stopDrawing);
+    }
 });
 
-const generateW2G = () => {
+const generateW2G = async () => {
     if (!player.value.name || !player.value.ssn) {
         alert('Please complete all player fields.');
         return;
     }
-    alert(`Generating W-2G for ${player.value.name} for amount ${formatCurrency(perPlayerPayout.value)}...`);
-    // In a real app, this would POST to an endpoint to generate a PDF
+
+    // Capture signature
+    if (signatureCanvas.value && hasSignature.value) {
+        signatureDataUrl.value = signatureCanvas.value.toDataURL();
+    }
+
+    isPrinting.value = true;
+    await nextTick();
+    window.print();
+
+    // Reset after print dialog closes (approximate)
+    setTimeout(() => {
+        isPrinting.value = false;
+    }, 1000);
 };
 
 </script>
+
+<style scoped>
+@media print {
+    :deep(body > *) {
+        display: none !important;
+    }
+    .print-only {
+        display: block !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: white;
+        z-index: 9999;
+    }
+}
+.print-only {
+    display: none;
+}
+</style>
