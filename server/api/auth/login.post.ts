@@ -1,48 +1,55 @@
-import { defineEventHandler, readBody, createError, setCookie } from 'h3'
-import { authService } from '@server/services/auth.service'
-import { randomBytes } from 'crypto'
-import { z } from 'zod'
+import { randomBytes } from "crypto";
+import { defineEventHandler, readBody, createError, setCookie } from "h3";
+import { authService } from "@server/services/auth.service";
+import { z } from "zod";
 
 const loginSchema = z.object({
   username: z.string(),
   password: z.string(),
-})
+});
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
-  const { username, password } = loginSchema.parse(body)
+  const body = await readBody(event);
+  const { username, password } = loginSchema.parse(body);
 
-  const user = await authService.getUserByUsername(username)
+  const user = await authService.getUserByUsername(username);
   if (!user) {
-    throw createError({ statusCode: 401, message: 'Invalid credentials' })
+    throw createError({ statusCode: 401, message: "Invalid credentials" });
   }
 
-  const valid = await authService.verifyPassword(password, user.password_hash)
+  const valid = await authService.verifyPassword(password, user.password_hash);
   if (!valid) {
-    throw createError({ statusCode: 401, message: 'Invalid credentials' })
+    throw createError({ statusCode: 401, message: "Invalid credentials" });
   }
 
   // Create session
-  const ip = event.node.req.socket.remoteAddress
-  const userAgent = event.node.req.headers['user-agent']
-  const { token, expiresAt } = await authService.createSession(user.id, ip, userAgent)
+  const ip = event.node.req.socket.remoteAddress;
+  const userAgent = event.node.req.headers["user-agent"];
+  const { token, expiresAt } = await authService.createSession(
+    user.id,
+    ip,
+    userAgent,
+  );
 
   // Set cookies
-  setCookie(event, 'auth_token', token, {
+  setCookie(event, "auth_token", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
     expires: expiresAt,
-  })
+  });
 
   // Set CSRF token cookie (readable by JS)
-  const csrfToken = randomBytes(16).toString('hex')
-  setCookie(event, 'csrf_token', csrfToken, {
+  const csrfToken = randomBytes(16).toString("hex");
+  setCookie(event, "csrf_token", csrfToken, {
     httpOnly: false, // JS needs to read this
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
     expires: expiresAt,
-  })
+  });
 
-  return { success: true, user: { id: user.id, username: user.username, role: user.role } }
-})
+  return {
+    success: true,
+    user: { id: user.id, username: user.username, role: user.role },
+  };
+});

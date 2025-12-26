@@ -1,31 +1,18 @@
-import prisma from '@server/db/client'
-import { auditService } from '@server/services/audit.service'
+// server/services/settings.service.ts
+import prisma from "@server/db/client";
 
 export const settingsService = {
-  async get(key: string) {
-    const setting = await prisma.siteSetting.findUnique({
-      where: { key },
-    })
-    return setting?.value || null
+  async get<T = unknown>(key: string): Promise<T | null> {
+    const row = await prisma.setting.findUnique({ where: { key } });
+    return (row?.value as T) ?? null;
   },
 
-  async set(key: string, value: any, actorUserId: string) {
-    const current = await this.get(key)
-
-    const updated = await prisma.siteSetting.upsert({
+  async set<T = unknown>(key: string, value: T): Promise<T> {
+    await prisma.setting.upsert({
       where: { key },
-      update: { value },
-      create: { key, value },
-    })
-
-    await auditService.log({
-      actorUserId,
-      action: 'UPDATE',
-      entity: `settings:${key}`,
-      before: current,
-      after: value,
-    })
-
-    return updated.value
+      create: { key, value: value as any },
+      update: { value: value as any },
+    });
+    return value;
   },
-}
+};

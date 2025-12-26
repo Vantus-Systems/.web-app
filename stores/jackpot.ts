@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { computed } from "vue";
 import { useBusiness } from "~/composables/useBusiness";
 
 export const useJackpotStore = defineStore("jackpot", () => {
@@ -12,9 +12,11 @@ export const useJackpotStore = defineStore("jackpot", () => {
   // Let's adapt.
 
   const currentJackpot = computed(() => {
-      // Handle various shapes if migration isn't perfect or if API returns object
-      const val = jackpot.value?.amount || jackpot.value?.value || 0;
-      return typeof val === 'string' ? parseFloat(val) : val;
+    // Handle various shapes if migration isn't perfect or if API returns object
+    const val =
+      (jackpot.value as any)?.amount ?? (jackpot.value as any)?.value ?? 0;
+    const n = typeof val === "string" ? Number.parseFloat(val) : val;
+    return Number.isFinite(n) ? n : 0;
   });
 
   async function fetchJackpot() {
@@ -25,8 +27,8 @@ export const useJackpotStore = defineStore("jackpot", () => {
   // `useBusiness` state is global, so this store is just a wrapper now?
   // Ideally, we refactor the app to use `useBusiness().jackpot` directly, but to avoid breaking changes:
   if (import.meta.client) {
-      fetchJackpot();
-      setInterval(fetchJackpot, 5 * 60 * 1000);
+    fetchJackpot();
+    setInterval(fetchJackpot, 5 * 60 * 1000);
   }
 
   return {

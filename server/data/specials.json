@@ -1,84 +1,98 @@
 {
-  "heroNote": "Mary Esther Bingo is the only hall in Fort Walton that plays session every single day; closest halls include Crestview, Pensacola, and Panama City.",
+  "heroNote": "Mary Esther Bingo is the only hall in Fort Walton that plays bingo session every single day.",
   "weekly": [
     {
       "day": "Sunday",
-      "title": "Sunday Night Celebrations",
-      "description": "Speedy Coveralls, Super 3, and a free U-PIK card for every player who joins session.",
-      "time": "Doors 4 PM • Session 6 PM",
+      "title": "Sunday Night Premium Session",
+      "description": "15 sessions with $250 jackpots on every game. Features Speedy Coveralls, Super 3, and U-PIK.",
+      "time": "Doors 4 PM • Session 7:30 PM",
       "offers": [
-        "Speedy Coveralls: 1 card $1, 3 cards $2",
-        "Super 3 & U-PIK: 1 card $1, 6 cards $5",
-        "Complimentary U-PIK card for every session participant"
+        "Session pricing: $11 for 1 machine / $22 for 2 machines",
+        "Speedy Coveralls: $1 per card, 3 cards for $2",
+        "Super 3 & U-PIK: $1 per card, 6 cards for $5",
+        "Every game pays $250 jackpot",
+        "Complimentary dinner for all session players",
+        "Weekly U-PIK for $500"
       ],
-      "note": "House lights stay bright for late-night laughs."
+      "note": "15 sessions with $250 guaranteed on every game."
     },
     {
       "day": "Monday",
-      "title": "Lucky Monday Warm-Up",
-      "description": "Afternoon double-action games lead into evening progressives with paper-only bonuses.",
-      "time": "Doors 10:00 AM • Session 7:30 PM",
+      "title": "Good Neighbor Monday Session",
+      "description": "$250 Jackpot with special 5x Horse Race Consolation. Winners can send a neighbor to play.",
+      "time": "Doors 10 AM • Session 7:30 PM",
       "offers": [
-        "Double Actions available nightly",
-        "Every player gets a $1 paper card with machine buy-in",
-        "Late-night bonus paper draws after 10:00 PM"
-      ]
+        "Session pricing: $11 for 1 machine / $22 for 2 machines",
+        "$250 Single Winner Jackpot",
+        "5x Horse Race Pull Tabs for Consolation Winner",
+        "Spend $2+ for unlimited paper cards",
+        "Paper cards: 1 card $1, 6 cards for $5"
+      ],
+      "note": "Winners can send a 'neighbor' to test their luck on us!"
     },
     {
       "day": "Tuesday",
-      "title": "Tradition Tuesday",
-      "description": "Classic coverall rounds paired with speed games that keep the energy high.",
-      "time": "Doors 10:00 AM • Session 7:30 PM",
+      "title": "Free 9-On Tuesday",
+      "description": "Complimentary 9-on machine when you buy into session. Played at 3 PM, 6 PM, and after session.",
+      "time": "Doors 10 AM • Session 7:30 PM",
       "offers": [
-        "Coverall night: 6 cards for $5",
-        "Speedy sessions with 3-card sets",
-        "Bonus $5 voucher drawing for every card pack purchased"
+        "One free machine when you buy into session",
+        "Free 9-on played at 3 PM, 6 PM, and after session",
+        "Session pricing: $11 for 1 machine / $22 for 2 machines",
+        "Spend $2+ for unlimited paper cards"
       ]
     },
     {
       "day": "Wednesday",
-      "title": "Wednesday Wonders",
-      "description": "High-value letter patterns and specialty daub tickets complete the mid-week rush.",
-      "time": "Doors 10:00 AM • Session 7:30 PM",
+      "title": "Free Machine Wednesday",
+      "description": "One free machine when you buy into session. Plus week-long free bingo game with $100 single winner.",
+      "time": "Doors 10 AM • Session 7:30 PM",
       "offers": [
-        "Letter Z, X, and Diamond papers",
-        "Buy 2 machines, get 1 specialty paper card free",
-        "After-hours daub ticket drawn nightly"
+        "One free machine when you buy into session",
+        "Week of free bingo game (Single winner $100)",
+        "All winners receive week of free session (7 consecutive days)",
+        "Free week includes: 2 free machines, all 6-packs & double actions, 6 for $5 treasure hunts"
       ]
     },
     {
       "day": "Thursday",
-      "title": "Throwback Thursday",
-      "description": "Retro-themed games including Big O and Odd/Even favorites, plus flash giveaways.",
-      "time": "Doors 10:00 AM • Session 7:30 PM",
+      "title": "Good Neighbor Thursday Session",
+      "description": "Another $250 Jackpot opportunity with 5x Horse Race Consolation for winners.",
+      "time": "Doors 10 AM • Session 7:30 PM",
       "offers": [
-        "Big O covers every board for $2",
-        "Odd/Even, Lucky Seven, and Treasure Hunt packets",
-        "Random flash giveaways between sessions"
+        "Session pricing: $11 for 1 machine / $22 for 2 machines",
+        "$250 Single Winner Jackpot",
+        "5x Horse Race Pull Tabs for Consolation Winner",
+        "Spend $2+ for unlimited paper cards",
+        "Send a neighbor to play on us!"
       ]
     },
     {
       "day": "Friday",
-      "title": "Friday Night Feature",
-      "description": "Premium bundles with letter-themed papers, progressive jackpots, and gourmet snacks on sale.",
+      "title": "Friday Premium Bundle",
+      "description": "6 for $5 treasure hunts included with session. Both portions pay $250 single winner jackpots.",
       "time": "Doors 4 PM • Session 7:30 PM",
       "offers": [
-        "2 machines for $22 with six-packs",
-        "Double actions and letter X papers included",
-        "Progressive daub ticket drawn during second half"
-      ],
-      "note": "Stay for the late-night lightning rounds."
+        "Session pricing: $11 for 1 machine / $22 for 2 machines",
+        "6 for $5 treasure hunts included FREE with session",
+        "Both treasure hunt portions pay $250 each",
+        "Spend $2+ for unlimited paper cards",
+        "Premium evening atmosphere"
+      ]
     },
     {
       "day": "Saturday",
-      "title": "Saturday Session Spectacular",
-      "description": "Full-day celebration with multiple paper-only specials and an electronic terminal lounge.",
-      "time": "Doors 10:00 AM • Sessions 12 PM, 4 PM, 8 PM",
+      "title": "Saturday Spectacular",
+      "description": "Multiple pricing options with all-you-can-play paper option. Alternates monthly with premium specials.",
+      "time": "Doors 10 AM • Session 7:30 PM",
       "offers": [
-        "Paper-only specials all day",
-        "Unlimited electronic terminal play after 4 PM",
-        "Prize drawings every hour for door prizes"
-      ]
+        "Standard: $11 for 1 machine / $22 for 2 machines",
+        "OR Premium Bundle: $40 + All-You-Can-Play paper + 6 for $5 free treasure hunts",
+        "Electronic terminal lounge available",
+        "Prize drawings throughout the day",
+        "December & holiday specials available"
+      ],
+      "note": "Pricing option varies by week. Check with hall for current Saturday promotion."
     }
   ],
   "meta": {

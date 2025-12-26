@@ -9,10 +9,18 @@
     "preview": "nuxt preview",
     "start": "serve -s .output/public",
     "start:server": "node .output/server/index.mjs",
-    "postinstall": "nuxt prepare",
+    "postinstall": "prisma generate && nuxt prepare",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx",
     "lint:fix": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx --fix",
-    "typecheck": "vue-tsc --noEmit"
+    "typecheck": "vue-tsc --noEmit",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate:dev": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:studio": "prisma studio",
+    "prisma:seed": "prisma db seed"
+  },
+  "prisma": {
+    "seed": "node --loader ts-node/esm prisma/seed.ts"
   },
   "dependencies": {
     "@nuxt/image": "^2.0.0",
@@ -20,7 +28,7 @@
     "@nuxtjs/sitemap": "^7.5.0",
     "@nuxtjs/tailwindcss": "^6.14.0",
     "@pinia/nuxt": "^0.11.3",
-    "@prisma/client": "^7.2.0",
+    "@prisma/client": "^5.22.0",
     "@vee-validate/zod": "^4.15.1",
     "@vueuse/core": "^14.1.0",
     "@vueuse/motion": "^3.0.3",
@@ -48,6 +56,11 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "prettier": "^3.7.4",
-    "prisma": "^7.2.0"
+    "prisma": "^5.22.0",
+    "ts-node": "^10.9.2"
+  },
+  "overrides": {
+    "replace-in-file": "^8.4.0",
+    "rimraf": "^4.0.1"
   }
 }

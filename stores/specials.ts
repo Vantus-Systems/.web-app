@@ -11,17 +11,36 @@ type SpecialDay = {
   note?: string;
 };
 
-// Adapting to use the new `useBusiness` composable
+type SpecialsData = {
+  heroNote?: string;
+  weekly?: SpecialDay[];
+  today?: SpecialDay | null;
+  timezone?: string;
+  location?: string;
+  meta?: {
+    timezone?: string;
+    location?: string;
+  };
+};
+
 export const useSpecialsStore = defineStore("specials", () => {
   const { specials, fetchSpecials: fetch } = useBusiness();
   const isLoading = ref(false);
   const error = ref<string | null>(null);
 
-  const weekly = computed(() => specials.value?.weekly ?? []);
-  const today = computed(() => specials.value?.today ?? null);
-  const heroNote = computed(() => specials.value?.heroNote ?? "");
-  const location = computed(() => specials.value?.location ?? "");
-  const timezone = computed(() => specials.value?.timezone ?? "America/Chicago");
+  const weekly = computed(() => (specials.value as SpecialsData)?.weekly ?? []);
+  const today = computed(() => (specials.value as SpecialsData)?.today ?? null);
+  const heroNote = computed(
+    () => (specials.value as SpecialsData)?.heroNote ?? "",
+  );
+  const location = computed(() => {
+    const s = specials.value as SpecialsData;
+    return s?.meta?.location ?? s?.location ?? "";
+  });
+  const timezone = computed(() => {
+    const s = specials.value as SpecialsData;
+    return s?.meta?.timezone ?? s?.timezone ?? "America/Chicago";
+  });
 
   const fetchSpecials = async () => {
     isLoading.value = true;

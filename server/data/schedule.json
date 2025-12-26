@@ -1,27 +1,208 @@
 [
   {
-    "name": "Doors Open",
-    "time": "Typically 10:00 AM",
-    "details": "Doors generally open in the morning for ticket sales."
+    "id": "morning-doors",
+    "name": "Doors Open & Early Bird",
+    "category": "Morning",
+    "startTime": "10:00 AM",
+    "endTime": "10:30 AM",
+    "gameType": "Early Access",
+    "description": "Doors open at 10 AM. Bingo starts at 10:30 AM. Pay-as-you-go electronic games available.",
+    "vibe": ["Relaxed", "Early Access"],
+    "pricing": {
+      "machines": "$1 / 3 for $2 / 5 for $3",
+      "paper": "Spend $1+ for 1 free paper card. Spend $2+ for unlimited paper.",
+      "type": "PayAsYouGo"
+    },
+    "jackpot": "$250",
+    "status": "Upcoming",
+    "eligibility": "18+",
+    "availableDays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
   },
   {
-    "name": "Daytime Sessions",
-    "time": "Late Morning",
-    "details": "Gameplay generally begins shortly after doors open. Jackpot-style games may be featured."
+    "id": "morning-session",
+    "name": "Daytime Pay-As-You-Go",
+    "category": "Morning",
+    "startTime": "10:30 AM",
+    "endTime": "12:30 PM",
+    "gameType": "Pay-As-You-Go",
+    "description": "Fast-paced daytime bingo. Pay only for the machines you want to play. Super 6 Jackpots ($250) start at 12 PM.",
+    "vibe": ["Social", "Community", "Daytime"],
+    "pricing": {
+      "machines": "$1 per machine / 3 for $2 / 5 for $3",
+      "paper": "Spend $1+ for 1 free paper card. Spend $2+ for unlimited paper.",
+      "packages": "3 paper cards for $0.25 / 6 for $0.50",
+      "type": "PayAsYouGo"
+    },
+    "jackpot": "$250 Hourly",
+    "status": "Upcoming",
+    "eligibility": "18+",
+    "availableDays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    "specials": {
+      "Tuesday": "Free 9-On",
+      "Wednesday": "$100 Single-Winner Game"
+    }
   },
   {
-    "name": "Afternoon Play",
-    "time": "Afternoon",
-    "details": "Progressive or special daytime games are commonly offered later in the afternoon."
+    "id": "afternoon-play",
+    "name": "Afternoon Pay-As-You-Go",
+    "category": "Afternoon",
+    "startTime": "12:30 PM",
+    "endTime": "5:15 PM",
+    "gameType": "Pay-As-You-Go",
+    "description": "Super 6 Jackpots ($250) at the top of each hour. Bingo Babes Progressive ($200 guaranteed) played after 4 PM Super 6.",
+    "vibe": ["High Energy", "Quick Wins"],
+    "pricing": {
+      "machines": "$1 per machine / 4 for $3",
+      "paper": "Spend $1+ for 1 free paper card. Spend $2+ for unlimited paper.",
+      "pullTabs": "Available the majority of the time we are open",
+      "type": "PayAsYouGo"
+    },
+    "jackpot": "$250 Hourly + $200 Progressive",
+    "status": "Upcoming",
+    "eligibility": "18+",
+    "availableDays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    "specials": {
+      "Friday": "Free 6-for-$5 Treasure Hunts (Session Only)"
+    }
   },
   {
-    "name": "Evening Session",
-    "time": "Early Evening",
-    "details": "Evening session sales usually begin in the late afternoon. Sessions often conclude later in the night."
+    "id": "session-sales",
+    "name": "Session Sales Open",
+    "category": "Evening",
+    "startTime": "5:15 PM",
+    "endTime": "7:30 PM",
+    "gameType": "Session Buy-In Window",
+    "description": "Buy your session cards for the main 7:30 PM session. Early buyers get best card selection.",
+    "vibe": ["Preparation", "Strategy"],
+    "pricing": {
+      "sessionBuyIn": {
+        "twoMachines": "$22 (Best Value: Includes 6-packs, double actions, and letter X papers)",
+        "oneMachine": "$11",
+        "note": "Two machines for $22 is the best value"
+      },
+      "type": "SessionSales"
+    },
+    "jackpot": "$5,000+",
+    "status": "Upcoming",
+    "eligibility": "18+",
+    "availableDays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
   },
   {
-    "name": "Late Night",
-    "time": "Following Evening",
-    "details": "Additional fast-paced or shorter-format games may be offered following evening sessions."
+    "id": "evening-main-session",
+    "name": "Evening Gala Session",
+    "category": "Evening",
+    "startTime": "7:30 PM",
+    "endTime": "10:00 PM",
+    "gameType": "Main Bingo Session",
+    "description": "Our main nightly session. Features Treasure Hunts, Lucky 7, UPIK, Odd-Even Coverall, and Letter X. Hornet Progressive ($250 guaranteed) played after Letter X.",
+    "vibe": ["High Stakes", "Gala", "Premier"],
+    "pricing": {
+      "sessionBuyIn": {
+        "twoMachines": "$22 (Best Value: Includes 6-packs, double actions, and letter X papers)",
+        "oneMachine": "$11 (Standard entry)",
+        "note": "Spend $2 or more to receive as many paper cards as you'd like"
+      },
+      "specialtyPapers": {
+        "oddEvenCoverall": "$1 per card / 6 for $5",
+        "luckySeven": "$1 per card / 6 for $5",
+        "treasureHunt": "$1 per card / 6 for $5"
+      },
+      "daubTickets": {
+        "cashBoard": "Available nightly",
+        "progressiveJackpot": "Hornet Progressive (Played after Letter X)"
+      },
+      "pullTabs": "Available the majority of the time we are open",
+      "type": "MainSession"
+    },
+    "games": [
+      { "number": 1, "name": "Triple Straight", "detail": "Ending Wilds" },
+      { "number": 2, "name": "Triple Bingo Anyway" },
+      { "number": 3, "name": "Double Action", "detail": "Pattern" },
+      { "number": 4, "name": "Triple Straight", "detail": "Quinella" },
+      { "number": 5, "name": "Triple Bingo Anyway" },
+      { "number": 6, "name": "Double Action", "detail": "4-Straight Lines" },
+      { "number": 7, "name": "Speedy Coverall" },
+      { "number": 8, "name": "Back-to-Back 3-On Games" },
+      { "number": 9, "name": "Super 6 Jackpot Game" }
+    ],
+    "jackpot": "$5,000+",
+    "status": "Upcoming",
+    "eligibility": "18+",
+    "availableDays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    "specials": {
+      "Mon": "Good Neighbor: 5× Pull Tabs, $250 Jackpot Neighbor Send-Out",
+      "Thu": "Good Neighbor: 5× Pull Tabs, $250 Jackpot Neighbor Send-Out",
+      "Tue": "Free 9-On, 1 free machine with session buy-in",
+      "Wed": "1 free machine, Week of Free Bingo Promotion ($100 single-winner, 7 days free bingo)",
+      "Fri": "Free 6-for-$5 Treasure Hunts, pays $250 (both halves)",
+      "Sat": "Alternates Monthly: Either $40 All-You-Can-Play or Pay-As-You-Go Specials"
+    }
+  },
+  {
+    "id": "sunday-main-session",
+    "name": "Sunday Premier Session",
+    "category": "Evening",
+    "startTime": "7:30 PM",
+    "endTime": "10:00 PM",
+    "gameType": "Main Bingo Session",
+    "description": "Sundays are special. 15× $250 jackpots + free dinner. Features Speedy, Super 3, and UPIK.",
+    "vibe": ["Premium", "Special", "Community"],
+    "pricing": {
+      "sessionBuyIn": {
+        "twoMachines": "$22 (Best Value: Includes 6-packs, double actions, and letter X papers)",
+        "oneMachine": "$11"
+      },
+      "sundayGames": {
+        "speedy": "$1 per card / 3 for $2",
+        "super3": "$1 per card / 6 for $5",
+        "upik": "$1 per card / 6 for $5 (FREE card included with session)"
+      },
+      "type": "MainSession"
+    },
+    "games": [
+      { "number": 1, "name": "Triple Straight", "detail": "Ending Wilds" },
+      { "number": 2, "name": "Triple Bingo Anyway" },
+      { "number": 3, "name": "Double Action", "detail": "Pattern" },
+      { "number": 4, "name": "Triple Straight", "detail": "Quinella" },
+      { "number": 5, "name": "Triple Bingo Anyway" },
+      { "number": 6, "name": "Double Action", "detail": "4-Straight Lines" },
+      { "number": 7, "name": "Speedy Coverall" },
+      { "number": 8, "name": "Back-to-Back 3-On Games" },
+      { "number": 9, "name": "Super 6 Jackpot Game" }
+    ],
+    "jackpot": "$5,000+ plus 15× $250 UPIK jackpots",
+    "bonuses": {
+      "freeDinner": true,
+      "freeUPIKCard": "With session buy-in",
+      "weeklyUPIK": "$500 weekly jackpot",
+      "multipleJackpots": "15× $250 opportunities"
+    },
+    "status": "Upcoming",
+    "eligibility": "18+",
+    "availableDays": ["Sun"],
+    "specials": {
+      "Sun": "Sunday Spectacular: 15× $250 Jackpots, Free Dinner for all players, and $500 Weekly UPIK"
+    }
+  },
+  {
+    "id": "late-night",
+    "name": "Late Night Bingo Bash",
+    "category": "Late Night",
+    "startTime": "10:00 PM",
+    "endTime": "11:00 PM",
+    "gameType": "Pay-As-You-Go",
+    "description": "Fast-paced, shorter-format games for night owls. Music, energy, late-night luck.",
+    "vibe": ["Fast Pace", "Night Owls", "Fun"],
+    "pricing": {
+      "machines": "$1 per machine / 4 for $3",
+      "paper": "1 card $1 or 6 cards for $5",
+      "note": "Spend $2 or more to receive as many paper cards as you'd like",
+      "type": "PayAsYouGo"
+    },
+    "jackpot": "$1,500",
+    "status": "Upcoming",
+    "eligibility": "18+",
+    "availableDays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    "note": "May continue until 10-11 PM depending on play"
   }
 ]

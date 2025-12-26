@@ -1,27 +1,19 @@
 <template>
   <div class="bg-white min-h-screen">
-    <!-- Hero Section -->
+    <!-- Hero Section with Bingo Background -->
     <section
       class="relative bg-gradient-to-br from-primary-950 via-primary-900 to-primary-800 text-white overflow-hidden py-24 md:py-36"
     >
-      <div class="absolute inset-0 opacity-5">
-        <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern
-              id="grid"
-              width="40"
-              height="40"
-              patternUnits="userSpaceOnUse"
-            >
-              <circle cx="20" cy="20" r="1" fill="white" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
+      <div class="absolute inset-0 z-0">
+        <img
+          src="https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?auto=format&fit=crop&q=80&w=2000"
+          class="w-full h-full object-cover opacity-30"
+          alt="Bingo hall"
+        />
+        <div
+          class="absolute inset-0 bg-gradient-to-t from-primary-950/90 via-primary-900/60 to-primary-800/40"
+        ></div>
       </div>
-      <div
-        class="absolute inset-0 bg-gradient-to-t from-primary-950/90 to-transparent"
-      ></div>
 
       <div class="relative z-10 container mx-auto px-4 text-center">
         <div
@@ -47,9 +39,8 @@
           v-motion-fade-visible
           class="text-xl md:text-2xl text-primary-100 max-w-3xl mx-auto mb-10 leading-relaxed font-light"
         >
-          Whether you're here for daytime casual play or our premium evening
-          session, we offer unbeatable value with clear, honest pricing. No
-          gimmicks, just great gaming.
+          One main session at 7:30 PM every night. Daytime pay-as-you-go games
+          from 10:30 AM. Clear, honest pricing with zero surprises.
         </p>
 
         <!-- Trust Badges -->
@@ -79,7 +70,7 @@
                 clip-rule="evenodd"
               />
             </svg>
-            <span>7-Days-A-Week Sessions</span>
+            <span>7 Days A Week</span>
           </div>
           <div class="flex items-center gap-2 text-primary-200 text-sm">
             <svg
@@ -116,15 +107,8 @@
     </section>
 
     <div class="container mx-auto px-4 py-20">
-      <!-- Loading State -->
-      <div v-if="!pricing" class="flex justify-center py-20">
-        <div
-          class="animate-spin h-12 w-12 border-4 border-gold-500 border-t-transparent rounded-full"
-        ></div>
-      </div>
-
-      <div v-else class="space-y-32">
-        <!-- ===== DAYTIME PLAY SECTION ===== -->
+      <div class="space-y-32">
+        <!-- ===== PAY-AS-YOU-GO (DAYTIME) ===== -->
         <section id="daytime" class="scroll-mt-20">
           <div class="text-center mb-16">
             <span
@@ -134,130 +118,169 @@
             <h2
               class="text-4xl md:text-5xl font-black text-primary-900 mt-4 mb-6"
             >
-              Daytime Play-As-You-Go
+              Daytime Pay-As-You-Go
             </h2>
-            <p class="text-xl text-slate-600 max-w-2xl mx-auto">
-              Enjoy flexible, affordable gaming with our machine and paper-card
-              options. Perfect for a quick afternoon or extended play session.
+            <p class="text-xl text-slate-600 max-w-3xl mx-auto">
+              Flexible, affordable gaming windows. Pay only for the machines you
+              want to play. Super 6 Jackpots ($250) start at 12 PM!
             </p>
           </div>
 
-          <!-- Time Windows -->
+          <!-- Morning Window -->
           <div class="grid md:grid-cols-2 gap-8 mb-16">
-            <!-- Morning 10:30 - 12:30 -->
             <div
               class="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-3xl p-8 md:p-12"
             >
               <div class="flex items-center gap-3 mb-6">
-                <div class="text-3xl">☀️</div>
-                <h3 class="text-2xl font-bold text-primary-900">
-                  Morning Window
-                </h3>
+                <div class="text-4xl">☀️</div>
+                <div>
+                  <h3 class="text-2xl font-bold text-primary-900">
+                    Morning Play
+                  </h3>
+                  <p class="text-amber-700 font-semibold">
+                    10:30 AM – 12:30 PM
+                  </p>
+                </div>
               </div>
-              <p class="text-amber-700 font-semibold text-lg mb-2">
-                10:30 AM – 12:30 PM
+              <p class="text-amber-700 mb-8">
+                Doors open at 10 AM. Bingo starts at 10:30 AM.
               </p>
-              <div class="space-y-4 mt-8 border-t-2 border-amber-200 pt-8">
-                <h4 class="font-bold text-primary-900 text-lg">Machine Play</h4>
-                <div class="space-y-3">
-                  <div
-                    class="flex justify-between items-center p-3 bg-white rounded-lg border border-amber-100"
-                  >
-                    <span class="font-medium text-slate-700">1 Machine</span>
-                    <span class="text-xl font-bold text-primary-900">$1</span>
-                  </div>
-                  <div
-                    class="flex justify-between items-center p-3 bg-white rounded-lg border border-amber-100"
-                  >
-                    <span class="font-medium text-slate-700">3 Machines</span>
-                    <span class="text-xl font-bold text-gold-600"
-                      >$2
-                      <span class="text-xs text-slate-500"
-                        >(save $1)</span
-                      ></span
-                    >
-                  </div>
-                  <div
-                    class="flex justify-between items-center p-3 bg-white rounded-lg border border-amber-100"
-                  >
-                    <span class="font-medium text-slate-700">5 Machines</span>
-                    <span class="text-xl font-bold text-gold-600"
-                      >$3
-                      <span class="text-xs text-slate-500"
-                        >(save $2)</span
-                      ></span
-                    >
-                  </div>
-                </div>
 
+              <h4 class="font-bold text-primary-900 text-lg mb-4">
+                Machine Pricing
+              </h4>
+              <div class="space-y-3 mb-8">
                 <div
-                  class="bg-amber-100 border-l-4 border-amber-500 rounded p-4 mt-6"
+                  class="flex justify-between items-center p-3 bg-white rounded-lg border border-amber-100"
                 >
-                  <p class="text-sm text-amber-900 font-semibold mb-2">
-                    💡 Free Paper Bonus
-                  </p>
-                  <p class="text-sm text-amber-800">
-                    Spend <strong>$1+</strong> on machines → Get
-                    <strong>1 free paper card</strong>
-                  </p>
-                  <p class="text-sm text-amber-800 mt-2">
-                    Spend <strong>$2+</strong> on machines → Get
-                    <strong>unlimited paper cards</strong>
-                  </p>
+                  <span class="font-medium text-slate-700">1 Machine</span>
+                  <span class="text-xl font-bold text-primary-900">$1</span>
                 </div>
+                <div
+                  class="flex justify-between items-center p-3 bg-white rounded-lg border border-amber-100"
+                >
+                  <span class="font-medium text-slate-700">3 Machines</span>
+                  <span class="text-xl font-bold text-gold-600"
+                    >$2
+                    <span class="text-xs text-slate-500">(save $1)</span></span
+                  >
+                </div>
+                <div
+                  class="flex justify-between items-center p-3 bg-white rounded-lg border border-amber-100"
+                >
+                  <span class="font-medium text-slate-700">5 Machines</span>
+                  <span class="text-xl font-bold text-gold-600"
+                    >$3
+                    <span class="text-xs text-slate-500">(save $2)</span></span
+                  >
+                </div>
+              </div>
+
+              <div class="bg-amber-100 border-l-4 border-amber-500 rounded p-4">
+                <p class="text-sm text-amber-900 font-semibold mb-2">
+                  💡 Free Paper Bonus
+                </p>
+                <p class="text-sm text-amber-800">
+                  <strong>Spend $1+ →</strong> Get 1 free paper card
+                </p>
+                <p class="text-sm text-amber-800 mt-1">
+                  <strong>Spend $2+ →</strong> Unlimited paper cards
+                </p>
               </div>
             </div>
 
-            <!-- Afternoon 12:30 - 7:30 -->
+            <!-- Afternoon Window -->
             <div
               class="bg-gradient-to-br from-slate-50 to-blue-50 border-2 border-slate-200 rounded-3xl p-8 md:p-12"
             >
               <div class="flex items-center gap-3 mb-6">
-                <div class="text-3xl">🕐</div>
-                <h3 class="text-2xl font-bold text-primary-900">
-                  Afternoon Window
-                </h3>
+                <div class="text-4xl">🕐</div>
+                <div>
+                  <h3 class="text-2xl font-bold text-primary-900">
+                    Afternoon Play
+                  </h3>
+                  <p class="text-slate-700 font-semibold">12:30 PM – 7:30 PM</p>
+                </div>
               </div>
-              <p class="text-slate-700 font-semibold text-lg mb-2">
-                12:30 PM – 7:30 PM
+              <p class="text-slate-700 mb-8">
+                Pay-as-you-go games continue until the main session.
               </p>
-              <div class="space-y-4 mt-8 border-t-2 border-slate-200 pt-8">
-                <h4 class="font-bold text-primary-900 text-lg">Machine Play</h4>
-                <div class="space-y-3">
-                  <div
-                    class="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-100"
-                  >
-                    <span class="font-medium text-slate-700">1 Machine</span>
-                    <span class="text-xl font-bold text-primary-900">$1</span>
-                  </div>
-                  <div
-                    class="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-100"
-                  >
-                    <span class="font-medium text-slate-700">4 Machines</span>
-                    <span class="text-xl font-bold text-gold-600"
-                      >$3
-                      <span class="text-xs text-slate-500"
-                        >(save $1)</span
-                      ></span
-                    >
-                  </div>
-                </div>
 
+              <h4 class="font-bold text-primary-900 text-lg mb-4">
+                Machine Pricing
+              </h4>
+              <div class="space-y-3 mb-8">
                 <div
-                  class="bg-blue-100 border-l-4 border-blue-500 rounded p-4 mt-6"
+                  class="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-100"
                 >
-                  <p class="text-sm text-blue-900 font-semibold mb-2">
-                    💡 Free Paper Bonus
-                  </p>
-                  <p class="text-sm text-blue-800">
-                    Spend <strong>$1+</strong> on machines → Get
-                    <strong>1 free paper card</strong>
-                  </p>
-                  <p class="text-sm text-blue-800 mt-2">
-                    Spend <strong>$2+</strong> on machines → Get
-                    <strong>unlimited paper cards</strong>
-                  </p>
+                  <span class="font-medium text-slate-700">1 Machine</span>
+                  <span class="text-xl font-bold text-primary-900">$1</span>
                 </div>
+                <div
+                  class="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-100"
+                >
+                  <span class="font-medium text-slate-700">4 Machines</span>
+                  <span class="text-xl font-bold text-gold-600"
+                    >$3
+                    <span class="text-xs text-slate-500">(save $1)</span></span
+                  >
+                </div>
+              </div>
+
+              <div class="bg-blue-100 border-l-4 border-blue-500 rounded p-4">
+                <p class="text-sm text-blue-900 font-semibold mb-2">
+                  💡 Free Paper Bonus
+                </p>
+                <p class="text-sm text-blue-800">
+                  <strong>Spend $1+ →</strong> Get 1 free paper card
+                </p>
+                <p class="text-sm text-blue-800 mt-1">
+                  <strong>Spend $2+ →</strong> Unlimited paper cards
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Daytime Jackpots -->
+          <div
+            class="bg-gradient-to-br from-purple-50 to-violet-50 border-2 border-purple-200 rounded-3xl p-8 md:p-12 mb-16"
+          >
+            <div class="flex items-center gap-3 mb-6">
+              <div class="text-4xl">💰</div>
+              <div>
+                <h3 class="text-2xl font-bold text-primary-900">
+                  Daytime Jackpots & Progressives
+                </h3>
+                <p class="text-purple-700 font-semibold">
+                  Big wins all day long!
+                </p>
+              </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+              <div class="bg-white rounded-2xl p-6 border border-purple-100">
+                <h4 class="font-bold text-primary-900 text-lg mb-2">
+                  Super 6 Jackpots
+                </h4>
+                <p class="text-slate-600 text-sm mb-4">
+                  Played at the top of each hour starting at 12 PM.
+                </p>
+                <div class="text-3xl font-black text-purple-600">$250</div>
+              </div>
+
+              <div class="bg-white rounded-2xl p-6 border border-purple-100">
+                <h4 class="font-bold text-primary-900 text-lg mb-2">
+                  Bingo Babes Progressive
+                </h4>
+                <p class="text-slate-600 text-sm mb-4">
+                  Played after the 4 PM Super 6 Jackpot game.
+                </p>
+                <div class="text-3xl font-black text-purple-600">
+                  $200 Guaranteed
+                </div>
+                <p class="text-xs text-purple-500 mt-1">
+                  + Chance at the Progressive Jackpot
+                </p>
               </div>
             </div>
           </div>
@@ -268,10 +291,10 @@
           >
             <div class="p-8 md:p-12">
               <h3 class="text-2xl font-bold text-primary-900 mb-2">
-                🎫 Paper Cards Only (No Machines)
+                🎫 Paper Cards Only
               </h3>
               <p class="text-slate-600 mb-8">
-                Prefer paper play? We've got affordable options for every game.
+                Prefer paper-only play? Low-cost entry to bingo.
               </p>
 
               <div class="grid md:grid-cols-2 gap-8">
@@ -299,22 +322,13 @@
                     Special Games
                   </h4>
                   <div class="space-y-3">
-                    <div>
-                      <p class="text-sm font-semibold text-slate-600 mb-1">
-                        Double Actions & Speedy Coveralls
-                      </p>
-                      <div
-                        class="flex justify-between p-3 bg-white rounded-lg text-sm"
-                      >
-                        <span>1 Card</span>
-                        <span class="font-bold">$1</span>
-                      </div>
-                      <div
-                        class="flex justify-between p-3 bg-white rounded-lg text-sm mt-1"
-                      >
-                        <span>3 Cards</span>
-                        <span class="font-bold">$2</span>
-                      </div>
+                    <div class="flex justify-between p-3 bg-white rounded-lg">
+                      <span class="text-slate-700">1 Card</span>
+                      <span class="font-bold text-primary-900">$1</span>
+                    </div>
+                    <div class="flex justify-between p-3 bg-white rounded-lg">
+                      <span class="text-slate-700">3 Cards</span>
+                      <span class="font-bold text-primary-900">$2</span>
                     </div>
                   </div>
                 </div>
@@ -323,21 +337,33 @@
           </div>
         </section>
 
-        <!-- ===== EVENING SESSION SECTION ===== -->
+        <!-- ===== EVENING SESSION ===== -->
         <section id="evening" class="scroll-mt-20">
           <div class="text-center mb-16">
             <span
               class="text-gold-600 font-bold uppercase tracking-widest text-sm"
-              >🌙 Starts at 7:30 PM</span
+              >🌙 7:30 PM Main Session</span
             >
             <h2
               class="text-4xl md:text-5xl font-black text-primary-900 mt-4 mb-6"
             >
-              Premium Evening Session
+              Nightly Bingo Session
             </h2>
-            <p class="text-xl text-slate-600 max-w-2xl mx-auto">
-              Our flagship gaming experience with all-inclusive machine bundles
-              and exciting nightly games.
+            <p class="text-xl text-slate-600 max-w-3xl mx-auto">
+              Our flagship nightly session with all-inclusive machine bundles,
+              specialty games, and the Hornet Progressive.
+            </p>
+          </div>
+
+          <!-- Session Sales Window -->
+          <div
+            class="mb-16 bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-3xl p-8"
+          >
+            <h3 class="text-2xl font-bold text-primary-900 mb-2">
+              📌 Session Sales Window: 5:15 PM – 7:30 PM
+            </h3>
+            <p class="text-emerald-700 font-medium">
+              Buy your session cards early for best card selection.
             </p>
           </div>
 
@@ -350,30 +376,50 @@
               class="relative bg-gradient-to-br from-primary-900 to-primary-800 text-white rounded-3xl p-8 md:p-16 text-center"
             >
               <div class="text-5xl mb-4">⭐</div>
-              <h3 class="text-3xl md:text-4xl font-black mb-4">
-                Best Value: 2 Machines for $22
+              <h3 class="text-3xl md:text-4xl font-black mb-6">
+                BEST VALUE: 2 Machines for $22
               </h3>
-              <p class="text-gold-200 text-lg mb-8">
-                Includes six-packs, double actions & letter X papers
-              </p>
-              <div
-                class="inline-block bg-gold-500 text-primary-900 px-6 py-3 rounded-full font-bold text-lg"
-              >
-                Premium Inclusions
+              <div class="grid md:grid-cols-3 gap-4 mb-8">
+                <div
+                  class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20"
+                >
+                  <p class="text-gold-300 font-bold text-sm mb-1">
+                    ✓ Six-Packs
+                  </p>
+                </div>
+                <div
+                  class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20"
+                >
+                  <p class="text-gold-300 font-bold text-sm mb-1">
+                    ✓ Double Actions
+                  </p>
+                </div>
+                <div
+                  class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20"
+                >
+                  <p class="text-gold-300 font-bold text-sm mb-1">
+                    ✓ Letter X Papers
+                  </p>
+                </div>
               </div>
+              <p class="text-primary-200">
+                Everything you need for a complete evening of premium bingo
+              </p>
             </div>
           </div>
 
-          <!-- Machine Options -->
+          <!-- Machine Packages -->
           <div class="grid md:grid-cols-2 gap-8 mb-16">
-            <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-8">
+            <div
+              class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-8 hover:shadow-lg transition-all"
+            >
               <h4 class="text-2xl font-bold text-primary-900 mb-6">
-                1 Machine Play
+                Single Machine
               </h4>
-              <div class="text-5xl font-black text-gold-600 mb-4">$11</div>
-              <p class="text-slate-600 mb-6">
-                Single machine entry for one evening session
+              <p class="text-slate-600 mb-8">
+                One machine entry for the 7:30 PM session
               </p>
+              <div class="text-5xl font-black text-gold-600 mb-4">$11</div>
               <button
                 class="w-full bg-primary-900 hover:bg-primary-800 text-white font-bold py-3 rounded-lg transition"
               >
@@ -382,52 +428,43 @@
             </div>
 
             <div
-              class="relative bg-gradient-to-br from-gold-100 to-gold-50 border-3 border-gold-500 rounded-2xl p-8 shadow-xl transform md:scale-105"
+              class="relative bg-gradient-to-br from-gold-100 to-gold-50 border-3 border-gold-500 rounded-2xl p-8 shadow-2xl transform md:scale-105 hover:shadow-2xl transition-all"
             >
               <div
                 class="absolute top-0 right-0 bg-gold-500 text-white font-bold px-4 py-2 rounded-bl-2xl rounded-tr-2xl text-sm uppercase"
               >
-                Best Value
+                ★ Best Value
               </div>
-              <h4 class="text-2xl font-bold text-primary-900 mb-6">
-                2 Machines Play
+              <h4 class="text-2xl font-bold text-primary-900 mb-6 mt-4">
+                Two Machines (Recommended)
               </h4>
-              <div class="text-5xl font-black text-gold-600 mb-4">$22</div>
-              <div class="bg-white rounded-lg p-4 mb-6 space-y-2">
-                <p class="text-sm font-bold text-gold-600">
-                  ✓ Six-packs included
-                </p>
-                <p class="text-sm font-bold text-gold-600">
-                  ✓ Double actions included
-                </p>
-                <p class="text-sm font-bold text-gold-600">
-                  ✓ Letter X papers included
-                </p>
-              </div>
+              <p class="text-slate-700 mb-8 font-medium">
+                Includes: 6-packs • Double Actions • Letter X Papers
+              </p>
+              <div class="text-5xl font-black text-gold-600 mb-6">$22</div>
               <button
-                class="w-full bg-gold-500 hover:bg-gold-600 text-primary-900 font-bold py-3 rounded-lg transition"
+                class="w-full bg-gold-500 hover:bg-gold-600 text-primary-900 font-bold py-3 rounded-lg transition transform hover:-translate-y-1"
               >
                 Select
               </button>
             </div>
           </div>
 
-          <!-- Special Papers & Games -->
+          <!-- Specialty Games & Add-Ons -->
           <div
             class="bg-white border-2 border-primary-200 rounded-3xl overflow-hidden"
           >
             <div class="bg-primary-900 text-white p-8">
               <h3 class="text-2xl font-bold">
-                ✏️ Additional Paper Games & Specials
+                ✏️ Session-Only Specialty Games
               </h3>
             </div>
             <div class="p-8 md:p-12 space-y-8">
-              <!-- Special Paper Games -->
               <div>
                 <h4
                   class="text-xl font-bold text-primary-900 mb-6 pb-3 border-b-2 border-primary-300"
                 >
-                  Odd/Even • Cover All • Lucky Seven • Treasure Hunt
+                  Odd/Even • Lucky Seven • Treasure Hunt • Cover All • Letter X
                 </h4>
                 <div class="grid md:grid-cols-2 gap-6">
                   <div
@@ -436,279 +473,299 @@
                     <p class="text-sm text-gold-700 font-semibold mb-2">
                       Single Card
                     </p>
-                    <p class="text-3xl font-bold text-gold-600">$1</p>
+                    <p class="text-4xl font-bold text-gold-600">$1</p>
                   </div>
                   <div
                     class="bg-gold-50 border-2 border-gold-200 rounded-lg p-6"
                   >
                     <p class="text-sm text-gold-700 font-semibold mb-2">
-                      6-Card Set (Per Game Type)
+                      6-Card Set
                     </p>
-                    <p class="text-3xl font-bold text-gold-600">$5</p>
+                    <p class="text-4xl font-bold text-gold-600">$5</p>
                     <p class="text-xs text-gold-700 mt-2">
-                      ⚠️ No mixing/matching across game types
+                      Per game type (no mixing)
                     </p>
                   </div>
                 </div>
               </div>
 
-              <!-- Progressive Daub -->
-              <div class="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-6">
-                <h4 class="text-lg font-bold text-blue-900 mb-2">
-                  🎲 Progressive Daub Ticket
-                </h4>
-                <p class="text-blue-800 mb-2">
-                  <strong>Played during second half of session</strong>
-                </p>
-                <p class="text-blue-800 text-sm">
-                  Included with machine play • Must purchase session entry to
-                  participate
-                </p>
-              </div>
-
-              <!-- Pull Tabs -->
-              <div
-                class="bg-purple-50 border-l-4 border-purple-500 rounded-lg p-6"
-              >
-                <h4 class="text-lg font-bold text-purple-900 mb-2">
-                  🐴 Pull Tabs (Horse Races)
-                </h4>
-                <p class="text-purple-800 text-sm">
-                  Available throughout most operating hours • Exciting
-                  scratch-to-win games
-                </p>
+              <div class="grid md:grid-cols-2 gap-6">
+                <div
+                  class="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-6"
+                >
+                  <h4 class="text-lg font-bold text-blue-900 mb-2">
+                    🐝 Hornet Progressive Daub Ticket
+                  </h4>
+                  <p class="text-blue-800 text-sm">
+                    Played after the Letter X game. $250 Guaranteed prize with a
+                    chance at the progressive jackpot.
+                  </p>
+                </div>
+                <div
+                  class="bg-purple-50 border-l-4 border-purple-500 rounded-lg p-6"
+                >
+                  <h4 class="text-lg font-bold text-purple-900 mb-2">
+                    🐴 Pull Tabs (Horse Races)
+                  </h4>
+                  <p class="text-purple-800 text-sm">
+                    Sold the majority of the time we are open. Also known as row
+                    games.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- ===== SUNDAY SPECIALS ===== -->
-        <section id="sunday" class="scroll-mt-20">
+        <!-- ===== WEEKLY SPECIALS ===== -->
+        <section id="specials" class="scroll-mt-20">
           <div class="text-center mb-16">
             <span
               class="text-gold-600 font-bold uppercase tracking-widest text-sm"
-              >🌟 SUNDAY EXCLUSIVE</span
+              >🎉 Weekly Promotions</span
             >
             <h2
               class="text-4xl md:text-5xl font-black text-primary-900 mt-4 mb-6"
             >
-              Sunday Night Specials
+              Weekly Specials & Bonuses
             </h2>
-            <p class="text-xl text-slate-600 max-w-2xl mx-auto">
-              In addition to all standard evening session pricing, enjoy these
-              Sunday-only games.
+            <p class="text-xl text-slate-600 max-w-3xl mx-auto">
+              Extra value every day of the week. Plan your visit and maximize
+              your winnings.
             </p>
           </div>
 
-          <div class="grid md:grid-cols-3 gap-8">
-            <!-- Speedy -->
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Monday -->
             <div
-              class="bg-gradient-to-br from-red-50 to-pink-50 border-2 border-red-300 rounded-2xl p-8"
+              class="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-300 rounded-2xl p-8"
             >
-              <h3 class="text-2xl font-bold text-primary-900 mb-6">Speedy</h3>
-              <p class="text-slate-600 mb-8">Fast-paced favorite</p>
-              <div class="space-y-3 mb-8">
-                <div class="flex justify-between p-3 bg-white rounded-lg">
-                  <span class="font-medium text-slate-700">1 Card</span>
-                  <span class="font-bold text-red-600">$1</span>
+              <h3 class="text-2xl font-bold text-primary-900 mb-4">Monday</h3>
+              <div class="space-y-3">
+                <div class="bg-white rounded p-3 border-l-4 border-red-500">
+                  <p class="font-bold text-primary-900">
+                    Good Neighbor Session
+                  </p>
+                  <p class="text-sm text-slate-600">5× Pull Tabs Consolation</p>
                 </div>
-                <div class="flex justify-between p-3 bg-white rounded-lg">
-                  <span class="font-medium text-slate-700">3 Cards</span>
-                  <span class="font-bold text-red-600">$2</span>
+                <div class="bg-white rounded p-3 border-l-4 border-red-500">
+                  <p class="font-bold text-primary-900">Neighbor Send-Out</p>
+                  <p class="text-sm text-slate-600">$250 Jackpot Winners</p>
                 </div>
               </div>
             </div>
 
-            <!-- Super 3 & U-PIK -->
+            <!-- Tuesday -->
+            <div
+              class="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-300 rounded-2xl p-8"
+            >
+              <h3 class="text-2xl font-bold text-primary-900 mb-4">Tuesday</h3>
+              <div class="space-y-3">
+                <div class="bg-white rounded p-3 border-l-4 border-blue-500">
+                  <p class="font-bold text-primary-900">Free 9-On Games</p>
+                  <p class="text-sm text-slate-600">3 PM, 6 PM, Post-Session</p>
+                </div>
+                <div class="bg-white rounded p-3 border-l-4 border-blue-500">
+                  <p class="font-bold text-primary-900">Bonus Machine</p>
+                  <p class="text-sm text-slate-600">
+                    1 free machine with session buy-in
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Wednesday -->
             <div
               class="bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-2xl p-8"
             >
-              <h3 class="text-2xl font-bold text-primary-900 mb-6">
-                Super 3 & U-PIK
+              <h3 class="text-2xl font-bold text-primary-900 mb-4">
+                Wednesday
               </h3>
-              <p class="text-slate-600 mb-8">Premium Sunday games</p>
-              <div class="space-y-3 mb-8">
-                <div class="flex justify-between p-3 bg-white rounded-lg">
-                  <span class="font-medium text-slate-700">1 Card</span>
-                  <span class="font-bold text-emerald-600">$1</span>
+              <div class="space-y-3">
+                <div class="bg-white rounded p-3 border-l-4 border-emerald-500">
+                  <p class="font-bold text-primary-900">Free Machine</p>
+                  <p class="text-sm text-slate-600">With session buy-in</p>
                 </div>
-                <div class="flex justify-between p-3 bg-white rounded-lg">
-                  <span class="font-medium text-slate-700">6 Cards</span>
-                  <span class="font-bold text-emerald-600">$5</span>
+                <div class="bg-white rounded p-3 border-l-4 border-emerald-500">
+                  <p class="font-bold text-primary-900">
+                    Weekly Free Bingo Promo
+                  </p>
+                  <p class="text-sm text-slate-600">$100 single-winner prize</p>
+                  <p class="text-xs text-emerald-700 mt-1">
+                    + 7 days free session play
+                  </p>
                 </div>
               </div>
-              <div class="bg-emerald-100 border border-emerald-400 rounded p-3">
-                <p class="text-xs text-emerald-900 font-semibold">
-                  🎁 FREE U-PIK CARD every night you play!
+            </div>
+
+            <!-- Thursday -->
+            <div
+              class="bg-gradient-to-br from-violet-50 to-purple-50 border-2 border-violet-300 rounded-2xl p-8"
+            >
+              <h3 class="text-2xl font-bold text-primary-900 mb-4">Thursday</h3>
+              <div class="space-y-3">
+                <div class="bg-white rounded p-3 border-l-4 border-violet-500">
+                  <p class="font-bold text-primary-900">
+                    Good Neighbor Session
+                  </p>
+                  <p class="text-sm text-slate-600">5× Pull Tabs Consolation</p>
+                </div>
+                <div class="bg-white rounded p-3 border-l-4 border-violet-500">
+                  <p class="font-bold text-primary-900">Neighbor Send-Out</p>
+                  <p class="text-sm text-slate-600">$250 Jackpot Winners</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Friday -->
+            <div
+              class="bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-2xl p-8"
+            >
+              <h3 class="text-2xl font-bold text-primary-900 mb-4">Friday</h3>
+              <div class="space-y-3">
+                <div class="bg-white rounded p-3 border-l-4 border-amber-500">
+                  <p class="font-bold text-primary-900">
+                    Free Treasure Hunt Cards
+                  </p>
+                  <p class="text-sm text-slate-600">6-for-$5 value FREE</p>
+                </div>
+                <div class="bg-white rounded p-3 border-l-4 border-amber-500">
+                  <p class="font-bold text-primary-900">
+                    Treasure Hunt Jackpot
+                  </p>
+                  <p class="text-sm text-slate-600">
+                    $250 single winner (both halves)
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Saturday -->
+            <div
+              class="bg-gradient-to-br from-pink-50 to-rose-50 border-2 border-pink-300 rounded-2xl p-8"
+            >
+              <h3 class="text-2xl font-bold text-primary-900 mb-4">Saturday</h3>
+              <div class="space-y-3">
+                <div class="bg-white rounded p-3 border-l-4 border-pink-500">
+                  <p class="font-bold text-primary-900">Alternating Specials</p>
+                  <p class="text-sm text-slate-600">
+                    AYCP Paper or Premium Bundles
+                  </p>
+                </div>
+                <div class="bg-white rounded p-3 border-l-4 border-pink-500">
+                  <p class="text-xs text-pink-700 italic">
+                    Check with hall for current promotion
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== SUNDAY SPECIAL ===== -->
+        <section
+          id="sunday"
+          class="scroll-mt-20 -mx-4 px-4 py-16 bg-gradient-to-br from-gold-50 via-amber-50 to-orange-50"
+        >
+          <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-16">
+              <span
+                class="text-gold-700 font-bold uppercase tracking-widest text-sm"
+                >🌟 SUNDAY SPECIAL</span
+              >
+              <h2
+                class="text-4xl md:text-5xl font-black text-primary-900 mt-4 mb-6"
+              >
+                Premier Sunday Night
+              </h2>
+              <p class="text-xl text-slate-700 max-w-3xl mx-auto font-medium">
+                Special games, free dinner, and 15× $250 jackpots make Sundays
+                our most exciting night.
+              </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 mb-12">
+              <div
+                class="bg-white rounded-2xl p-8 border-2 border-gold-300 shadow-lg"
+              >
+                <div class="text-4xl mb-4">🎉</div>
+                <h3 class="text-2xl font-bold text-primary-900 mb-4">
+                  Speedy Coverall
+                </h3>
+                <div class="space-y-3">
+                  <div class="flex justify-between p-3 bg-gold-50 rounded">
+                    <span class="font-medium text-slate-700">1 Card</span>
+                    <span class="font-bold text-primary-900">$1</span>
+                  </div>
+                  <div class="flex justify-between p-3 bg-gold-50 rounded">
+                    <span class="font-medium text-slate-700">3 Cards</span>
+                    <span class="font-bold text-gold-600">$2</span>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="bg-white rounded-2xl p-8 border-2 border-gold-300 shadow-lg"
+              >
+                <div class="text-4xl mb-4">⭐</div>
+                <h3 class="text-2xl font-bold text-primary-900 mb-4">
+                  Super 3 & U-PIK
+                </h3>
+                <div class="space-y-3">
+                  <div class="flex justify-between p-3 bg-gold-50 rounded">
+                    <span class="font-medium text-slate-700">1 Card</span>
+                    <span class="font-bold text-primary-900">$1</span>
+                  </div>
+                  <div class="flex justify-between p-3 bg-gold-50 rounded">
+                    <span class="font-medium text-slate-700">6 Cards</span>
+                    <span class="font-bold text-gold-600">$5</span>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl p-8 border-3 border-emerald-400 shadow-lg flex flex-col justify-center text-center"
+              >
+                <div class="text-5xl mb-4">🎁</div>
+                <h3 class="text-2xl font-bold text-primary-900 mb-2">
+                  FREE U-PIK Card
+                </h3>
+                <p class="text-emerald-800 font-semibold">
+                  Every session entry includes
+                </p>
+                <p class="text-sm text-emerald-700 mt-2">
+                  Plus $500 weekly jackpot
                 </p>
               </div>
             </div>
 
-            <!-- Free U-PIK Highlight -->
             <div
-              class="bg-gradient-to-br from-gold-50 to-amber-50 border-3 border-gold-400 rounded-2xl p-8 flex flex-col justify-center"
+              class="bg-white rounded-3xl p-8 border-2 border-gold-300 text-center"
             >
-              <div class="text-5xl text-center mb-4">🎉</div>
-              <h3 class="text-2xl font-bold text-primary-900 mb-4 text-center">
-                Free U-PIK Reward
+              <h3 class="text-2xl font-bold text-primary-900 mb-4">
+                15× $250 UPIK Jackpots
               </h3>
-              <p class="text-center text-slate-700 font-semibold mb-2">
-                Every night you play session
+              <p class="text-slate-700 mb-6 font-medium">
+                Plus Free Dinner & Special Games
               </p>
-              <p class="text-center text-sm text-slate-600">
-                Receive 1 complimentary U-PIK card as our thank you for joining
-                us
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <!-- ===== TESTIMONIALS SECTION ===== -->
-        <section class="scroll-mt-20">
-          <div class="text-center mb-16">
-            <span
-              class="inline-block bg-gold-100 text-gold-800 px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider mb-4"
-            >
-              Community Voices
-            </span>
-            <h2 class="text-4xl md:text-5xl font-black text-primary-900 mb-6">
-              What Our Players Say
-            </h2>
-            <p class="text-xl text-slate-600 max-w-2xl mx-auto">
-              Real feedback from real players who choose Mary Esther Bingo every
-              week
-            </p>
-          </div>
-
-          <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <div
-              v-motion-fade-visible
-              class="bg-gradient-to-br from-white to-slate-50 border-2 border-slate-200 rounded-3xl p-8 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300"
-            >
-              <div class="flex items-center gap-2 mb-4">
-                <svg
-                  v-for="i in 5"
-                  :key="i"
-                  class="w-5 h-5 text-gold-500"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-                  />
-                </svg>
-              </div>
-              <p class="text-slate-700 leading-relaxed mb-6 italic">
-                "Saved $15 on the Friday night bundle! The $22 for 2 machines
-                deal includes everything you need. Best value in Northwest
-                Florida."
-              </p>
-              <div class="flex items-center gap-3">
-                <div
-                  class="w-12 h-12 bg-gradient-to-br from-gold-400 to-gold-600 rounded-full flex items-center justify-center text-white font-bold text-lg"
-                >
-                  M
+              <div class="grid md:grid-cols-3 gap-4">
+                <div class="bg-gold-100 rounded-lg p-4">
+                  <p class="text-sm font-bold text-gold-900">
+                    15 Separate Chances
+                  </p>
+                  <p class="text-2xl font-black text-gold-700">$250</p>
                 </div>
-                <div>
-                  <p class="font-bold text-primary-900">Maria S.</p>
-                  <p class="text-sm text-slate-500">Friday Regular</p>
+                <div class="bg-emerald-100 rounded-lg p-4">
+                  <p class="text-sm font-bold text-emerald-900">Free Dinner</p>
+                  <p class="text-2xl font-black text-emerald-700">Included</p>
+                </div>
+                <div class="bg-blue-100 rounded-lg p-4">
+                  <p class="text-sm font-bold text-blue-900">
+                    Best Session Value
+                  </p>
+                  <p class="text-2xl font-black text-blue-700">$22</p>
                 </div>
               </div>
-            </div>
-
-            <div
-              v-motion-fade-visible
-              class="bg-gradient-to-br from-white to-slate-50 border-2 border-slate-200 rounded-3xl p-8 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300"
-            >
-              <div class="flex items-center gap-2 mb-4">
-                <svg
-                  v-for="i in 5"
-                  :key="i"
-                  class="w-5 h-5 text-gold-500"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-                  />
-                </svg>
-              </div>
-              <p class="text-slate-700 leading-relaxed mb-6 italic">
-                "Love the daytime play-as-you-go option. I can drop in for an
-                hour or stay all afternoon — my budget, my choice. Way better
-                than driving to Pensacola!"
-              </p>
-              <div class="flex items-center gap-3">
-                <div
-                  class="w-12 h-12 bg-gradient-to-br from-gold-400 to-gold-600 rounded-full flex items-center justify-center text-white font-bold text-lg"
-                >
-                  J
-                </div>
-                <div>
-                  <p class="font-bold text-primary-900">James T.</p>
-                  <p class="text-sm text-slate-500">Afternoon Player</p>
-                </div>
-              </div>
-            </div>
-
-            <div
-              v-motion-fade-visible
-              class="bg-gradient-to-br from-white to-slate-50 border-2 border-slate-200 rounded-3xl p-8 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300"
-            >
-              <div class="flex items-center gap-2 mb-4">
-                <svg
-                  v-for="i in 5"
-                  :key="i"
-                  class="w-5 h-5 text-gold-500"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-                  />
-                </svg>
-              </div>
-              <p class="text-slate-700 leading-relaxed mb-6 italic">
-                "Only hall in Fort Walton with sessions every single day! The
-                staff is professional, the facility is clean, and I've made
-                friends I see every week. Five stars!"
-              </p>
-              <div class="flex items-center gap-3">
-                <div
-                  class="w-12 h-12 bg-gradient-to-br from-gold-400 to-gold-600 rounded-full flex items-center justify-center text-white font-bold text-lg"
-                >
-                  L
-                </div>
-                <div>
-                  <p class="font-bold text-primary-900">Linda R.</p>
-                  <p class="text-sm text-slate-500">Sunday Night Fan</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ===== FAQ SECTION ===== -->
-        <section id="faq" class="scroll-mt-20">
-          <div class="text-center mb-16">
-            <h2 class="text-4xl font-black text-primary-900 mb-6">
-              Frequently Asked Questions
-            </h2>
-            <p class="text-xl text-slate-600">
-              Quick answers to help you understand our pricing
-            </p>
-          </div>
-
-          <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <div
-              v-for="(faq, idx) in pricing?.faqs"
-              :key="idx"
-              class="bg-slate-50 border-l-4 border-gold-500 rounded-lg p-6"
-            >
-              <h3 class="font-bold text-primary-900 text-lg mb-3">
-                {{ faq.question }}
-              </h3>
-              <p class="text-slate-600 leading-relaxed">{{ faq.answer }}</p>
             </div>
           </div>
         </section>
@@ -719,8 +776,8 @@
         >
           <h2 class="text-3xl md:text-4xl font-black mb-6">Ready to Play?</h2>
           <p class="text-xl text-primary-100 mb-8 max-w-2xl mx-auto">
-            Join us today and experience premier bingo gaming with unbeatable
-            value and community spirit.
+            Choose your favorite day and session, then visit us. Clear pricing,
+            transparent rules, and premium bingo awaits.
           </p>
           <NuxtLink
             to="/schedule"
@@ -735,25 +792,14 @@
 </template>
 
 <script setup lang="ts">
-import { useBusiness } from "~/composables/useBusiness";
 useSeoMeta({
   title: "Pricing & Sessions | Mary Esther Bingo",
   description:
-    "View our session prices, machine bundles, and special game rates. Affordable entertainment daily!",
+    "Clear, transparent pricing for all bingo sessions. From $1 pay-as-you-go to premium evening sessions with jackpots.",
 });
-
-const { pricing, fetchPricing } = useBusiness();
-await fetchPricing();
 </script>
 
 <style scoped>
-.pattern-grid-lg {
-  background-image: radial-gradient(
-    rgba(234, 179, 8, 0.2) 1px,
-    transparent 1px
-  );
-  background-size: 32px 32px;
-}
 html {
   scroll-behavior: smooth;
 }

@@ -1,8 +1,8 @@
-import { defineEventHandler, createError } from 'h3'
+import { defineEventHandler, createError } from "h3";
 
 export default defineEventHandler((event) => {
   if (!event.context.user) {
-    throw createError({ statusCode: 401, message: 'Unauthorized' })
+    throw createError({ statusCode: 401, message: "Unauthorized" });
   }
 
   return {
@@ -10,6 +10,6 @@ export default defineEventHandler((event) => {
       id: event.context.user.id,
       username: event.context.user.username,
       role: event.context.user.role,
-    }
-  }
-})
+    },
+  };
+});

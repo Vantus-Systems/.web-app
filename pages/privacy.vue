@@ -66,14 +66,19 @@
             us at:
           </p>
           <address class="mt-4 not-italic">
-            <strong>{{ BUSINESS_INFO.name }}</strong
-            ><br />
-            {{ BUSINESS_INFO.address.full }}<br />
+            <strong>{{ BUSINESS_INFO.name || "Mary Esther Bingo" }}</strong>
+            <br />
+            <span v-if="BUSINESS_INFO.address">
+              {{ BUSINESS_INFO.address.full }}<br />
+            </span>
             <a
+              v-if="BUSINESS_INFO.contact?.phonePlain"
               :href="`tel:${BUSINESS_INFO.contact.phonePlain}`"
               class="text-primary-700 hover:underline"
-              >{{ BUSINESS_INFO.contact.phone }}</a
             >
+              {{ BUSINESS_INFO.contact.phone ?? "Call us" }}
+            </a>
+            <span v-else class="text-slate-500">Call us for details.</span>
           </address>
         </section>
       </div>

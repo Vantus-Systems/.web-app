@@ -7,10 +7,9 @@ def verify_pricing(page):
     page.wait_for_selector("text=Evening Session")
 
     # Verify key sections
-    assert page.is_visible("text=Tech-Assist Bundles")
-    assert page.is_visible("text=Paper Specials")
     assert page.is_visible("text=Morning Play")
     assert page.is_visible("text=Afternoon Play")
+    assert page.is_visible("text=Paper Cards Only")
 
     # Take screenshot of the whole page
     page.screenshot(path="verification/pricing_page.png", full_page=True)
@@ -18,6 +17,7 @@ def verify_pricing(page):
 
 def verify_admin(page):
     page.goto("http://localhost:3000/admin/login")
+    page.fill("input[name='username']", "admin")
     page.fill("input[name='password']", "admin123")
     page.click("button:has-text('Sign in')")
 
