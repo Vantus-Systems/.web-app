@@ -30,7 +30,9 @@ function startServer() {
     process.exit(0);
   }
 
-  const child = spawn(process.execPath, [SERVER_ENTRY, ...process.argv.slice(2)], {
+  const args = ["-r", "dotenv/config", SERVER_ENTRY, ...process.argv.slice(2)];
+
+  const child = spawn(process.execPath, args, {
     stdio: "inherit",
   });
 
