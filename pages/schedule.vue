@@ -104,30 +104,9 @@ const filteredSessions = computed(() => {
   const currentDay = days.value.find((d) => d.id === activeDay.value);
   const dayOfWeek = currentDay?.dayOfWeek || "Mon";
 
-  // Calculate specific date string for current active day
-  // If "today", we use today's date. If ID is date string, use that.
-  let targetDateStr = "";
-  if (activeDay.value === 'today') {
-      targetDateStr = new Date().toISOString().split('T')[0];
-  } else {
-      targetDateStr = activeDay.value || "";
-  }
-
-  // 1. Find Recurring Sessions that match this day of week
-  const recurring = sessions.value.filter(s =>
-      !s.isOverride &&
-      s.availableDays.includes(dayOfWeek) &&
-      (!s.excludedDates || !s.excludedDates.includes(targetDateStr))
+  let filtered = sessions.value.filter((s) =>
+    s.availableDays.includes(dayOfWeek),
   );
-
-  // 2. Find Overrides for this specific date
-  const overrides = sessions.value.filter(s => s.isOverride && s.overrideDate === targetDateStr);
-
-  // Combine
-  let filtered = [...recurring, ...overrides];
-
-  // Sort by start time
-  filtered.sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
 
   if (activeFilter.value !== "All") {
     filtered = filtered.filter((s) => s.category === activeFilter.value);
@@ -323,7 +302,7 @@ useSeoMeta({
           <Filter class="w-4 h-4" />
           <span
             >Showing {{ filteredSessions.length }} sessions for
-            {{ days.find((d) => d.id === activeDay)?.label || 'Selected Day' }}</span
+            {{ days.find((d) => d.id === activeDay)?.label }}</span
           >
         </div>
       </div>

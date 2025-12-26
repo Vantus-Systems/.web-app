@@ -57,7 +57,12 @@ async function main() {
   const emptyFrame = () => Array(25).fill(0);
   const frameWith = (indices) => {
     const f = emptyFrame();
-    indices.forEach(i => f[i] = 1);
+    indices.forEach(i => {
+      // Validate index to prevent property pollution warning
+      if (typeof i === 'number' && i >= 0 && i < 25) {
+        f[i] = 1;
+      }
+    });
     return f;
   };
 
