@@ -54,33 +54,7 @@ export const useBusiness = () => {
 
   const fetchJackpot = async () => {
     const { data } = await useFetch("/api/jackpot");
-    // Debug: log what the API returned so we can diagnose client-side updates
-    try {
-      // eslint-disable-next-line no-console
-      console.log("[useBusiness] fetchJackpot ->", data.value);
-    } catch (e) {}
-
-    // If useFetch returns no `data.value` for some reason, try a low-level fetch to see what's coming back
-    if (!data.value) {
-      try {
-        // eslint-disable-next-line no-console
-        const manual = await (globalThis.$fetch ? globalThis.$fetch('/api/jackpot') : fetch('/api/jackpot').then(r => r.json()));
-        // eslint-disable-next-line no-console
-        console.log('[useBusiness] manual fallback ->', manual);
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error('[useBusiness] manual fallback error ->', err);
-      }
-    }
-    if (data.value) {
-      // Normalize number/shape to a consistent object { value, lastUpdated }
-      const payload = data.value;
-      if (typeof payload === "number" || typeof payload === "string") {
-        jackpot.value = { value: Number(payload) } as any;
-      } else {
-        jackpot.value = payload as any;
-      }
-    }
+    if (data.value) jackpot.value = data.value;
   };
 
   const fetchSpecials = async () => {

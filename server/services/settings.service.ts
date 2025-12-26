@@ -1,7 +1,7 @@
 // server/services/settings.service.ts
-import prisma from "@server/db/client";
 import fs from "fs/promises";
 import path from "path";
+import prisma from "@server/db/client";
 
 const DATA_DIR = path.join(process.cwd(), "server", "data");
 

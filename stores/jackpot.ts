@@ -26,8 +26,12 @@ export const useJackpotStore = defineStore("jackpot", () => {
   // Fetch on init if not already loaded (though composables handle state)
   // `useBusiness` state is global, so this store is just a wrapper now?
   // Ideally, we refactor the app to use `useBusiness().jackpot` directly, but to avoid breaking changes:
+  
+  // Initial fetch (works both SSR and client-side)
+  fetchJackpot();
+  
+  // Set up periodic refresh only on client
   if (import.meta.client) {
-    fetchJackpot();
     setInterval(fetchJackpot, 5 * 60 * 1000);
   }
 

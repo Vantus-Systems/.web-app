@@ -1,7 +1,4 @@
 #!/usr/bin/env node
-/* scripts/check-db.js
-   Simple DB connectivity check using Prisma Client. Loads .env if present.
-*/
 import fs from "fs";
 import path from "path";
 import { PrismaClient } from "@prisma/client";
@@ -31,16 +28,16 @@ function loadDotEnv() {
   loadDotEnv();
   const prisma = new PrismaClient();
   try {
-    console.log(
-      "[check-db] Connecting to database (DATABASE_URL from env or .env)...",
-    );
-    await prisma.$connect();
-    const res = await prisma.$queryRaw`SELECT 1 as ok`;
-    console.log("[check-db] Database connected OK:", res);
+    console.log("[query-settings] Querying all settings from database...");
+    const settings = await prisma.setting.findMany();
+    console.log(`[query-settings] Found ${settings.length} settings:`);
+    for (const setting of settings) {
+      console.log(`  ${setting.key}:`, setting.value.substring(0, 200));
+    }
     process.exit(0);
   } catch (err) {
     console.error(
-      "[check-db] DB connectivity check failed:",
+      "[query-settings] Query failed:",
       err && err.message ? err.message : err,
     );
     process.exit(1);

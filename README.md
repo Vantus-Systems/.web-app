@@ -179,6 +179,8 @@ npm run build
 node .output/server/index.mjs
 ```
 
+Alternatively, you can run `npm run start:server` after cloning; the helper script automatically runs `nuxt build` whenever the `.output/server/index.mjs` entrypoint is missing, so you don't need to build manually before starting the production runtime.
+
 For production:
 1. Set `NODE_ENV=production`
 2. Replace the demo login in `server/api/auth/login.post.ts` with a secure username/password flow (use `getUserByUsername()` + `verifyPassword()`); rotate default credentials
