@@ -168,6 +168,20 @@
                         class="block w-full bg-slate-50 border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-gold focus:border-transparent p-4 transition-all"
                       />
                     </div>
+                     <!-- W-2G Issuer Info -->
+                     <div class="sm:col-span-6 pt-8 border-t border-slate-200">
+                         <h4 class="text-sm font-bold text-primary-900 uppercase tracking-widest mb-4">W-2G Compliance Info</h4>
+                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                             <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Payer Name (Legal)</label>
+                                <input v-model="businessData.w2gPayerName" type="text" class="block w-full bg-slate-50 border-slate-200 rounded-xl px-4 py-3" />
+                             </div>
+                             <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Payer EIN</label>
+                                <input v-model="businessData.w2gEin" type="text" class="block w-full bg-slate-50 border-slate-200 rounded-xl px-4 py-3" />
+                             </div>
+                         </div>
+                     </div>
                   </div>
                   <div class="flex justify-end pt-4">
                     <BaseButton
@@ -182,99 +196,17 @@
               </BaseCard>
             </div>
 
-            <!-- Jackpot Tab -->
-            <div v-if="currentTab === 'jackpot'">
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <BaseCard
-                  class-name="bg-primary-950 text-white border-none relative overflow-hidden"
-                >
-                  <div
-                    class="absolute top-0 right-0 w-64 h-64 bg-gold/10 rounded-full blur-3xl -mr-32 -mt-32"
-                  ></div>
-                  <template #header>
-                    <h3 class="text-lg font-bold text-gold">
-                      Live Jackpot Configuration
-                    </h3>
-                  </template>
-                  <form
-                    class="space-y-8 relative z-10"
-                    @submit.prevent="saveJackpot"
-                  >
-                    <div>
-                      <label
-                        class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"
-                        >Current Prize Pool</label
-                      >
-                      <div class="relative">
-                        <div
-                          class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
-                        >
-                          <span class="text-gold font-bold text-2xl">$</span>
-                        </div>
-                        <input
-                          v-model="jackpotData.value"
-                          type="number"
-                          step="0.01"
-                          class="block w-full bg-primary-900 border-primary-800 rounded-2xl text-white text-4xl font-black pl-12 pr-4 py-6 focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
-                          placeholder="0.00"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label
-                        class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"
-                        >Display Timestamp</label
-                      >
-                      <input
-                        v-model="jackpotData.lastUpdated"
-                        type="text"
-                        class="block w-full bg-primary-900 border-primary-800 rounded-xl text-slate-300 p-4 focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
-                        placeholder="e.g. Today at 5PM"
-                      />
-                    </div>
-                    <div class="flex justify-end">
-                      <BaseButton
-                        variant="gold"
-                        type="submit"
-                        class-name="w-full py-5 text-lg shadow-2xl shadow-gold/10"
-                      >
-                        Broadcast Update
-                      </BaseButton>
-                    </div>
-                  </form>
-                </BaseCard>
+            <!-- Progressives Tab (Refactored) -->
+            <div v-if="currentTab === 'progressives'">
+              <ProgressiveEditor v-model="jackpotData" :is-saving="isSavingJackpot" @save="saveJackpot" />
 
-                <div class="space-y-6">
-                  <div
-                    class="bg-white p-8 rounded-2xl shadow-lg border border-slate-100"
-                  >
-                    <h4
-                      class="text-sm font-black text-primary-900 uppercase tracking-widest mb-4"
-                    >
-                      Jackpot Strategy
-                    </h4>
-                    <p class="text-slate-600 text-sm leading-relaxed">
-                      The jackpot amount is the primary driver for player
-                      attendance. High-visibility updates during peak hours (4PM
-                      - 6PM) correlate with a 15% increase in session revenue.
-                    </p>
+              <div class="mt-12">
+                  <div class="flex items-center gap-4 mb-6">
+                      <div class="h-px bg-slate-200 flex-grow"></div>
+                      <span class="text-sm font-bold text-slate-400 uppercase tracking-widest">Compliance Tools</span>
+                      <div class="h-px bg-slate-200 flex-grow"></div>
                   </div>
-                  <div class="bg-gold/5 p-8 rounded-2xl border border-gold/20">
-                    <h4
-                      class="text-sm font-black text-gold-700 uppercase tracking-widest mb-4"
-                    >
-                      Public Display
-                    </h4>
-                    <div
-                      class="flex items-center justify-center h-24 bg-primary-950 rounded-xl border-2 border-gold/30"
-                    >
-                      <span
-                        class="text-gold font-black text-3xl tracking-tighter"
-                        >${{ jackpotData.value }}</span
-                      >
-                    </div>
-                  </div>
-                </div>
+                  <W2GGenerator />
               </div>
             </div>
 
@@ -554,6 +486,8 @@
 <script setup lang="ts">
 import PricingEditor from '~/components/admin/PricingEditor.vue';
 import ScheduleEditor from '~/components/admin/ScheduleEditor.vue';
+import ProgressiveEditor from '~/components/admin/ProgressiveEditor.vue';
+import W2GGenerator from '~/components/admin/W2GGenerator.vue';
 
 definePageMeta({
   middleware: ["auth"],
@@ -562,7 +496,7 @@ definePageMeta({
 const router = useRouter();
 const tabs = [
   { id: "business", name: "Business Info" },
-  { id: "jackpot", name: "Jackpot" },
+  { id: "progressives", name: "Progressives" },
   { id: "pricing", name: "Pricing" },
   { id: "schedule", name: "Schedule" },
   { id: "messages", name: "Messages" },
@@ -589,6 +523,7 @@ const newUser = ref({
 const pending = ref(true);
 const isSavingPricing = ref(false);
 const isSavingSchedule = ref(false);
+const isSavingJackpot = ref(false);
 
 const deepCloneValue = <T,>(value: T): T =>
   JSON.parse(JSON.stringify(value ?? {}));
@@ -756,11 +691,20 @@ const saveBusinessInfo = async () => {
 };
 
 const saveJackpot = async () => {
-  await $fetch("/api/admin/jackpot", {
-    method: "POST",
-    body: jackpotData.value,
-  });
-  alert("Jackpot Updated!");
+  isSavingJackpot.value = true;
+  try {
+    // Update timestamp
+    jackpotData.value.lastUpdated = new Date().toLocaleString();
+    await $fetch("/api/admin/jackpot", {
+        method: "POST",
+        body: jackpotData.value,
+    });
+    alert("Progressives Updated!");
+  } catch (e) {
+      alert("Failed to update progressives.");
+  } finally {
+      isSavingJackpot.value = false;
+  }
 };
 
 const savePricing = async () => {

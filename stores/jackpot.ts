@@ -1,42 +1,92 @@
 import { defineStore } from "pinia";
-import { computed } from "vue";
+import { computed, ref, onMounted } from "vue";
 import { useBusiness } from "~/composables/useBusiness";
 
 export const useJackpotStore = defineStore("jackpot", () => {
-  // Use composable for data to ensure shared state / SSR hydration
   const { jackpot, fetchJackpot: fetch } = useBusiness();
+  const cycleState = ref<'babes' | 'hornet'>('babes');
 
-  // We can expose a computed property for the amount or just use the composable directly
-  // The existing store exposes `currentJackpot` as a ref number.
-  // The new API returns { amount: number, lastUpdated: string } based on `admin/index.vue` handling
-  // Let's adapt.
+  // Timer for cycling display (outside active hours)
+  // We can't rely on lifecycle hooks like onMounted in a store setup function directly for cleanup,
+  // but we can start the interval.
+  let intervalId: any;
 
-  const currentJackpot = computed(() => {
-    // Handle various shapes if migration isn't perfect or if API returns object
-    const val =
-      (jackpot.value as any)?.amount ?? (jackpot.value as any)?.value ?? 0;
-    const n = typeof val === "string" ? Number.parseFloat(val) : val;
-    return Number.isFinite(n) ? n : 0;
+  // Start cycling on client side
+  if (import.meta.client) {
+    intervalId = setInterval(() => {
+      cycleState.value = cycleState.value === 'babes' ? 'hornet' : 'babes';
+    }, 5000);
+
+    // Also periodic fetch
+    setInterval(fetch, 5 * 60 * 1000);
+  }
+
+  // Initial fetch
+  fetch();
+
+  // Expose individual progressive values
+  const babesValue = computed(() => {
+      if (!jackpot.value || !('babes' in jackpot.value)) return 0;
+      return (jackpot.value as any).babes.current ?? 0;
   });
 
-  async function fetchJackpot() {
-    await fetch();
-  }
+  const hornetValue = computed(() => {
+      if (!jackpot.value || !('hornet' in jackpot.value)) {
+           // Fallback for legacy if needed, or just 0
+           return 0;
+      }
+      return (jackpot.value as any).hornet.current ?? 0;
+  });
 
-  // Fetch on init if not already loaded (though composables handle state)
-  // `useBusiness` state is global, so this store is just a wrapper now?
-  // Ideally, we refactor the app to use `useBusiness().jackpot` directly, but to avoid breaking changes:
+  const activeKey = computed(() => {
+      // Default fallback
+      if (!jackpot.value || !('babes' in jackpot.value)) return 'legacy';
 
-  // Initial fetch (works both SSR and client-side)
-  fetchJackpot();
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const totalMinutes = hours * 60 + minutes;
 
-  // Set up periodic refresh only on client
-  if (import.meta.client) {
-    setInterval(fetchJackpot, 5 * 60 * 1000);
-  }
+      const startDay = 10 * 60;       // 10:00 AM
+      const endDay = 16 * 60 + 20;    // 4:20 PM
+      const endNight = 21 * 60 + 30;  // 9:30 PM
+
+      // "show the daytime progressive until around 4:20 PM"
+      // "switch to the night time progressive until around 9:30 pm"
+      // "cycle between the two" (implied: otherwise)
+
+      if (totalMinutes >= startDay && totalMinutes < endDay) {
+          return 'babes';
+      } else if (totalMinutes >= endDay && totalMinutes < endNight) {
+          return 'hornet';
+      } else {
+          return cycleState.value;
+      }
+  });
+
+  const currentJackpot = computed(() => {
+    if (activeKey.value === 'legacy') {
+         const val = (jackpot.value as any)?.value ?? 0;
+         return typeof val === 'string' ? parseFloat(val) : val;
+    }
+    return activeKey.value === 'babes' ? babesValue.value : hornetValue.value;
+  });
+
+  const activeLabel = computed(() => {
+      if (activeKey.value === 'legacy') return "Shamrock Progressive Jackpot";
+
+      if (activeKey.value === 'babes') {
+          return (jackpot.value as any)?.babes?.label || "Bingo Babes Progressive";
+      } else {
+          return (jackpot.value as any)?.hornet?.label || "Progressive Hornet";
+      }
+  });
 
   return {
     currentJackpot,
-    fetchJackpot,
+    activeLabel,
+    babesValue,
+    hornetValue,
+    fetchJackpot: fetch,
   };
 });

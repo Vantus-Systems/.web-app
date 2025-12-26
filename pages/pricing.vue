@@ -276,10 +276,10 @@
                   Played after the 4 PM Super 6 Jackpot game.
                 </p>
                 <div class="text-3xl font-black text-purple-600">
-                  $200 Guaranteed
+                  {{ formatCurrency(jackpotStore.babesValue) }}
                 </div>
                 <p class="text-xs text-purple-500 mt-1">
-                  + Chance at the Progressive Jackpot
+                  Current Progressive Amount
                 </p>
               </div>
             </div>
@@ -497,8 +497,11 @@
                     🐝 Hornet Progressive Daub Ticket
                   </h4>
                   <p class="text-blue-800 text-sm">
-                    Played after the Letter X game. $250 Guaranteed prize with a
-                    chance at the progressive jackpot.
+                    Played after the Letter X game.
+                    <span class="font-bold text-blue-900 block mt-1 text-lg">
+                      {{ formatCurrency(jackpotStore.hornetValue) }}
+                    </span>
+                    with a chance at the progressive jackpot.
                   </p>
                 </div>
                 <div
@@ -792,11 +795,23 @@
 </template>
 
 <script setup lang="ts">
+import { useJackpotStore } from "~/stores/jackpot";
+
+const jackpotStore = useJackpotStore();
+
 useSeoMeta({
   title: "Pricing & Sessions | Mary Esther Bingo",
   description:
     "Clear, transparent pricing for all bingo sessions. From $1 pay-as-you-go to premium evening sessions with jackpots.",
 });
+
+const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 0,
+  }).format(value);
+};
 </script>
 
 <style scoped>

@@ -43,7 +43,7 @@
             <p
               class="text-[10px] text-slate-500 uppercase tracking-wider font-bold"
             >
-              Current Jackpot
+              {{ jackpotStore.activeLabel }}
             </p>
             <p class="text-primary-700 font-bold font-mono">
               {{ formatCurrency(jackpotStore.currentJackpot) }}
