@@ -11,11 +11,20 @@
               Schedule Control Room
             </h3>
             <p class="text-sm text-slate-500">
-              Manage weekly sessions with a high-level calendar view.
+              Manage sessions with a monthly calendar view.
             </p>
           </div>
           <div class="flex flex-wrap gap-2">
-            <BaseButton
+             <div class="flex items-center gap-2 bg-slate-100 rounded-lg p-1">
+                 <button @click="changeMonth(-1)" class="p-2 hover:bg-white rounded-md transition text-slate-500 hover:text-primary-900">
+                     <ChevronLeft class="w-4 h-4" />
+                 </button>
+                 <span class="text-sm font-bold text-primary-900 w-32 text-center">{{ currentMonthLabel }}</span>
+                 <button @click="changeMonth(1)" class="p-2 hover:bg-white rounded-md transition text-slate-500 hover:text-primary-900">
+                     <ChevronRight class="w-4 h-4" />
+                 </button>
+             </div>
+             <BaseButton
               variant="gold"
               class-name="px-4 py-2 text-xs uppercase tracking-[0.3em]"
               type="button"
@@ -29,47 +38,66 @@
         </div>
       </template>
 
-      <!-- Weekly Calendar View -->
-      <div class="overflow-x-auto pb-4">
-        <div class="min-w-[1000px] grid grid-cols-7 gap-4">
-          <div v-for="day in daysOfWeek" :key="day" class="flex flex-col gap-4">
-            <div class="text-center pb-2 border-b-2 border-primary-100">
-              <h4 class="text-sm font-black text-primary-900 uppercase tracking-widest">{{ day }}</h4>
-            </div>
-
-            <div class="space-y-3 min-h-[200px] bg-slate-50/50 rounded-xl p-2 border border-dashed border-slate-200">
-               <!-- Sessions for this day -->
-               <div
-                  v-for="session in getSessionsForDay(day)"
-                  :key="session.id"
-                  class="group relative bg-white border border-slate-200 rounded-lg p-3 shadow-sm hover:shadow-md cursor-pointer transition-all hover:border-gold/50"
-                  @click="editSession(session)"
-               >
-                  <div class="flex justify-between items-start mb-1">
-                      <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ session.startTime }}</span>
-                      <span class="text-[10px] font-bold text-slate-400" v-if="session.category">{{ session.category }}</span>
-                  </div>
-                  <h5 class="font-bold text-primary-900 text-sm leading-tight mb-2">{{ session.name }}</h5>
-                  <div class="flex flex-wrap gap-1">
-                      <span class="text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">{{ session.gameType }}</span>
-                      <span v-if="session.status" :class="statusBadgeClass(session.status, true)">{{ session.status }}</span>
-                  </div>
-               </div>
-
-               <!-- Add Button -->
-               <button
-                  @click="addNewSession(day)"
-                  class="w-full py-3 rounded-lg border-2 border-dashed border-slate-200 text-slate-400 text-xs font-bold uppercase tracking-wider hover:border-gold hover:text-gold hover:bg-gold/5 transition-colors flex items-center justify-center gap-1"
-                >
-                  <Plus class="w-3 h-3" /> Add
-               </button>
-            </div>
+      <!-- Monthly Calendar View -->
+      <div class="border border-slate-200 rounded-xl overflow-hidden bg-white">
+          <div class="grid grid-cols-7 border-b border-slate-200 bg-slate-50">
+              <div v-for="day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']" :key="day" class="py-3 text-center text-xs font-bold uppercase tracking-widest text-slate-500">
+                  {{ day }}
+              </div>
           </div>
-        </div>
+          <div class="grid grid-cols-7 auto-rows-fr bg-slate-200 gap-px">
+               <div
+                  v-for="(day, index) in calendarDays"
+                  :key="`${day.dateStr}-${index}`"
+                  class="min-h-[140px] bg-white p-2 relative group hover:bg-slate-50 transition-colors"
+                  :class="{ 'opacity-50 bg-slate-50': !day.isCurrentMonth }"
+               >
+                   <div class="flex justify-between items-start mb-2">
+                       <span
+                          class="text-sm font-bold w-7 h-7 flex items-center justify-center rounded-full"
+                          :class="isToday(day.dateStr || '') ? 'bg-gold text-primary-900' : 'text-slate-700'"
+                       >
+                           {{ day.dayNum }}
+                       </span>
+                       <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                           <button
+                              class="p-1 text-slate-400 hover:text-gold transition-all"
+                              title="Copy Schedule to Entire Month"
+                              @click.stop="copyDayToMonth(day)"
+                           >
+                               <Copy class="w-4 h-4" />
+                           </button>
+                           <button
+                              class="p-1 text-slate-400 hover:text-gold transition-all"
+                              title="Add Session Override"
+                              @click.stop="openDayEditor(day)"
+                           >
+                               <Plus class="w-4 h-4" />
+                           </button>
+                       </div>
+                   </div>
+
+                   <!-- Sessions for this specific date -->
+                   <div class="space-y-1">
+                       <div
+                          v-for="session in getSessionsForDate(day.dateStr || '')"
+                          :key="session.id"
+                          class="text-[10px] p-1.5 rounded border truncate cursor-pointer transition-all"
+                          :class="[
+                              session.isOverride ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-slate-50 border-slate-100 text-slate-600',
+                              'hover:border-gold hover:shadow-sm'
+                          ]"
+                          @click.stop="editSession(session, day.dateStr || '')"
+                       >
+                           <span class="font-bold">{{ session.startTime }}</span> {{ session.name }}
+                       </div>
+                   </div>
+               </div>
+          </div>
       </div>
     </BaseCard>
 
-    <!-- Session Editor Modal/Panel -->
+    <!-- Session Editor Modal -->
     <div v-if="editingSession" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
         <div class="absolute inset-0 bg-primary-950/50 backdrop-blur-sm" @click="closeEditor"></div>
         <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col">
@@ -77,15 +105,21 @@
             <div class="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between z-10">
                 <div>
                     <h3 class="text-xl font-black text-primary-900">
-                        {{ editingSession.id ? 'Edit Session' : 'New Session' }}
+                        {{ editingSession.id.startsWith('temp-') ? 'New Session' : 'Edit Session' }}
                     </h3>
                     <p class="text-xs text-slate-500 uppercase tracking-widest">
                         {{ editingSession.name || 'Untitled' }}
+                        <span v-if="editingTargetDate" class="ml-2 text-gold-600 font-bold">
+                            @ {{ formatDate(editingTargetDate) }}
+                        </span>
+                        <span v-else class="ml-2 text-slate-400 font-bold">
+                            (Recurring Pattern)
+                        </span>
                     </p>
                 </div>
                 <div class="flex gap-2">
                     <button
-                        v-if="editingSession.id"
+                        v-if="!editingSession.id.startsWith('temp-')"
                         type="button"
                         class="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition"
                         title="Delete Session"
@@ -104,6 +138,18 @@
             </div>
 
             <div class="p-6 space-y-6">
+                <!-- Override Warning -->
+                <div v-if="editingTargetDate && !editingSession.isOverride" class="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-start gap-3">
+                    <AlertTriangle class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                        <h4 class="text-sm font-bold text-amber-900">Editing Recurring Session for a Specific Date</h4>
+                        <p class="text-xs text-amber-700 mt-1">
+                            Saving changes here will create a specific override for <strong>{{ formatDate(editingTargetDate) }}</strong>.
+                            It will not affect this session on other days.
+                        </p>
+                    </div>
+                </div>
+
                 <!-- Basic Info -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <label class="block">
@@ -150,9 +196,9 @@
                     </label>
                 </div>
 
-                <!-- Days Selection -->
-                <div>
-                     <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Active Days</span>
+                <!-- Days Selection (Only if NOT overriding a specific date) -->
+                <div v-if="!editingTargetDate">
+                     <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Recurring Days</span>
                      <div class="flex flex-wrap gap-2">
                          <button
                             v-for="day in daysOfWeek"
@@ -170,9 +216,28 @@
                          </button>
                      </div>
                      <p class="text-xs text-slate-400 mt-2">
-                        Select which days this specific session configuration applies to.
+                        Select which days of the week this session normally occurs.
                      </p>
                 </div>
+
+                <!-- Daily Special Promotion (Only visible if specific day or overriding) -->
+                 <div v-if="editingTargetDate || editingSession.availableDays?.length > 0">
+                    <label class="block">
+                        <span class="text-xs font-bold text-gold-600 uppercase tracking-wider mb-1 block flex items-center gap-1">
+                            <Star class="w-3 h-3" /> Daily Promotion / Special
+                        </span>
+                        <input
+                            v-if="editingTargetDate"
+                            v-model="editingSession.specials[editingTargetDate]"
+                            type="text"
+                            placeholder="e.g. Free Dauber with Buy-In"
+                            class="w-full rounded-xl border-gold-200 bg-gold-50/50 focus:border-gold focus:ring-gold"
+                        />
+                         <p v-else class="text-xs text-slate-400 italic">
+                             Promotions are set on specific calendar dates.
+                         </p>
+                    </label>
+                 </div>
 
                  <!-- Details -->
                  <div class="grid grid-cols-1 gap-6">
@@ -201,23 +266,13 @@
                         <input v-model="editingSession.eligibility" type="text" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:border-gold focus:ring-gold" />
                     </label>
                 </div>
-
-                <!-- Vibe -->
-                 <div>
-                     <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Vibe Tags</span>
-                     <div class="flex flex-wrap gap-2">
-                        <span v-for="(tag, idx) in editingSession.vibe ?? []" :key="idx" class="flex items-center bg-slate-100 rounded-full px-3 py-1 text-xs border border-slate-200">
-                             <input v-model="editingSession.vibe[idx]" class="bg-transparent border-none p-0 w-20 text-xs font-semibold focus:ring-0" />
-                             <button @click="editingSession.vibe.splice(idx, 1)" class="ml-1 text-slate-400 hover:text-rose-500">&times;</button>
-                        </span>
-                        <button @click="addVibe" class="text-xs font-bold text-primary-600 bg-primary-50 px-3 py-1 rounded-full border border-transparent hover:border-primary-200">+ Add</button>
-                     </div>
-                 </div>
             </div>
 
             <div class="sticky bottom-0 bg-slate-50 border-t border-slate-200 px-6 py-4 flex justify-end gap-3 z-10 rounded-b-2xl">
                 <BaseButton variant="outline" type="button" @click="closeEditor">Cancel</BaseButton>
-                <BaseButton variant="gold" type="button" @click="saveSession">Done</BaseButton>
+                <BaseButton variant="gold" type="button" @click="saveSession">
+                    {{ editingTargetDate ? 'Save Override' : 'Save Session' }}
+                </BaseButton>
             </div>
         </div>
     </div>
@@ -228,7 +283,7 @@
 import { ref, computed, onMounted } from 'vue';
 import BaseCard from '~/components/ui/BaseCard.vue';
 import BaseButton from '~/components/ui/BaseButton.vue';
-import { Plus, Trash2, X } from 'lucide-vue-next';
+import { Plus, Trash2, X, ChevronLeft, ChevronRight, AlertTriangle, Star, Copy } from 'lucide-vue-next';
 
 const props = defineProps<{
   modelValue: any[];
@@ -238,6 +293,7 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue', 'save']);
 
 const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const currentDate = ref(new Date());
 const editingSession = ref<any>(null);
 const programs = ref<any[]>([]);
 
@@ -248,64 +304,162 @@ onMounted(async () => {
         console.error('Failed to load programs', e);
     }
 });
+const editingTargetDate = ref<string | null>(null);
 
-// Get sessions that occur on a specific day
-const getSessionsForDay = (day: string) => {
-    return props.modelValue.filter(s => s.availableDays?.includes(day))
-        .sort((a, b) => {
-            // Simple sort by time if possible, otherwise by creation
-            return (a.startTime || '').localeCompare(b.startTime || '');
+// Calendar Navigation
+const currentMonthLabel = computed(() => {
+    return currentDate.value.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+});
+
+const changeMonth = (delta: number) => {
+    const newDate = new Date(currentDate.value);
+    newDate.setMonth(newDate.getMonth() + delta);
+    currentDate.value = newDate;
+};
+
+// Generate Calendar Grid
+const calendarDays = computed(() => {
+    const year = currentDate.value.getFullYear();
+    const month = currentDate.value.getMonth();
+    const firstDayOfMonth = new Date(year, month, 1);
+    const lastDayOfMonth = new Date(year, month + 1, 0);
+
+    const days = [];
+
+    // Previous Month Padding
+    const startPadding = firstDayOfMonth.getDay(); // 0 is Sunday
+    for (let i = startPadding; i > 0; i--) {
+        const d = new Date(year, month, 1 - i);
+        days.push({
+            date: d,
+            dateStr: d.toISOString().split('T')[0],
+            dayNum: d.getDate(),
+            isCurrentMonth: false
         });
+    }
+
+    // Current Month
+    for (let i = 1; i <= lastDayOfMonth.getDate(); i++) {
+        const d = new Date(year, month, i);
+        days.push({
+            date: d,
+            dateStr: d.toISOString().split('T')[0],
+            dayNum: i,
+            isCurrentMonth: true
+        });
+    }
+
+    // Next Month Padding (to fill 6 rows of 7 = 42 cells)
+    const remainingCells = 42 - days.length;
+    for (let i = 1; i <= remainingCells; i++) {
+        const d = new Date(year, month + 1, i);
+        days.push({
+            date: d,
+            dateStr: d.toISOString().split('T')[0],
+            dayNum: i,
+            isCurrentMonth: false
+        });
+    }
+
+    return days;
+});
+
+const isToday = (dateStr: string) => {
+    return dateStr === new Date().toISOString().split('T')[0];
 };
 
-const statusBadgeClass = (status: string, small = false) => {
-    const map: Record<string, string> = {
-        Upcoming: "bg-yellow-100 text-yellow-800",
-        Live: "bg-emerald-100 text-emerald-800",
-        Closing: "bg-rose-100 text-rose-800",
-        "Sold Out": "bg-slate-200 text-slate-600",
-    };
-    const classes = map[status] || "bg-slate-100 text-slate-500";
-    return small ? `text-[9px] px-1.5 py-0.5 rounded ${classes}` : classes;
+const formatDate = (dateStr: string) => {
+    const [y, m, d] = dateStr.split('-');
+    return new Date(Number(y), Number(m) - 1, Number(d)).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 };
 
-const createSessionId = () => `session-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+// --- Session Logic ---
 
-const addNewSession = (day: string) => {
+// Get sessions for a specific date (combining recurring + overrides)
+const getSessionsForDate = (dateStr: string) => {
+    const date = new Date(dateStr + 'T12:00:00'); // Midday to avoid timezone issues
+    const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'short' }); // "Mon", "Tue"...
+
+    // 1. Find Recurring Sessions that match this day of week
+    const recurring = props.modelValue.filter(s =>
+        !s.isOverride &&
+        s.availableDays?.includes(dayOfWeek)
+    );
+
+    // 2. Find Overrides for this specific date
+    const overrides = props.modelValue.filter(s => s.overrideDate === dateStr);
+
+    const effectiveSessions = [];
+
+    // Add valid recurring sessions
+    for (const session of recurring) {
+        if (!session.excludedDates?.includes(dateStr)) {
+             effectiveSessions.push({ ...session, isOverride: false });
+        }
+    }
+
+    // Add overrides
+    for (const session of overrides) {
+        effectiveSessions.push({ ...session, isOverride: true });
+    }
+
+    return effectiveSessions.sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+};
+
+const openDayEditor = (day: any) => {
+    // Open a blank session for this specific day
+    editingTargetDate.value = day.dateStr;
     editingSession.value = {
-        id: createSessionId(), // Temporary ID until saved
-        name: "New Session",
+        id: `temp-${Date.now()}`,
+        name: "New Event",
         category: "General",
         startTime: "6:00 PM",
         endTime: "9:00 PM",
-        gameType: "Regular",
+        gameType: "Special",
         description: "",
         status: "Upcoming",
         jackpot: "",
         eligibility: "18+",
-        availableDays: [day], // Pre-select the column day
+        availableDays: [], // Irrelevant for override
+        overrideDate: day.dateStr,
+        isOverride: true,
         vibe: ["Fun"],
-        pricing: {},
         specials: {},
         programSlug: "",
     };
 };
 
-const editSession = (session: any) => {
-    // Deep clone to avoid mutating the prop directly until "Done"
+const editSession = (session: any, dateStr: string) => {
+    editingTargetDate.value = dateStr;
+
+    // Deep clone
     const clone = JSON.parse(JSON.stringify(session));
     if (!clone.specials) clone.specials = {};
-    editingSession.value = clone;
+
+    if (session.isOverride) {
+        // We are editing an existing override
+        editingSession.value = clone;
+    } else {
+        // We are clicking a Recurring session on a specific date.
+        // Editing it should propose creating an Override.
+        clone.id = `temp-override-${Date.now()}`; // New ID for the override
+        clone.parentId = session.id; // Link to original
+        clone.overrideDate = dateStr;
+        clone.isOverride = true;
+        // Keep availableDays for reference or clear them? Clear them to avoid confusion.
+        clone.availableDays = [];
+        editingSession.value = clone;
+    }
 };
 
 const closeEditor = () => {
     editingSession.value = null;
+    editingTargetDate.value = null;
 };
 
 const toggleDay = (day: string) => {
     if (!editingSession.value) return;
     if (!editingSession.value.availableDays) editingSession.value.availableDays = [];
-
     const days = editingSession.value.availableDays;
     if (days.includes(day)) {
         editingSession.value.availableDays = days.filter((d: string) => d !== day);
@@ -314,21 +468,51 @@ const toggleDay = (day: string) => {
     }
 };
 
-const addVibe = () => {
-    if (!editingSession.value.vibe) editingSession.value.vibe = [];
-    editingSession.value.vibe.push("");
-};
-
 const saveSession = () => {
     if (!editingSession.value) return;
 
-    const index = props.modelValue.findIndex(s => s.id === editingSession.value.id);
-    const updatedList = [...props.modelValue];
+    let updatedList = [...props.modelValue];
+    const sessionToSave = { ...editingSession.value };
 
-    if (index >= 0) {
-        updatedList[index] = editingSession.value;
+    // If saving an override
+    if (sessionToSave.isOverride && sessionToSave.overrideDate) {
+        // 1. If it has a parent (it was a recurring session we are now customizing),
+        // we must exclude the date from the parent to avoid duplication.
+        if (sessionToSave.parentId) {
+            const parentIndex = updatedList.findIndex(s => s.id === sessionToSave.parentId);
+            if (parentIndex >= 0) {
+                const parent = updatedList[parentIndex];
+                if (!parent.excludedDates) parent.excludedDates = [];
+                if (!parent.excludedDates.includes(sessionToSave.overrideDate)) {
+                    parent.excludedDates.push(sessionToSave.overrideDate);
+                    updatedList[parentIndex] = parent; // Update parent
+                }
+            }
+            delete sessionToSave.parentId; // Clean up
+        }
+
+        // 2. Add/Update the override session
+        if (sessionToSave.id.startsWith('temp-')) {
+             sessionToSave.id = `evt-${Date.now()}-${Math.floor(Math.random()*1000)}`;
+             updatedList.push(sessionToSave);
+        } else {
+             const idx = updatedList.findIndex(s => s.id === sessionToSave.id);
+             if (idx >= 0) updatedList[idx] = sessionToSave;
+             else updatedList.push(sessionToSave);
+        }
+
     } else {
-        updatedList.push(editingSession.value);
+        // Saving a normal Recurring session (logic from before)
+        // If it was a temp ID, give it a real one
+        if (sessionToSave.id.startsWith('temp-') || sessionToSave.id.startsWith('session-') && !props.modelValue.find(s=>s.id === sessionToSave.id)) {
+             // It's new
+             // Ensure ID is unique if we generated it in `createSessionId` earlier
+             if (sessionToSave.id.startsWith('temp-')) sessionToSave.id = `session-${Date.now()}`;
+             updatedList.push(sessionToSave);
+        } else {
+             const idx = updatedList.findIndex(s => s.id === sessionToSave.id);
+             if (idx >= 0) updatedList[idx] = sessionToSave;
+        }
     }
 
     emit('update:modelValue', updatedList);
@@ -337,9 +521,55 @@ const saveSession = () => {
 
 const deleteSession = () => {
     if (!confirm('Are you sure you want to delete this session?')) return;
-    const updatedList = props.modelValue.filter(s => s.id !== editingSession.value.id);
-    emit('update:modelValue', updatedList);
+
+    // If deleting an override
+    if (editingSession.value.isOverride) {
+        const updatedList = props.modelValue.filter(s => s.id !== editingSession.value.id);
+        emit('update:modelValue', updatedList);
+    } else {
+        // Deleting a recurring session template
+        const updatedList = props.modelValue.filter(s => s.id !== editingSession.value.id);
+        emit('update:modelValue', updatedList);
+    }
+
     closeEditor();
+};
+
+// --- COPY DAY TO MONTH LOGIC ---
+
+const copyDayToMonth = (sourceDay: any) => {
+  if (!confirm(`Overwrite the entire month of ${currentMonthLabel.value} with the schedule from ${formatDate(sourceDay.dateStr)}? This will create individual entries for every day and cannot be easily undone.`)) return;
+
+  const sourceDateStr = sourceDay.dateStr;
+  const sourceSessions = getSessionsForDate(sourceDateStr);
+
+  // We need to mutate the modelValue
+  let updatedList = [...props.modelValue];
+
+  // Identify target dates (all days in current month except source)
+  const targetDates = calendarDays.value
+    .filter(d => d.isCurrentMonth && d.dateStr !== sourceDateStr)
+    .map(d => d.dateStr);
+
+  // 1. Clear existing OVERRIDES for target dates to ensure a clean slate
+  updatedList = updatedList.filter(s => !s.overrideDate || !targetDates.includes(s.overrideDate));
+
+  // 2. For every target date, create overrides based on source sessions
+  targetDates.forEach(targetDate => {
+      sourceSessions.forEach(session => {
+          const newSession = JSON.parse(JSON.stringify(session));
+          // Create unique ID
+          newSession.id = `evt-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          newSession.isOverride = true;
+          newSession.overrideDate = targetDate;
+          newSession.availableDays = []; // Clear recurrence rules
+          delete newSession.parentId; // Detach from parent logic to keep it simple
+
+          updatedList.push(newSession);
+      });
+  });
+
+  emit('update:modelValue', updatedList);
 };
 
 </script>

@@ -242,6 +242,41 @@
                 </div>
              </div>
         </div>
+
+        <!-- Paper Only Games -->
+        <div class="bg-slate-100 rounded-2xl p-6 border border-slate-200">
+             <h4 class="text-lg font-black text-primary-900 mb-6">Paper Only Options</h4>
+             <div class="grid md:grid-cols-2 gap-8">
+                 <!-- Regular Bingo -->
+                 <div>
+                     <div class="flex items-center justify-between mb-4">
+                         <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Regular Bingo</span>
+                         <button @click="addPaperOption('regular_bingo')" class="text-xs text-primary-600 font-bold hover:underline">+ Add Option</button>
+                     </div>
+                     <div class="space-y-3">
+                         <div v-for="(opt, idx) in modelValue.daytime?.paperOnlyGames?.regular_bingo ?? []" :key="`reg-${idx}`" class="flex gap-2 items-center">
+                             <input v-model="opt.cards" placeholder="e.g. 3 Cards" class="text-sm rounded-lg border-slate-200 w-full" />
+                             <input v-model="opt.price" placeholder="$0.25" class="text-sm rounded-lg border-slate-200 w-24 font-bold" />
+                             <button @click="removePaperOption('regular_bingo', Number(idx))" class="text-slate-400 hover:text-rose-500">&times;</button>
+                         </div>
+                     </div>
+                 </div>
+                 <!-- Special Games -->
+                 <div>
+                     <div class="flex items-center justify-between mb-4">
+                         <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Special Games</span>
+                         <button @click="addPaperOption('specials')" class="text-xs text-primary-600 font-bold hover:underline">+ Add Option</button>
+                     </div>
+                     <div class="space-y-3">
+                         <div v-for="(opt, idx) in modelValue.daytime?.paperOnlyGames?.specials ?? []" :key="`spec-${idx}`" class="flex gap-2 items-center">
+                             <input v-model="opt.cards" placeholder="e.g. 1 Card" class="text-sm rounded-lg border-slate-200 w-full" />
+                             <input v-model="opt.price" placeholder="$1" class="text-sm rounded-lg border-slate-200 w-24 font-bold" />
+                             <button @click="removePaperOption('specials', Number(idx))" class="text-slate-400 hover:text-rose-500">&times;</button>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+        </div>
       </div>
 
       <!-- Evening Tab -->
@@ -289,6 +324,30 @@
                                 <button @click="removeEveningMachine(Number(index))" class="text-xs text-rose-500 font-bold">Remove</button>
                             </div>
                         </div>
+                   </div>
+
+                   <!-- Specialty Games -->
+                   <div class="pt-6 border-t border-slate-200">
+                       <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-black text-primary-900">Specialty Games</h4>
+                            <button @click="addSpecialtyGame" class="text-xs bg-primary-100 text-primary-700 px-3 py-1 rounded-full font-bold">+ Add Game</button>
+                       </div>
+                       <div class="space-y-3">
+                            <div
+                                v-for="(game, index) in modelValue.evening?.specialtyGames ?? []"
+                                :key="`evening-game-${index}`"
+                                class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm"
+                            >
+                                <div class="grid grid-cols-3 gap-3 mb-2">
+                                    <input v-model="game.name" placeholder="Game Name" class="col-span-2 text-sm border-slate-200 rounded-lg font-bold" />
+                                    <input v-model="game.price" placeholder="Price" class="text-sm border-slate-200 rounded-lg font-bold text-primary-700 text-right" />
+                                </div>
+                                <input v-model="game.description" placeholder="Description / Note" class="w-full text-xs border-slate-100 bg-slate-50 rounded-lg text-slate-500 mb-2" />
+                                <div class="flex justify-end">
+                                    <button @click="removeSpecialtyGame(Number(index))" class="text-xs text-rose-500 font-bold">Remove</button>
+                                </div>
+                            </div>
+                       </div>
                    </div>
               </div>
           </div>
@@ -441,6 +500,16 @@ const removeDaytimeJackpot = (index: number) => {
     props.modelValue.daytime.jackpots.splice(index, 1);
 };
 
+const addPaperOption = (type: 'regular_bingo' | 'specials') => {
+    if (!props.modelValue.daytime) props.modelValue.daytime = {};
+    if (!props.modelValue.daytime.paperOnlyGames) props.modelValue.daytime.paperOnlyGames = { regular_bingo: [], specials: [] };
+    if (!props.modelValue.daytime.paperOnlyGames[type]) props.modelValue.daytime.paperOnlyGames[type] = [];
+    props.modelValue.daytime.paperOnlyGames[type].push({ cards: "", price: "" });
+};
+const removePaperOption = (type: 'regular_bingo' | 'specials', index: number) => {
+    props.modelValue.daytime.paperOnlyGames[type].splice(index, 1);
+};
+
 const addEveningMachine = () => {
      if (!props.modelValue.evening) props.modelValue.evening = { machines: [] };
      if (!props.modelValue.evening.machines) props.modelValue.evening.machines = [];
@@ -448,6 +517,15 @@ const addEveningMachine = () => {
 };
 const removeEveningMachine = (index: number) => {
     props.modelValue.evening.machines.splice(index, 1);
+};
+
+const addSpecialtyGame = () => {
+    if (!props.modelValue.evening) props.modelValue.evening = {};
+    if (!props.modelValue.evening.specialtyGames) props.modelValue.evening.specialtyGames = [];
+    props.modelValue.evening.specialtyGames.push({ name: "", price: "", description: "", category: "General" });
+};
+const removeSpecialtyGame = (index: number) => {
+    props.modelValue.evening.specialtyGames.splice(index, 1);
 };
 
 const addSundaySpecial = () => {
