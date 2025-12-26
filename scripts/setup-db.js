@@ -67,9 +67,19 @@ function isLikelyPlaceholder(url) {
 
 function dockerAvailable() {
   try {
+    // Ensure docker is installed
     execSync("docker --version", { stdio: "ignore" });
+    // Ensure current user can access the daemon (avoid permission-denied scenarios)
+    execSync("docker ps", { stdio: "ignore" });
     return true;
-  } catch {
+  } catch (err) {
+    // If docker is installed but the daemon socket is not accessible, provide a helpful message
+    const msg = String(err && err.message ? err.message : err);
+    if (msg.includes("permission denied") || msg.includes("connect: permission denied")) {
+      log("Docker is installed but the current user cannot access the Docker daemon socket.");
+      log("Fix: add your user to the docker group and re-login: `sudo usermod -aG docker $USER && newgrp docker` (then re-run install)");
+      return false;
+    }
     return false;
   }
 }
@@ -210,44 +220,102 @@ async function main() {
   }
 
   try {
-    log("Docker available — provisioning local PostgreSQL container...");
-    const port = await findFreePort(5432, 5540);
-    log("Using host port", port);
+    const POSTGRES_IMAGE = process.env.POSTGRES_IMAGE || DEFAULT_IMAGE;
+    const POSTGRES_CONTAINER = process.env.POSTGRES_CONTAINER || DEFAULT_CONTAINER;
+    const DB_PROVISION_TIMEOUT_MS = parseInt(process.env.DB_PROVISION_TIMEOUT_MS || String(120 * 1000), 10);
+    const DB_PROVISION_INTERVAL_MS = parseInt(process.env.DB_PROVISION_INTERVAL_MS || String(2000), 10);
 
-    if (!containerExists(DEFAULT_CONTAINER)) {
-      // Start a new container
+    log("Docker available — provisioning local PostgreSQL container...");
+
+    const chosenPort = await findFreePort(5432, 5540);
+    log("Found free host port", chosenPort);
+
+    let hostPort = chosenPort;
+
+    if (!containerExists(POSTGRES_CONTAINER)) {
+      // Start a new container, mapping chosenPort -> 5432 inside container
       runCmd(
-        `docker run -d --name ${DEFAULT_CONTAINER} -e POSTGRES_PASSWORD=${DEFAULT_PASSWORD} -e POSTGRES_USER=${DEFAULT_USER} -e POSTGRES_DB=${DEFAULT_DB} -p ${port}:5432 ${DEFAULT_IMAGE}`,
+        `docker run -d --name ${POSTGRES_CONTAINER} -e POSTGRES_PASSWORD=${DEFAULT_PASSWORD} -e POSTGRES_USER=${DEFAULT_USER} -e POSTGRES_DB=${DEFAULT_DB} -p ${chosenPort}:5432 ${POSTGRES_IMAGE}`,
       );
-    } else if (!containerRunning(DEFAULT_CONTAINER)) {
-      log(`Starting existing container ${DEFAULT_CONTAINER}`);
-      runCmd(`docker start ${DEFAULT_CONTAINER}`);
+      hostPort = chosenPort;
     } else {
-      log(`Using already running container ${DEFAULT_CONTAINER}`);
+      if (!containerRunning(POSTGRES_CONTAINER)) {
+        log(`Starting existing container ${POSTGRES_CONTAINER}`);
+        runCmd(`docker start ${POSTGRES_CONTAINER}`);
+      } else {
+        log(`Using already running container ${POSTGRES_CONTAINER}`);
+      }
+
+      // Try to discover host port mapping for the running container
+      try {
+        const portOut = execSync(`docker port ${POSTGRES_CONTAINER} 5432`, { encoding: "utf8" }).trim();
+        if (portOut) {
+          const m = portOut.match(/:(\d+)$/);
+          if (m) {
+            hostPort = parseInt(m[1], 10);
+            log(`Detected container host port mapping: ${hostPort}`);
+          } else {
+            log("Could not parse container port mapping, falling back to chosen host port", chosenPort);
+          }
+        } else {
+          log("No port mapping found for container, using chosen host port", chosenPort);
+        }
+      } catch (err) {
+        log("Could not inspect container port mapping:", err && err.message ? err.message : err);
+        log("Falling back to chosen host port", chosenPort);
+      }
     }
 
-    const databaseUrl = `postgresql://${DEFAULT_USER}:${DEFAULT_PASSWORD}@localhost:${port}/${DEFAULT_DB}?schema=public`;
+    const databaseUrl = `postgresql://${DEFAULT_USER}:${DEFAULT_PASSWORD}@localhost:${hostPort}/${DEFAULT_DB}?schema=public`;
 
     // wait for DB to accept connections and push schema
-    const timeoutMs = 60 * 1000;
-    const intervalMs = 2000;
+    const timeoutMs = DB_PROVISION_TIMEOUT_MS;
+    const intervalMs = DB_PROVISION_INTERVAL_MS;
     const start = Date.now();
     let ok = false;
     while (Date.now() - start < timeoutMs) {
       try {
+        // Prefer to probe readiness from inside the container using pg_isready
+        try {
+          execSync(`docker exec ${POSTGRES_CONTAINER} pg_isready -U ${DEFAULT_USER} -d ${DEFAULT_DB}`, { stdio: "ignore" });
+          log("pg_isready reports Postgres is accepting connections inside the container.");
+        } catch (probeErr) {
+          // Not ready yet or probe failed — fall through to log and wait
+          throw probeErr;
+        }
+
+        // If we get here, attempt schema push + seed
         pushSchemaAndSeed(databaseUrl);
         ok = true;
         break;
-      } catch {
-        log("Waiting for Postgres to be ready...");
+      } catch (err) {
+        // Not ready yet; try to show container logs for diagnostic hints
+        try {
+          const logs = execSync(`docker logs ${POSTGRES_CONTAINER} --tail 25`, { encoding: "utf8" });
+          if (logs.includes("database system is ready to accept connections")) {
+            log("Detected Postgres readiness message in container logs.");
+            // try push/seed once more
+            try {
+              pushSchemaAndSeed(databaseUrl);
+              ok = true;
+              break;
+            } catch (e) {
+              // continue waiting
+            }
+          }
+          log("Waiting for Postgres to be ready (container logs last 25 lines):");
+          log(logs);
+        } catch (logsErr) {
+          log("Waiting for Postgres to be ready (unable to fetch logs yet).");
+        }
 
-        // wait
         await new Promise((resolve) => setTimeout(resolve, intervalMs));
       }
     }
 
     if (!ok) {
-      log("Timed out waiting for Postgres to become ready");
+      log(`Timed out waiting for Postgres to become ready after ${timeoutMs}ms`);
+      log(`Tip: run \`docker logs ${POSTGRES_CONTAINER}\` and \`docker inspect ${POSTGRES_CONTAINER}\` to inspect the container.`);
       return;
     }
 

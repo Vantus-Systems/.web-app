@@ -64,11 +64,31 @@ Official website for Mary Esther Bingo, a premier entertainment venue in Florida
 
 - What happens during `postinstall`:
   - If a valid `DATABASE_URL` is already present, Prisma schema will be pushed and seeds applied.
-  - If no `DATABASE_URL` is found and Docker is available, the script will start a local Postgres container (`med-postgres`) and configure `DATABASE_URL` in `.env` for you and then push the Prisma schema and run the seed.
-  - The setup step is skipped in CI environments (when `CI=true`) or when `SKIP_DB_SETUP=true`.
+  - If no `DATABASE_URL` is found and Docker is available (and accessible by your user), the script will start a local Postgres container (default name `med-postgres`) and configure `DATABASE_URL` in `.env` for you, then push the Prisma schema and run the seed.
+  - The setup step is skipped in CI environments (`CI=true`) or when `SKIP_DB_SETUP=true`.
 
-- Manual commands (if you prefer to run only DB setup):
-  - `npm run setup:db` or `npm run db:setup`
+- Environment configuration / advanced options:
+  - `POSTGRES_IMAGE` - override the image used to provision Postgres (default: `postgres:15-alpine`).
+  - `POSTGRES_CONTAINER` - override the container name (default: `med-postgres`).
+  - `DB_PROVISION_TIMEOUT_MS` - how long the script waits for Postgres readiness (default: `120000` ms).
+  - `DB_PROVISION_INTERVAL_MS` - polling interval while waiting for readiness (default: `2000` ms).
+
+- Manual commands & verification:
+  - `npm run setup:db` or `npm run db:setup` to run the provisioning script by hand.
+  - `npm run check:db` to verify your app can connect to the DB (runs a simple Prisma query).
+
+- Troubleshooting:
+  - If you see `permission denied while trying to connect to the Docker daemon socket`, fix it by adding your user to the docker group and re-login:
+    ```bash
+    sudo usermod -aG docker $USER
+    # then log out & back in, or run:
+    newgrp docker
+    ```
+  - If provisioning times out, inspect the container with:
+    ```bash
+    docker logs med-postgres --tail 50
+    docker inspect med-postgres
+    ```
 
 - If you don't want automatic DB provisioning, set `SKIP_DB_SETUP=true` in your environment.
 
