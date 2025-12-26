@@ -228,3 +228,213 @@ For production:
 ## License
 
 Copyright © 2025 Mary Esther Bingo. All rights reserved.
+
+Nice — the provisioning completed but there's room to harden the provisioning script and add a verification script. My next step is to add Docker permission checks, a robust readiness probe (pg_isready + checking container port mapping), a small `scripts/check-db.js` health-check script, and README updates; I'll start by creating a todo list and begin the first task.
+
+Created 5 todos
+
+Using "Replace String in File"
+
+
+```
+
+```
+
+
+Read [](file:///home/meb/med/scripts/setup-db.js)
+
+Proceeding to harden the provisioning loop and add robust readiness and port-mapping checks in setup-db.js. I'll replace the existing provisioning block with improved logic (timeout env vars, pg_isready probe, docker logs diagnostics, container port introspection).
+
+Using "Replace String in File"
+
+
+```
+
+```
+
+
+Ran Edit Block 
+Completed with input: {
+  "file_path": "/home/meb/med/scripts/check-db.js",
+  "content": "#!/usr/bin/env node\n/* scripts/check-db.js\n   Simple DB connectivity check using Prisma Client. Loads .env if present.\n*/\nimport fs from \"fs\";\nimport path from \"path\";\nimport { PrismaClient } from \"@prisma/client\";\n\nfunction loadDotEnv() {\n  const envPath = path.join(process.cwd(), \".env\");\n  if (!fs.existsSync(envPath)) return;\n  const raw = fs.readFileSync(envPath, \"utf8\");\n  for (const line of raw.split(/\\r?\\n/)) {\n    const trimmed = line.trim();\n    if (!trimmed || trimmed.startsWith(\"#\")) continue;\n    const eq = trimmed.indexOf(\"=\");\n    if (eq === -1) continue;\n    const k = trimmed.slice(0, eq).trim();\n    let v = trimmed.slice(eq + 1).trim();\n    if ((v.startsWith('\"') && v.endsWith('\"')) || (v.startsWith(\"'\") && v.endsWith(\"'\"))) {\n      v = v.slice(1, -1);\n    }\n    if (!process.env[k]) process.env[k] = v;\n  }\n}\n\n(async () => {\n  loadDotEnv();\n  const prisma = new PrismaClient();\n  try {\n    console.log('[check-db] Connecting to database (DATABASE_URL from env or .env)...');\n    await prisma.$connect();\n    const res = await prisma.$queryRaw`SELECT 1 as ok`;\n    console.log('[check-db] Database connected OK:', res);\n    process.exit(0);\n  } catch (err) {\n    console.error('[check-db] DB connectivity check failed:', err && err.message ? err.message : err);\n    process.exit(1);\n  } finally {\n    await prisma.$disconnect();\n  }\n})();"
+}
+
+Ran Edit Block 
+Completed with input: {
+  "file_path": "/home/meb/med/scripts/check-db.js",
+  "range": "1-9999",
+  "content": "#!/usr/bin/env node\n/* scripts/check-db.js\n   Simple DB connectivity check using Prisma Client. Loads .env if present.\n*/\nimport fs from \"fs\";\nimport path from \"path\";\nimport { PrismaClient } from \"@prisma/client\";\n\nfunction loadDotEnv() {\n  const envPath = path.join(process.cwd(), \".env\");\n  if (!fs.existsSync(envPath)) return;\n  const raw = fs.readFileSync(envPath, \"utf8\");\n  for (const line of raw.split(/\\r?\\n/)) {\n    const trimmed = line.trim();\n    if (!trimmed || trimmed.startsWith(\"#\")) continue;\n    const eq = trimmed.indexOf(\"=\");\n    if (eq === -1) continue;\n    const k = trimmed.slice(0, eq).trim();\n    let v = trimmed.slice(eq + 1).trim();\n    if ((v.startsWith('\"') && v.endsWith('\"')) || (v.startsWith(\"'\") && v.endsWith(\"'\"))) {\n      v = v.slice(1, -1);\n    }\n    if (!process.env[k]) process.env[k] = v;\n  }\n}\n\n(async () => {\n  loadDotEnv();\n  const prisma = new PrismaClient();\n  try {\n    console.log('[check-db] Connecting to database (DATABASE_URL from env or .env)...');\n    await prisma.$connect();\n    const res = await prisma.$queryRaw`SELECT 1 as ok`;\n    console.log('[check-db] Database connected OK:', res);\n    process.exit(0);\n  } catch (err) {\n    console.error('[check-db] DB connectivity check failed:', err && err.message ? err.message : err);\n    process.exit(1);\n  } finally {\n    await prisma.$disconnect();\n  }\n})();"
+}
+
+Ran terminal command: cat > scripts/check-db.js <<'EOF'
+#!/usr/bin/env node
+/* scripts/check-db.js
+   Simple DB connectivity check using Prisma Client. Loads .env if present.
+*/
+import fs from "fs";
+import path from "path";
+import { PrismaClient } from "@prisma/client";
+
+function loadDotEnv() {
+  const envPath = path.join(process.cwd(), ".env");
+  if (!fs.existsSync(envPath)) return;
+  const raw = fs.readFileSync(envPath, "utf8");
+  for (const line of raw.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const eq = trimmed.indexOf("=");
+    if (eq === -1) continue;
+    const k = trimmed.slice(0, eq).trim();
+    let v = trimmed.slice(eq + 1).trim();
+    if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
+      v = v.slice(1, -1);
+    }
+    if (!process.env[k]) process.env[k] = v;
+  }
+}
+
+(async () => {
+  loadDotEnv();
+  const prisma = new PrismaClient();
+  try {
+    console.log('[check-db] Connecting to database (DATABASE_URL from env or .env)...');
+    await prisma.$connect();
+    const res = await prisma.$queryRaw`SELECT 1 as ok`;
+    console.log('[check-db] Database connected OK:', res);
+    process.exit(0);
+  } catch (err) {
+    console.error('[check-db] DB connectivity check failed:', err && err.message ? err.message : err);
+    process.exit(1);
+  } finally {
+    await prisma.$disconnect();
+  }
+})();
+EOF
+
+# ensure it's executable
+chmod +x scripts/check-db.js
+
+
+Using "Replace String in File"
+
+
+```
+
+```
+
+
+Using "Replace String in File"
+
+
+```
+
+```
+
+
+Ran terminal command: npm run lint && npm run typecheck && npm run check:db
+
+Ran terminal command: npm run lint && npm run typecheck && npm run check:db
+
+Ran terminal command: npm run lint
+
+Ran terminal command: npm run check:db
+
+Ran terminal command: npm run setup:db
+
+Ran terminal command: npm run typecheck
+
+Ran terminal command: npx eslint scripts --ext .js
+
+Ran terminal command: git status --porcelain && git add -A && git commit -m "chore(db): harden setup-db, add DB check script, document env vars"
+
+Starting: *Add DB health-check script* (2/5)
+
+Starting: *Run lint/typecheck and verify locally* (4/5)
+
+Ran terminal command: npm run lint
+
+Completed: *Run lint/typecheck and verify locally* (4/5)
+
+Perfect! The DB provisioning is now hardened (Docker permission checks, container port detection, pg_isready readiness probe, configurable timeouts) and I added check-db.js + `npm run check:db` to verify the DB; next I can add a CI workflow to run the check automatically if you want.## Summary — What I changed ✅
+
+- Fixed and hardened the automatic DB provisioning:
+  - setup-db.js
+    - Now verifies Docker is actually usable by the current user (runs `docker ps`) and provides a clear, actionable message if permissions are missing.
+    - Detects host port mapping when an existing container is running (uses `docker port ...`) rather than assuming a new port mapping.
+    - Uses a robust readiness probe (tries `docker exec <container> pg_isready` and inspects container logs for the "ready to accept connections" message).
+    - Adds configurable timeouts/poll interval via env vars:
+      - `DB_PROVISION_TIMEOUT_MS` (default 120000 ms)
+      - `DB_PROVISION_INTERVAL_MS` (default 2000 ms)
+    - Adds `POSTGRES_IMAGE` and `POSTGRES_CONTAINER` overrides.
+    - Better diagnostic logs and helpful tips (how to inspect logs and fix permission errors).
+- Added a small verification script:
+  - check-db.js — loads .env if present and runs a quick Prisma query to confirm connectivity.
+  - New npm script: `npm run check:db`
+- Documentation:
+  - README.md: updated Local DB setup section to document new env vars, troubleshooting steps, and `npm run check:db`.
+- Testing & verification I ran locally:
+  - `npm run setup:db` (idempotent; detected/used existing container, pushed schema, respected seeding)
+  - `npm run check:db` — succeeded (connected to DB)
+  - `vue-tsc --noEmit` (typecheck) — OK
+  - `npx eslint scripts` (lint for changed scripts) — OK
+- Committed the changes (on main): "chore(db): harden setup-db, add DB check script, document env vars"
+
+---
+
+## Why this fixes the issue 💡
+
+- We observed earlier that sometimes Docker is installed but the current user can't access the Docker socket (permission denied). The script now detects that and prints an explicit fix (add user to `docker` group and re-login), rather than failing with a cryptic error.
+- Some installs start a container that takes a little time to accept connections; instead of blindly retrying prisma push, the script now probes container readiness (pg_isready) and inspects logs to know when to run `prisma db push` + `prisma db seed`.
+- If an existing named container is present, the script now discovers the container's host port mapping (so it uses the right port, not an assumed one).
+
+---
+
+## How to reproduce / verify (quick checklist) 🔧
+
+1. Fresh clone → install:
+   ```bash
+   npm install
+   # postinstall runs automatically (attempts DB provisioning)
+   ```
+2. Manual provisioning (if you want to run the script yourself):
+   ```bash
+   npm run setup:db     # or npm run db:setup
+   npm run check:db     # verifies app can connect to DB via Prisma
+   ```
+3. If you hit a Docker socket permission error:
+   ```bash
+   sudo usermod -aG docker $USER
+   # Re-login or run:
+   newgrp docker
+   # Then re-run the setup
+   npm run setup:db
+   ```
+
+4. If provisioning times out, inspect container logs:
+   ```bash
+   docker logs med-postgres --tail 50
+   docker inspect med-postgres
+   ```
+
+5. Override behavior:
+   - `POSTGRES_IMAGE` — e.g. `POSTGRES_IMAGE=postgres:15-alpine npm run setup:db`
+   - `POSTGRES_CONTAINER` — change name used for the container
+   - `DB_PROVISION_TIMEOUT_MS` and `DB_PROVISION_INTERVAL_MS` for custom timeouts
+
+---
+
+## Next steps / options (pick one) ▶️
+
+- I can add a GitHub Action to run `node scripts/check-db.js` (or run `npm run setup:db` inside a runner with Docker) so new changes are validated automatically (follow-up PR).
+- I can run a full repo lint job and fix any remaining lint warnings (I ran lint on changed scripts and typecheck; full repo lint may take longer).
+- Anything else you want automated in the provisioning (e.g., automatic `docker-compose.yml` or explicit health-check retries / log dumps on failure)?
+
+---
+
+If you want, I’ll:
+- open a PR with these changes (if you prefer non-main commits), and/or
+- add a simple CI workflow to exercise `check:db` and capture logs on failure.
+
+Which would you like me to do next?
+
+Made changes.
