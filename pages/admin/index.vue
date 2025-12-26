@@ -545,9 +545,10 @@
             </div>
           </div>
         </div>
-      </main>
     </div>
+      </main>
   </div>
+</div>
 </template>
 
 <script setup lang="ts">
