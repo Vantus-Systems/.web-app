@@ -37,6 +37,8 @@ Official website for Mary Esther Bingo, a premier entertainment venue in Florida
    ```
    Visit `http://localhost:3000`.
 
+   Tip: `npm run dev` runs a full dev server with API routes and is the recommended workflow while you iterate on server-side features.
+
 3. **Linting & Type Checking:**
    ```bash
    npm run lint
@@ -50,6 +52,10 @@ Official website for Mary Esther Bingo, a premier entertainment venue in Florida
    # or run the built server directly
    node .output/server/index.mjs
    ```
+
+   Important notes about previewing builds locally:
+   - `npm run preview` and `node .output/server/index.mjs` will run the server runtime and make API routes available (unlike `serve -s .output/public` which only serves static files and will not expose server APIs).
+   - In production builds the server may set the session cookie `auth_token` with the `Secure` attribute (meaning it will only be sent over HTTPS). For local development over plain HTTP either use `npm run dev` or use the provided convenience script `npm run start:local` which starts the built server with `NODE_ENV=development` and loads `.env` so cookies are set without `Secure` and will work on `http://localhost:3000`.
 
 ### Local database setup (new)
 

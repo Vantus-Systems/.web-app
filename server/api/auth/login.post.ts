@@ -34,7 +34,9 @@ export default defineEventHandler(async (event) => {
   // Set cookies
   setCookie(event, "auth_token", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    // Use bracket notation to avoid bundler inlining NODE_ENV at build time so
+    // this check remains runtime-configurable.
+    secure: process.env["NODE_ENV"] === "production",
     sameSite: "lax",
     expires: expiresAt,
   });
@@ -43,7 +45,7 @@ export default defineEventHandler(async (event) => {
   const csrfToken = randomBytes(16).toString("hex");
   setCookie(event, "csrf_token", csrfToken, {
     httpOnly: false, // JS needs to read this
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env["NODE_ENV"] === "production",
     sameSite: "lax",
     expires: expiresAt,
   });

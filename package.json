@@ -9,6 +9,7 @@
     "preview": "nuxt preview",
     "start": "serve -s .output/public",
     "start:server": "node .output/server/index.mjs",
+    "start:local": "NODE_ENV=development node -r dotenv/config .output/server/index.mjs",
     "postinstall": "node ./scripts/setup-db.js || true && prisma generate && nuxt prepare",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx",
     "lint:fix": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx --fix",
