@@ -54,7 +54,20 @@ export const useBusiness = () => {
 
   const fetchJackpot = async () => {
     const { data } = await useFetch("/api/jackpot");
-    if (data.value) jackpot.value = data.value;
+    // Debug: log what the API returned so we can diagnose client-side updates
+    try {
+      // eslint-disable-next-line no-console
+      console.debug("[useBusiness] fetchJackpot ->", data.value);
+    } catch (e) {}
+    if (data.value) {
+      // Normalize number/shape to a consistent object { value, lastUpdated }
+      const payload = data.value;
+      if (typeof payload === "number" || typeof payload === "string") {
+        jackpot.value = { value: Number(payload) } as any;
+      } else {
+        jackpot.value = payload as any;
+      }
+    }
   };
 
   const fetchSpecials = async () => {
