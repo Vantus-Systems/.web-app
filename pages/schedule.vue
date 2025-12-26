@@ -17,20 +17,46 @@ const sessions = computed(() =>
   Array.isArray(scheduleRef.value) ? scheduleRef.value : [],
 );
 
-const days = [
-  { id: "today", label: "Today", date: "Dec 25", dayOfWeek: "Wed" },
-  { id: "tomorrow", label: "Tomorrow", date: "Dec 26", dayOfWeek: "Thu" },
-  { id: "friday", label: "Friday", date: "Dec 27", dayOfWeek: "Fri" },
-  { id: "saturday", label: "Saturday", date: "Dec 28", dayOfWeek: "Sat" },
-  { id: "sunday", label: "Sunday", date: "Dec 29", dayOfWeek: "Sun" },
-];
+type Day = {
+  id: string;
+  label: string;
+  date: string;
+  dayOfWeek: string;
+};
+
+const days = computed<Day[]>(() => {
+  const now = new Date();
+  const dateFmt = new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "2-digit",
+  });
+  const weekdayShort = new Intl.DateTimeFormat(undefined, { weekday: "short" });
+  const weekdayLong = new Intl.DateTimeFormat(undefined, { weekday: "long" });
+
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(now);
+    d.setDate(now.getDate() + i);
+
+    const id = i === 0 ? "today" : d.toISOString().slice(0, 10);
+    const label =
+      i === 0 ? "Today" : i === 1 ? "Tomorrow" : weekdayLong.format(d);
+    const dayOfWeek = weekdayShort.format(d);
+
+    return {
+      id,
+      label,
+      date: dateFmt.format(d),
+      dayOfWeek,
+    };
+  });
+});
 
 const activeDay = ref("today");
 const activeFilter = ref("All");
 const filters = ["All", "Morning", "Afternoon", "Evening"];
 
 const filteredSessions = computed(() => {
-  const currentDay = days.find((d) => d.id === activeDay.value);
+  const currentDay = days.value.find((d) => d.id === activeDay.value);
   const dayOfWeek = currentDay?.dayOfWeek || "Mon";
 
   let filtered = sessions.value.filter((s) =>
@@ -45,7 +71,7 @@ const filteredSessions = computed(() => {
 });
 
 const activeDayOfWeek = computed(() => {
-  return days.find((d) => d.id === activeDay.value)?.dayOfWeek || "Mon";
+  return days.value.find((d) => d.id === activeDay.value)?.dayOfWeek || "Mon";
 });
 
 const selectDay = (dayId: string) => {

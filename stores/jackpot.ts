@@ -1,25 +1,33 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { computed } from "vue";
+import { useBusiness } from "~/composables/useBusiness";
 
 export const useJackpotStore = defineStore("jackpot", () => {
-  const currentJackpot = ref(2500);
+  // Use composable for data to ensure shared state / SSR hydration
+  const { jackpot, fetchJackpot: fetch } = useBusiness();
+
+  // We can expose a computed property for the amount or just use the composable directly
+  // The existing store exposes `currentJackpot` as a ref number.
+  // The new API returns { amount: number, lastUpdated: string } based on `admin/index.vue` handling
+  // Let's adapt.
+
+  const currentJackpot = computed(() => {
+    // Handle various shapes if migration isn't perfect or if API returns object
+    const val =
+      (jackpot.value as any)?.amount ?? (jackpot.value as any)?.value ?? 0;
+    const n = typeof val === "string" ? Number.parseFloat(val) : val;
+    return Number.isFinite(n) ? n : 0;
+  });
 
   async function fetchJackpot() {
-    try {
-      const data = await $fetch("/api/jackpot");
-      if (data && typeof data.value === "number") {
-        currentJackpot.value = data.value;
-      }
-    } catch (e) {
-      console.error("Failed to fetch jackpot:", e);
-      // Fallback is already set
-    }
+    await fetch();
   }
 
-  // Fetch on init
+  // Fetch on init if not already loaded (though composables handle state)
+  // `useBusiness` state is global, so this store is just a wrapper now?
+  // Ideally, we refactor the app to use `useBusiness().jackpot` directly, but to avoid breaking changes:
   if (import.meta.client) {
     fetchJackpot();
-    // Refresh occasionally (e.g., every 5 minutes), not every second
     setInterval(fetchJackpot, 5 * 60 * 1000);
   }
 

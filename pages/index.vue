@@ -185,7 +185,7 @@ if (BUSINESS_INFO.value.name) {
     script: [
       {
         type: "application/ld+json",
-        innerHTML: JSON.stringify({
+        children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "LocalBusiness",
           name: BUSINESS_INFO.value.name,

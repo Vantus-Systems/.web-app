@@ -31,10 +31,7 @@ export interface BusinessInfo {
 }
 
 export const useBusiness = () => {
-  const business = useState<BusinessInfo>(
-    "business",
-    () => ({}) as BusinessInfo,
-  );
+  const business = useState<BusinessInfo>("business", () => ({}));
   const pricing = useState("pricing", () => ({}));
   const schedule = useState("schedule", () => ({}));
   const jackpot = useState("jackpot", () => ({}));
