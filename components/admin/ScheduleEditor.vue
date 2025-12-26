@@ -266,12 +266,15 @@ const addNewSession = (day: string) => {
         availableDays: [day], // Pre-select the column day
         vibe: ["Fun"],
         pricing: {},
+        specials: {},
     };
 };
 
 const editSession = (session: any) => {
     // Deep clone to avoid mutating the prop directly until "Done"
-    editingSession.value = JSON.parse(JSON.stringify(session));
+    const clone = JSON.parse(JSON.stringify(session));
+    if (!clone.specials) clone.specials = {};
+    editingSession.value = clone;
 };
 
 const closeEditor = () => {
@@ -280,11 +283,13 @@ const closeEditor = () => {
 
 const toggleDay = (day: string) => {
     if (!editingSession.value) return;
-    const days = editingSession.value.availableDays || [];
+    if (!editingSession.value.availableDays) editingSession.value.availableDays = [];
+
+    const days = editingSession.value.availableDays;
     if (days.includes(day)) {
         editingSession.value.availableDays = days.filter((d: string) => d !== day);
     } else {
-        editingSession.value.availableDays.push(day);
+        days.push(day);
     }
 };
 

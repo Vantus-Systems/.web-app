@@ -539,127 +539,36 @@
           </div>
 
           <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Monday -->
             <div
-              class="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-300 rounded-2xl p-8"
+              v-for="day in daysOrder"
+              :key="day"
+              :class="[
+                'border-2 rounded-2xl p-8',
+                dayStyles[day]?.border || 'border-slate-200',
+                dayStyles[day]?.bg || 'bg-slate-50'
+              ]"
             >
-              <h3 class="text-2xl font-bold text-primary-900 mb-4">Monday</h3>
-              <div class="space-y-3">
-                <div class="bg-white rounded p-3 border-l-4 border-red-500">
-                  <p class="font-bold text-primary-900">
-                    Good Neighbor Session
-                  </p>
-                  <p class="text-sm text-slate-600">5× Pull Tabs Consolation</p>
-                </div>
-                <div class="bg-white rounded p-3 border-l-4 border-red-500">
-                  <p class="font-bold text-primary-900">Neighbor Send-Out</p>
-                  <p class="text-sm text-slate-600">$250 Jackpot Winners</p>
-                </div>
-              </div>
-            </div>
+              <h3 class="text-2xl font-bold text-primary-900 mb-4">{{ day }}</h3>
 
-            <!-- Tuesday -->
-            <div
-              class="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-300 rounded-2xl p-8"
-            >
-              <h3 class="text-2xl font-bold text-primary-900 mb-4">Tuesday</h3>
               <div class="space-y-3">
-                <div class="bg-white rounded p-3 border-l-4 border-blue-500">
-                  <p class="font-bold text-primary-900">Free 9-On Games</p>
-                  <p class="text-sm text-slate-600">3 PM, 6 PM, Post-Session</p>
-                </div>
-                <div class="bg-white rounded p-3 border-l-4 border-blue-500">
-                  <p class="font-bold text-primary-900">Bonus Machine</p>
-                  <p class="text-sm text-slate-600">
-                    1 free machine with session buy-in
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Wednesday -->
-            <div
-              class="bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-2xl p-8"
-            >
-              <h3 class="text-2xl font-bold text-primary-900 mb-4">
-                Wednesday
-              </h3>
-              <div class="space-y-3">
-                <div class="bg-white rounded p-3 border-l-4 border-emerald-500">
-                  <p class="font-bold text-primary-900">Free Machine</p>
-                  <p class="text-sm text-slate-600">With session buy-in</p>
-                </div>
-                <div class="bg-white rounded p-3 border-l-4 border-emerald-500">
-                  <p class="font-bold text-primary-900">
-                    Weekly Free Bingo Promo
-                  </p>
-                  <p class="text-sm text-slate-600">$100 single-winner prize</p>
-                  <p class="text-xs text-emerald-700 mt-1">
-                    + 7 days free session play
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Thursday -->
-            <div
-              class="bg-gradient-to-br from-violet-50 to-purple-50 border-2 border-violet-300 rounded-2xl p-8"
-            >
-              <h3 class="text-2xl font-bold text-primary-900 mb-4">Thursday</h3>
-              <div class="space-y-3">
-                <div class="bg-white rounded p-3 border-l-4 border-violet-500">
-                  <p class="font-bold text-primary-900">
-                    Good Neighbor Session
-                  </p>
-                  <p class="text-sm text-slate-600">5× Pull Tabs Consolation</p>
-                </div>
-                <div class="bg-white rounded p-3 border-l-4 border-violet-500">
-                  <p class="font-bold text-primary-900">Neighbor Send-Out</p>
-                  <p class="text-sm text-slate-600">$250 Jackpot Winners</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Friday -->
-            <div
-              class="bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-2xl p-8"
-            >
-              <h3 class="text-2xl font-bold text-primary-900 mb-4">Friday</h3>
-              <div class="space-y-3">
-                <div class="bg-white rounded p-3 border-l-4 border-amber-500">
-                  <p class="font-bold text-primary-900">
-                    Free Treasure Hunt Cards
-                  </p>
-                  <p class="text-sm text-slate-600">6-for-$5 value FREE</p>
-                </div>
-                <div class="bg-white rounded p-3 border-l-4 border-amber-500">
-                  <p class="font-bold text-primary-900">
-                    Treasure Hunt Jackpot
-                  </p>
-                  <p class="text-sm text-slate-600">
-                    $250 single winner (both halves)
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Saturday -->
-            <div
-              class="bg-gradient-to-br from-pink-50 to-rose-50 border-2 border-pink-300 rounded-2xl p-8"
-            >
-              <h3 class="text-2xl font-bold text-primary-900 mb-4">Saturday</h3>
-              <div class="space-y-3">
-                <div class="bg-white rounded p-3 border-l-4 border-pink-500">
-                  <p class="font-bold text-primary-900">Alternating Specials</p>
-                  <p class="text-sm text-slate-600">
-                    AYCP Paper or Premium Bundles
-                  </p>
-                </div>
-                <div class="bg-white rounded p-3 border-l-4 border-pink-500">
-                  <p class="text-xs text-pink-700 italic">
-                    Check with hall for current promotion
-                  </p>
-                </div>
+                <template v-if="getSpecialsForDay(day).length > 0">
+                  <div
+                    v-for="(special, idx) in getSpecialsForDay(day)"
+                    :key="idx"
+                    class="bg-white rounded p-3 border-l-4 shadow-sm"
+                    :class="dayStyles[day]?.accent || 'border-slate-400'"
+                  >
+                    <p class="font-bold text-primary-900">
+                      {{ special.title }}
+                    </p>
+                    <p class="text-sm text-slate-600">{{ special.detail }}</p>
+                  </div>
+                </template>
+                <template v-else>
+                  <div class="bg-white/50 rounded p-4 text-center border border-dashed border-slate-300">
+                     <p class="text-sm text-slate-400 italic">No specials listed</p>
+                  </div>
+                </template>
               </div>
             </div>
           </div>
@@ -796,8 +705,14 @@
 
 <script setup lang="ts">
 import { useJackpotStore } from "~/stores/jackpot";
+import { useBusiness } from "~/composables/useBusiness";
+import { computed } from "vue";
 
 const jackpotStore = useJackpotStore();
+const { fetchSchedule, schedule } = useBusiness();
+
+// Fetch schedule on load
+await fetchSchedule();
 
 useSeoMeta({
   title: "Pricing & Sessions | Mary Esther Bingo",
@@ -812,6 +727,51 @@ const formatCurrency = (value: number) => {
     minimumFractionDigits: 0,
   }).format(value);
 };
+
+// --- Dynamic Specials Logic ---
+
+const daysOrder = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+const dayStyles: Record<string, any> = {
+    Mon: { bg: 'bg-gradient-to-br from-red-50 to-orange-50', border: 'border-red-300', accent: 'border-red-500' },
+    Tue: { bg: 'bg-gradient-to-br from-blue-50 to-cyan-50', border: 'border-blue-300', accent: 'border-blue-500' },
+    Wed: { bg: 'bg-gradient-to-br from-emerald-50 to-teal-50', border: 'border-emerald-300', accent: 'border-emerald-500' },
+    Thu: { bg: 'bg-gradient-to-br from-violet-50 to-purple-50', border: 'border-violet-300', accent: 'border-violet-500' },
+    Fri: { bg: 'bg-gradient-to-br from-amber-50 to-yellow-50', border: 'border-amber-300', accent: 'border-amber-500' },
+    Sat: { bg: 'bg-gradient-to-br from-pink-50 to-rose-50', border: 'border-pink-300', accent: 'border-pink-500' },
+    Sun: { bg: 'bg-gradient-to-br from-gold-50 to-orange-50', border: 'border-gold-300', accent: 'border-gold-500' }
+};
+
+const getSpecialsForDay = (day: string) => {
+    if (!schedule.value || !Array.isArray(schedule.value)) return [];
+
+    const specials: { title: string; detail: string }[] = [];
+
+    schedule.value.forEach((session: any) => {
+        // Check if session is active on this day
+        if (session.availableDays && session.availableDays.includes(day)) {
+            // Check if it has a specific special for this day
+            if (session.specials && session.specials[day]) {
+                specials.push({
+                    title: session.name, // Use session name as title (e.g. "Good Neighbor Session")
+                    detail: session.specials[day]
+                });
+            }
+            // Fallback: If it's a "Special" category session but has no specific daily override, use description
+            // BUT only if it's not a generic "Daytime" session which clutters the view.
+            else if (session.category === 'Special' || session.category === 'Promotion') {
+                 specials.push({
+                    title: session.name,
+                    detail: session.description
+                });
+            }
+        }
+    });
+
+    // Sort logic could go here if needed, e.g. prioritizing named specials
+    return specials;
+};
+
 </script>
 
 <style scoped>

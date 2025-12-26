@@ -648,6 +648,7 @@ const normalizeSchedule = (raw: any) => {
     availableDays: ensureArray(session.availableDays),
     vibe: ensureArray(session.vibe),
     pricing: ensureObject(session.pricing),
+    specials: ensureObject(session.specials),
   }));
   return normalizedArray;
 };
