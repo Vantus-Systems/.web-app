@@ -9,7 +9,7 @@
     "preview": "nuxt preview",
     "start": "serve -s .output/public",
     "start:server": "node .output/server/index.mjs",
-    "postinstall": "prisma generate && nuxt prepare",
+    "postinstall": "node ./scripts/setup-db.js || true && prisma generate && nuxt prepare",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx",
     "lint:fix": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx --fix",
     "typecheck": "vue-tsc --noEmit",
@@ -17,10 +17,12 @@
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
-    "prisma:seed": "prisma db seed"
+    "prisma:seed": "prisma db seed",
+    "setup:db": "node ./scripts/setup-db.js",
+    "db:setup": "node ./scripts/setup-db.js"
   },
   "prisma": {
-    "seed": "node --loader ts-node/esm prisma/seed.ts"
+    "seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@nuxt/image": "^2.0.0",

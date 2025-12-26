@@ -51,6 +51,27 @@ Official website for Mary Esther Bingo, a premier entertainment venue in Florida
    node .output/server/index.mjs
    ```
 
+### Local database setup (new)
+
+- After cloning, a simple setup flow is:
+
+  ```bash
+  npm install
+  npm run postinstall   # runs DB setup (if necessary), generates Prisma client, prepares Nuxt
+  npm run generate
+  npm run start
+  ```
+
+- What happens during `postinstall`:
+  - If a valid `DATABASE_URL` is already present, Prisma schema will be pushed and seeds applied.
+  - If no `DATABASE_URL` is found and Docker is available, the script will start a local Postgres container (`med-postgres`) and configure `DATABASE_URL` in `.env` for you and then push the Prisma schema and run the seed.
+  - The setup step is skipped in CI environments (when `CI=true`) or when `SKIP_DB_SETUP=true`.
+
+- Manual commands (if you prefer to run only DB setup):
+  - `npm run setup:db` or `npm run db:setup`
+
+- If you don't want automatic DB provisioning, set `SKIP_DB_SETUP=true` in your environment.
+
 ## Project Structure
 
 - `assets/`: Global styles and images.
