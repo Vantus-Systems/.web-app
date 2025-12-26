@@ -16,7 +16,7 @@ function ensureBuild() {
     return;
   }
 
-  log("Built server entry not found. Running \"npx nuxt build\"...");
+  log('Built server entry not found. Running "npx nuxt build"...');
   execSync("npx nuxt build", { stdio: "inherit", shell: true });
 
   if (!fs.existsSync(SERVER_ENTRY)) {
@@ -41,7 +41,7 @@ function startServer() {
   });
 }
 
-(async () => {
+(() => {
   ensureBuild();
   startServer();
 })();

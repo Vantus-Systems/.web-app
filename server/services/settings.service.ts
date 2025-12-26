@@ -10,7 +10,7 @@ async function readDataFile<T>(key: string): Promise<T | null> {
     const p = path.join(DATA_DIR, `${key}.json`);
     const raw = await fs.readFile(p, "utf8");
     return JSON.parse(raw) as T;
-  } catch (e) {
+  } catch {
     return null;
   }
 }

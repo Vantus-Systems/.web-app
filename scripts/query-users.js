@@ -14,7 +14,10 @@ function loadDotEnv() {
     if (eq === -1) continue;
     const k = trimmed.slice(0, eq).trim();
     let v = trimmed.slice(eq + 1).trim();
-    if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
+    if (
+      (v.startsWith('"') && v.endsWith('"')) ||
+      (v.startsWith("'") && v.endsWith("'"))
+    ) {
       v = v.slice(1, -1);
     }
     if (!process.env[k]) process.env[k] = v;
@@ -25,7 +28,9 @@ function loadDotEnv() {
   loadDotEnv();
   const prisma = new PrismaClient();
   try {
-    const users = await prisma.user.findMany({ select: { id: true, username: true, role: true, created_at: true } });
+    const users = await prisma.user.findMany({
+      select: { id: true, username: true, role: true, created_at: true },
+    });
     console.log(`Found ${users.length} users:`);
     for (const u of users) {
       console.log(`  ${u.username} (${u.role}) - created: ${u.created_at}`);
