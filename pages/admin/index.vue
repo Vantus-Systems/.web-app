@@ -52,10 +52,7 @@
               <span class="text-white text-xs font-bold"
                 >System Administrator</span
               >
-              <span
-                class="text-slate-400 text-[10px] uppercase tracking-tighter"
-                >Fortune-10000 Node</span
-              >
+              
             </div>
             <button
               class="bg-primary-800 hover:bg-red-900/40 text-slate-300 hover:text-white px-4 py-2 rounded-lg text-xs font-bold border border-primary-700 transition-colors"
