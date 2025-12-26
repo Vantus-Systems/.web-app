@@ -59,6 +59,19 @@ export const useBusiness = () => {
       // eslint-disable-next-line no-console
       console.log("[useBusiness] fetchJackpot ->", data.value);
     } catch (e) {}
+
+    // If useFetch returns no `data.value` for some reason, try a low-level fetch to see what's coming back
+    if (!data.value) {
+      try {
+        // eslint-disable-next-line no-console
+        const manual = await (globalThis.$fetch ? globalThis.$fetch('/api/jackpot') : fetch('/api/jackpot').then(r => r.json()));
+        // eslint-disable-next-line no-console
+        console.log('[useBusiness] manual fallback ->', manual);
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error('[useBusiness] manual fallback error ->', err);
+      }
+    }
     if (data.value) {
       // Normalize number/shape to a consistent object { value, lastUpdated }
       const payload = data.value;
