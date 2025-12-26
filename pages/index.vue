@@ -69,7 +69,7 @@
       >
         <span
           class="text-gold font-bold uppercase tracking-widest text-lg md:text-xl"
-          >Shamrock Progressive Jackpot</span
+          >{{ jackpotStore.activeLabel }}</span
         >
         <span
           v-motion-pop
@@ -79,7 +79,7 @@
         </span>
         <span
           class="text-xs text-primary-300 mt-2 md:mt-0 uppercase tracking-wider"
-          >* Current Posted Jackpot</span
+          >* Current Progressive Amount</span
         >
       </div>
     </div>
