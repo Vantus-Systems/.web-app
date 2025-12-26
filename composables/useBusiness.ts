@@ -57,7 +57,7 @@ export const useBusiness = () => {
     // Debug: log what the API returned so we can diagnose client-side updates
     try {
       // eslint-disable-next-line no-console
-      console.debug("[useBusiness] fetchJackpot ->", data.value);
+      console.log("[useBusiness] fetchJackpot ->", data.value);
     } catch (e) {}
     if (data.value) {
       // Normalize number/shape to a consistent object { value, lastUpdated }
