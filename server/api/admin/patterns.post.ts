@@ -1,5 +1,5 @@
-import prisma from "~/server/db/client";
 import { z } from "zod";
+import prisma from "~/server/db/client";
 import { auditService } from "~/server/services/audit.service";
 
 const frameSchema = z.array(z.number().int().min(0).max(1)).length(25);
@@ -48,7 +48,9 @@ export default defineEventHandler(async (event) => {
     actorUserId: event.context.user.id,
     action: before ? "UPDATE_PATTERN" : "CREATE_PATTERN",
     entity: `bingoPattern:${data.slug}`,
-    before: before ? { ...before, definition: JSON.parse(before.definition) } : null,
+    before: before
+      ? { ...before, definition: JSON.parse(before.definition) }
+      : null,
     after: data,
   });
 

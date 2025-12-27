@@ -275,8 +275,13 @@ const addToCalendar = () => {
             </div>
 
             <!-- Program Table or Legacy Game Stack -->
-            <div v-if="program" class="md:col-span-2 bg-slate-50 rounded-2xl p-4 border border-slate-100">
-               <div class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">
+            <div
+              v-if="program"
+              class="md:col-span-2 bg-slate-50 rounded-2xl p-4 border border-slate-100"
+            >
+              <div
+                class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4"
+              >
                 Full Program
               </div>
               <ProgramTable :program="program" />

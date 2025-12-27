@@ -168,20 +168,38 @@
                         class="block w-full bg-slate-50 border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-gold focus:border-transparent p-4 transition-all"
                       />
                     </div>
-                     <!-- W-2G Issuer Info -->
-                     <div class="sm:col-span-6 pt-8 border-t border-slate-200">
-                         <h4 class="text-sm font-bold text-primary-900 uppercase tracking-widest mb-4">W-2G Compliance Info</h4>
-                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                             <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Payer Name (Legal)</label>
-                                <input v-model="businessData.w2gPayerName" type="text" class="block w-full bg-slate-50 border-slate-200 rounded-xl px-4 py-3" />
-                             </div>
-                             <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Payer EIN</label>
-                                <input v-model="businessData.w2gEin" type="text" class="block w-full bg-slate-50 border-slate-200 rounded-xl px-4 py-3" />
-                             </div>
-                         </div>
-                     </div>
+                    <!-- W-2G Issuer Info -->
+                    <div class="sm:col-span-6 pt-8 border-t border-slate-200">
+                      <h4
+                        class="text-sm font-bold text-primary-900 uppercase tracking-widest mb-4"
+                      >
+                        W-2G Compliance Info
+                      </h4>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <label
+                            class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"
+                            >Payer Name (Legal)</label
+                          >
+                          <input
+                            v-model="businessData.w2gPayerName"
+                            type="text"
+                            class="block w-full bg-slate-50 border-slate-200 rounded-xl px-4 py-3"
+                          />
+                        </div>
+                        <div>
+                          <label
+                            class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"
+                            >Payer EIN</label
+                          >
+                          <input
+                            v-model="businessData.w2gEin"
+                            type="text"
+                            class="block w-full bg-slate-50 border-slate-200 rounded-xl px-4 py-3"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   <div class="flex justify-end pt-4">
                     <BaseButton
@@ -198,198 +216,292 @@
 
             <!-- Progressives Tab (Refactored) -->
             <div v-if="currentTab === 'progressives'">
-              <ProgressiveEditor v-model="jackpotData" :is-saving="isSavingJackpot" @save="saveJackpot" />
+              <ProgressiveEditor
+                v-model="jackpotData"
+                :is-saving="isSavingJackpot"
+                @save="saveJackpot"
+              />
 
               <div class="mt-12">
-                  <div class="flex items-center gap-4 mb-6">
-                      <div class="h-px bg-slate-200 flex-grow"></div>
-                      <span class="text-sm font-bold text-slate-400 uppercase tracking-widest">Compliance Tools</span>
-                      <div class="h-px bg-slate-200 flex-grow"></div>
-                  </div>
-                  <W2GGenerator />
+                <div class="flex items-center gap-4 mb-6">
+                  <div class="h-px bg-slate-200 flex-grow"></div>
+                  <span
+                    class="text-sm font-bold text-slate-400 uppercase tracking-widest"
+                    >Compliance Tools</span
+                  >
+                  <div class="h-px bg-slate-200 flex-grow"></div>
+                </div>
+                <W2GGenerator />
               </div>
             </div>
 
-             <!-- Pricing Tab (NEW COMPONENT) -->
-             <div v-if="currentTab === 'pricing'">
-                <PricingEditor v-model="pricingData" :is-saving="isSavingPricing" @save="savePricing" />
-             </div>
-
-             <!-- Schedule Tab (NEW COMPONENT) -->
-             <div v-if="currentTab === 'schedule'">
-                <ScheduleEditor v-model="scheduleData" :is-saving="isSavingSchedule" @save="saveSchedule" />
-             </div>
-
-          <!-- Messages Tab -->
-          <div v-if="currentTab === 'messages'">
-            <div
-              v-if="messagesData.length === 0"
-              class="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-dashed border-slate-300"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-12 w-12 text-slate-300 mb-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="1"
-                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                />
-              </svg>
-              <p class="text-slate-400 font-medium">Inbox is currently empty</p>
+            <!-- Pricing Tab (NEW COMPONENT) -->
+            <div v-if="currentTab === 'pricing'">
+              <PricingEditor
+                v-model="pricingData"
+                :is-saving="isSavingPricing"
+                @save="savePricing"
+              />
             </div>
-            <div v-else class="grid grid-cols-1 gap-6">
+
+            <!-- Schedule Tab (NEW COMPONENT) -->
+            <div v-if="currentTab === 'schedule'">
+              <ScheduleEditor
+                v-model="scheduleData"
+                :is-saving="isSavingSchedule"
+                @save="saveSchedule"
+              />
+            </div>
+
+            <!-- Messages Tab -->
+            <div v-if="currentTab === 'messages'">
               <div
-                v-for="msg in messagesData"
-                :key="msg.timestamp"
-                class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow"
+                v-if="messagesData.length === 0"
+                class="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-dashed border-slate-300"
               >
-                <div class="flex items-start justify-between">
-                  <div class="flex items-center">
-                    <div
-                      class="h-10 w-10 rounded-full bg-primary-50 flex items-center justify-center text-primary-700 font-black mr-4"
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-12 w-12 text-slate-300 mb-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1"
+                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                  />
+                </svg>
+                <p class="text-slate-400 font-medium">
+                  Inbox is currently empty
+                </p>
+              </div>
+              <div v-else class="grid grid-cols-1 gap-6">
+                <div
+                  v-for="msg in messagesData"
+                  :key="msg.timestamp"
+                  class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow"
+                >
+                  <div class="flex items-start justify-between">
+                    <div class="flex items-center">
+                      <div
+                        class="h-10 w-10 rounded-full bg-primary-50 flex items-center justify-center text-primary-700 font-black mr-4"
+                      >
+                        {{ msg.name.charAt(0).toUpperCase() }}
+                      </div>
+                      <div>
+                        <h3 class="font-bold text-primary-950">
+                          {{ msg.name }}
+                        </h3>
+                        <p class="text-xs text-slate-500">{{ msg.email }}</p>
+                      </div>
+                    </div>
+                    <span
+                      class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter"
                     >
-                      {{ msg.name.charAt(0).toUpperCase() }}
-                    </div>
-                    <div>
-                      <h3 class="font-bold text-primary-950">{{ msg.name }}</h3>
-                      <p class="text-xs text-slate-500">{{ msg.email }}</p>
-                    </div>
+                      {{ new Date(msg.created_at).toLocaleString() }}
+                    </span>
                   </div>
-                  <span
-                    class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter"
-                  >
-                    {{ new Date(msg.created_at).toLocaleString() }}
-                  </span>
-                </div>
-                <div class="mt-4 pl-14">
-                  <p
-                    class="text-slate-700 text-sm leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100"
-                  >
-                    {{ msg.message }}
-                  </p>
+                  <div class="mt-4 pl-14">
+                    <p
+                      class="text-slate-700 text-sm leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100"
+                    >
+                      {{ msg.message }}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Users Tab -->
-        <div v-if="currentTab === 'users'" class="space-y-8">
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- User List -->
-            <div class="lg:col-span-2">
-              <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-bold text-primary-900">
-                  Active Team Members
-                </h2>
-                <span
-                  class="bg-primary-100 text-primary-700 text-xs font-bold px-2.5 py-0.5 rounded-full"
-                >
-                  {{ usersData.length }} Total
-                </span>
-              </div>
+          <!-- Users Tab -->
+          <div v-if="currentTab === 'users'" class="space-y-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <!-- User List -->
+              <div class="lg:col-span-2">
+                <div class="flex items-center justify-between mb-4">
+                  <h2 class="text-xl font-bold text-primary-900">
+                    Active Team Members
+                  </h2>
+                  <span
+                    class="bg-primary-100 text-primary-700 text-xs font-bold px-2.5 py-0.5 rounded-full"
+                  >
+                    {{ usersData.length }} Total
+                  </span>
+                </div>
 
-              <div
-                class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg"
-              >
-                <table class="min-w-full divide-y divide-gray-300">
-                  <thead class="bg-gray-50">
-                    <tr>
-                      <th
-                        scope="col"
-                        class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
-                      >
-                        Username
-                      </th>
-                      <th
-                        scope="col"
-                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Role
-                      </th>
-                      <th
-                        scope="col"
-                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Last Login
-                      </th>
-                      <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                        <span class="sr-only">Actions</span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-gray-200 bg-white">
-                    <tr v-for="user in usersData" :key="user.id">
-                      <td
-                        class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6"
-                      >
-                        <div class="flex items-center">
-                          <div
-                            class="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold mr-3"
-                          >
-                            {{ user.username.charAt(0).toUpperCase() }}
-                          </div>
-                          {{ user.username }}
-                        </div>
-                      </td>
-                      <td
-                        class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
-                      >
-                        <span
-                          :class="[
-                            user.role === 'admin'
-                              ? 'bg-gold-100 text-gold-800'
-                              : 'bg-blue-100 text-blue-800',
-                            'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize',
-                          ]"
-                        >
-                          {{ user.role }}
-                        </span>
-                      </td>
-                      <td
-                        class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
-                      >
-                        {{
-                          user.last_login_at
-                            ? new Date(user.last_login_at).toLocaleDateString()
-                            : "Never"
-                        }}
-                      </td>
-                      <td
-                        class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6"
-                      >
-                        <button
-                          class="text-red-600 hover:text-red-900 font-bold"
-                          @click="deleteUser(user.id)"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <!-- Add User Form -->
-            <div>
-              <div
-                class="bg-primary-900 rounded-xl p-6 text-white shadow-xl relative overflow-hidden"
-              >
-                <!-- Decorative background element -->
                 <div
-                  class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 bg-gold opacity-10 rounded-full blur-2xl"
-                ></div>
+                  class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg"
+                >
+                  <table class="min-w-full divide-y divide-gray-300">
+                    <thead class="bg-gray-50">
+                      <tr>
+                        <th
+                          scope="col"
+                          class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                        >
+                          Username
+                        </th>
+                        <th
+                          scope="col"
+                          class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        >
+                          Role
+                        </th>
+                        <th
+                          scope="col"
+                          class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        >
+                          Last Login
+                        </th>
+                        <th
+                          scope="col"
+                          class="relative py-3.5 pl-3 pr-4 sm:pr-6"
+                        >
+                          <span class="sr-only">Actions</span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 bg-white">
+                      <tr v-for="user in usersData" :key="user.id">
+                        <td
+                          class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6"
+                        >
+                          <div class="flex items-center">
+                            <div
+                              class="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold mr-3"
+                            >
+                              {{ user.username.charAt(0).toUpperCase() }}
+                            </div>
+                            {{ user.username }}
+                          </div>
+                        </td>
+                        <td
+                          class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
+                        >
+                          <span
+                            :class="[
+                              user.role === 'admin'
+                                ? 'bg-gold-100 text-gold-800'
+                                : 'bg-blue-100 text-blue-800',
+                              'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize',
+                            ]"
+                          >
+                            {{ user.role }}
+                          </span>
+                        </td>
+                        <td
+                          class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
+                        >
+                          {{
+                            user.last_login_at
+                              ? new Date(
+                                  user.last_login_at,
+                                ).toLocaleDateString()
+                              : "Never"
+                          }}
+                        </td>
+                        <td
+                          class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6"
+                        >
+                          <button
+                            class="text-red-600 hover:text-red-900 font-bold"
+                            @click="deleteUser(user.id)"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
 
-                <h2 class="text-xl font-bold mb-6 flex items-center">
+              <!-- Add User Form -->
+              <div>
+                <div
+                  class="bg-primary-900 rounded-xl p-6 text-white shadow-xl relative overflow-hidden"
+                >
+                  <!-- Decorative background element -->
+                  <div
+                    class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 bg-gold opacity-10 rounded-full blur-2xl"
+                  ></div>
+
+                  <h2 class="text-xl font-bold mb-6 flex items-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-6 w-6 mr-2 text-gold"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+                      />
+                    </svg>
+                    Add New Member
+                  </h2>
+
+                  <form class="space-y-4" @submit.prevent="addUser">
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-gray-300 mb-1"
+                        >Username</label
+                      >
+                      <input
+                        v-model="newUser.username"
+                        type="text"
+                        required
+                        class="block w-full bg-primary-800 border-primary-700 rounded-lg text-white placeholder-primary-400 focus:ring-gold focus:border-gold p-2.5"
+                        placeholder="jdoe"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-gray-300 mb-1"
+                        >Password</label
+                      >
+                      <input
+                        v-model="newUser.password"
+                        type="password"
+                        required
+                        class="block w-full bg-primary-800 border-primary-700 rounded-lg text-white placeholder-primary-400 focus:ring-gold focus:border-gold p-2.5"
+                        placeholder="••••••••"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-gray-300 mb-1"
+                        >Role</label
+                      >
+                      <select
+                        v-model="newUser.role"
+                        class="block w-full bg-primary-800 border-primary-700 rounded-lg text-white focus:ring-gold focus:border-gold p-2.5"
+                      >
+                        <option value="mic">MIC (Caller)</option>
+                        <option value="admin">Administrator</option>
+                      </select>
+                    </div>
+                    <button
+                      type="submit"
+                      class="w-full bg-gold hover:bg-gold-600 text-primary-900 font-black py-3 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+                    >
+                      Create Account
+                    </button>
+                  </form>
+                </div>
+
+                <!-- Fortune-1000 Trust Signal -->
+                <div
+                  class="mt-6 p-4 bg-gold-50 border border-gold-100 rounded-lg flex items-start"
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    class="h-6 w-6 mr-2 text-gold"
+                    class="h-5 w-5 text-gold-600 mr-3 mt-0.5"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -398,98 +510,31 @@
                       stroke-linecap="round"
                       stroke-linejoin="round"
                       stroke-width="2"
-                      d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  Add New Member
-                </h2>
-
-                <form class="space-y-4" @submit.prevent="addUser">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1"
-                      >Username</label
-                    >
-                    <input
-                      v-model="newUser.username"
-                      type="text"
-                      required
-                      class="block w-full bg-primary-800 border-primary-700 rounded-lg text-white placeholder-primary-400 focus:ring-gold focus:border-gold p-2.5"
-                      placeholder="jdoe"
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1"
-                      >Password</label
-                    >
-                    <input
-                      v-model="newUser.password"
-                      type="password"
-                      required
-                      class="block w-full bg-primary-800 border-primary-700 rounded-lg text-white placeholder-primary-400 focus:ring-gold focus:border-gold p-2.5"
-                      placeholder="••••••••"
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1"
-                      >Role</label
-                    >
-                    <select
-                      v-model="newUser.role"
-                      class="block w-full bg-primary-800 border-primary-700 rounded-lg text-white focus:ring-gold focus:border-gold p-2.5"
-                    >
-                      <option value="mic">MIC (Caller)</option>
-                      <option value="admin">Administrator</option>
-                    </select>
-                  </div>
-                  <button
-                    type="submit"
-                    class="w-full bg-gold hover:bg-gold-600 text-primary-900 font-black py-3 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
-                  >
-                    Create Account
-                  </button>
-                </form>
-              </div>
-
-              <!-- Fortune-1000 Trust Signal -->
-              <div
-                class="mt-6 p-4 bg-gold-50 border border-gold-100 rounded-lg flex items-start"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-5 w-5 text-gold-600 mr-3 mt-0.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <p class="text-xs text-gold-800 leading-relaxed">
-                  <strong>Security Note:</strong> New accounts are active
-                  immediately. Ensure passwords meet complexity requirements for
-                  multi-million dollar operation security standards.
-                </p>
+                  <p class="text-xs text-gold-800 leading-relaxed">
+                    <strong>Security Note:</strong> New accounts are active
+                    immediately. Ensure passwords meet complexity requirements
+                    for multi-million dollar operation security standards.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-    </div>
       </main>
+    </div>
   </div>
-</div>
 </template>
 
 <script setup lang="ts">
-import PricingEditor from '~/components/admin/PricingEditor.vue';
-import ScheduleEditor from '~/components/admin/ScheduleEditor.vue';
-import ProgressiveEditor from '~/components/admin/ProgressiveEditor.vue';
-import W2GGenerator from '~/components/admin/W2GGenerator.vue';
-import PatternEditor from '~/components/admin/PatternEditor.vue';
-import ProgramEditor from '~/components/admin/ProgramEditor.vue';
+import PricingEditor from "~/components/admin/PricingEditor.vue";
+import ScheduleEditor from "~/components/admin/ScheduleEditor.vue";
+import ProgressiveEditor from "~/components/admin/ProgressiveEditor.vue";
+import W2GGenerator from "~/components/admin/W2GGenerator.vue";
+import PatternEditor from "~/components/admin/PatternEditor.vue";
+import ProgramEditor from "~/components/admin/ProgramEditor.vue";
 
 definePageMeta({
   middleware: ["auth"],
@@ -657,7 +702,6 @@ const normalizeSchedule = (raw: any) => {
   return normalizedArray;
 };
 
-
 // Fetch all data
 const loadData = async () => {
   pending.value = true;
@@ -701,14 +745,14 @@ const saveJackpot = async () => {
     // Update timestamp
     jackpotData.value.lastUpdated = new Date().toLocaleString();
     await $fetch("/api/admin/jackpot", {
-        method: "POST",
-        body: jackpotData.value,
+      method: "POST",
+      body: jackpotData.value,
     });
     alert("Progressives Updated!");
   } catch (e) {
-      alert("Failed to update progressives.");
+    alert("Failed to update progressives.");
   } finally {
-      isSavingJackpot.value = false;
+    isSavingJackpot.value = false;
   }
 };
 
