@@ -68,16 +68,22 @@ export default defineEventHandler(async (event) => {
     // Need to map patternSlug to patternId
     const patternMap = new Map(patterns.map((p) => [p.slug, p.id]));
 
-    await tx.bingoGame.createMany({
-      data: data.games.map((g) => ({
-        program_id: prog.id,
-        sort_order: g.sortOrder,
-        title: g.title,
-        paperColor: g.paperColor,
-        notes: g.notes,
-        pattern_id: patternMap.get(g.patternSlug)!,
-      })),
-    });
+    // SQLite/Prisma limitation: createMany doesn't always handle default IDs well
+    // Use Promise.all with create instead
+    await Promise.all(
+      data.games.map((g) =>
+        tx.bingoGame.create({
+          data: {
+            program_id: prog.id,
+            sort_order: g.sortOrder,
+            title: g.title,
+            paperColor: g.paperColor,
+            notes: g.notes,
+            pattern_id: patternMap.get(g.patternSlug)!,
+          },
+        }),
+      ),
+    );
 
     return prog;
   });
