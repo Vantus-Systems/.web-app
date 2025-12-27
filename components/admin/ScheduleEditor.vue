@@ -362,14 +362,12 @@ const calendarCells = computed(() => {
     const prevMonthLastDay = new Date(year, month, 0).getDate();
     for (let i = startDay - 1; i >= 0; i--) {
         const d = new Date(year, month - 1, prevMonthLastDay - i);
-        // @ts-ignore
         cells.push(createCell(d, false));
     }
 
     // Current month
     for (let i = 1; i <= totalDays; i++) {
         const d = new Date(year, month, i);
-        // @ts-ignore
         cells.push(createCell(d, true));
     }
 
@@ -377,7 +375,6 @@ const calendarCells = computed(() => {
     const remaining = 42 - cells.length; // 6 rows * 7 cols
     for (let i = 1; i <= remaining; i++) {
         const d = new Date(year, month + 1, i);
-        // @ts-ignore
         cells.push(createCell(d, false));
     }
 
