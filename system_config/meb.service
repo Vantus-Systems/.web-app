@@ -1,0 +1,42 @@
+[Unit]
+Description=med (MEb) Nuxt application service
+Documentation=https://example.com
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=frappe
+Group=frappe
+WorkingDirectory=/home/frappe/med
+Environment=NODE_ENV=production
+Environment=PATH=/usr/bin:/usr/local/bin:/bin:/usr/sbin:/sbin
+EnvironmentFile=-/etc/default/meb
+
+# Allow ample time for `npm install` / `npm run build` during startup
+TimeoutStartSec=1200
+TimeoutStopSec=30
+
+# Build steps (run as the service user)
+ExecStartPre=/bin/sh -c 'npm install'
+ExecStartPre=/bin/sh -c 'npm run build'
+
+# Start the server
+ExecStart=/bin/sh -c 'npm run start:server'
+
+# Keep the service running and restart on failure
+Restart=on-failure
+RestartSec=5
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+# Logging
+SyslogIdentifier=meb
+StandardOutput=journal
+StandardError=journal
+
+# Resource limits
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
