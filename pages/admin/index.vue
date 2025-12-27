@@ -488,8 +488,8 @@ import PricingEditor from '~/components/admin/PricingEditor.vue';
 import ScheduleEditor from '~/components/admin/ScheduleEditor.vue';
 import ProgressiveEditor from '~/components/admin/ProgressiveEditor.vue';
 import W2GGenerator from '~/components/admin/W2GGenerator.vue';
-import BaseCard from '~/components/ui/BaseCard.vue';
-import BaseButton from '~/components/ui/BaseButton.vue';
+import PatternEditor from '~/components/admin/PatternEditor.vue';
+import ProgramEditor from '~/components/admin/ProgramEditor.vue';
 
 definePageMeta({
   middleware: ["auth"],
@@ -501,6 +501,8 @@ const tabs = [
   { id: "progressives", name: "Progressives" },
   { id: "pricing", name: "Pricing" },
   { id: "schedule", name: "Schedule" },
+  { id: "patterns", name: "Patterns" },
+  { id: "programs", name: "Programs" },
   { id: "messages", name: "Messages" },
   { id: "users", name: "Users" },
 ];
@@ -601,14 +603,6 @@ const normalizePricing = (raw: any) => {
         type: machine.type ?? "bundle",
         savings: machine.savings ?? "",
       })),
-      specialtyGames: ensureArray(clone?.evening?.specialtyGames).map(
-        (game: any) => ({
-          name: game.name ?? "",
-          price: game.price ?? "",
-          description: game.description ?? "",
-          category: game.category ?? "General",
-        }),
-      ),
       specialPapers: ensureArray(clone?.evening?.specialPapers).map(
         (paper: any) => ({
           name: paper.name ?? "",
@@ -659,9 +653,6 @@ const normalizeSchedule = (raw: any) => {
     vibe: ensureArray(session.vibe),
     pricing: ensureObject(session.pricing),
     specials: ensureObject(session.specials),
-    isOverride: !!session.isOverride,
-    overrideDate: session.overrideDate || null,
-    excludedDates: ensureArray(session.excludedDates),
   }));
   return normalizedArray;
 };

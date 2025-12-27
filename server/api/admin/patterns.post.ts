@@ -1,0 +1,59 @@
+import prisma from "~/server/db/client";
+import { z } from "zod";
+import { auditService } from "~/server/services/audit.service";
+
+const frameSchema = z.array(z.number().int().min(0).max(1)).length(25);
+
+const patternSchema = z.object({
+  slug: z.string().min(1),
+  name: z.string().min(1),
+  description: z.string().optional(),
+  isAnimated: z.boolean().default(false),
+  definition: z.object({
+    frames: z.array(frameSchema).min(1),
+    interval: z.number().min(50).max(5000).optional(),
+  }),
+});
+
+export default defineEventHandler(async (event) => {
+  if (!event.context.user || event.context.user.role !== "admin") {
+    throw createError({ statusCode: 403, message: "Forbidden" });
+  }
+
+  const body = await readBody(event);
+  const data = patternSchema.parse(body);
+
+  const before = await prisma.bingoPattern.findUnique({
+    where: { slug: data.slug },
+  });
+
+  const result = await prisma.bingoPattern.upsert({
+    where: { slug: data.slug },
+    update: {
+      name: data.name,
+      description: data.description,
+      isAnimated: data.isAnimated,
+      definition: JSON.stringify(data.definition),
+    },
+    create: {
+      slug: data.slug,
+      name: data.name,
+      description: data.description,
+      isAnimated: data.isAnimated,
+      definition: JSON.stringify(data.definition),
+    },
+  });
+
+  await auditService.log({
+    actorUserId: event.context.user.id,
+    action: before ? "UPDATE_PATTERN" : "CREATE_PATTERN",
+    entity: `bingoPattern:${data.slug}`,
+    before: before ? { ...before, definition: JSON.parse(before.definition) } : null,
+    after: data,
+  });
+
+  return {
+    ...result,
+    definition: JSON.parse(result.definition),
+  };
+});

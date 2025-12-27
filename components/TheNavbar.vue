@@ -98,6 +98,7 @@ const isMenuOpen = ref(false);
 const links = [
   { name: "Home", path: "/" },
   { name: "Schedule", path: "/schedule" },
+  { name: "Programs", path: "/programs" },
   { name: "Pricing", path: "/pricing" },
   { name: "About & Charities", path: "/about" },
   { name: "Contact", path: "/contact" },
