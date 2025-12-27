@@ -405,9 +405,9 @@ const createCell = (date: Date, isCurrentMonth: boolean) => {
             const s2 = sessions[i+1];
             // Assuming start/end exist and parseable. If missing, skip.
             // Using parseTime helper
-            const start1 = parseTime(s1.startTime);
-            const end1 = parseTime(s1.endTime);
-            const start2 = parseTime(s2.startTime);
+            const start1 = parseTime(s1.startTime || "");
+            const end1 = parseTime(s1.endTime || "");
+            const start2 = parseTime(s2.startTime || "");
 
             if (start2 < end1) {
                 hasConflict = true;
