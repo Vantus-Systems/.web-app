@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
       },
     },
     orderBy: {
-      name: 'asc',
+      name: "asc",
     },
   });
 
