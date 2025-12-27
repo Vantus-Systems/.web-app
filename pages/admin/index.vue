@@ -253,6 +253,16 @@
               />
             </div>
 
+            <!-- Patterns Tab -->
+            <div v-if="currentTab === 'patterns'">
+              <PatternEditor />
+            </div>
+
+            <!-- Programs Tab -->
+            <div v-if="currentTab === 'programs'">
+              <ProgramEditor />
+            </div>
+
             <!-- Messages Tab -->
             <div v-if="currentTab === 'messages'">
               <div
