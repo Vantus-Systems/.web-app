@@ -2,6 +2,7 @@ import { defineEventHandler } from "h3";
 import { settingsService } from "@server/services/settings.service";
 
 export default defineEventHandler(async () => {
+  // Explicitly fetch PUBLISHED schedule
   const data = await settingsService.get("schedule");
 
   // Ensure array
