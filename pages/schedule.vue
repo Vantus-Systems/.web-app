@@ -123,7 +123,8 @@ const filteredSessions = computed(() => {
 });
 
 const activeDayOfWeek = computed(() => {
-  return days.value.find((d) => d.id === activeDay.value)?.dayOfWeek || "Mon";
+  const found = days.value.find((d) => d.id === activeDay.value);
+  return found ? found.dayOfWeek : "Mon";
 });
 
 // Program Fetching
