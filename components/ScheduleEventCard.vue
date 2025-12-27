@@ -9,6 +9,7 @@ import {
   Sun,
   ChevronRight,
 } from "lucide-vue-next";
+import ProgramTable from "~/components/bingo/ProgramTable.vue";
 
 interface Session {
   id: string;
@@ -38,6 +39,8 @@ const props = defineProps<{
   session: Session;
   index: number;
   activeDayOfWeek?: string;
+  program?: any;
+  status?: "live" | "upcoming" | "past" | "inactive";
 }>();
 
 const currentSpecial = computed(() => {
@@ -160,6 +163,7 @@ const addToCalendar = () => {
             </div>
 
             <div
+              v-if="status === 'live'"
               class="flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-full border border-green-100"
             >
               <span class="relative flex h-2 w-2">
@@ -172,7 +176,7 @@ const addToCalendar = () => {
               </span>
               <span
                 class="text-[10px] font-black uppercase tracking-widest text-green-700"
-                >Live Status</span
+                >Live Now</span
               >
             </div>
           </div>
@@ -270,9 +274,15 @@ const addToCalendar = () => {
               </div>
             </div>
 
-            <!-- Game Stack Preview (if available) -->
+            <!-- Program Table or Legacy Game Stack -->
+            <div v-if="program" class="md:col-span-2 bg-slate-50 rounded-2xl p-4 border border-slate-100">
+               <div class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">
+                Full Program
+              </div>
+              <ProgramTable :program="program" />
+            </div>
             <div
-              v-if="session.games"
+              v-else-if="session.games"
               class="bg-slate-50 rounded-2xl p-6 border border-slate-100"
             >
               <div

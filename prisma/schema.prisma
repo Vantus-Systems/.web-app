@@ -75,3 +75,49 @@ model setting {
 
   @@map("settings")
 }
+
+model bingoPattern {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  name        String
+  description String?
+  isAnimated  Boolean  @default(false)
+  definition  String   // JSON string { frames: number[][]; interval?: number }
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  games       bingoGame[]
+
+  @@map("bingo_patterns")
+}
+
+model bingoProgram {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  name        String
+  description String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  games       bingoGame[]
+
+  @@map("bingo_programs")
+}
+
+model bingoGame {
+  id          String   @id @default(uuid())
+  program_id  String
+  pattern_id  String
+  sort_order  Int
+  title       String
+  paperColor  String
+  notes       String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  program     bingoProgram @relation(fields: [program_id], references: [id], onDelete: Cascade)
+  pattern     bingoPattern @relation(fields: [pattern_id], references: [id])
+
+  @@unique([program_id, sort_order])
+  @@map("bingo_games")
+}

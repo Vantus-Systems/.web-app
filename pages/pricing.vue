@@ -126,39 +126,24 @@
             </p>
           </div>
 
-          <!-- Dynamic Daytime Sessions -->
-          <div v-if="pricing?.daytime?.sessions" class="grid md:grid-cols-2 gap-8 mb-16">
+          <!-- Morning Window -->
+          <div class="grid md:grid-cols-2 gap-8 mb-16">
             <div
-              v-for="(session, idx) in pricing.daytime.sessions"
-              :key="session.id || idx"
-              class="border-2 rounded-3xl p-8 md:p-12"
-              :class="[
-                idx % 2 === 0
-                  ? 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200'
-                  : 'bg-gradient-to-br from-slate-50 to-blue-50 border-slate-200'
-              ]"
+              class="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-3xl p-8 md:p-12"
             >
               <div class="flex items-center gap-3 mb-6">
-                <div class="text-4xl">
-                   <!-- Icon logic could be enhanced, falling back to simple emoji -->
-                   <span v-if="session.icon === 'sun'">☀️</span>
-                   <span v-else-if="session.icon === 'clock'">🕐</span>
-                   <span v-else>🔸</span>
-                </div>
+                <div class="text-4xl">☀️</div>
                 <div>
                   <h3 class="text-2xl font-bold text-primary-900">
-                    {{ session.name }}
+                    Morning Play
                   </h3>
-                  <p
-                    class="font-semibold"
-                    :class="idx % 2 === 0 ? 'text-amber-700' : 'text-slate-700'"
-                  >
-                    {{ session.timeRange }}
+                  <p class="text-amber-700 font-semibold">
+                    10:30 AM – 12:30 PM
                   </p>
                 </div>
               </div>
-              <p :class="idx % 2 === 0 ? 'text-amber-700' : 'text-slate-700'" class="mb-8">
-                {{ session.description }}
+              <p class="text-amber-700 mb-8">
+                Doors open at 10 AM. Bingo starts at 10:30 AM.
               </p>
 
               <h4 class="font-bold text-primary-900 text-lg mb-4">
@@ -166,40 +151,97 @@
               </h4>
               <div class="space-y-3 mb-8">
                 <div
-                  v-for="(machine, mIdx) in session.machines"
-                  :key="mIdx"
-                  class="flex justify-between items-center p-3 bg-white rounded-lg border"
-                  :class="idx % 2 === 0 ? 'border-amber-100' : 'border-slate-100'"
+                  class="flex justify-between items-center p-3 bg-white rounded-lg border border-amber-100"
                 >
-                  <span class="font-medium text-slate-700">{{ machine.description }}</span>
-                  <span class="text-xl font-bold" :class="machine.type === 'bundle' ? 'text-gold-600' : 'text-primary-900'">
-                      {{ machine.price }}
-                      <span v-if="machine.savings" class="text-xs text-slate-500 ml-1">({{ machine.savings }})</span>
-                  </span>
+                  <span class="font-medium text-slate-700">1 Machine</span>
+                  <span class="text-xl font-bold text-primary-900">$1</span>
+                </div>
+                <div
+                  class="flex justify-between items-center p-3 bg-white rounded-lg border border-amber-100"
+                >
+                  <span class="font-medium text-slate-700">3 Machines</span>
+                  <span class="text-xl font-bold text-gold-600"
+                    >$2
+                    <span class="text-xs text-slate-500">(save $1)</span></span
+                  >
+                </div>
+                <div
+                  class="flex justify-between items-center p-3 bg-white rounded-lg border border-amber-100"
+                >
+                  <span class="font-medium text-slate-700">5 Machines</span>
+                  <span class="text-xl font-bold text-gold-600"
+                    >$3
+                    <span class="text-xs text-slate-500">(save $2)</span></span
+                  >
                 </div>
               </div>
 
-              <div
-                class="border-l-4 rounded p-4"
-                 :class="idx % 2 === 0 ? 'bg-amber-100 border-amber-500' : 'bg-blue-100 border-blue-500'"
-              >
-                <p
-                    class="text-sm font-semibold mb-2"
-                    :class="idx % 2 === 0 ? 'text-amber-900' : 'text-blue-900'"
-                >
+              <div class="bg-amber-100 border-l-4 border-amber-500 rounded p-4">
+                <p class="text-sm text-amber-900 font-semibold mb-2">
                   💡 Free Paper Bonus
                 </p>
-                <p class="text-sm" :class="idx % 2 === 0 ? 'text-amber-800' : 'text-blue-800'">
-                  <strong>Spend {{ session.paperRules?.minSpend || '$1' }}+ →</strong> {{ session.paperRules?.description || 'Get 1 free paper card' }}
+                <p class="text-sm text-amber-800">
+                  <strong>Spend $1+ →</strong> Get 1 free paper card
                 </p>
-                 <p v-if="session.paperRulesAdvanced?.minSpendAdvanced" class="text-sm mt-1" :class="idx % 2 === 0 ? 'text-amber-800' : 'text-blue-800'">
-                  <strong>Spend {{ session.paperRulesAdvanced.minSpendAdvanced }} →</strong> {{ session.paperRulesAdvanced.description }}
+                <p class="text-sm text-amber-800 mt-1">
+                  <strong>Spend $2+ →</strong> Unlimited paper cards
+                </p>
+              </div>
+            </div>
+
+            <!-- Afternoon Window -->
+            <div
+              class="bg-gradient-to-br from-slate-50 to-blue-50 border-2 border-slate-200 rounded-3xl p-8 md:p-12"
+            >
+              <div class="flex items-center gap-3 mb-6">
+                <div class="text-4xl">🕐</div>
+                <div>
+                  <h3 class="text-2xl font-bold text-primary-900">
+                    Afternoon Play
+                  </h3>
+                  <p class="text-slate-700 font-semibold">12:30 PM – 7:30 PM</p>
+                </div>
+              </div>
+              <p class="text-slate-700 mb-8">
+                Pay-as-you-go games continue until the main session.
+              </p>
+
+              <h4 class="font-bold text-primary-900 text-lg mb-4">
+                Machine Pricing
+              </h4>
+              <div class="space-y-3 mb-8">
+                <div
+                  class="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-100"
+                >
+                  <span class="font-medium text-slate-700">1 Machine</span>
+                  <span class="text-xl font-bold text-primary-900">$1</span>
+                </div>
+                <div
+                  class="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-100"
+                >
+                  <span class="font-medium text-slate-700">4 Machines</span>
+                  <span class="text-xl font-bold text-gold-600"
+                    >$3
+                    <span class="text-xs text-slate-500">(save $1)</span></span
+                  >
+                </div>
+              </div>
+
+              <div class="bg-blue-100 border-l-4 border-blue-500 rounded p-4">
+                <p class="text-sm text-blue-900 font-semibold mb-2">
+                  💡 Free Paper Bonus
+                </p>
+                <p class="text-sm text-blue-800">
+                  <strong>Spend $1+ →</strong> Get 1 free paper card
+                </p>
+                <p class="text-sm text-blue-800 mt-1">
+                  <strong>Spend $2+ →</strong> Unlimited paper cards
                 </p>
               </div>
             </div>
           </div>
 
-          <!-- Dynamic Daytime Jackpots -->
+          <!-- Daytime Jackpots -->
           <div
             class="bg-gradient-to-br from-purple-50 to-violet-50 border-2 border-purple-200 rounded-3xl p-8 md:p-12 mb-16"
           >
@@ -216,27 +258,17 @@
             </div>
 
             <div class="grid md:grid-cols-2 gap-8">
-              <!-- Render from API -->
-              <div
-                v-for="(jackpot, idx) in pricing?.daytime?.jackpots || []"
-                :key="idx"
-                class="bg-white rounded-2xl p-6 border border-purple-100"
-              >
+              <div class="bg-white rounded-2xl p-6 border border-purple-100">
                 <h4 class="font-bold text-primary-900 text-lg mb-2">
-                  {{ jackpot.name }}
+                  Super 6 Jackpots
                 </h4>
                 <p class="text-slate-600 text-sm mb-4">
-                  {{ jackpot.time }}
+                  Played at the top of each hour starting at 12 PM.
                 </p>
-                <div class="text-3xl font-black text-purple-600">{{ jackpot.prize }}</div>
-                 <p v-if="jackpot.description" class="text-xs text-purple-500 mt-1">
-                  {{ jackpot.description }}
-                </p>
+                <div class="text-3xl font-black text-purple-600">$250</div>
               </div>
 
-              <!-- Bingo Babes Progressive (Hardcoded fallback if not in API, but ideally API controlled) -->
-              <!-- We can keep the specialized Progressive component here as it uses store -->
-               <div class="bg-white rounded-2xl p-6 border border-purple-100">
+              <div class="bg-white rounded-2xl p-6 border border-purple-100">
                 <h4 class="font-bold text-primary-900 text-lg mb-2">
                   Bingo Babes Progressive
                 </h4>
@@ -253,9 +285,8 @@
             </div>
           </div>
 
-          <!-- Paper Only Option (Dynamic) -->
+          <!-- Paper Only Option -->
           <div
-            v-if="pricing?.daytime?.paperOnlyGames"
             class="bg-gradient-to-r from-primary-50 to-slate-50 border-2 border-primary-200 rounded-3xl overflow-hidden"
           >
             <div class="p-8 md:p-12">
@@ -274,13 +305,13 @@
                     Regular Bingo
                   </h4>
                   <div class="space-y-3">
-                    <div
-                        v-for="(opt, idx) in pricing.daytime.paperOnlyGames.regular_bingo || []"
-                        :key="idx"
-                        class="flex justify-between p-3 bg-white rounded-lg"
-                    >
-                      <span class="text-slate-700">{{ opt.cards }}</span>
-                      <span class="font-bold text-primary-900">{{ opt.price }}</span>
+                    <div class="flex justify-between p-3 bg-white rounded-lg">
+                      <span class="text-slate-700">3 Cards</span>
+                      <span class="font-bold text-primary-900">$0.25</span>
+                    </div>
+                    <div class="flex justify-between p-3 bg-white rounded-lg">
+                      <span class="text-slate-700">6 Cards</span>
+                      <span class="font-bold text-primary-900">$0.50</span>
                     </div>
                   </div>
                 </div>
@@ -291,13 +322,13 @@
                     Special Games
                   </h4>
                   <div class="space-y-3">
-                    <div
-                        v-for="(opt, idx) in pricing.daytime.paperOnlyGames.specials || []"
-                        :key="idx"
-                        class="flex justify-between p-3 bg-white rounded-lg"
-                    >
-                      <span class="text-slate-700">{{ opt.cards }}</span>
-                      <span class="font-bold text-primary-900">{{ opt.price }}</span>
+                    <div class="flex justify-between p-3 bg-white rounded-lg">
+                      <span class="text-slate-700">1 Card</span>
+                      <span class="font-bold text-primary-900">$1</span>
+                    </div>
+                    <div class="flex justify-between p-3 bg-white rounded-lg">
+                      <span class="text-slate-700">3 Cards</span>
+                      <span class="font-bold text-primary-900">$2</span>
                     </div>
                   </div>
                 </div>
@@ -311,7 +342,7 @@
           <div class="text-center mb-16">
             <span
               class="text-gold-600 font-bold uppercase tracking-widest text-sm"
-              >🌙 {{ pricing?.evening?.startTime || '7:30 PM' }} Main Session</span
+              >🌙 7:30 PM Main Session</span
             >
             <h2
               class="text-4xl md:text-5xl font-black text-primary-900 mt-4 mb-6"
@@ -319,24 +350,24 @@
               Nightly Bingo Session
             </h2>
             <p class="text-xl text-slate-600 max-w-3xl mx-auto">
-              {{ pricing?.evening?.valueProposition || 'Our flagship nightly session with all-inclusive machine bundles, specialty games, and the Hornet Progressive.' }}
+              Our flagship nightly session with all-inclusive machine bundles,
+              specialty games, and the Hornet Progressive.
             </p>
           </div>
 
           <!-- Session Sales Window -->
           <div
-            v-if="pricing?.evening?.scheduleNote"
             class="mb-16 bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-3xl p-8"
           >
             <h3 class="text-2xl font-bold text-primary-900 mb-2">
-              📌 {{ pricing.evening.scheduleNote }}
+              📌 Session Sales Window: 5:15 PM – 7:30 PM
             </h3>
             <p class="text-emerald-700 font-medium">
               Buy your session cards early for best card selection.
             </p>
           </div>
 
-          <!-- Best Value Highlight (Static structure but dynamic content could be mapped if needed) -->
+          <!-- Best Value Highlight -->
           <div class="mb-16 relative">
             <div
               class="absolute -inset-1 bg-gradient-to-r from-gold-400 via-gold-500 to-gold-400 rounded-3xl blur opacity-25"
@@ -380,31 +411,39 @@
           <!-- Machine Packages -->
           <div class="grid md:grid-cols-2 gap-8 mb-16">
             <div
-              v-for="(machine, idx) in pricing?.evening?.machines || []"
-              :key="idx"
-              :class="[
-                  machine.type === 'premium'
-                    ? 'relative bg-gradient-to-br from-gold-100 to-gold-50 border-3 border-gold-500 shadow-2xl transform md:scale-105 hover:shadow-2xl'
-                    : 'bg-slate-50 border-2 border-slate-200 hover:shadow-lg',
-                  'rounded-2xl p-8 transition-all'
-              ]"
+              class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-8 hover:shadow-lg transition-all"
+            >
+              <h4 class="text-2xl font-bold text-primary-900 mb-6">
+                Single Machine
+              </h4>
+              <p class="text-slate-600 mb-8">
+                One machine entry for the 7:30 PM session
+              </p>
+              <div class="text-5xl font-black text-gold-600 mb-4">$11</div>
+              <button
+                class="w-full bg-primary-900 hover:bg-primary-800 text-white font-bold py-3 rounded-lg transition"
+              >
+                Select
+              </button>
+            </div>
+
+            <div
+              class="relative bg-gradient-to-br from-gold-100 to-gold-50 border-3 border-gold-500 rounded-2xl p-8 shadow-2xl transform md:scale-105 hover:shadow-2xl transition-all"
             >
               <div
-                v-if="machine.type === 'premium'"
                 class="absolute top-0 right-0 bg-gold-500 text-white font-bold px-4 py-2 rounded-bl-2xl rounded-tr-2xl text-sm uppercase"
               >
                 ★ Best Value
               </div>
-              <h4 class="text-2xl font-bold text-primary-900 mb-6" :class="{ 'mt-4': machine.type === 'premium' }">
-                {{ machine.description }}
+              <h4 class="text-2xl font-bold text-primary-900 mb-6 mt-4">
+                Two Machines (Recommended)
               </h4>
-              <p class="text-slate-600 mb-8">
-                {{ machine.savings || 'Entry for the 7:30 PM session' }}
+              <p class="text-slate-700 mb-8 font-medium">
+                Includes: 6-packs • Double Actions • Letter X Papers
               </p>
-              <div class="text-5xl font-black text-gold-600 mb-4">{{ machine.price }}</div>
+              <div class="text-5xl font-black text-gold-600 mb-6">$22</div>
               <button
-                class="w-full font-bold py-3 rounded-lg transition"
-                :class="machine.type === 'premium' ? 'bg-gold-500 hover:bg-gold-600 text-primary-900' : 'bg-primary-900 hover:bg-primary-800 text-white'"
+                class="w-full bg-gold-500 hover:bg-gold-600 text-primary-900 font-bold py-3 rounded-lg transition transform hover:-translate-y-1"
               >
                 Select
               </button>
@@ -425,30 +464,31 @@
                 <h4
                   class="text-xl font-bold text-primary-900 mb-6 pb-3 border-b-2 border-primary-300"
                 >
-                  <span class="block mb-2 text-sm text-slate-500 uppercase tracking-widest font-normal">Available Games</span>
-                  <span v-if="pricing?.evening?.specialtyGames?.length">
-                      {{ pricing.evening.specialtyGames.map(g => g.name).join(' • ') }}
-                  </span>
-                  <span v-else>Odd/Even • Lucky Seven • Treasure Hunt • Cover All • Letter X</span>
+                  Odd/Even • Lucky Seven • Treasure Hunt • Cover All • Letter X
                 </h4>
-
                 <div class="grid md:grid-cols-2 gap-6">
-                    <!-- Dynamic Specialty Games Pricing -->
-                    <div
-                        v-for="(game, idx) in pricing?.evening?.specialtyGames || []"
-                        :key="idx"
-                        class="bg-gold-50 border-2 border-gold-200 rounded-lg p-6"
-                    >
-                        <p class="text-sm text-gold-700 font-semibold mb-2">
-                        {{ game.name }}
-                        </p>
-                        <p class="text-4xl font-bold text-gold-600">{{ game.price }}</p>
-                        <p class="text-xs text-gold-700 mt-2">{{ game.description }}</p>
-                    </div>
+                  <div
+                    class="bg-gold-50 border-2 border-gold-200 rounded-lg p-6"
+                  >
+                    <p class="text-sm text-gold-700 font-semibold mb-2">
+                      Single Card
+                    </p>
+                    <p class="text-4xl font-bold text-gold-600">$1</p>
+                  </div>
+                  <div
+                    class="bg-gold-50 border-2 border-gold-200 rounded-lg p-6"
+                  >
+                    <p class="text-sm text-gold-700 font-semibold mb-2">
+                      6-Card Set
+                    </p>
+                    <p class="text-4xl font-bold text-gold-600">$5</p>
+                    <p class="text-xs text-gold-700 mt-2">
+                      Per game type (no mixing)
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <!-- Fixed Specialty Games (Hornet & Pull Tabs) - kept as per design but could be dynamic -->
               <div class="grid md:grid-cols-2 gap-6">
                 <div
                   class="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-6"
@@ -548,44 +588,66 @@
               <h2
                 class="text-4xl md:text-5xl font-black text-primary-900 mt-4 mb-6"
               >
-                {{ pricing?.sunday?.title || 'Premier Sunday Night' }}
+                Premier Sunday Night
               </h2>
               <p class="text-xl text-slate-700 max-w-3xl mx-auto font-medium">
-                {{ pricing?.sunday?.note || 'Special games, free dinner, and 15× $250 jackpots make Sundays our most exciting night.' }}
+                Special games, free dinner, and 15× $250 jackpots make Sundays
+                our most exciting night.
               </p>
             </div>
 
-            <!-- Dynamic Sunday Specials -->
-            <div v-if="pricing?.sunday?.specials" class="grid md:grid-cols-3 gap-6 mb-12">
+            <div class="grid md:grid-cols-3 gap-6 mb-12">
               <div
-                v-for="(special, idx) in pricing.sunday.specials"
-                :key="idx"
                 class="bg-white rounded-2xl p-8 border-2 border-gold-300 shadow-lg"
               >
-                <div class="text-4xl mb-4">
-                    <span v-if="idx === 0">🎉</span>
-                    <span v-else-if="idx === 1">⭐</span>
-                    <span v-else>🎁</span>
-                </div>
+                <div class="text-4xl mb-4">🎉</div>
                 <h3 class="text-2xl font-bold text-primary-900 mb-4">
-                  {{ special.name }}
+                  Speedy Coverall
                 </h3>
                 <div class="space-y-3">
-                    <p v-if="special.description" class="text-emerald-800 font-semibold">
-                        {{ special.description }}
-                    </p>
-                   <div v-if="special.optionOne" class="flex justify-between p-3 bg-gold-50 rounded">
-                     <span class="font-medium text-slate-700">{{ special.optionOne.split('$')[0] || 'Option 1' }}</span>
-                     <span class="font-bold text-primary-900">{{ special.optionOne.match(/\$\d+/)?.[0] || '' }}</span>
-                   </div>
-                   <div v-if="special.optionTwo" class="flex justify-between p-3 bg-gold-50 rounded">
-                     <span class="font-medium text-slate-700">{{ special.optionTwo.split('$')[0] || 'Option 2' }}</span>
-                     <span class="font-bold text-gold-600">{{ special.optionTwo.match(/\$\d+/)?.[0] || '' }}</span>
-                   </div>
-                   <p v-if="special.upikNote" class="text-sm text-emerald-700 mt-2">
-                        {{ special.upikNote }}
-                   </p>
+                  <div class="flex justify-between p-3 bg-gold-50 rounded">
+                    <span class="font-medium text-slate-700">1 Card</span>
+                    <span class="font-bold text-primary-900">$1</span>
+                  </div>
+                  <div class="flex justify-between p-3 bg-gold-50 rounded">
+                    <span class="font-medium text-slate-700">3 Cards</span>
+                    <span class="font-bold text-gold-600">$2</span>
+                  </div>
                 </div>
+              </div>
+
+              <div
+                class="bg-white rounded-2xl p-8 border-2 border-gold-300 shadow-lg"
+              >
+                <div class="text-4xl mb-4">⭐</div>
+                <h3 class="text-2xl font-bold text-primary-900 mb-4">
+                  Super 3 & U-PIK
+                </h3>
+                <div class="space-y-3">
+                  <div class="flex justify-between p-3 bg-gold-50 rounded">
+                    <span class="font-medium text-slate-700">1 Card</span>
+                    <span class="font-bold text-primary-900">$1</span>
+                  </div>
+                  <div class="flex justify-between p-3 bg-gold-50 rounded">
+                    <span class="font-medium text-slate-700">6 Cards</span>
+                    <span class="font-bold text-gold-600">$5</span>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl p-8 border-3 border-emerald-400 shadow-lg flex flex-col justify-center text-center"
+              >
+                <div class="text-5xl mb-4">🎁</div>
+                <h3 class="text-2xl font-bold text-primary-900 mb-2">
+                  FREE U-PIK Card
+                </h3>
+                <p class="text-emerald-800 font-semibold">
+                  Every session entry includes
+                </p>
+                <p class="text-sm text-emerald-700 mt-2">
+                  Plus $500 weekly jackpot
+                </p>
               </div>
             </div>
 
@@ -647,13 +709,10 @@ import { useBusiness } from "~/composables/useBusiness";
 import { computed } from "vue";
 
 const jackpotStore = useJackpotStore();
-const { fetchSchedule, schedule, fetchPricing, pricing } = useBusiness();
+const { fetchSchedule, schedule } = useBusiness();
 
-// Fetch schedule and pricing on load
-await Promise.all([
-    fetchSchedule(),
-    fetchPricing()
-]);
+// Fetch schedule on load
+await fetchSchedule();
 
 useSeoMeta({
   title: "Pricing & Sessions | Mary Esther Bingo",
