@@ -1,5 +1,5 @@
-import prisma from "~/server/db/client";
 import { z } from "zod";
+import prisma from "~/server/db/client";
 import { auditService } from "~/server/services/audit.service";
 
 export default defineEventHandler(async (event) => {
@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
     actorUserId: event.context.user.id,
     action: "DELETE_PROGRAM",
     entity: `bingoProgram:${slug}`,
-    before: before,
+    before,
     after: null,
   });
 

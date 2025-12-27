@@ -16,13 +16,13 @@ export default defineEventHandler(async () => {
   const d = data as any;
 
   // If already has new structure
-  if ('babes' in d && 'hornet' in d) {
-      return d;
+  if ("babes" in d && "hornet" in d) {
+    return d;
   }
 
   // Migration for legacy single-value format
   // Old format: { value: number, lastUpdated: string }
-  if ('value' in d) {
+  if ("value" in d) {
     return {
       babes: { current: 0, backup: 0, label: "Bingo Babes Progressive" },
       hornet: {

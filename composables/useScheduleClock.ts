@@ -38,7 +38,9 @@ export function useScheduleClock() {
       return {
         dateStr: customDate.value, // YYYY-MM-DD
         minutes: hr * 60 + min,
-        dayOfWeek: new Date(y, m - 1, d).toLocaleDateString("en-US", { weekday: "short" }) as any, // "Mon"
+        dayOfWeek: new Date(y, m - 1, d).toLocaleDateString("en-US", {
+          weekday: "short",
+        }) as any, // "Mon"
       };
     }
 
@@ -98,7 +100,9 @@ export function useScheduleClock() {
   const initCustom = () => {
     const ct = chicagoTime.value;
     customDate.value = ct.dateStr;
-    const h = Math.floor(ct.minutes / 60).toString().padStart(2, "0");
+    const h = Math.floor(ct.minutes / 60)
+      .toString()
+      .padStart(2, "0");
     const m = (ct.minutes % 60).toString().padStart(2, "0");
     customTime.value = `${h}:${m}`;
   };

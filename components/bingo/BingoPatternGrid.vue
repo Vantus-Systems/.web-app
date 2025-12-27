@@ -13,7 +13,7 @@ const props = withDefaults(
     fillColor: "#eab308", // gold-500 equivalent default
     size: "md",
     animate: false,
-  }
+  },
 );
 
 const currentFrameIndex = ref(0);
@@ -34,7 +34,8 @@ const startAnimation = () => {
   if (props.animate && frames.value.length > 1) {
     const interval = props.definition.interval || 1000;
     intervalId.value = setInterval(() => {
-      currentFrameIndex.value = (currentFrameIndex.value + 1) % frames.value.length;
+      currentFrameIndex.value =
+        (currentFrameIndex.value + 1) % frames.value.length;
     }, interval);
   }
 };
@@ -47,10 +48,13 @@ const stopAnimation = () => {
   currentFrameIndex.value = 0;
 };
 
-watch(() => props.animate, (val) => {
-  if (val) startAnimation();
-  else stopAnimation();
-});
+watch(
+  () => props.animate,
+  (val) => {
+    if (val) startAnimation();
+    else stopAnimation();
+  },
+);
 
 onMounted(() => {
   if (props.animate) startAnimation();
@@ -63,19 +67,27 @@ onUnmounted(() => {
 // Size classes
 const containerClass = computed(() => {
   switch (props.size) {
-    case "xs": return "w-8 h-8 gap-px text-[0px]";
-    case "sm": return "w-16 h-16 gap-0.5 text-[6px]";
-    case "md": return "w-32 h-32 gap-1 text-[10px]";
-    default: return "w-32 h-32 gap-1 text-[10px]";
+    case "xs":
+      return "w-8 h-8 gap-px text-[0px]";
+    case "sm":
+      return "w-16 h-16 gap-0.5 text-[6px]";
+    case "md":
+      return "w-32 h-32 gap-1 text-[10px]";
+    default:
+      return "w-32 h-32 gap-1 text-[10px]";
   }
 });
 
 const cellClass = computed(() => {
   switch (props.size) {
-    case "xs": return "rounded-[1px]";
-    case "sm": return "rounded-sm";
-    case "md": return "rounded";
-    default: return "rounded";
+    case "xs":
+      return "rounded-[1px]";
+    case "sm":
+      return "rounded-sm";
+    case "md":
+      return "rounded";
+    default:
+      return "rounded";
   }
 });
 </script>
@@ -93,9 +105,15 @@ const cellClass = computed(() => {
       :key="index"
       class="flex items-center justify-center bg-white transition-colors duration-200"
       :class="cellClass"
-      :style="activeFrame[index] === 1 || index === 12 ? { backgroundColor: index === 12 ? undefined : fillColor } : {}"
+      :style="
+        activeFrame[index] === 1 || index === 12
+          ? { backgroundColor: index === 12 ? undefined : fillColor }
+          : {}
+      "
     >
-      <span v-if="index === 12" class="font-bold text-neutral-400 select-none">FREE</span>
+      <span v-if="index === 12" class="font-bold text-neutral-400 select-none"
+        >FREE</span
+      >
     </div>
   </div>
 </template>

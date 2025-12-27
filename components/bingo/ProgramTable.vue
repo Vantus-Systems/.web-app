@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import BingoPatternGrid from "./BingoPatternGrid.vue";
 import BaseModal from "../ui/BaseModal.vue";
+import BingoPatternGrid from "./BingoPatternGrid.vue";
 
 interface ProgramGame {
   sortOrder: number;
@@ -36,7 +36,9 @@ const openGame = (game: ProgramGame) => {
 </script>
 
 <template>
-  <div class="overflow-hidden rounded-lg border border-emerald-900/10 bg-white shadow-sm">
+  <div
+    class="overflow-hidden rounded-lg border border-emerald-900/10 bg-white shadow-sm"
+  >
     <div class="overflow-x-auto">
       <table class="w-full text-left text-sm">
         <thead class="bg-emerald-50/50 text-emerald-900">
@@ -56,7 +58,9 @@ const openGame = (game: ProgramGame) => {
           >
             <td class="px-4 py-3 align-middle">
               <div class="font-medium text-emerald-950">{{ game.title }}</div>
-              <div v-if="game.notes" class="text-xs text-neutral-500">{{ game.notes }}</div>
+              <div v-if="game.notes" class="text-xs text-neutral-500">
+                {{ game.notes }}
+              </div>
             </td>
             <td class="px-4 py-3 align-middle">
               <div class="flex items-center gap-2">
@@ -91,8 +95,8 @@ const openGame = (game: ProgramGame) => {
 
     <BaseModal
       :model-value="!!selectedGame"
-      @update:model-value="(val) => !val && (selectedGame = null)"
       :title="selectedGame?.title || 'Game Details'"
+      @update:model-value="(val) => !val && (selectedGame = null)"
     >
       <div v-if="selectedGame" class="flex flex-col items-center gap-6">
         <div class="flex items-center gap-2 text-sm text-neutral-600">
@@ -112,13 +116,21 @@ const openGame = (game: ProgramGame) => {
         />
 
         <div class="text-center">
-          <h4 class="font-semibold text-emerald-900">{{ selectedGame.pattern.name }}</h4>
-          <p v-if="selectedGame.pattern.description" class="mt-1 text-sm text-neutral-500">
+          <h4 class="font-semibold text-emerald-900">
+            {{ selectedGame.pattern.name }}
+          </h4>
+          <p
+            v-if="selectedGame.pattern.description"
+            class="mt-1 text-sm text-neutral-500"
+          >
             {{ selectedGame.pattern.description }}
           </p>
         </div>
 
-        <div v-if="selectedGame.notes" class="w-full rounded bg-emerald-50 p-3 text-center text-sm text-emerald-800">
+        <div
+          v-if="selectedGame.notes"
+          class="w-full rounded bg-emerald-50 p-3 text-center text-sm text-emerald-800"
+        >
           {{ selectedGame.notes }}
         </div>
       </div>
