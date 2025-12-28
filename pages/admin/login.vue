@@ -76,7 +76,7 @@ const handleLogin = async () => {
       body: { username: username.value, password: password.value },
     });
 
-    const authCookie = useCookie("admin_auth");
+    const authCookie = useCookie("admin_auth", { path: "/" });
     authCookie.value = "true";
     await router.push("/admin");
   } catch {

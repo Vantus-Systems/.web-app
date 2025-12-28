@@ -728,7 +728,7 @@ const normalizeSchedule = (raw: any) => {
 };
 
 const clearAuthState = () => {
-  const authCookie = useCookie("admin_auth");
+  const authCookie = useCookie("admin_auth", { path: "/" });
   authCookie.value = null;
 };
 
