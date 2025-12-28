@@ -658,6 +658,13 @@ const normalizePricing = (raw: any) => {
         type: machine.type ?? "bundle",
         savings: machine.savings ?? "",
       })),
+      specialtyGames: ensureArray(clone?.evening?.specialtyGames).map(
+        (game: any) => ({
+          name: game.name ?? "",
+          price: game.price ?? "",
+          description: game.description ?? "",
+        }),
+      ),
       specialPapers: ensureArray(clone?.evening?.specialPapers).map(
         (paper: any) => ({
           name: paper.name ?? "",
