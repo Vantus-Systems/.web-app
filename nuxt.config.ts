@@ -58,6 +58,8 @@ export default defineNuxtConfig({
       Montserrat: [400, 500, 600, 700, 800],
     },
     display: "swap",
+    download: false,
+    useStylesheet: true,
   },
 
   tailwindcss: {

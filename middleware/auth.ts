@@ -1,7 +1,16 @@
-export default defineNuxtRouteMiddleware((to, _from) => {
-  const auth = useCookie("admin_auth");
+export default defineNuxtRouteMiddleware(async (to, _from) => {
+  if (to.path === "/admin/login") {
+    return;
+  }
 
-  if (!auth.value && to.path !== "/admin/login") {
+  try {
+    const response = await $fetch<{ user: { role?: string } }>(
+      "/api/auth/user",
+    );
+    if (response?.user?.role !== "admin") {
+      return navigateTo("/admin/login");
+    }
+  } catch {
     return navigateTo("/admin/login");
   }
 });

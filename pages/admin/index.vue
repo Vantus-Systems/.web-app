@@ -15,7 +15,7 @@
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-20">
-          <div class="flex items-center">
+          <div class="flex items-center gap-6">
             <div class="flex-shrink-0 flex items-center">
               <span
                 class="text-gold font-black text-2xl tracking-tighter uppercase italic"
@@ -31,26 +31,17 @@
                 Admin
               </div>
             </div>
-            <div class="hidden lg:ml-10 lg:flex lg:space-x-4">
-              <button
-                v-for="tab in tabs"
-                :key="tab.id"
-                :class="[
-                  currentTab === tab.id
-                    ? 'bg-primary-900 text-gold shadow-inner'
-                    : 'text-slate-400 hover:text-white hover:bg-primary-900/50',
-                  'px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 flex items-center space-x-2',
-                ]"
-                @click="currentTab = tab.id"
-              >
-                <span>{{ tab.name }}</span>
-              </button>
+            <div class="hidden lg:flex items-center gap-2 text-xs text-slate-300">
+              <span class="uppercase tracking-[0.4em]">Operations Hub</span>
             </div>
           </div>
           <div class="flex items-center space-x-4">
             <div class="hidden md:flex flex-col items-end mr-4">
               <span class="text-white text-xs font-bold"
                 >System Administrator</span
+              >
+              <span class="text-[10px] text-slate-400 uppercase tracking-widest"
+                >Enterprise Admin</span
               >
             </div>
             <button
@@ -61,35 +52,246 @@
             </button>
           </div>
         </div>
+        <div class="flex flex-wrap gap-2 pb-4 lg:hidden">
+          <button
+            v-for="tab in tabs"
+            :key="`mobile-${tab.id}`"
+            :class="[
+              currentTab === tab.id
+                ? 'bg-primary-900 text-gold shadow-inner'
+                : 'text-slate-400 hover:text-white hover:bg-primary-900/50',
+              isTabLocked(tab.id) ? 'opacity-50 cursor-not-allowed' : '',
+              'px-3 py-2 rounded-lg text-xs font-bold transition-all duration-200',
+            ]"
+            :disabled="isTabLocked(tab.id)"
+            @click="selectTab(tab.id)"
+          >
+            {{ tab.name }}
+          </button>
+        </div>
       </div>
     </nav>
 
-    <div class="py-12 relative z-10">
-      <header class="mb-10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex items-end justify-between">
-            <div>
-              <p
-                class="text-gold font-bold text-xs uppercase tracking-[0.2em] mb-1"
-              >
-                Management Console
-              </p>
-              <h1 class="text-4xl font-black text-primary-950 tracking-tight">
-                {{ currentTabName }}
-              </h1>
-            </div>
-            <div class="hidden sm:block text-right">
-              <p class="text-slate-400 text-xs font-medium">Last System Sync</p>
-              <p class="text-slate-900 font-bold text-sm">
-                {{ new Date().toLocaleTimeString() }}
-              </p>
-            </div>
+    <div class="relative z-10">
+      <div class="flex">
+        <aside
+          class="hidden lg:flex lg:flex-col lg:w-72 bg-white border-r border-slate-200 min-h-[calc(100vh-5rem)] sticky top-20"
+        >
+          <div class="px-6 py-8">
+            <p class="text-xs uppercase tracking-[0.4em] text-slate-400">
+              Control Center
+            </p>
+            <h2 class="text-2xl font-black text-primary-950 mt-2">
+              Admin Suite
+            </h2>
+            <p class="text-xs text-slate-500 mt-2">
+              Pricing, programs, and scheduling orchestration.
+            </p>
           </div>
-        </div>
-      </header>
+          <div class="px-4 space-y-2">
+            <button
+              v-for="tab in tabs"
+              :key="`sidebar-${tab.id}`"
+              :class="[
+                currentTab === tab.id
+                  ? 'bg-primary-900 text-gold shadow-inner'
+                  : 'bg-white text-slate-600 hover:bg-slate-100',
+                isTabLocked(tab.id) ? 'opacity-50 cursor-not-allowed' : '',
+                'w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200',
+              ]"
+              :disabled="isTabLocked(tab.id)"
+              @click="selectTab(tab.id)"
+            >
+              <span>{{ tab.name }}</span>
+              <span
+                v-if="isTabLocked(tab.id)"
+                class="text-[10px] uppercase tracking-[0.3em] text-amber-500"
+                >Locked</span
+              >
+            </button>
+          </div>
+          <div class="mt-auto px-6 py-6 border-t border-slate-200">
+            <div class="text-xs text-slate-500 uppercase tracking-[0.3em]">
+              System Sync
+            </div>
+            <ClientOnly>
+              <div class="text-sm font-bold text-slate-900 mt-2">
+                {{ lastSystemSync }}
+              </div>
+              <template #fallback>
+                <div class="text-sm font-bold text-slate-900 mt-2">--</div>
+              </template>
+            </ClientOnly>
+          </div>
+        </aside>
 
-      <main>
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="flex-1 py-12">
+          <header class="mb-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div class="flex items-end justify-between">
+                <div>
+                  <p
+                    class="text-gold font-bold text-xs uppercase tracking-[0.2em] mb-1"
+                  >
+                    Management Console
+                  </p>
+                  <h1
+                    class="text-4xl font-black text-primary-950 tracking-tight"
+                  >
+                    {{ currentTabName }}
+                  </h1>
+                </div>
+                <div class="hidden sm:block text-right">
+                  <p class="text-slate-400 text-xs font-medium">
+                    Last System Sync
+                  </p>
+                  <ClientOnly>
+                    <p class="text-slate-900 font-bold text-sm">
+                      {{ lastSystemSync }}
+                    </p>
+                    <template #fallback>
+                      <p class="text-slate-900 font-bold text-sm">--</p>
+                    </template>
+                  </ClientOnly>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <main>
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+          <BaseCard
+            v-if="workflowVisible"
+            class-name="mb-10 border-l-4 border-l-gold"
+          >
+            <template #header>
+              <div class="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <p
+                    class="text-gold font-bold text-xs uppercase tracking-[0.4em] mb-1"
+                  >
+                    Operational Workflow
+                  </p>
+                  <h3 class="text-2xl font-black text-primary-950">
+                    Pricing → Programs → Schedule
+                  </h3>
+                  <p class="text-sm text-slate-500">
+                    Establish pricing first, then build programs, then publish
+                    the schedule for a controlled release.
+                  </p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                  <BaseButton
+                    variant="outline"
+                    class-name="px-4 py-2 text-xs uppercase tracking-[0.3em]"
+                    type="button"
+                    @click="focusTab('pricing')"
+                  >
+                    Pricing
+                  </BaseButton>
+                  <BaseButton
+                    variant="outline"
+                    class-name="px-4 py-2 text-xs uppercase tracking-[0.3em]"
+                    type="button"
+                    :disabled="!isPricingReady"
+                    @click="focusTab('programs')"
+                  >
+                    Programs
+                  </BaseButton>
+                  <BaseButton
+                    variant="outline"
+                    class-name="px-4 py-2 text-xs uppercase tracking-[0.3em]"
+                    type="button"
+                    :disabled="!isProgramsReady"
+                    @click="focusTab('schedule')"
+                  >
+                    Schedule
+                  </BaseButton>
+                </div>
+              </div>
+            </template>
+            <div class="grid gap-4 md:grid-cols-3">
+              <div
+                v-for="step in workflowSteps"
+                :key="step.id"
+                class="rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm"
+              >
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-xs uppercase tracking-[0.3em] text-slate-400">
+                      Step {{ step.order }}
+                    </p>
+                    <p class="text-lg font-black text-primary-950">
+                      {{ step.label }}
+                    </p>
+                  </div>
+                  <span
+                    :class="[
+                      'px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide',
+                      step.ready
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-amber-100 text-amber-700',
+                    ]"
+                  >
+                    {{ step.ready ? "Ready" : "Pending" }}
+                  </span>
+                </div>
+                <p class="text-xs text-slate-500 mt-2">
+                  {{ step.description }}
+                </p>
+              </div>
+            </div>
+          </BaseCard>
+
+          <BaseCard class-name="mb-10">
+            <template #header>
+              <div class="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <p
+                    class="text-gold font-bold text-xs uppercase tracking-[0.4em] mb-1"
+                  >
+                    Executive Summary
+                  </p>
+                  <h3 class="text-2xl font-black text-primary-950">
+                    Admin Operations Snapshot
+                  </h3>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                  <BaseButton
+                    variant="outline"
+                    class-name="px-4 py-2 text-xs uppercase tracking-[0.3em]"
+                    type="button"
+                    @click="focusTab('pricing')"
+                  >
+                    Review Pricing
+                  </BaseButton>
+                  <BaseButton
+                    variant="outline"
+                    class-name="px-4 py-2 text-xs uppercase tracking-[0.3em]"
+                    type="button"
+                    @click="focusTab('programs')"
+                  >
+                    Review Programs
+                  </BaseButton>
+                </div>
+              </div>
+            </template>
+            <div class="grid gap-4 md:grid-cols-4">
+              <div
+                v-for="card in summaryCards"
+                :key="card.id"
+                class="rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm"
+              >
+                <p class="text-xs uppercase tracking-[0.3em] text-slate-400">
+                  {{ card.label }}
+                </p>
+                <p class="mt-2 text-2xl font-black" :class="card.accent">
+                  {{ card.value }}
+                </p>
+              </div>
+            </div>
+          </BaseCard>
+
           <!-- Loading State -->
           <div
             v-if="pending"
@@ -110,6 +312,13 @@
 
           <!-- Tab Content -->
           <div v-else>
+            <div
+              v-if="lockedNotice"
+              class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-800"
+            >
+              {{ lockedNotice }}
+            </div>
+
             <!-- Business Info Tab -->
             <div v-if="currentTab === 'business'">
               <BaseCard>
@@ -246,9 +455,43 @@
 
             <!-- Schedule Tab (NEW COMPONENT) -->
             <div v-if="currentTab === 'schedule'">
+              <div v-if="!isProgramsReady" class="space-y-6">
+                <BaseCard>
+                  <template #header>
+                    <h3 class="text-lg font-bold text-primary-900">
+                      Schedule Locked
+                    </h3>
+                  </template>
+                  <p class="text-sm text-slate-600">
+                    Programs must be created before scheduling sessions. Build
+                    the program lineup to unlock the enterprise scheduling
+                    suite.
+                  </p>
+                  <div class="mt-4 flex flex-wrap gap-3">
+                    <BaseButton
+                      variant="gold"
+                      class-name="px-6 py-3 text-xs uppercase tracking-[0.3em]"
+                      type="button"
+                      @click="focusTab('programs')"
+                    >
+                      Build Programs
+                    </BaseButton>
+                    <BaseButton
+                      variant="outline"
+                      class-name="px-6 py-3 text-xs uppercase tracking-[0.3em]"
+                      type="button"
+                      @click="focusTab('pricing')"
+                    >
+                      Review Pricing
+                    </BaseButton>
+                  </div>
+                </BaseCard>
+              </div>
               <ScheduleEditor
+                v-else
                 v-model="scheduleData"
                 :pricing-data="pricingData"
+                :programs-count="programsCount"
                 :is-saving="isSavingSchedule"
                 @save="saveSchedule"
               />
@@ -261,7 +504,31 @@
 
             <!-- Programs Tab -->
             <div v-if="currentTab === 'programs'">
-              <ProgramEditor />
+              <div v-if="!isPricingReady" class="space-y-6">
+                <BaseCard>
+                  <template #header>
+                    <h3 class="text-lg font-bold text-primary-900">
+                      Programs Locked
+                    </h3>
+                  </template>
+                  <p class="text-sm text-slate-600">
+                    Pricing must be defined before programs can be created. Set
+                    pricing tiers first to ensure every program aligns with your
+                    revenue strategy.
+                  </p>
+                  <div class="mt-4 flex flex-wrap gap-3">
+                    <BaseButton
+                      variant="gold"
+                      class-name="px-6 py-3 text-xs uppercase tracking-[0.3em]"
+                      type="button"
+                      @click="focusTab('pricing')"
+                    >
+                      Configure Pricing
+                    </BaseButton>
+                  </div>
+                </BaseCard>
+              </div>
+              <ProgramEditor v-else />
             </div>
 
             <!-- Messages Tab -->
@@ -535,6 +802,8 @@
           </div>
         </div>
       </main>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -546,6 +815,7 @@ import ProgressiveEditor from "~/components/admin/ProgressiveEditor.vue";
 import W2GGenerator from "~/components/admin/W2GGenerator.vue";
 import PatternEditor from "~/components/admin/PatternEditor.vue";
 import ProgramEditor from "~/components/admin/ProgramEditor.vue";
+import { provide } from "vue";
 
 definePageMeta({
   middleware: ["auth"],
@@ -574,6 +844,7 @@ const pricingData = ref<any>({});
 const scheduleData = ref<any>([]);
 const messagesData = ref<any[]>([]);
 const usersData = ref<any[]>([]);
+const patternsCount = ref(0);
 const newUser = ref({
   username: "",
   password: "",
@@ -584,6 +855,10 @@ const pending = ref(true);
 const isSavingPricing = ref(false);
 const isSavingSchedule = ref(false);
 const isSavingJackpot = ref(false);
+const lastSystemSync = ref("");
+const programsCount = ref(0);
+const lockedNotice = ref("");
+let lastSyncInterval: ReturnType<typeof setInterval> | null = null;
 
 const deepCloneValue = <T,>(value: T): T =>
   JSON.parse(JSON.stringify(value ?? {}));
@@ -720,17 +995,156 @@ const normalizeSchedule = (raw: any) => {
   return normalizedArray;
 };
 
+const isPricingReady = computed(() => {
+  const pricing = pricingData.value ?? {};
+  const daytimeSessions = pricing?.daytime?.sessions?.length ?? 0;
+  const eveningDefined =
+    Boolean(pricing?.evening?.startTime) ||
+    (pricing?.evening?.machines?.length ?? 0) > 0 ||
+    (pricing?.evening?.specialtyGames?.length ?? 0) > 0;
+  return daytimeSessions > 0 || eveningDefined;
+});
+
+const isProgramsReady = computed(() => programsCount.value > 0);
+const isPatternsReady = computed(() => patternsCount.value > 0);
+
+const workflowSteps = computed(() => [
+  {
+    id: "pricing",
+    order: 1,
+    label: "Pricing",
+    ready: isPricingReady.value,
+    description: "Define pricing tiers and session templates.",
+  },
+  {
+    id: "programs",
+    order: 2,
+    label: "Programs",
+    ready: isProgramsReady.value,
+    description: isPatternsReady.value
+      ? "Build program lineups anchored to pricing."
+      : "Add patterns to unlock program creation.",
+  },
+  {
+    id: "schedule",
+    order: 3,
+    label: "Schedule",
+    ready: isProgramsReady.value,
+    description: "Publish sessions after programs are approved.",
+  },
+]);
+
+const workflowVisible = computed(() =>
+  ["pricing", "programs", "schedule"].includes(currentTab.value),
+);
+
+const getTabLockReason = (tabId: string) => {
+  if (tabId === "programs" && !isPricingReady.value) {
+    return "Programs unlock after pricing is configured.";
+  }
+  if (tabId === "schedule" && !isProgramsReady.value) {
+    return "Schedule unlocks after at least one program is created.";
+  }
+  return "";
+};
+
+const isTabLocked = (tabId: string) => Boolean(getTabLockReason(tabId));
+
+const focusTab = (tabId: string) => {
+  lockedNotice.value = "";
+  currentTab.value = tabId;
+};
+
+const selectTab = (tabId: string) => {
+  const reason = getTabLockReason(tabId);
+  if (reason) {
+    lockedNotice.value = reason;
+    return;
+  }
+  focusTab(tabId);
+};
+
+const refreshAdminCounts = async () => {
+  try {
+    const [programs, patterns] = await Promise.all([
+      $fetch("/api/admin/programs"),
+      $fetch("/api/admin/patterns"),
+    ]);
+    programsCount.value = Array.isArray(programs) ? programs.length : 0;
+    patternsCount.value = Array.isArray(patterns) ? patterns.length : 0;
+  } catch (error) {
+    console.error("Failed to refresh admin counts", error);
+  }
+};
+
+provide("setAdminTab", focusTab);
+provide("refreshAdminCounts", refreshAdminCounts);
+
+const summaryCards = computed(() => [
+  {
+    id: "pricing",
+    label: "Pricing Templates",
+    value: isPricingReady.value ? "Configured" : "Pending",
+    accent: isPricingReady.value ? "text-emerald-600" : "text-amber-600",
+  },
+  {
+    id: "patterns",
+    label: "Patterns",
+    value: patternsCount.value,
+    accent: patternsCount.value > 0 ? "text-emerald-600" : "text-amber-600",
+  },
+  {
+    id: "programs",
+    label: "Programs",
+    value: programsCount.value,
+    accent: programsCount.value > 0 ? "text-emerald-600" : "text-amber-600",
+  },
+  {
+    id: "schedule",
+    label: "Scheduled Sessions",
+    value: scheduleData.value.length,
+    accent: scheduleData.value.length > 0 ? "text-emerald-600" : "text-amber-600",
+  },
+]);
+
+const clearAuthState = () => {
+  const authCookie = useCookie("admin_auth", { path: "/" });
+  authCookie.value = null;
+};
+
+const verifyAdminSession = async () => {
+  try {
+    const response = await $fetch<{ user: { role?: string } }>(
+      "/api/auth/user",
+    );
+    const role = response?.user?.role;
+    if (!role || role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    return response.user;
+  } catch (error) {
+    clearAuthState();
+    await router.push("/admin/login");
+    return null;
+  }
+};
+
 // Fetch all data
 const loadData = async () => {
   pending.value = true;
   try {
-    const [biz, jack, price, sched, msgs, users] = await Promise.all([
+    const user = await verifyAdminSession();
+    if (!user) return;
+    const [biz, jack, price, sched, msgs, users, programs, patterns] =
+      await Promise.all([
       $fetch("/api/business"),
       $fetch("/api/jackpot"),
       $fetch("/api/pricing"),
       $fetch("/api/schedule"),
-      $fetch("/api/admin/messages").catch(() => []),
-      $fetch("/api/admin/users").catch(() => []),
+      $fetch("/api/admin/messages"),
+      $fetch("/api/admin/users"),
+      $fetch("/api/admin/programs"),
+      $fetch("/api/admin/patterns"),
     ]);
 
     businessData.value = biz;
@@ -739,6 +1153,8 @@ const loadData = async () => {
     scheduleData.value = normalizeSchedule(sched);
     messagesData.value = msgs;
     usersData.value = users;
+    programsCount.value = Array.isArray(programs) ? programs.length : 0;
+    patternsCount.value = Array.isArray(patterns) ? patterns.length : 0;
   } catch (e) {
     console.error("Failed to load data", e);
   } finally {
@@ -746,7 +1162,20 @@ const loadData = async () => {
   }
 };
 
-onMounted(loadData);
+onMounted(() => {
+  lastSystemSync.value = new Date().toLocaleTimeString();
+  lastSyncInterval = setInterval(() => {
+    lastSystemSync.value = new Date().toLocaleTimeString();
+  }, 1000 * 60);
+  loadData();
+});
+
+onBeforeUnmount(() => {
+  if (lastSyncInterval) {
+    clearInterval(lastSyncInterval);
+    lastSyncInterval = null;
+  }
+});
 
 // Save Handlers
 const saveBusinessInfo = async () => {
@@ -833,8 +1262,7 @@ const deleteUser = async (id: string) => {
 
 const logout = async () => {
   await $fetch("/api/auth/logout", { method: "POST" });
-  const authCookie = useCookie("admin_auth");
-  authCookie.value = null;
+  clearAuthState();
   router.push("/admin/login");
 };
 </script>
