@@ -710,6 +710,7 @@ import { parseTime } from "~/utils/time.utils";
 const props = defineProps<{
   modelValue: any[];
   isSaving: boolean;
+  pricingData?: any;
 }>();
 
 const emit = defineEmits(["update:modelValue", "save"]);
