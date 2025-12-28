@@ -734,11 +734,14 @@ const clearAuthState = () => {
 
 const verifyAdminSession = async () => {
   try {
-    const user = await $fetch("/api/auth/user");
-    if (!user || user.role !== "admin") {
+    const response = await $fetch<{ user: { role?: string } }>(
+      "/api/auth/user",
+    );
+    const role = response?.user?.role;
+    if (!role || role !== "admin") {
       throw new Error("Unauthorized");
     }
-    return user;
+    return response.user;
   } catch (error) {
     clearAuthState();
     await router.push("/admin/login");
