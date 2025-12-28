@@ -10,7 +10,7 @@ const editingPattern = ref<any>(null); // null means list view, object means edi
 const fetchPatterns = async () => {
   isLoading.value = true;
   try {
-    patterns.value = await $fetch("/api/admin/patterns");
+    patterns.value = await $fetch("/api/admin/patterns", { credentials: "include" });
   } catch (e) {
     console.error(e);
   } finally {
@@ -76,6 +76,7 @@ const savePattern = async () => {
     await $fetch("/api/admin/patterns", {
       method: "POST",
       body: form.value,
+      credentials: "include"
     });
     await fetchPatterns();
     editingPattern.value = null;
@@ -90,7 +91,7 @@ const deletePattern = async (slug: string) => {
   if (!confirm("Are you sure? This may break programs using this pattern."))
     return;
   try {
-    await $fetch(`/api/admin/patterns?slug=${slug}`, { method: "DELETE" });
+    await $fetch(`/api/admin/patterns?slug=${slug}`, { method: "DELETE", credentials: "include" });
     await fetchPatterns();
   } catch (e: any) {
     alert(e.data?.message || "Failed to delete");
