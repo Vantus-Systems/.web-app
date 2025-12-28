@@ -71,21 +71,16 @@ const handleLogin = async () => {
   error.value = "";
 
   try {
-    const { error: apiError } = await useFetch("/api/auth/login", {
+    await $fetch("/api/auth/login", {
       method: "POST",
       body: { username: username.value, password: password.value },
     });
 
-    if (apiError.value) {
-      error.value = "Invalid username or password";
-    } else {
-      // Store a simple token/flag
-      const authCookie = useCookie("admin_auth");
-      authCookie.value = "true";
-      router.push("/admin");
-    }
+    const authCookie = useCookie("admin_auth");
+    authCookie.value = "true";
+    await router.push("/admin");
   } catch {
-    error.value = "An error occurred";
+    error.value = "Invalid username or password";
   } finally {
     isLoading.value = false;
   }
