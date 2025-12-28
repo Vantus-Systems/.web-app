@@ -80,9 +80,14 @@
             </div>
             <div class="hidden sm:block text-right">
               <p class="text-slate-400 text-xs font-medium">Last System Sync</p>
-              <p class="text-slate-900 font-bold text-sm">
-                {{ new Date().toLocaleTimeString() }}
-              </p>
+              <ClientOnly>
+                <p class="text-slate-900 font-bold text-sm">
+                  {{ lastSystemSync }}
+                </p>
+                <template #fallback>
+                  <p class="text-slate-900 font-bold text-sm">--</p>
+                </template>
+              </ClientOnly>
             </div>
           </div>
         </div>
@@ -584,6 +589,8 @@ const pending = ref(true);
 const isSavingPricing = ref(false);
 const isSavingSchedule = ref(false);
 const isSavingJackpot = ref(false);
+const lastSystemSync = ref("");
+let lastSyncInterval: ReturnType<typeof setInterval> | null = null;
 
 const deepCloneValue = <T,>(value: T): T =>
   JSON.parse(JSON.stringify(value ?? {}));
@@ -720,17 +727,38 @@ const normalizeSchedule = (raw: any) => {
   return normalizedArray;
 };
 
+const clearAuthState = () => {
+  const authCookie = useCookie("admin_auth");
+  authCookie.value = null;
+};
+
+const verifyAdminSession = async () => {
+  try {
+    const user = await $fetch("/api/auth/user");
+    if (!user || user.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    return user;
+  } catch (error) {
+    clearAuthState();
+    await router.push("/admin/login");
+    return null;
+  }
+};
+
 // Fetch all data
 const loadData = async () => {
   pending.value = true;
   try {
+    const user = await verifyAdminSession();
+    if (!user) return;
     const [biz, jack, price, sched, msgs, users] = await Promise.all([
       $fetch("/api/business"),
       $fetch("/api/jackpot"),
       $fetch("/api/pricing"),
       $fetch("/api/schedule"),
-      $fetch("/api/admin/messages").catch(() => []),
-      $fetch("/api/admin/users").catch(() => []),
+      $fetch("/api/admin/messages"),
+      $fetch("/api/admin/users"),
     ]);
 
     businessData.value = biz;
@@ -746,7 +774,20 @@ const loadData = async () => {
   }
 };
 
-onMounted(loadData);
+onMounted(() => {
+  lastSystemSync.value = new Date().toLocaleTimeString();
+  lastSyncInterval = setInterval(() => {
+    lastSystemSync.value = new Date().toLocaleTimeString();
+  }, 1000 * 60);
+  loadData();
+});
+
+onBeforeUnmount(() => {
+  if (lastSyncInterval) {
+    clearInterval(lastSyncInterval);
+    lastSyncInterval = null;
+  }
+});
 
 // Save Handlers
 const saveBusinessInfo = async () => {
@@ -833,8 +874,7 @@ const deleteUser = async (id: string) => {
 
 const logout = async () => {
   await $fetch("/api/auth/logout", { method: "POST" });
-  const authCookie = useCookie("admin_auth");
-  authCookie.value = null;
+  clearAuthState();
   router.push("/admin/login");
 };
 </script>
