@@ -15,7 +15,7 @@
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-20">
-          <div class="flex items-center">
+          <div class="flex items-center gap-6">
             <div class="flex-shrink-0 flex items-center">
               <span
                 class="text-gold font-black text-2xl tracking-tighter uppercase italic"
@@ -31,28 +31,17 @@
                 Admin
               </div>
             </div>
-            <div class="hidden lg:ml-10 lg:flex lg:space-x-4">
-              <button
-                v-for="tab in tabs"
-                :key="tab.id"
-                :class="[
-                  currentTab === tab.id
-                    ? 'bg-primary-900 text-gold shadow-inner'
-                    : 'text-slate-400 hover:text-white hover:bg-primary-900/50',
-                  isTabLocked(tab.id) ? 'opacity-50 cursor-not-allowed' : '',
-                  'px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 flex items-center space-x-2',
-                ]"
-                :disabled="isTabLocked(tab.id)"
-                @click="selectTab(tab.id)"
-              >
-                <span>{{ tab.name }}</span>
-              </button>
+            <div class="hidden lg:flex items-center gap-2 text-xs text-slate-300">
+              <span class="uppercase tracking-[0.4em]">Operations Hub</span>
             </div>
           </div>
           <div class="flex items-center space-x-4">
             <div class="hidden md:flex flex-col items-end mr-4">
               <span class="text-white text-xs font-bold"
                 >System Administrator</span
+              >
+              <span class="text-[10px] text-slate-400 uppercase tracking-widest"
+                >Enterprise Admin</span
               >
             </div>
             <button
@@ -63,40 +52,114 @@
             </button>
           </div>
         </div>
+        <div class="flex flex-wrap gap-2 pb-4 lg:hidden">
+          <button
+            v-for="tab in tabs"
+            :key="`mobile-${tab.id}`"
+            :class="[
+              currentTab === tab.id
+                ? 'bg-primary-900 text-gold shadow-inner'
+                : 'text-slate-400 hover:text-white hover:bg-primary-900/50',
+              isTabLocked(tab.id) ? 'opacity-50 cursor-not-allowed' : '',
+              'px-3 py-2 rounded-lg text-xs font-bold transition-all duration-200',
+            ]"
+            :disabled="isTabLocked(tab.id)"
+            @click="selectTab(tab.id)"
+          >
+            {{ tab.name }}
+          </button>
+        </div>
       </div>
     </nav>
 
-    <div class="py-12 relative z-10">
-      <header class="mb-10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex items-end justify-between">
-            <div>
-              <p
-                class="text-gold font-bold text-xs uppercase tracking-[0.2em] mb-1"
-              >
-                Management Console
-              </p>
-              <h1 class="text-4xl font-black text-primary-950 tracking-tight">
-                {{ currentTabName }}
-              </h1>
-            </div>
-            <div class="hidden sm:block text-right">
-              <p class="text-slate-400 text-xs font-medium">Last System Sync</p>
-              <ClientOnly>
-                <p class="text-slate-900 font-bold text-sm">
-                  {{ lastSystemSync }}
-                </p>
-                <template #fallback>
-                  <p class="text-slate-900 font-bold text-sm">--</p>
-                </template>
-              </ClientOnly>
-            </div>
+    <div class="relative z-10">
+      <div class="flex">
+        <aside
+          class="hidden lg:flex lg:flex-col lg:w-72 bg-white border-r border-slate-200 min-h-[calc(100vh-5rem)] sticky top-20"
+        >
+          <div class="px-6 py-8">
+            <p class="text-xs uppercase tracking-[0.4em] text-slate-400">
+              Control Center
+            </p>
+            <h2 class="text-2xl font-black text-primary-950 mt-2">
+              Admin Suite
+            </h2>
+            <p class="text-xs text-slate-500 mt-2">
+              Pricing, programs, and scheduling orchestration.
+            </p>
           </div>
-        </div>
-      </header>
+          <div class="px-4 space-y-2">
+            <button
+              v-for="tab in tabs"
+              :key="`sidebar-${tab.id}`"
+              :class="[
+                currentTab === tab.id
+                  ? 'bg-primary-900 text-gold shadow-inner'
+                  : 'bg-white text-slate-600 hover:bg-slate-100',
+                isTabLocked(tab.id) ? 'opacity-50 cursor-not-allowed' : '',
+                'w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200',
+              ]"
+              :disabled="isTabLocked(tab.id)"
+              @click="selectTab(tab.id)"
+            >
+              <span>{{ tab.name }}</span>
+              <span
+                v-if="isTabLocked(tab.id)"
+                class="text-[10px] uppercase tracking-[0.3em] text-amber-500"
+                >Locked</span
+              >
+            </button>
+          </div>
+          <div class="mt-auto px-6 py-6 border-t border-slate-200">
+            <div class="text-xs text-slate-500 uppercase tracking-[0.3em]">
+              System Sync
+            </div>
+            <ClientOnly>
+              <div class="text-sm font-bold text-slate-900 mt-2">
+                {{ lastSystemSync }}
+              </div>
+              <template #fallback>
+                <div class="text-sm font-bold text-slate-900 mt-2">--</div>
+              </template>
+            </ClientOnly>
+          </div>
+        </aside>
 
-      <main>
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="flex-1 py-12">
+          <header class="mb-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div class="flex items-end justify-between">
+                <div>
+                  <p
+                    class="text-gold font-bold text-xs uppercase tracking-[0.2em] mb-1"
+                  >
+                    Management Console
+                  </p>
+                  <h1
+                    class="text-4xl font-black text-primary-950 tracking-tight"
+                  >
+                    {{ currentTabName }}
+                  </h1>
+                </div>
+                <div class="hidden sm:block text-right">
+                  <p class="text-slate-400 text-xs font-medium">
+                    Last System Sync
+                  </p>
+                  <ClientOnly>
+                    <p class="text-slate-900 font-bold text-sm">
+                      {{ lastSystemSync }}
+                    </p>
+                    <template #fallback>
+                      <p class="text-slate-900 font-bold text-sm">--</p>
+                    </template>
+                  </ClientOnly>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <main>
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <BaseCard
             v-if="workflowVisible"
             class-name="mb-10 border-l-4 border-l-gold"
@@ -739,6 +802,8 @@
           </div>
         </div>
       </main>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -1068,14 +1133,18 @@ const verifyAdminSession = async () => {
 const loadData = async () => {
   pending.value = true;
   try {
-    // Explicitly use useAdminFetch or $fetch with credentials: include
-    const [biz, jack, price, sched, msgs, users] = await Promise.all([
+    const user = await verifyAdminSession();
+    if (!user) return;
+    const [biz, jack, price, sched, msgs, users, programs, patterns] =
+      await Promise.all([
       $fetch("/api/business"),
       $fetch("/api/jackpot"),
       $fetch("/api/pricing"),
       $fetch("/api/schedule"),
-      $fetch("/api/admin/messages", { credentials: "include" }).catch(() => []),
-      $fetch("/api/admin/users", { credentials: "include" }).catch(() => []),
+      $fetch("/api/admin/messages"),
+      $fetch("/api/admin/users"),
+      $fetch("/api/admin/programs"),
+      $fetch("/api/admin/patterns"),
     ]);
 
     businessData.value = biz;
@@ -1199,9 +1268,8 @@ const deleteUser = async (id: string) => {
 };
 
 const logout = async () => {
-  await $fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-  const authCookie = useCookie("admin_auth");
-  authCookie.value = null;
+  await $fetch("/api/auth/logout", { method: "POST" });
+  clearAuthState();
   router.push("/admin/login");
 };
 </script>

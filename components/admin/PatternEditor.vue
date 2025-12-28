@@ -14,7 +14,8 @@ const refreshAdminCounts = inject<(() => Promise<void>) | null>(
 const fetchPatterns = async () => {
   isLoading.value = true;
   try {
-    patterns.value = await $fetch("/api/admin/patterns", { credentials: "include" });
+    patterns.value = await $fetch("/api/admin/patterns");
+    await refreshAdminCounts?.();
   } catch (e) {
     console.error(e);
   } finally {
