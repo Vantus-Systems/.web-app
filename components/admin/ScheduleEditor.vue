@@ -16,6 +16,26 @@
             >
               Unsaved Changes
             </span>
+            <span
+              :class="[
+                'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide',
+                pricingReady
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-amber-100 text-amber-700',
+              ]"
+            >
+              Pricing {{ pricingReady ? "Ready" : "Pending" }}
+            </span>
+            <span
+              :class="[
+                'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide',
+                programsReady
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-amber-100 text-amber-700',
+              ]"
+            >
+              Programs {{ programsReady ? "Ready" : "Pending" }}
+            </span>
           </div>
           <h3 class="text-3xl font-black text-primary-950 tracking-tight">
             Schedule Control Room
@@ -711,6 +731,7 @@ const props = defineProps<{
   modelValue: any[];
   isSaving: boolean;
   pricingData?: any;
+  programsCount?: number;
 }>();
 
 const emit = defineEmits(["update:modelValue", "save"]);
@@ -726,6 +747,18 @@ const filters = ref({
   showDrafts: true,
   highlightConflicts: true,
 });
+
+const pricingReady = computed(() => {
+  const pricing = props.pricingData ?? {};
+  const daytimeSessions = pricing?.daytime?.sessions?.length ?? 0;
+  const eveningDefined =
+    Boolean(pricing?.evening?.startTime) ||
+    (pricing?.evening?.machines?.length ?? 0) > 0 ||
+    (pricing?.evening?.specialtyGames?.length ?? 0) > 0;
+  return daytimeSessions > 0 || eveningDefined;
+});
+
+const programsReady = computed(() => (props.programsCount ?? 0) > 0);
 
 // Bulk Ops State
 const showBulkModal = ref(false);

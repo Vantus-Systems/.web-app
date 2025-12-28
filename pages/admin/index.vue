@@ -180,6 +180,55 @@
             </div>
           </BaseCard>
 
+          <BaseCard class-name="mb-10">
+            <template #header>
+              <div class="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <p
+                    class="text-gold font-bold text-xs uppercase tracking-[0.4em] mb-1"
+                  >
+                    Executive Summary
+                  </p>
+                  <h3 class="text-2xl font-black text-primary-950">
+                    Admin Operations Snapshot
+                  </h3>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                  <BaseButton
+                    variant="outline"
+                    class-name="px-4 py-2 text-xs uppercase tracking-[0.3em]"
+                    type="button"
+                    @click="focusTab('pricing')"
+                  >
+                    Review Pricing
+                  </BaseButton>
+                  <BaseButton
+                    variant="outline"
+                    class-name="px-4 py-2 text-xs uppercase tracking-[0.3em]"
+                    type="button"
+                    @click="focusTab('programs')"
+                  >
+                    Review Programs
+                  </BaseButton>
+                </div>
+              </div>
+            </template>
+            <div class="grid gap-4 md:grid-cols-4">
+              <div
+                v-for="card in summaryCards"
+                :key="card.id"
+                class="rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm"
+              >
+                <p class="text-xs uppercase tracking-[0.3em] text-slate-400">
+                  {{ card.label }}
+                </p>
+                <p class="mt-2 text-2xl font-black" :class="card.accent">
+                  {{ card.value }}
+                </p>
+              </div>
+            </div>
+          </BaseCard>
+
           <!-- Loading State -->
           <div
             v-if="pending"
@@ -379,6 +428,7 @@
                 v-else
                 v-model="scheduleData"
                 :pricing-data="pricingData"
+                :programs-count="programsCount"
                 :is-saving="isSavingSchedule"
                 @save="saveSchedule"
               />
@@ -700,6 +750,7 @@ import ProgressiveEditor from "~/components/admin/ProgressiveEditor.vue";
 import W2GGenerator from "~/components/admin/W2GGenerator.vue";
 import PatternEditor from "~/components/admin/PatternEditor.vue";
 import ProgramEditor from "~/components/admin/ProgramEditor.vue";
+import { provide } from "vue";
 
 definePageMeta({
   middleware: ["auth"],
@@ -728,6 +779,7 @@ const pricingData = ref<any>({});
 const scheduleData = ref<any>([]);
 const messagesData = ref<any[]>([]);
 const usersData = ref<any[]>([]);
+const patternsCount = ref(0);
 const newUser = ref({
   username: "",
   password: "",
@@ -889,6 +941,7 @@ const isPricingReady = computed(() => {
 });
 
 const isProgramsReady = computed(() => programsCount.value > 0);
+const isPatternsReady = computed(() => patternsCount.value > 0);
 
 const workflowSteps = computed(() => [
   {
@@ -903,7 +956,9 @@ const workflowSteps = computed(() => [
     order: 2,
     label: "Programs",
     ready: isProgramsReady.value,
-    description: "Build program lineups anchored to pricing.",
+    description: isPatternsReady.value
+      ? "Build program lineups anchored to pricing."
+      : "Add patterns to unlock program creation.",
   },
   {
     id: "schedule",
@@ -944,6 +999,49 @@ const selectTab = (tabId: string) => {
   focusTab(tabId);
 };
 
+const refreshAdminCounts = async () => {
+  try {
+    const [programs, patterns] = await Promise.all([
+      $fetch("/api/admin/programs"),
+      $fetch("/api/admin/patterns"),
+    ]);
+    programsCount.value = Array.isArray(programs) ? programs.length : 0;
+    patternsCount.value = Array.isArray(patterns) ? patterns.length : 0;
+  } catch (error) {
+    console.error("Failed to refresh admin counts", error);
+  }
+};
+
+provide("setAdminTab", focusTab);
+provide("refreshAdminCounts", refreshAdminCounts);
+
+const summaryCards = computed(() => [
+  {
+    id: "pricing",
+    label: "Pricing Templates",
+    value: isPricingReady.value ? "Configured" : "Pending",
+    accent: isPricingReady.value ? "text-emerald-600" : "text-amber-600",
+  },
+  {
+    id: "patterns",
+    label: "Patterns",
+    value: patternsCount.value,
+    accent: patternsCount.value > 0 ? "text-emerald-600" : "text-amber-600",
+  },
+  {
+    id: "programs",
+    label: "Programs",
+    value: programsCount.value,
+    accent: programsCount.value > 0 ? "text-emerald-600" : "text-amber-600",
+  },
+  {
+    id: "schedule",
+    label: "Scheduled Sessions",
+    value: scheduleData.value.length,
+    accent: scheduleData.value.length > 0 ? "text-emerald-600" : "text-amber-600",
+  },
+]);
+
 const clearAuthState = () => {
   const authCookie = useCookie("admin_auth", { path: "/" });
   authCookie.value = null;
@@ -972,7 +1070,8 @@ const loadData = async () => {
   try {
     const user = await verifyAdminSession();
     if (!user) return;
-    const [biz, jack, price, sched, msgs, users, programs] = await Promise.all([
+    const [biz, jack, price, sched, msgs, users, programs, patterns] =
+      await Promise.all([
       $fetch("/api/business"),
       $fetch("/api/jackpot"),
       $fetch("/api/pricing"),
@@ -980,6 +1079,7 @@ const loadData = async () => {
       $fetch("/api/admin/messages"),
       $fetch("/api/admin/users"),
       $fetch("/api/admin/programs"),
+      $fetch("/api/admin/patterns"),
     ]);
 
     businessData.value = biz;
@@ -989,6 +1089,7 @@ const loadData = async () => {
     messagesData.value = msgs;
     usersData.value = users;
     programsCount.value = Array.isArray(programs) ? programs.length : 0;
+    patternsCount.value = Array.isArray(patterns) ? patterns.length : 0;
   } catch (e) {
     console.error("Failed to load data", e);
   } finally {

@@ -1,16 +1,21 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, computed, watch, inject } from "vue";
 import BingoPatternGrid from "~/components/bingo/BingoPatternGrid.vue";
 
 const patterns = ref<any[]>([]);
 const isLoading = ref(false);
 const isSaving = ref(false);
 const editingPattern = ref<any>(null); // null means list view, object means edit mode
+const refreshAdminCounts = inject<(() => Promise<void>) | null>(
+  "refreshAdminCounts",
+  null,
+);
 
 const fetchPatterns = async () => {
   isLoading.value = true;
   try {
     patterns.value = await $fetch("/api/admin/patterns");
+    await refreshAdminCounts?.();
   } catch (e) {
     console.error(e);
   } finally {
@@ -79,6 +84,7 @@ const savePattern = async () => {
     });
     await fetchPatterns();
     editingPattern.value = null;
+    await refreshAdminCounts?.();
   } catch (e: any) {
     alert(e.data?.message || "Failed to save pattern");
   } finally {
@@ -92,6 +98,7 @@ const deletePattern = async (slug: string) => {
   try {
     await $fetch(`/api/admin/patterns?slug=${slug}`, { method: "DELETE" });
     await fetchPatterns();
+    await refreshAdminCounts?.();
   } catch (e: any) {
     alert(e.data?.message || "Failed to delete");
   }
