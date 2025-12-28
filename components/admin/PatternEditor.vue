@@ -14,8 +14,7 @@ const refreshAdminCounts = inject<(() => Promise<void>) | null>(
 const fetchPatterns = async () => {
   isLoading.value = true;
   try {
-    patterns.value = await $fetch("/api/admin/patterns");
-    await refreshAdminCounts?.();
+    patterns.value = await $fetch("/api/admin/patterns", { credentials: "include" });
   } catch (e) {
     console.error(e);
   } finally {
@@ -81,6 +80,7 @@ const savePattern = async () => {
     await $fetch("/api/admin/patterns", {
       method: "POST",
       body: form.value,
+      credentials: "include"
     });
     await fetchPatterns();
     editingPattern.value = null;
@@ -96,7 +96,7 @@ const deletePattern = async (slug: string) => {
   if (!confirm("Are you sure? This may break programs using this pattern."))
     return;
   try {
-    await $fetch(`/api/admin/patterns?slug=${slug}`, { method: "DELETE" });
+    await $fetch(`/api/admin/patterns?slug=${slug}`, { method: "DELETE", credentials: "include" });
     await fetchPatterns();
     await refreshAdminCounts?.();
   } catch (e: any) {

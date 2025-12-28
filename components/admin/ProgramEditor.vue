@@ -21,8 +21,8 @@ const fetchPrograms = async () => {
   isLoading.value = true;
   try {
     const [progs, pats] = await Promise.all([
-      $fetch("/api/admin/programs"),
-      $fetch("/api/admin/patterns"),
+      $fetch("/api/admin/programs", { credentials: "include" }),
+      $fetch("/api/admin/patterns", { credentials: "include" }),
     ]);
     programs.value = progs;
     patterns.value = pats;
@@ -80,6 +80,7 @@ const saveProgram = async () => {
     await $fetch("/api/admin/programs", {
       method: "POST",
       body: form.value,
+      credentials: "include"
     });
     await fetchPrograms();
     editingProgram.value = null;
@@ -94,7 +95,7 @@ const saveProgram = async () => {
 const deleteProgram = async (slug: string) => {
   if (!confirm("Are you sure?")) return;
   try {
-    await $fetch(`/api/admin/programs?slug=${slug}`, { method: "DELETE" });
+    await $fetch(`/api/admin/programs?slug=${slug}`, { method: "DELETE", credentials: "include" });
     await fetchPrograms();
     await refreshAdminCounts?.();
   } catch (e: any) {
