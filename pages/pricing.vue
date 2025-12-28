@@ -23,7 +23,7 @@
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <path
               fill-rule="evenodd"
-              d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+              d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
               clip-rule="evenodd"
             />
           </svg>
@@ -39,7 +39,7 @@
           v-motion-fade-visible
           class="text-xl md:text-2xl text-primary-100 max-w-3xl mx-auto mb-10 leading-relaxed font-light"
         >
-          One main session at 7:30 PM every night. Daytime pay-as-you-go games
+          One main session at {{ pricing.evening?.startTime || "7:30 PM" }} every night. Daytime pay-as-you-go games
           from 10:30 AM. Clear, honest pricing with zero surprises.
         </p>
 
@@ -126,24 +126,41 @@
             </p>
           </div>
 
-          <!-- Morning Window -->
+          <!-- Dynamic Daytime Sessions -->
           <div class="grid md:grid-cols-2 gap-8 mb-16">
             <div
-              class="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-3xl p-8 md:p-12"
+              v-for="(session, idx) in pricing.daytime?.sessions || []"
+              :key="idx"
+              :class="[
+                'border-2 rounded-3xl p-8 md:p-12',
+                idx % 2 === 0
+                  ? 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200'
+                  : 'bg-gradient-to-br from-slate-50 to-blue-50 border-slate-200',
+              ]"
             >
               <div class="flex items-center gap-3 mb-6">
-                <div class="text-4xl">☀️</div>
+                <div class="text-4xl">{{ session.icon === 'sun' ? '☀️' : (session.icon === 'moon' ? '🌙' : '🕐') }}</div>
                 <div>
                   <h3 class="text-2xl font-bold text-primary-900">
-                    Morning Play
+                    {{ session.name }}
                   </h3>
-                  <p class="text-amber-700 font-semibold">
-                    10:30 AM – 12:30 PM
+                  <p
+                    :class="[
+                      'font-semibold',
+                      idx % 2 === 0 ? 'text-amber-700' : 'text-slate-700',
+                    ]"
+                  >
+                    {{ session.timeRange }}
                   </p>
                 </div>
               </div>
-              <p class="text-amber-700 mb-8">
-                Doors open at 10 AM. Bingo starts at 10:30 AM.
+              <p
+                :class="[
+                  'mb-8',
+                  idx % 2 === 0 ? 'text-amber-700' : 'text-slate-700',
+                ]"
+              >
+                {{ session.description }}
               </p>
 
               <h4 class="font-bold text-primary-900 text-lg mb-4">
@@ -151,92 +168,68 @@
               </h4>
               <div class="space-y-3 mb-8">
                 <div
-                  class="flex justify-between items-center p-3 bg-white rounded-lg border border-amber-100"
+                  v-for="(machine, mIdx) in session.machines || []"
+                  :key="mIdx"
+                  class="flex justify-between items-center p-3 bg-white rounded-lg border"
+                  :class="
+                    idx % 2 === 0 ? 'border-amber-100' : 'border-slate-100'
+                  "
                 >
-                  <span class="font-medium text-slate-700">1 Machine</span>
-                  <span class="text-xl font-bold text-primary-900">$1</span>
-                </div>
-                <div
-                  class="flex justify-between items-center p-3 bg-white rounded-lg border border-amber-100"
-                >
-                  <span class="font-medium text-slate-700">3 Machines</span>
-                  <span class="text-xl font-bold text-gold-600"
-                    >$2
-                    <span class="text-xs text-slate-500">(save $1)</span></span
-                  >
-                </div>
-                <div
-                  class="flex justify-between items-center p-3 bg-white rounded-lg border border-amber-100"
-                >
-                  <span class="font-medium text-slate-700">5 Machines</span>
-                  <span class="text-xl font-bold text-gold-600"
-                    >$3
-                    <span class="text-xs text-slate-500">(save $2)</span></span
-                  >
+                  <span class="font-medium text-slate-700">{{
+                    machine.description
+                  }}</span>
+                  <span class="text-xl font-bold text-primary-900">
+                    {{ machine.price }}
+                    <span
+                      v-if="machine.savings"
+                      class="text-xs text-slate-500 font-normal ml-1"
+                      >({{ machine.savings }})</span
+                    >
+                  </span>
                 </div>
               </div>
 
-              <div class="bg-amber-100 border-l-4 border-amber-500 rounded p-4">
-                <p class="text-sm text-amber-900 font-semibold mb-2">
+              <!-- Paper Rules / Bonus (Static or Dynamic if added later) -->
+              <div
+                v-if="session.paperRules"
+                :class="[
+                  'border-l-4 rounded p-4',
+                  idx % 2 === 0
+                    ? 'bg-amber-100 border-amber-500'
+                    : 'bg-blue-100 border-blue-500',
+                ]"
+              >
+                <p
+                  :class="[
+                    'text-sm font-semibold mb-2',
+                    idx % 2 === 0 ? 'text-amber-900' : 'text-blue-900',
+                  ]"
+                >
                   💡 Free Paper Bonus
                 </p>
-                <p class="text-sm text-amber-800">
-                  <strong>Spend $1+ →</strong> Get 1 free paper card
-                </p>
-                <p class="text-sm text-amber-800 mt-1">
-                  <strong>Spend $2+ →</strong> Unlimited paper cards
-                </p>
-              </div>
-            </div>
-
-            <!-- Afternoon Window -->
-            <div
-              class="bg-gradient-to-br from-slate-50 to-blue-50 border-2 border-slate-200 rounded-3xl p-8 md:p-12"
-            >
-              <div class="flex items-center gap-3 mb-6">
-                <div class="text-4xl">🕐</div>
-                <div>
-                  <h3 class="text-2xl font-bold text-primary-900">
-                    Afternoon Play
-                  </h3>
-                  <p class="text-slate-700 font-semibold">12:30 PM – 7:30 PM</p>
-                </div>
-              </div>
-              <p class="text-slate-700 mb-8">
-                Pay-as-you-go games continue until the main session.
-              </p>
-
-              <h4 class="font-bold text-primary-900 text-lg mb-4">
-                Machine Pricing
-              </h4>
-              <div class="space-y-3 mb-8">
-                <div
-                  class="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-100"
+                <p
+                  :class="[
+                    'text-sm',
+                    idx % 2 === 0 ? 'text-amber-800' : 'text-blue-800',
+                  ]"
                 >
-                  <span class="font-medium text-slate-700">1 Machine</span>
-                  <span class="text-xl font-bold text-primary-900">$1</span>
-                </div>
-                <div
-                  class="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-100"
+                  <strong>{{ session.paperRules.minSpend }} →</strong>
+                  Get {{ session.paperRules.minPaperCards }} free paper card
+                </p>
+                <p
+                  v-if="session.paperRulesAdvanced"
+                  :class="[
+                    'text-sm mt-1',
+                    idx % 2 === 0 ? 'text-amber-800' : 'text-blue-800',
+                  ]"
                 >
-                  <span class="font-medium text-slate-700">4 Machines</span>
-                  <span class="text-xl font-bold text-gold-600"
-                    >$3
-                    <span class="text-xs text-slate-500">(save $1)</span></span
-                  >
-                </div>
-              </div>
-
-              <div class="bg-blue-100 border-l-4 border-blue-500 rounded p-4">
-                <p class="text-sm text-blue-900 font-semibold mb-2">
-                  💡 Free Paper Bonus
+                  <strong>{{ session.paperRulesAdvanced.minSpendAdvanced }} →</strong>
+                  {{ session.paperRulesAdvanced.maxPaperCards }} paper cards
                 </p>
-                <p class="text-sm text-blue-800">
-                  <strong>Spend $1+ →</strong> Get 1 free paper card
-                </p>
-                <p class="text-sm text-blue-800 mt-1">
-                  <strong>Spend $2+ →</strong> Unlimited paper cards
-                </p>
+                 <!-- Fallback if fields are missing in data but exist in UI expectation -->
+                 <p v-else :class="['text-sm mt-1', idx % 2 === 0 ? 'text-amber-800' : 'text-blue-800']">
+                    <strong>Spend $2+ →</strong> Unlimited paper cards
+                 </p>
               </div>
             </div>
           </div>
@@ -258,16 +251,24 @@
             </div>
 
             <div class="grid md:grid-cols-2 gap-8">
-              <div class="bg-white rounded-2xl p-6 border border-purple-100">
+              <!-- Dynamic Jackpots -->
+              <div
+                v-for="(jackpot, idx) in pricing.daytime?.jackpots || []"
+                :key="idx"
+                class="bg-white rounded-2xl p-6 border border-purple-100"
+              >
                 <h4 class="font-bold text-primary-900 text-lg mb-2">
-                  Super 6 Jackpots
+                  {{ jackpot.name }}
                 </h4>
                 <p class="text-slate-600 text-sm mb-4">
-                  Played at the top of each hour starting at 12 PM.
+                  {{ jackpot.time }}
                 </p>
-                <div class="text-3xl font-black text-purple-600">$250</div>
+                <div class="text-3xl font-black text-purple-600">
+                  {{ jackpot.prize }}
+                </div>
               </div>
 
+              <!-- Hardcoded Bingo Babes (Connected to Store) -->
               <div class="bg-white rounded-2xl p-6 border border-purple-100">
                 <h4 class="font-bold text-primary-900 text-lg mb-2">
                   Bingo Babes Progressive
@@ -285,7 +286,7 @@
             </div>
           </div>
 
-          <!-- Paper Only Option -->
+          <!-- Paper Only Option (Hardcoded / Static for now as it's not in editor) -->
           <div
             class="bg-gradient-to-r from-primary-50 to-slate-50 border-2 border-primary-200 rounded-3xl overflow-hidden"
           >
@@ -342,7 +343,7 @@
           <div class="text-center mb-16">
             <span
               class="text-gold-600 font-bold uppercase tracking-widest text-sm"
-              >🌙 7:30 PM Main Session</span
+              >🌙 {{ pricing.evening?.startTime || "7:30 PM" }} Main Session</span
             >
             <h2
               class="text-4xl md:text-5xl font-black text-primary-900 mt-4 mb-6"
@@ -350,107 +351,107 @@
               Nightly Bingo Session
             </h2>
             <p class="text-xl text-slate-600 max-w-3xl mx-auto">
-              Our flagship nightly session with all-inclusive machine bundles,
-              specialty games, and the Hornet Progressive.
+              {{ pricing.evening?.valueProposition || "Our flagship nightly session with all-inclusive machine bundles, specialty games, and the Hornet Progressive." }}
             </p>
           </div>
 
           <!-- Session Sales Window -->
           <div
+            v-if="pricing.evening?.scheduleNote"
             class="mb-16 bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-3xl p-8"
           >
             <h3 class="text-2xl font-bold text-primary-900 mb-2">
-              📌 Session Sales Window: 5:15 PM – 7:30 PM
+              📌 {{ pricing.evening.scheduleNote }}
             </h3>
             <p class="text-emerald-700 font-medium">
               Buy your session cards early for best card selection.
             </p>
           </div>
 
-          <!-- Best Value Highlight -->
+          <!-- Best Value Highlight (Dynamic from Premium Bundles) -->
+           <!-- Use the first "premium" type bundle found or default to hardcoded -->
           <div class="mb-16 relative">
-            <div
+             <div
               class="absolute -inset-1 bg-gradient-to-r from-gold-400 via-gold-500 to-gold-400 rounded-3xl blur opacity-25"
             ></div>
             <div
               class="relative bg-gradient-to-br from-primary-900 to-primary-800 text-white rounded-3xl p-8 md:p-16 text-center"
             >
               <div class="text-5xl mb-4">⭐</div>
-              <h3 class="text-3xl md:text-4xl font-black mb-6">
-                BEST VALUE: 2 Machines for $22
-              </h3>
-              <div class="grid md:grid-cols-3 gap-4 mb-8">
-                <div
-                  class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20"
-                >
-                  <p class="text-gold-300 font-bold text-sm mb-1">
-                    ✓ Six-Packs
-                  </p>
-                </div>
-                <div
-                  class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20"
-                >
-                  <p class="text-gold-300 font-bold text-sm mb-1">
-                    ✓ Double Actions
-                  </p>
-                </div>
-                <div
-                  class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20"
-                >
-                  <p class="text-gold-300 font-bold text-sm mb-1">
-                    ✓ Letter X Papers
-                  </p>
-                </div>
-              </div>
+               <!-- Logic to find "Premium" bundle -->
+               <div v-if="pricing.evening?.machines?.find((m: any) => m.type === 'premium')">
+                  <h3 class="text-3xl md:text-4xl font-black mb-6">
+                    {{ pricing.evening.machines.find((m: any) => m.type === 'premium').description }} for {{ pricing.evening.machines.find((m: any) => m.type === 'premium').price }}
+                  </h3>
+                  <div class="grid md:grid-cols-3 gap-4 mb-8">
+                     <!-- Assuming description implies contents, or hardcoded 'features' if structure doesn't support list. -->
+                     <!-- For now, we keep the badges generic or based on description parsing if needed. Let's keep generic 'Best Value' badges. -->
+                     <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                        <p class="text-gold-300 font-bold text-sm mb-1">✓ Six-Packs</p>
+                     </div>
+                     <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                        <p class="text-gold-300 font-bold text-sm mb-1">✓ Double Actions</p>
+                     </div>
+                     <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                        <p class="text-gold-300 font-bold text-sm mb-1">✓ Letter X Papers</p>
+                     </div>
+                  </div>
+               </div>
+               <div v-else>
+                  <h3 class="text-3xl md:text-4xl font-black mb-6">
+                    BEST VALUE: 2 Machines for $22
+                  </h3>
+                   <div class="grid md:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                      <p class="text-gold-300 font-bold text-sm mb-1">✓ Six-Packs</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                      <p class="text-gold-300 font-bold text-sm mb-1">✓ Double Actions</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                      <p class="text-gold-300 font-bold text-sm mb-1">✓ Letter X Papers</p>
+                    </div>
+                  </div>
+               </div>
               <p class="text-primary-200">
                 Everything you need for a complete evening of premium bingo
               </p>
             </div>
           </div>
 
-          <!-- Machine Packages -->
+          <!-- Machine Packages (Dynamic) -->
           <div class="grid md:grid-cols-2 gap-8 mb-16">
             <div
-              class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-8 hover:shadow-lg transition-all"
+              v-for="(machine, idx) in pricing.evening?.machines?.filter((m: any) => m.type !== 'premium') || []"
+              :key="idx"
+              :class="[
+                 machine.type === 'bundle' ? 'relative bg-gradient-to-br from-gold-100 to-gold-50 border-3 border-gold-500 shadow-2xl transform md:scale-105 hover:shadow-2xl' : 'bg-slate-50 border-2 border-slate-200 hover:shadow-lg',
+                 'rounded-2xl p-8 transition-all'
+              ]"
             >
-              <h4 class="text-2xl font-bold text-primary-900 mb-6">
-                Single Machine
-              </h4>
-              <p class="text-slate-600 mb-8">
-                One machine entry for the 7:30 PM session
-              </p>
-              <div class="text-5xl font-black text-gold-600 mb-4">$11</div>
-              <button
-                class="w-full bg-primary-900 hover:bg-primary-800 text-white font-bold py-3 rounded-lg transition"
-              >
-                Select
-              </button>
-            </div>
-
-            <div
-              class="relative bg-gradient-to-br from-gold-100 to-gold-50 border-3 border-gold-500 rounded-2xl p-8 shadow-2xl transform md:scale-105 hover:shadow-2xl transition-all"
-            >
-              <div
+               <div
+                v-if="machine.type === 'bundle'"
                 class="absolute top-0 right-0 bg-gold-500 text-white font-bold px-4 py-2 rounded-bl-2xl rounded-tr-2xl text-sm uppercase"
               >
-                ★ Best Value
+                ★ Recommended
               </div>
-              <h4 class="text-2xl font-bold text-primary-900 mb-6 mt-4">
-                Two Machines (Recommended)
+              <h4 class="text-2xl font-bold text-primary-900 mb-6" :class="{ 'mt-4': machine.type === 'bundle' }">
+                {{ machine.description }}
               </h4>
-              <p class="text-slate-700 mb-8 font-medium">
-                Includes: 6-packs • Double Actions • Letter X Papers
+              <p class="text-slate-600 mb-8 font-medium">
+                 {{ machine.savings || "Standard Entry" }}
               </p>
-              <div class="text-5xl font-black text-gold-600 mb-6">$22</div>
+              <div class="text-5xl font-black text-gold-600 mb-4">{{ machine.price }}</div>
               <button
-                class="w-full bg-gold-500 hover:bg-gold-600 text-primary-900 font-bold py-3 rounded-lg transition transform hover:-translate-y-1"
+                class="w-full font-bold py-3 rounded-lg transition"
+                :class="machine.type === 'bundle' ? 'bg-gold-500 hover:bg-gold-600 text-primary-900' : 'bg-primary-900 hover:bg-primary-800 text-white'"
               >
                 Select
               </button>
             </div>
           </div>
 
-          <!-- Specialty Games & Add-Ons -->
+          <!-- Specialty Games & Add-Ons (Dynamic) -->
           <div
             class="bg-white border-2 border-primary-200 rounded-3xl overflow-hidden"
           >
@@ -460,33 +461,37 @@
               </h3>
             </div>
             <div class="p-8 md:p-12 space-y-8">
-              <div>
-                <h4
-                  class="text-xl font-bold text-primary-900 mb-6 pb-3 border-b-2 border-primary-300"
-                >
-                  Odd/Even • Lucky Seven • Treasure Hunt • Cover All • Letter X
-                </h4>
-                <div class="grid md:grid-cols-2 gap-6">
-                  <div
-                    class="bg-gold-50 border-2 border-gold-200 rounded-lg p-6"
-                  >
-                    <p class="text-sm text-gold-700 font-semibold mb-2">
-                      Single Card
-                    </p>
-                    <p class="text-4xl font-bold text-gold-600">$1</p>
+              <!-- Dynamic List -->
+              <div v-if="pricing.evening?.specialtyGames && pricing.evening.specialtyGames.length > 0">
+                 <div v-for="(game, idx) in pricing.evening.specialtyGames" :key="idx" class="mb-8 border-b border-slate-100 last:border-0 pb-6 last:pb-0">
+                    <h4 class="text-xl font-bold text-primary-900 mb-2">
+                      {{ game.name }}
+                    </h4>
+                    <p class="text-slate-600 text-sm mb-4">{{ game.description }}</p>
+                    <p class="text-2xl font-bold text-gold-600">{{ game.price }}</p>
+                 </div>
+              </div>
+
+              <!-- Fallback Hardcoded if no dynamic data (Legacy Support) -->
+              <div v-else>
+                 <div>
+                    <h4
+                      class="text-xl font-bold text-primary-900 mb-6 pb-3 border-b-2 border-primary-300"
+                    >
+                      Odd/Even • Lucky Seven • Treasure Hunt • Cover All • Letter X
+                    </h4>
+                    <div class="grid md:grid-cols-2 gap-6">
+                      <div class="bg-gold-50 border-2 border-gold-200 rounded-lg p-6">
+                        <p class="text-sm text-gold-700 font-semibold mb-2">Single Card</p>
+                        <p class="text-4xl font-bold text-gold-600">$1</p>
+                      </div>
+                      <div class="bg-gold-50 border-2 border-gold-200 rounded-lg p-6">
+                        <p class="text-sm text-gold-700 font-semibold mb-2">6-Card Set</p>
+                        <p class="text-4xl font-bold text-gold-600">$5</p>
+                        <p class="text-xs text-gold-700 mt-2">Per game type (no mixing)</p>
+                      </div>
+                    </div>
                   </div>
-                  <div
-                    class="bg-gold-50 border-2 border-gold-200 rounded-lg p-6"
-                  >
-                    <p class="text-sm text-gold-700 font-semibold mb-2">
-                      6-Card Set
-                    </p>
-                    <p class="text-4xl font-bold text-gold-600">$5</p>
-                    <p class="text-xs text-gold-700 mt-2">
-                      Per game type (no mixing)
-                    </p>
-                  </div>
-                </div>
               </div>
 
               <div class="grid md:grid-cols-2 gap-6">
@@ -594,66 +599,38 @@
               <h2
                 class="text-4xl md:text-5xl font-black text-primary-900 mt-4 mb-6"
               >
-                Premier Sunday Night
+                {{ pricing.sunday?.title || "Premier Sunday Night" }}
               </h2>
               <p class="text-xl text-slate-700 max-w-3xl mx-auto font-medium">
-                Special games, free dinner, and 15× $250 jackpots make Sundays
-                our most exciting night.
+                {{ pricing.sunday?.note || "Special games, free dinner, and 15× $250 jackpots make Sundays our most exciting night." }}
               </p>
             </div>
 
+            <!-- Dynamic Sunday Specials -->
             <div class="grid md:grid-cols-3 gap-6 mb-12">
-              <div
+               <div
+                v-for="(special, idx) in pricing.sunday?.specials || []"
+                :key="idx"
                 class="bg-white rounded-2xl p-8 border-2 border-gold-300 shadow-lg"
               >
                 <div class="text-4xl mb-4">🎉</div>
                 <h3 class="text-2xl font-bold text-primary-900 mb-4">
-                  Speedy Coverall
+                  {{ special.name }}
                 </h3>
                 <div class="space-y-3">
-                  <div class="flex justify-between p-3 bg-gold-50 rounded">
-                    <span class="font-medium text-slate-700">1 Card</span>
-                    <span class="font-bold text-primary-900">$1</span>
+                  <div v-if="special.optionOne" class="flex justify-between p-3 bg-gold-50 rounded">
+                    <span class="font-medium text-slate-700">{{ special.optionOne }}</span>
                   </div>
-                  <div class="flex justify-between p-3 bg-gold-50 rounded">
-                    <span class="font-medium text-slate-700">3 Cards</span>
-                    <span class="font-bold text-gold-600">$2</span>
+                  <div v-if="special.optionTwo" class="flex justify-between p-3 bg-gold-50 rounded">
+                    <span class="font-medium text-slate-700">{{ special.optionTwo }}</span>
                   </div>
+                  <p v-if="special.description" class="text-xs text-slate-500 mt-2">{{ special.description }}</p>
                 </div>
               </div>
 
-              <div
-                class="bg-white rounded-2xl p-8 border-2 border-gold-300 shadow-lg"
-              >
-                <div class="text-4xl mb-4">⭐</div>
-                <h3 class="text-2xl font-bold text-primary-900 mb-4">
-                  Super 3 & U-PIK
-                </h3>
-                <div class="space-y-3">
-                  <div class="flex justify-between p-3 bg-gold-50 rounded">
-                    <span class="font-medium text-slate-700">1 Card</span>
-                    <span class="font-bold text-primary-900">$1</span>
-                  </div>
-                  <div class="flex justify-between p-3 bg-gold-50 rounded">
-                    <span class="font-medium text-slate-700">6 Cards</span>
-                    <span class="font-bold text-gold-600">$5</span>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                class="bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl p-8 border-3 border-emerald-400 shadow-lg flex flex-col justify-center text-center"
-              >
-                <div class="text-5xl mb-4">🎁</div>
-                <h3 class="text-2xl font-bold text-primary-900 mb-2">
-                  FREE U-PIK Card
-                </h3>
-                <p class="text-emerald-800 font-semibold">
-                  Every session entry includes
-                </p>
-                <p class="text-sm text-emerald-700 mt-2">
-                  Plus $500 weekly jackpot
-                </p>
+              <!-- Hardcoded Fallback if empty -->
+              <div v-if="(!pricing.sunday?.specials || pricing.sunday.specials.length === 0)" class="col-span-3 text-center text-slate-500 italic">
+                 No Sunday specials configured.
               </div>
             </div>
 
@@ -688,6 +665,17 @@
           </div>
         </section>
 
+        <!-- FAQs Section (Dynamic) -->
+        <section v-if="pricing.faqs && pricing.faqs.length > 0" class="max-w-4xl mx-auto">
+           <h2 class="text-3xl font-black text-primary-900 mb-8 text-center">Frequently Asked Questions</h2>
+           <div class="space-y-4">
+              <div v-for="(faq, idx) in pricing.faqs" :key="idx" class="bg-slate-50 rounded-2xl p-6 border border-slate-200">
+                 <h3 class="font-bold text-lg text-primary-900 mb-2">{{ faq.question }}</h3>
+                 <p class="text-slate-600">{{ faq.answer }}</p>
+              </div>
+           </div>
+        </section>
+
         <!-- CTA Section -->
         <section
           class="text-center py-16 bg-gradient-to-r from-primary-900 to-primary-800 text-white rounded-3xl"
@@ -715,10 +703,11 @@ import { useJackpotStore } from "~/stores/jackpot";
 import { useBusiness } from "~/composables/useBusiness";
 
 const jackpotStore = useJackpotStore();
-const { fetchSchedule, schedule } = useBusiness();
+const { fetchSchedule, schedule, fetchPricing, pricing } = useBusiness();
 
-// Fetch schedule on load
+// Fetch data on load
 await fetchSchedule();
+await fetchPricing();
 
 useSeoMeta({
   title: "Pricing & Sessions | Mary Esther Bingo",
