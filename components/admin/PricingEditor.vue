@@ -278,6 +278,35 @@
                 </div>
               </div>
             </div>
+
+            <!-- Paper Rules Configuration -->
+            <div class="mt-6 pt-6 border-t border-slate-100">
+               <h5
+                  class="text-sm font-bold text-primary-900 uppercase tracking-wider mb-4"
+                >
+                  Paper Rules
+                </h5>
+                <div class="grid gap-4 md:grid-cols-2">
+                   <!-- Basic Rule -->
+                   <div class="space-y-2">
+                      <label class="block text-xs font-bold text-slate-500">Basic Spend Threshold</label>
+                      <input v-model="session.paperRules.minSpend" placeholder="e.g. $1+" class="w-full text-sm border-slate-200 rounded-lg" />
+                   </div>
+                   <div class="space-y-2">
+                      <label class="block text-xs font-bold text-slate-500">Free Cards (Basic)</label>
+                      <input v-model.number="session.paperRules.minPaperCards" type="number" placeholder="1" class="w-full text-sm border-slate-200 rounded-lg" />
+                   </div>
+                   <!-- Advanced Rule -->
+                   <div class="space-y-2">
+                      <label class="block text-xs font-bold text-slate-500">Advanced Spend Threshold</label>
+                      <input v-model="session.paperRulesAdvanced.minSpendAdvanced" placeholder="e.g. $2+" class="w-full text-sm border-slate-200 rounded-lg" />
+                   </div>
+                   <div class="space-y-2">
+                      <label class="block text-xs font-bold text-slate-500">Max Cards (Advanced)</label>
+                      <input v-model="session.paperRulesAdvanced.maxPaperCards" placeholder="e.g. Unlimited" class="w-full text-sm border-slate-200 rounded-lg" />
+                   </div>
+                </div>
+            </div>
           </article>
         </div>
 
@@ -422,6 +451,55 @@
                   <button
                     class="text-xs text-rose-500 font-bold"
                     @click="removeEveningMachine(Number(index))"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Specialty Games Section -->
+        <div class="space-y-6 pt-8 border-t border-slate-200">
+          <div class="flex items-center justify-between">
+            <h4 class="text-lg font-black text-primary-900">
+              Session-Only Specialty Games
+            </h4>
+            <button
+              class="text-xs bg-primary-100 text-primary-700 px-3 py-1 rounded-full font-bold"
+              @click="addSpecialtyGame"
+            >
+              + Add Game
+            </button>
+          </div>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div
+              v-for="(game, index) in modelValue.evening?.specialtyGames ?? []"
+              :key="`specialty-game-${index}`"
+              class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm"
+            >
+              <div class="space-y-3">
+                <input
+                  v-model="game.name"
+                  placeholder="Game Name / Title"
+                  class="w-full text-sm font-bold border-slate-200 rounded-lg"
+                />
+                <input
+                  v-model="game.price"
+                  placeholder="Price (e.g. $1 or $1 / $5)"
+                  class="w-full text-sm border-slate-200 rounded-lg font-bold text-gold-600"
+                />
+                <textarea
+                  v-model="game.description"
+                  placeholder="Description or sub-text"
+                  rows="2"
+                  class="w-full text-xs border-slate-200 rounded-lg bg-slate-50"
+                ></textarea>
+                <div class="flex justify-end">
+                  <button
+                    class="text-xs text-rose-500 font-bold"
+                    @click="removeSpecialtyGame(Number(index))"
                   >
                     Remove
                   </button>
@@ -691,6 +769,21 @@ const addEveningMachine = () => {
 };
 const removeEveningMachine = (index: number) => {
   props.modelValue.evening.machines.splice(index, 1);
+};
+
+const addSpecialtyGame = () => {
+  if (!props.modelValue.evening) props.modelValue.evening = {};
+  if (!props.modelValue.evening.specialtyGames)
+    props.modelValue.evening.specialtyGames = [];
+  props.modelValue.evening.specialtyGames.push({
+    name: "",
+    price: "",
+    description: "",
+  });
+};
+
+const removeSpecialtyGame = (index: number) => {
+  props.modelValue.evening.specialtyGames.splice(index, 1);
 };
 
 const addSundaySpecial = () => {

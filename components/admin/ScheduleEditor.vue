@@ -62,6 +62,15 @@
            <div class="h-8 w-px bg-slate-200 mx-2 hidden sm:block"></div>
 
            <BaseButton
+              variant="outline"
+              class-name="px-4 py-3 text-xs uppercase tracking-[0.2em]"
+              type="button"
+              @click="openBulkModal"
+            >
+              Bulk Tools
+            </BaseButton>
+
+           <BaseButton
               variant="gold"
               class-name="px-6 py-3 text-xs uppercase tracking-[0.2em] shadow-xl shadow-gold/20"
               type="button"
@@ -188,6 +197,72 @@
         </button>
     </div>
 
+    <!-- Bulk Generator Modal -->
+    <div v-if="showBulkModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+       <div class="absolute inset-0 bg-primary-950/60 backdrop-blur-sm" @click="showBulkModal = false"></div>
+       <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+          <div class="bg-slate-50 border-b border-slate-100 px-6 py-4 flex justify-between items-center">
+             <h3 class="text-xl font-black text-primary-900">Bulk Schedule Generator</h3>
+             <button @click="showBulkModal = false" class="text-slate-400 hover:text-slate-600"><X class="w-5 h-5" /></button>
+          </div>
+          <div class="p-6 space-y-6">
+             <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Select Template</label>
+                <select v-model="bulkForm.template" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:border-gold focus:ring-gold">
+                   <option :value="null">-- Select a Template --</option>
+                   <optgroup label="Daytime Sessions" v-if="pricingData?.daytime?.sessions">
+                      <option v-for="(s, idx) in pricingData.daytime.sessions" :key="idx" :value="{type: 'daytime', data: s}">
+                         {{ s.name }} ({{ s.timeRange }})
+                      </option>
+                   </optgroup>
+                   <optgroup label="Evening" v-if="pricingData?.evening">
+                      <option :value="{type: 'evening', data: pricingData.evening}">
+                         Nightly Session ({{ pricingData.evening.startTime }})
+                      </option>
+                   </optgroup>
+                </select>
+             </div>
+
+             <div class="grid grid-cols-2 gap-4">
+                <div>
+                   <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Start Date</label>
+                   <input type="date" v-model="bulkForm.startDate" class="w-full rounded-xl border-slate-200 bg-slate-50" />
+                </div>
+                <div>
+                   <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">End Date</label>
+                   <input type="date" v-model="bulkForm.endDate" class="w-full rounded-xl border-slate-200 bg-slate-50" />
+                </div>
+             </div>
+
+             <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Days of Week</label>
+                <div class="flex flex-wrap gap-2">
+                   <button
+                      v-for="(day, idx) in weekDays"
+                      :key="day"
+                      type="button"
+                      :class="[
+                         'px-3 py-1 rounded text-xs font-bold border transition-colors',
+                         bulkForm.days.includes(idx) ? 'bg-primary-900 text-white border-primary-900' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'
+                      ]"
+                      @click="toggleBulkDay(idx)"
+                   >
+                      {{ day }}
+                   </button>
+                </div>
+             </div>
+
+             <div class="bg-amber-50 text-amber-800 text-xs p-3 rounded-lg border border-amber-100">
+                <strong>Note:</strong> This will create individual session entries for every matching date.
+             </div>
+          </div>
+          <div class="bg-slate-50 px-6 py-4 flex justify-end gap-3 border-t border-slate-200">
+             <BaseButton variant="outline" @click="showBulkModal = false">Cancel</BaseButton>
+             <BaseButton variant="gold" @click="runBulkGenerate">Generate Sessions</BaseButton>
+          </div>
+       </div>
+    </div>
+
     <!-- Session Editor Modal (Reused/Updated) -->
     <div v-if="editingSession" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
         <div class="absolute inset-0 bg-primary-950/60 backdrop-blur-sm" @click="closeEditor"></div>
@@ -226,6 +301,34 @@
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Seats</label>
                         <input v-model.number="editingSession.totalSeats" type="number" class="w-full rounded-lg border-slate-200 text-xs font-bold text-slate-700 focus:border-gold focus:ring-gold" placeholder="100" />
                      </div>
+                </div>
+
+                <!-- Template Loader -->
+                <div v-if="pricingData" class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-6">
+                   <label class="block text-xs font-bold text-indigo-800 uppercase tracking-wider mb-2">Load From Pricing Template</label>
+                   <div class="flex gap-2">
+                      <select v-model="selectedTemplate" class="flex-1 rounded-lg border-indigo-200 text-sm">
+                         <option value="">-- Select a Template --</option>
+                         <!-- Daytime Templates -->
+                         <optgroup label="Daytime Sessions">
+                            <option v-for="(s, idx) in pricingData.daytime?.sessions || []" :key="s.id || idx" :value="{ type: 'daytime', data: s }">
+                               {{ s.name }} ({{ s.timeRange }})
+                            </option>
+                         </optgroup>
+                         <!-- Evening Template -->
+                         <optgroup label="Evening">
+                            <option :value="{ type: 'evening', data: pricingData.evening }">
+                               Nightly Session ({{ pricingData.evening?.startTime }})
+                            </option>
+                         </optgroup>
+                      </select>
+                      <BaseButton variant="outline" type="button" @click="applyTemplate" :disabled="!selectedTemplate" class-name="text-xs">
+                         Apply
+                      </BaseButton>
+                   </div>
+                   <p class="text-[10px] text-indigo-600 mt-2">
+                      Overwrites Name, Time, Description, and Jackpot with selected template data.
+                   </p>
                 </div>
 
                 <!-- Basic Info -->
@@ -332,10 +435,20 @@ const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const currentDate = ref(new Date()); // Represents the 1st of the displayed month
 const unsavedChanges = ref(false);
 const editingSession = ref<any>(null);
+const selectedTemplate = ref<any>("");
 const contextMenu = ref({ visible: false, x: 0, y: 0, session: null as any });
 const filters = ref({
     showDrafts: true,
     highlightConflicts: true
+});
+
+// Bulk Ops State
+const showBulkModal = ref(false);
+const bulkForm = ref({
+   template: null as any,
+   startDate: '',
+   endDate: '',
+   days: [] as number[] // 0=Mon, 6=Sun to match weekDays array index
 });
 
 // --- Computed Calendar Logic ---
@@ -638,6 +751,35 @@ const editSession = (session: any) => {
     if (realSession) {
         editingSession.value = JSON.parse(JSON.stringify(realSession));
     }
+    selectedTemplate.value = ""; // Reset template selector
+};
+
+const applyTemplate = () => {
+    if (!selectedTemplate.value || !editingSession.value) return;
+
+    const { type, data } = selectedTemplate.value;
+
+    if (type === 'daytime') {
+        editingSession.value.name = data.name;
+        // Parse timeRange "10:00 AM – 12:00 PM" -> startTime, endTime
+        if (data.timeRange) {
+            const parts = data.timeRange.split('–').map((s: string) => s.trim());
+            if (parts.length >= 1) editingSession.value.startTime = parts[0];
+            if (parts.length >= 2) editingSession.value.endTime = parts[1];
+        }
+        editingSession.value.description = data.description;
+        editingSession.value.jackpot = data.jackpot;
+        // Also copy specific fields if we want strong linkage?
+        // For now, copy-paste is safer.
+    } else if (type === 'evening') {
+        editingSession.value.name = "Evening Session"; // Or keep generic
+        editingSession.value.startTime = data.startTime;
+        editingSession.value.description = data.scheduleNote;
+        // Evening usually ends around 10 PM
+        editingSession.value.endTime = "10:00 PM";
+    }
+
+    alert("Template applied! Review changes before saving.");
 };
 
 const saveSession = () => {
@@ -693,7 +835,204 @@ const toggleDay = (day: string) => {
     }
 };
 
+// --- Bulk Operations ---
+const openBulkModal = () => {
+   bulkForm.value = {
+      template: null,
+      startDate: new Date().toISOString().slice(0, 10),
+      endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().slice(0, 10),
+      days: [4] // Default to Friday (Mon=0, Tue=1, Wed=2, Thu=3, Fri=4...)
+   };
+   showBulkModal.value = true;
+};
+
+const toggleBulkDay = (idx: number) => {
+   const i = bulkForm.value.days.indexOf(idx);
+   if (i === -1) bulkForm.value.days.push(idx);
+   else bulkForm.value.days.splice(i, 1);
+};
+
+const runBulkGenerate = () => {
+   if (!bulkForm.value.template) return alert("Please select a template.");
+   if (!bulkForm.value.startDate || !bulkForm.value.endDate) return alert("Please select a date range.");
+   if (bulkForm.value.days.length === 0) return alert("Please select at least one day of the week.");
+
+   const start = new Date(bulkForm.value.startDate);
+   const end = new Date(bulkForm.value.endDate);
+
+   // Safety check for loop
+   if (start > end) return alert("Start date must be before end date.");
+   const diffTime = Math.abs(end.getTime() - start.getTime());
+   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+   if (diffDays > 365) return alert("Please generate less than a year at a time.");
+
+   const { type, data } = bulkForm.value.template;
+   const newSessions = [];
+   const loopDate = new Date(start);
+
+   while (loopDate <= end) {
+      // getDay(): 0=Sun, 1=Mon...
+      // weekDays array: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+      // so Mon is index 0 in weekDays, but 1 in getDay().
+      // Mapping:
+      // getDay() -> weekDays Index
+      // 1 (Mon) -> 0
+      // 2 (Tue) -> 1
+      // ...
+      // 6 (Sat) -> 5
+      // 0 (Sun) -> 6
+
+      let dayIndex = loopDate.getDay() - 1;
+      if (dayIndex === -1) dayIndex = 6;
+
+      if (bulkForm.value.days.includes(dayIndex)) {
+         // Create Session
+         const dateStr = loopDate.toISOString().slice(0, 10);
+
+         const newSession = {
+            id: createSessionId(),
+            name: type === 'daytime' ? data.name : "Evening Session",
+            category: type === 'daytime' ? data.name.split(' ')[0] : 'Evening', // simple heuristic
+            startTime: '',
+            endTime: type === 'evening' ? "10:00 PM" : "",
+            gameType: "Regular",
+            status: "Upcoming",
+            overrideDate: dateStr,
+            availableDays: [],
+            pricing: {},
+            specials: {},
+            isDraft: false,
+            projectedRevenue: 0,
+            ticketsSold: 0,
+            totalSeats: 100
+         };
+
+         if (type === 'daytime') {
+             if (data.timeRange) {
+                 const parts = data.timeRange.split('–').map((s: string) => s.trim());
+                 if (parts.length >= 1) newSession.startTime = parts[0];
+                 if (parts.length >= 2) newSession.endTime = parts[1];
+             }
+             newSession.description = data.description;
+             newSession.jackpot = data.jackpot;
+         } else {
+             newSession.startTime = data.startTime;
+             newSession.description = data.scheduleNote;
+         }
+
+         newSessions.push(newSession);
+      }
+
+      loopDate.setDate(loopDate.getDate() + 1);
+   }
+
+   if (newSessions.length > 0) {
+      const updatedList = [...props.modelValue, ...newSessions];
+      emit('update:modelValue', updatedList);
+      unsavedChanges.value = true;
+      showBulkModal.value = false;
+      alert(`Generated ${newSessions.length} sessions.`);
+   } else {
+      alert("No dates matched your selection criteria.");
+   }
+};
+
+// --- Conflict Validation ---
+const validateConflicts = () => {
+    // We need to check for overlaps on specific dates.
+    // 1. Recurring vs Recurring
+    // 2. Override vs Override
+    // 3. Override vs Recurring
+
+    // Simplification: Expand all sessions into a map keyed by "YYYY-MM-DD".
+    // Since infinite recurring is hard, let's just validate the *current month* view + any overrides being saved.
+    // Actually, "Prevent saving" implies a global check.
+    // A robust check iterates all overrides against each other.
+    // And recurring against recurring (Do they share a DOW?).
+
+    const errors = [];
+    const list = props.modelValue;
+
+    // Check Recurring vs Recurring
+    const recurring = list.filter(s => !s.overrideDate && s.availableDays && s.availableDays.length > 0);
+    for (let i = 0; i < recurring.length; i++) {
+        for (let j = i + 1; j < recurring.length; j++) {
+            const s1 = recurring[i];
+            const s2 = recurring[j];
+            // Check DOW overlap
+            const commonDays = s1.availableDays.filter((d: string) => s2.availableDays.includes(d));
+            if (commonDays.length > 0) {
+                // Check Time overlap
+                if (checkTimeOverlap(s1, s2)) {
+                    errors.push(`Recurring conflict: "${s1.name}" vs "${s2.name}" on ${commonDays.join(', ')}`);
+                }
+            }
+        }
+    }
+
+    // Check Overrides vs Overrides (on same date)
+    const overrides = list.filter(s => s.overrideDate);
+    // Group by date
+    const byDate: Record<string, any[]> = {};
+    overrides.forEach(s => {
+        if (!byDate[s.overrideDate]) byDate[s.overrideDate] = [];
+        byDate[s.overrideDate].push(s);
+    });
+
+    for (const date in byDate) {
+        const sessionsOnDate = byDate[date];
+        if (sessionsOnDate.length < 2) continue;
+        for (let i = 0; i < sessionsOnDate.length; i++) {
+            for (let j = i + 1; j < sessionsOnDate.length; j++) {
+                if (checkTimeOverlap(sessionsOnDate[i], sessionsOnDate[j])) {
+                    errors.push(`Date conflict (${date}): "${sessionsOnDate[i].name}" vs "${sessionsOnDate[j].name}"`);
+                }
+            }
+        }
+    }
+
+    // Check Overrides vs Recurring (on that date)
+    // For every override, find recurring sessions active on that DOW (unless excluded).
+    overrides.forEach(ov => {
+        const dateObj = new Date(ov.overrideDate);
+        // Mon=0... index mapping again
+        // date.getDay(): 0=Sun
+        const dayMap = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const dow = dayMap[dateObj.getDay()];
+
+        // Find recurring for this dow
+        const activeRecurring = recurring.filter(r =>
+            r.availableDays.includes(dow) &&
+            (!r.excludedDates || !r.excludedDates.includes(ov.overrideDate))
+        );
+
+        activeRecurring.forEach(rec => {
+            if (checkTimeOverlap(ov, rec)) {
+                 errors.push(`Conflict (${ov.overrideDate}): Override "${ov.name}" overlaps with recurring "${rec.name}"`);
+            }
+        });
+    });
+
+    return errors;
+};
+
+const checkTimeOverlap = (s1: any, s2: any) => {
+    const start1 = parseTime(s1.startTime || "");
+    const end1 = parseTime(s1.endTime || "");
+    const start2 = parseTime(s2.startTime || "");
+    const end2 = parseTime(s2.endTime || "");
+    // Standard overlap: Start1 < End2 && Start2 < End1
+    return start1 < end2 && start2 < end1;
+};
+
 const saveAll = () => {
+    const conflicts = validateConflicts();
+    if (conflicts.length > 0) {
+        // Show first 3 errors
+        alert("Cannot save due to schedule conflicts:\n\n" + conflicts.slice(0, 3).join("\n") + (conflicts.length > 3 ? "\n...and more" : ""));
+        return;
+    }
+
     emit('save');
     unsavedChanges.value = false;
 };
