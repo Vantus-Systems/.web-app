@@ -81,6 +81,7 @@ const savePattern = async () => {
     await $fetch("/api/admin/patterns", {
       method: "POST",
       body: form.value,
+      credentials: "include"
     });
     await fetchPatterns();
     editingPattern.value = null;
@@ -96,7 +97,7 @@ const deletePattern = async (slug: string) => {
   if (!confirm("Are you sure? This may break programs using this pattern."))
     return;
   try {
-    await $fetch(`/api/admin/patterns?slug=${slug}`, { method: "DELETE" });
+    await $fetch(`/api/admin/patterns?slug=${slug}`, { method: "DELETE", credentials: "include" });
     await fetchPatterns();
     await refreshAdminCounts?.();
   } catch (e: any) {

@@ -1157,6 +1157,9 @@ const loadData = async () => {
     patternsCount.value = Array.isArray(patterns) ? patterns.length : 0;
   } catch (e) {
     console.error("Failed to load data", e);
+    if (e.response?.status === 401 || e.response?.status === 403) {
+       router.push('/admin/login');
+    }
   } finally {
     pending.value = false;
   }
@@ -1182,6 +1185,7 @@ const saveBusinessInfo = async () => {
   await $fetch("/api/admin/business", {
     method: "POST",
     body: businessData.value,
+    credentials: "include"
   });
   alert("Business Info Saved!");
 };
@@ -1194,6 +1198,7 @@ const saveJackpot = async () => {
     await $fetch("/api/admin/jackpot", {
       method: "POST",
       body: jackpotData.value,
+      credentials: "include"
     });
     alert("Progressives Updated!");
   } catch (e) {
@@ -1207,7 +1212,7 @@ const savePricing = async () => {
   isSavingPricing.value = true;
   try {
     const payload = deepCloneValue(pricingData.value);
-    await $fetch("/api/admin/pricing", { method: "POST", body: payload });
+    await $fetch("/api/admin/pricing", { method: "POST", body: payload, credentials: "include" });
     pricingData.value = normalizePricing(payload);
     alert("Pricing Updated!");
   } catch (e) {
@@ -1222,7 +1227,7 @@ const saveSchedule = async () => {
   isSavingSchedule.value = true;
   try {
     const payload = deepCloneValue(scheduleData.value);
-    await $fetch("/api/admin/schedule", { method: "POST", body: payload });
+    await $fetch("/api/admin/schedule", { method: "POST", body: payload, credentials: "include" });
     scheduleData.value = normalizeSchedule(payload);
     alert("Schedule Updated!");
   } catch (e) {
@@ -1238,6 +1243,7 @@ const addUser = async () => {
     const user = await $fetch("/api/admin/users", {
       method: "POST",
       body: newUser.value,
+      credentials: "include"
     });
     usersData.value.push(user);
     newUser.value = { username: "", password: "", role: "mic" };
@@ -1253,6 +1259,7 @@ const deleteUser = async (id: string) => {
     await $fetch("/api/admin/users", {
       method: "DELETE",
       body: { id },
+      credentials: "include"
     });
     usersData.value = usersData.value.filter((u) => u.id !== id);
   } catch (e: any) {
