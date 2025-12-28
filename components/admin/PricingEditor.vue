@@ -281,31 +281,56 @@
 
             <!-- Paper Rules Configuration -->
             <div class="mt-6 pt-6 border-t border-slate-100">
-               <h5
-                  class="text-sm font-bold text-primary-900 uppercase tracking-wider mb-4"
-                >
-                  Paper Rules
-                </h5>
-                <div class="grid gap-4 md:grid-cols-2">
-                   <!-- Basic Rule -->
-                   <div class="space-y-2">
-                      <label class="block text-xs font-bold text-slate-500">Basic Spend Threshold</label>
-                      <input v-model="session.paperRules.minSpend" placeholder="e.g. $1+" class="w-full text-sm border-slate-200 rounded-lg" />
-                   </div>
-                   <div class="space-y-2">
-                      <label class="block text-xs font-bold text-slate-500">Free Cards (Basic)</label>
-                      <input v-model.number="session.paperRules.minPaperCards" type="number" placeholder="1" class="w-full text-sm border-slate-200 rounded-lg" />
-                   </div>
-                   <!-- Advanced Rule -->
-                   <div class="space-y-2">
-                      <label class="block text-xs font-bold text-slate-500">Advanced Spend Threshold</label>
-                      <input v-model="session.paperRulesAdvanced.minSpendAdvanced" placeholder="e.g. $2+" class="w-full text-sm border-slate-200 rounded-lg" />
-                   </div>
-                   <div class="space-y-2">
-                      <label class="block text-xs font-bold text-slate-500">Max Cards (Advanced)</label>
-                      <input v-model="session.paperRulesAdvanced.maxPaperCards" placeholder="e.g. Unlimited" class="w-full text-sm border-slate-200 rounded-lg" />
-                   </div>
+              <h5
+                class="text-sm font-bold text-primary-900 uppercase tracking-wider mb-4"
+              >
+                Paper Rules
+              </h5>
+              <div class="grid gap-4 md:grid-cols-2">
+                <!-- Basic Rule -->
+                <div class="space-y-2">
+                  <label class="block text-xs font-bold text-slate-500"
+                    >Basic Spend Threshold</label
+                  >
+                  <input
+                    v-model="session.paperRules.minSpend"
+                    placeholder="e.g. $1+"
+                    class="w-full text-sm border-slate-200 rounded-lg"
+                  />
                 </div>
+                <div class="space-y-2">
+                  <label class="block text-xs font-bold text-slate-500"
+                    >Free Cards (Basic)</label
+                  >
+                  <input
+                    v-model.number="session.paperRules.minPaperCards"
+                    type="number"
+                    placeholder="1"
+                    class="w-full text-sm border-slate-200 rounded-lg"
+                  />
+                </div>
+                <!-- Advanced Rule -->
+                <div class="space-y-2">
+                  <label class="block text-xs font-bold text-slate-500"
+                    >Advanced Spend Threshold</label
+                  >
+                  <input
+                    v-model="session.paperRulesAdvanced.minSpendAdvanced"
+                    placeholder="e.g. $2+"
+                    class="w-full text-sm border-slate-200 rounded-lg"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label class="block text-xs font-bold text-slate-500"
+                    >Max Cards (Advanced)</label
+                  >
+                  <input
+                    v-model="session.paperRulesAdvanced.maxPaperCards"
+                    placeholder="e.g. Unlimited"
+                    class="w-full text-sm border-slate-200 rounded-lg"
+                  />
+                </div>
+              </div>
             </div>
           </article>
         </div>
