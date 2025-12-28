@@ -248,6 +248,7 @@
             <div v-if="currentTab === 'schedule'">
               <ScheduleEditor
                 v-model="scheduleData"
+                :pricing-data="pricingData"
                 :is-saving="isSavingSchedule"
                 @save="saveSchedule"
               />

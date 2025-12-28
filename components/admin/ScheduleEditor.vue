@@ -228,6 +228,34 @@
                      </div>
                 </div>
 
+                <!-- Template Loader -->
+                <div v-if="pricingData" class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-6">
+                   <label class="block text-xs font-bold text-indigo-800 uppercase tracking-wider mb-2">Load From Pricing Template</label>
+                   <div class="flex gap-2">
+                      <select v-model="selectedTemplate" class="flex-1 rounded-lg border-indigo-200 text-sm">
+                         <option value="">-- Select a Template --</option>
+                         <!-- Daytime Templates -->
+                         <optgroup label="Daytime Sessions">
+                            <option v-for="(s, idx) in pricingData.daytime?.sessions || []" :key="s.id || idx" :value="{ type: 'daytime', data: s }">
+                               {{ s.name }} ({{ s.timeRange }})
+                            </option>
+                         </optgroup>
+                         <!-- Evening Template -->
+                         <optgroup label="Evening">
+                            <option :value="{ type: 'evening', data: pricingData.evening }">
+                               Nightly Session ({{ pricingData.evening?.startTime }})
+                            </option>
+                         </optgroup>
+                      </select>
+                      <BaseButton variant="outline" type="button" @click="applyTemplate" :disabled="!selectedTemplate" class-name="text-xs">
+                         Apply
+                      </BaseButton>
+                   </div>
+                   <p class="text-[10px] text-indigo-600 mt-2">
+                      Overwrites Name, Time, Description, and Jackpot with selected template data.
+                   </p>
+                </div>
+
                 <!-- Basic Info -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <label class="block">
@@ -332,6 +360,7 @@ const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const currentDate = ref(new Date()); // Represents the 1st of the displayed month
 const unsavedChanges = ref(false);
 const editingSession = ref<any>(null);
+const selectedTemplate = ref<any>("");
 const contextMenu = ref({ visible: false, x: 0, y: 0, session: null as any });
 const filters = ref({
     showDrafts: true,
@@ -638,6 +667,35 @@ const editSession = (session: any) => {
     if (realSession) {
         editingSession.value = JSON.parse(JSON.stringify(realSession));
     }
+    selectedTemplate.value = ""; // Reset template selector
+};
+
+const applyTemplate = () => {
+    if (!selectedTemplate.value || !editingSession.value) return;
+
+    const { type, data } = selectedTemplate.value;
+
+    if (type === 'daytime') {
+        editingSession.value.name = data.name;
+        // Parse timeRange "10:00 AM – 12:00 PM" -> startTime, endTime
+        if (data.timeRange) {
+            const parts = data.timeRange.split('–').map((s: string) => s.trim());
+            if (parts.length >= 1) editingSession.value.startTime = parts[0];
+            if (parts.length >= 2) editingSession.value.endTime = parts[1];
+        }
+        editingSession.value.description = data.description;
+        editingSession.value.jackpot = data.jackpot;
+        // Also copy specific fields if we want strong linkage?
+        // For now, copy-paste is safer.
+    } else if (type === 'evening') {
+        editingSession.value.name = "Evening Session"; // Or keep generic
+        editingSession.value.startTime = data.startTime;
+        editingSession.value.description = data.scheduleNote;
+        // Evening usually ends around 10 PM
+        editingSession.value.endTime = "10:00 PM";
+    }
+
+    alert("Template applied! Review changes before saving.");
 };
 
 const saveSession = () => {
