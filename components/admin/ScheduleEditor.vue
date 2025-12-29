@@ -75,6 +75,45 @@
 
           <div class="h-8 w-px bg-slate-200 mx-2 hidden sm:block"></div>
 
+          <!-- View Switcher -->
+          <div class="flex items-center gap-2">
+            <button
+              :class="[
+                'px-3 py-2 rounded-lg text-xs font-bold transition-all border',
+                viewMode === 'month'
+                  ? 'bg-primary-900 text-white border-primary-900'
+                  : 'bg-white text-slate-500 border-slate-200',
+              ]"
+              @click="viewMode = 'month'"
+            >
+              Month
+            </button>
+            <button
+              :class="[
+                'px-3 py-2 rounded-lg text-xs font-bold transition-all border',
+                viewMode === 'week'
+                  ? 'bg-primary-900 text-white border-primary-900'
+                  : 'bg-white text-slate-500 border-slate-200',
+              ]"
+              @click="viewMode = 'week'"
+            >
+              Week
+            </button>
+            <button
+              :class="[
+                'px-3 py-2 rounded-lg text-xs font-bold transition-all border',
+                viewMode === 'agenda'
+                  ? 'bg-primary-900 text-white border-primary-900'
+                  : 'bg-white text-slate-500 border-slate-200',
+              ]"
+              @click="viewMode = 'agenda'"
+            >
+              Agenda
+            </button>
+          </div>
+
+          <div class="h-8 w-px bg-slate-200 mx-2 hidden sm:block"></div>
+
           <!-- Filter Toggles -->
           <div class="flex items-center gap-2">
             <button
@@ -98,6 +137,17 @@
               @click="toggleFilter('conflicts')"
             >
               Conflicts
+            </button>
+            <button
+              :class="[
+                'px-3 py-2 rounded-lg text-xs font-bold transition-all border',
+                filters.showMetrics
+                  ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+                  : 'bg-white text-slate-500 border-slate-200',
+              ]"
+              @click="toggleFilter('metrics')"
+            >
+              Metrics
             </button>
           </div>
 
@@ -127,7 +177,10 @@
     </BaseCard>
 
     <!-- Monthly Calendar Grid -->
-    <div class="bg-slate-100 rounded-xl p-1 overflow-x-auto shadow-inner">
+    <div
+      v-if="viewMode === 'month'"
+      class="bg-slate-100 rounded-xl p-1 overflow-x-auto shadow-inner"
+    >
       <div
         class="min-w-[1000px] grid grid-cols-7 gap-px bg-slate-200 border border-slate-200 rounded-lg overflow-hidden"
       >
@@ -183,91 +236,117 @@
             <AlertTriangle class="w-3 h-3" /> Scheduling Conflict
           </div>
 
-          <!-- Sessions Stack -->
+          <!-- Day Profile Summary -->
           <div class="space-y-2">
             <div
-              v-for="session in cell.sessions"
-              :key="session.uniqueKey"
-              draggable="true"
-              :class="[
-                'p-2 rounded-lg border shadow-sm cursor-move transition-all hover:scale-[1.02] relative overflow-hidden',
-                session.isDraft
-                  ? 'border-dashed border-slate-300 bg-slate-50 opacity-80'
-                  : 'border-slate-200 bg-white hover:border-gold/50',
-                session.hasConflict && filters.highlightConflicts
-                  ? 'ring-2 ring-rose-500 ring-offset-1'
-                  : '',
-              ]"
-              @dragstart="onDragStart($event, session)"
-              @contextmenu.prevent="openContextMenu($event, session)"
+              class="rounded-lg border px-2 py-2 text-xs font-bold"
+              :class="profileClass(profileForDate(cell.dateStr)?.category)"
             >
-              <!-- Status Bar -->
-              <div
-                :class="[
-                  'absolute left-0 top-0 bottom-0 w-1',
-                  getStatusColor(session.status),
-                ]"
-              ></div>
-
-              <div class="pl-2">
-                <div class="flex justify-between items-start">
-                  <span class="text-[10px] font-bold text-slate-500">{{
-                    session.startTime
-                  }}</span>
-                  <span
-                    v-if="session.isDraft"
-                    class="text-[9px] font-bold bg-slate-200 text-slate-600 px-1 rounded uppercase"
-                    >Draft</span
+              <div class="flex items-center justify-between gap-2">
+                <span>
+                  {{
+                    profileForDate(cell.dateStr)?.name || "Unassigned Profile"
+                  }}
+                </span>
+                <select
+                  class="bg-white/70 border border-slate-200 rounded text-[10px] px-1 py-0.5"
+                  :value="profileForDate(cell.dateStr)?.id || ''"
+                  @change="
+                    setDayProfileAssignment(
+                      cell.dateStr,
+                      ($event.target as HTMLSelectElement).value,
+                    )
+                  "
+                >
+                  <option value="">--</option>
+                  <option
+                    v-for="profile in dayProfilesData.profiles"
+                    :key="profile.id"
+                    :value="profile.id"
                   >
-                </div>
-
-                <h5
-                  class="text-xs font-bold text-primary-900 leading-tight my-1 truncate"
-                >
-                  {{ session.name }}
-                </h5>
-
-                <!-- NEW: Linked Program/Template indicators -->
-                <div v-if="session.programSlug || session.pricingSessionId" class="flex gap-1 flex-wrap mt-1">
-                    <span v-if="session.programSlug" class="text-[9px] bg-indigo-50 text-indigo-700 px-1 rounded border border-indigo-100 truncate max-w-full">
-                        {{ getProgramName(session.programSlug) }}
-                    </span>
-                    <span v-if="session.pricingSessionId" class="text-[9px] bg-emerald-50 text-emerald-700 px-1 rounded border border-emerald-100 truncate max-w-full">
-                        {{ getPricingName(session.pricingSessionId) }}
-                    </span>
-                </div>
-
-                <!-- BI Metrics -->
-                <div
-                  class="flex items-center gap-2 mt-2 pt-2 border-t border-slate-100"
-                >
-                  <div class="flex flex-col">
-                    <span
-                      class="text-[9px] text-slate-400 uppercase tracking-tighter font-bold"
-                      >Proj. Rev</span
-                    >
-                    <span class="text-[10px] font-bold text-emerald-600"
-                      >${{ formatMoney(session.projectedRevenue) }}</span
-                    >
-                  </div>
-                  <div class="flex-1">
-                    <div
-                      class="flex justify-between text-[9px] text-slate-400 mb-0.5"
-                    >
-                      <span>Occ.</span>
-                      <span>{{ session.occupancy }}%</span>
-                    </div>
-                    <div class="h-1 bg-slate-100 rounded-full overflow-hidden">
-                      <div
-                        class="h-full bg-primary-500"
-                        :style="{ width: session.occupancy + '%' }"
-                      ></div>
-                    </div>
-                  </div>
-                </div>
+                    {{ profile.name }}
+                  </option>
+                </select>
               </div>
+              <p class="mt-1 text-[10px] font-semibold text-slate-500">
+                {{ cell.sessions.length }} session{{
+                  cell.sessions.length === 1 ? "" : "s"
+                }}
+              </p>
+              <button
+                class="mt-2 text-[10px] font-bold uppercase tracking-wider text-primary-700"
+                @click="openProfileDrawer(cell.dateStr)"
+              >
+                View Sessions
+              </button>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Week View -->
+    <div
+      v-if="viewMode === 'week'"
+      class="bg-white rounded-xl border border-slate-200 p-4"
+    >
+      <div class="grid grid-cols-7 gap-4">
+        <div
+          v-for="date in weekDates"
+          :key="date.toISOString()"
+          class="space-y-3"
+        >
+          <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            {{ date.toLocaleDateString("en-US", { weekday: "short" }) }}
+            {{ date.getDate() }}
+          </div>
+          <div
+            v-for="session in getSessionsForDate(
+              date.toISOString().slice(0, 10),
+              date.toLocaleDateString('en-US', { weekday: 'short' }),
+            )"
+            :key="session.uniqueKey"
+            class="rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs"
+          >
+            <div class="font-bold text-primary-900">{{ session.name }}</div>
+            <div class="text-slate-500">{{ session.startTime }} - {{ session.endTime }}</div>
+            <div
+              v-if="filters.showMetrics"
+              class="mt-2 rounded border border-slate-100 bg-white px-2 py-1 text-[10px] text-slate-500"
+            >
+              Proj. Rev: ${{ formatMoney(session.projectedRevenue) }} • Occ.
+              {{ session.occupancy }}%
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agenda View -->
+    <div
+      v-if="viewMode === 'agenda'"
+      class="bg-white rounded-xl border border-slate-200 p-4 space-y-3"
+    >
+      <div
+        v-for="session in agendaSessions"
+        :key="session.uniqueKey"
+        class="flex items-center justify-between rounded-lg border border-slate-200 p-3"
+      >
+        <div>
+          <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            {{ session.dateStr }}
+          </p>
+          <p class="text-sm font-bold text-primary-900">{{ session.name }}</p>
+          <p class="text-xs text-slate-500">
+            {{ session.startTime }} - {{ session.endTime }}
+          </p>
+          <p v-if="filters.showMetrics" class="text-[10px] text-slate-400">
+            Proj. Rev: ${{ formatMoney(session.projectedRevenue) }} • Occ.
+            {{ session.occupancy }}%
+          </p>
+        </div>
+        <div class="text-xs text-slate-500">
+          {{ session.status }}
         </div>
       </div>
     </div>
@@ -591,8 +670,8 @@
               >
               <input
                 v-model="editingSession.startTime"
-                type="text"
-                placeholder="e.g. 6:30 PM"
+                type="time"
+                placeholder="18:30"
                 class="w-full rounded-xl border-slate-200 bg-slate-50 focus:border-gold focus:ring-gold"
               />
             </label>
@@ -603,8 +682,8 @@
               >
               <input
                 v-model="editingSession.endTime"
-                type="text"
-                placeholder="e.g. 9:00 PM"
+                type="time"
+                placeholder="21:00"
                 class="w-full rounded-xl border-slate-200 bg-slate-50 focus:border-gold focus:ring-gold"
               />
             </label>
@@ -695,6 +774,68 @@
         </div>
       </div>
     </div>
+
+    <!-- Day Profile Sessions Drawer -->
+    <div
+      v-if="profileDrawerDate"
+      class="fixed inset-0 z-50 flex items-center justify-end"
+    >
+      <div
+        class="absolute inset-0 bg-primary-950/40"
+        @click="closeProfileDrawer"
+      ></div>
+      <div
+        class="relative bg-white h-full w-full max-w-md shadow-2xl border-l border-slate-200 flex flex-col"
+      >
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              Day Profile Sessions
+            </p>
+            <h3 class="text-lg font-black text-primary-900">
+              {{ profileDrawerDate }}
+            </h3>
+          </div>
+          <button
+            class="text-slate-400 hover:text-slate-600"
+            @click="closeProfileDrawer"
+          >
+            <X class="w-5 h-5" />
+          </button>
+        </div>
+        <div class="p-6 space-y-3 overflow-y-auto">
+          <div
+            v-for="session in getSessionsForDate(
+              profileDrawerDate,
+              new Date(profileDrawerDate).toLocaleDateString('en-US', { weekday: 'short' }),
+            )"
+            :key="session.uniqueKey"
+            class="rounded-lg border border-slate-200 p-3"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-bold text-primary-900">{{ session.name }}</p>
+                <p class="text-xs text-slate-500">
+                  {{ session.startTime }} - {{ session.endTime }}
+                </p>
+              </div>
+              <button
+                class="text-xs font-bold text-primary-600"
+                @click="editSession(session)"
+              >
+                Edit
+              </button>
+            </div>
+          </div>
+          <div v-if="getSessionsForDate(
+              profileDrawerDate,
+              new Date(profileDrawerDate).toLocaleDateString('en-US', { weekday: 'short' }),
+            ).length === 0" class="text-sm text-slate-400">
+            No sessions assigned.
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -720,9 +861,14 @@ const props = defineProps<{
   isSaving: boolean;
   pricingData?: any;
   programs?: any[];
+  dayProfiles?: {
+    profiles: any[];
+    assignments: Record<string, string>;
+    overrides: Record<string, any[]>;
+  };
 }>();
 
-const emit = defineEmits(["update:modelValue", "save"]);
+const emit = defineEmits(["update:modelValue", "save", "update:dayProfiles"]);
 
 // --- State ---
 const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -730,9 +876,12 @@ const currentDate = ref(new Date());
 const unsavedChanges = ref(false);
 const editingSession = ref<any>(null);
 const contextMenu = ref({ visible: false, x: 0, y: 0, session: null as any });
+const profileDrawerDate = ref<string | null>(null);
+const viewMode = ref<"month" | "week" | "agenda">("month");
 const filters = ref({
   showDrafts: true,
   highlightConflicts: true,
+  showMetrics: true,
 });
 
 const pricingReady = computed(() => {
@@ -795,6 +944,40 @@ const calendarCells = computed(() => {
   return cells;
 });
 
+const dayProfilesData = computed(() => ({
+  profiles: props.dayProfiles?.profiles ?? [],
+  assignments: props.dayProfiles?.assignments ?? {},
+  overrides: props.dayProfiles?.overrides ?? {},
+}));
+
+const weekDates = computed(() => {
+  const base = new Date(currentDate.value);
+  const day = base.getDay();
+  const diff = (day === 0 ? -6 : 1) - day;
+  const monday = new Date(base);
+  monday.setDate(base.getDate() + diff);
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d;
+  });
+});
+
+const agendaSessions = computed(() => {
+  const sessions = calendarCells.value.flatMap((cell) =>
+    cell.sessions.map((session: any) => ({
+      ...session,
+      dateStr: cell.dateStr,
+    })),
+  );
+  return sessions.sort((a, b) => {
+    if (a.dateStr === b.dateStr) {
+      return parseTime(a.startTime) - parseTime(b.startTime);
+    }
+    return a.dateStr.localeCompare(b.dateStr);
+  });
+});
+
 const createCell = (date: Date, isCurrentMonth: boolean) => {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -830,6 +1013,43 @@ const createCell = (date: Date, isCurrentMonth: boolean) => {
     sessions,
     hasConflict,
   };
+};
+
+const profileForDate = (dateStr: string) => {
+  const profileId = dayProfilesData.value.assignments[dateStr];
+  return dayProfilesData.value.profiles.find((p: any) => p.id === profileId);
+};
+
+const profileClass = (category?: string) => {
+  switch (category) {
+    case "weekend":
+      return "bg-purple-50 border-purple-200 text-purple-800";
+    case "special":
+      return "bg-gold/10 border-gold/30 text-gold-800";
+    case "closed":
+      return "bg-slate-100 border-slate-200 text-slate-500";
+    case "weekday":
+    default:
+      return "bg-sky-50 border-sky-200 text-sky-800";
+  }
+};
+
+const setDayProfileAssignment = (dateStr: string, profileId: string) => {
+  const next = {
+    profiles: dayProfilesData.value.profiles,
+    assignments: { ...dayProfilesData.value.assignments, [dateStr]: profileId },
+    overrides: dayProfilesData.value.overrides,
+  };
+  emit("update:dayProfiles", next);
+  unsavedChanges.value = true;
+};
+
+const openProfileDrawer = (dateStr: string) => {
+  profileDrawerDate.value = dateStr;
+};
+
+const closeProfileDrawer = () => {
+  profileDrawerDate.value = null;
 };
 
 const getSessionsForDate = (dateStr: string, dayName: string) => {
@@ -940,10 +1160,11 @@ const onDrop = (e: DragEvent, targetDateStr: string) => {
   unsavedChanges.value = true;
 };
 
-const toggleFilter = (key: "drafts" | "conflicts") => {
+const toggleFilter = (key: "drafts" | "conflicts" | "metrics") => {
   if (key === "drafts") filters.value.showDrafts = !filters.value.showDrafts;
   if (key === "conflicts")
     filters.value.highlightConflicts = !filters.value.highlightConflicts;
+  if (key === "metrics") filters.value.showMetrics = !filters.value.showMetrics;
 };
 
 // --- Context Menu ---
@@ -1006,8 +1227,8 @@ const addNewSession = (dateStr: string) => {
     id: createSessionId(),
     name: "New Session",
     category: "General",
-    startTime: "6:00 PM",
-    endTime: "9:00 PM",
+    startTime: "18:00",
+    endTime: "21:00",
     gameType: "Regular",
     status: "Upcoming",
     overrideDate: dateStr,
@@ -1064,7 +1285,7 @@ const applyTemplateData = (type: string, data: any) => {
     editingSession.value.name = "Evening Session";
     editingSession.value.startTime = data.startTime;
     editingSession.value.description = data.scheduleNote;
-    editingSession.value.endTime = "10:00 PM";
+    editingSession.value.endTime = "22:00";
   }
 };
 
@@ -1182,7 +1403,7 @@ const runBulkGenerate = () => {
         name: type === "daytime" ? data.name : "Evening Session",
         category: type === "daytime" ? data.name.split(" ")[0] : "Evening",
         startTime: "",
-        endTime: type === "evening" ? "10:00 PM" : "",
+        endTime: type === "evening" ? "22:00" : "",
         gameType: "Regular",
         status: "Upcoming",
         overrideDate: dateStr,

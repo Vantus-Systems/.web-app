@@ -9,6 +9,9 @@ const patternSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
   isAnimated: z.boolean().default(false),
+  category: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  activeSessions: z.array(z.string()).optional(),
   definition: z.object({
     frames: z.array(frameSchema).min(1),
     interval: z.number().min(50).max(5000).optional(),
@@ -34,6 +37,11 @@ export default defineEventHandler(async (event) => {
       description: data.description,
       isAnimated: data.isAnimated,
       definition: JSON.stringify(data.definition),
+      category: data.category,
+      tags: data.tags ? JSON.stringify(data.tags) : null,
+      active_sessions: data.activeSessions
+        ? JSON.stringify(data.activeSessions)
+        : null,
     },
     create: {
       slug: data.slug,
@@ -41,6 +49,11 @@ export default defineEventHandler(async (event) => {
       description: data.description,
       isAnimated: data.isAnimated,
       definition: JSON.stringify(data.definition),
+      category: data.category,
+      tags: data.tags ? JSON.stringify(data.tags) : null,
+      active_sessions: data.activeSessions
+        ? JSON.stringify(data.activeSessions)
+        : null,
     },
   });
 
@@ -57,5 +70,9 @@ export default defineEventHandler(async (event) => {
   return {
     ...result,
     definition: JSON.parse(result.definition),
+    tags: result.tags ? JSON.parse(result.tags) : [],
+    activeSessions: result.active_sessions
+      ? JSON.parse(result.active_sessions)
+      : [],
   };
 });
