@@ -58,8 +58,8 @@
             <ul class="space-y-4 text-slate-700">
               <li>
                 <strong>Bingo Verification:</strong> It is the player's
-                responsibility to announce "BINGO" clearly for the caller to
-                hear. The game concludes when the caller acknowledges the win.
+                responsibility to announce "BINGO" clearly for the MIC to
+                hear. The game concludes when the MIC acknowledges the win.
                 Late calls may not be honored if the next number has already
                 been started.
               </li>
