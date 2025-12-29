@@ -1,4 +1,7 @@
-import type { ShiftWorkflowType, ShiftDesignation } from "@prisma/client";
+import type {
+  ShiftWorkflowType,
+  ShiftDesignation,
+} from "~/server/schemas/shift-record.zod";
 import { createError } from "h3";
 import prisma from "~/server/db/client";
 

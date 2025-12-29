@@ -1,14 +1,18 @@
 import { z } from "zod";
 
+export const shiftDesignationSchema = z.enum(["AM", "PM"]);
 export const shiftWorkflowSchema = z.enum([
   "NORMAL",
   "NEGATIVE_BINGO_BOX",
   "RECUPERATION_BOX_RETURN",
 ]);
 
+export type ShiftDesignation = z.infer<typeof shiftDesignationSchema>;
+export type ShiftWorkflowType = z.infer<typeof shiftWorkflowSchema>;
+
 export const shiftRecordInputSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  shift: z.enum(["AM", "PM"]),
+  shift: shiftDesignationSchema,
   pulltabs_total: z.number().min(0),
   deposit_total: z.number().min(0).optional(),
   players: z.number().int().min(0).optional(),

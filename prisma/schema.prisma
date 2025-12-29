@@ -23,41 +23,21 @@ model user {
 
   sessions      session[]
   audit_logs    auditLog[] @relation("AuditActor")
+  created_shifts shiftRecord[] @relation("UserShiftRecords")
 
   @@map("users")
 }
 
-enum ShiftDesignation {
-  AM
-  PM
-}
-
-enum ShiftWorkflowType {
-  NORMAL
-  NEGATIVE_BINGO_BOX
-  RECUPERATION_BOX_RETURN
-}
-
-enum HolidayRuleType {
-  FIXED_DATE
-  NTH_WEEKDAY
-  EASTER
-}
-
-enum HolidayClosureType {
-  CLOSED
-  CLOSE_EARLY
-}
 
 model shiftRecord {
   id                String             @id @default(uuid())
   date              DateTime
-  shift             ShiftDesignation
+  shift             String
   pulltabs_total    Float
   deposit_total     Float
   bingo_total       Float
   players           Int?
-  workflow_type     ShiftWorkflowType
+  workflow_type     String
   beginning_box     Float?
   ending_box        Float?
   bingo_actual      Float?
@@ -69,7 +49,7 @@ model shiftRecord {
   created_at        DateTime           @default(now())
   updated_at        DateTime           @updatedAt
 
-  created_by        user               @relation(fields: [created_by_user_id], references: [id])
+  created_by        user               @relation("UserShiftRecords", fields: [created_by_user_id], references: [id])
   prev_shift        shiftRecord?       @relation("ShiftPrev", fields: [prev_shift_id], references: [id])
   next_shifts       shiftRecord[]      @relation("ShiftPrev")
 
@@ -81,12 +61,12 @@ model shiftRecord {
 model holidayRule {
   id           String             @id @default(uuid())
   name         String             @unique
-  rule_type    HolidayRuleType
+  rule_type    String
   month        Int?
   day          Int?
   weekday      Int?
   week         Int?
-  closure_type HolidayClosureType
+  closure_type String
   close_time   String?
   start_year   Int?
   end_year     Int?
