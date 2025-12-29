@@ -30,3 +30,5 @@ prisma/med.db-journal
 # Verification artifacts
 verification/*.png
 package-lock.json
+
+*med.db
