@@ -178,11 +178,11 @@ const rollbackSchema = () => {
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-900"></div>
             </div>
             <div v-else>
-                <div v-if="currentStep === 'pricing' && opsStore.pricingDraft" class="fade-enter-active">
+                <div v-if="currentStep === 'pricing'" class="fade-enter-active">
                     <PricingEditor
-                        :modelValue="opsStore.pricingDraft"
+                        :modelValue="opsStore.opsSchemaDraft"
                         :isSaving="false"
-                        @update:modelValue="opsStore.updatePricingDraft"
+                        @update:modelValue="opsStore.updateOpsSchemaDraft"
                         @save="handleSave"
                     />
                 </div>
