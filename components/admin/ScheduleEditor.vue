@@ -16,6 +16,26 @@
             >
               Unsaved Changes
             </span>
+            <span
+              :class="[
+                'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide',
+                pricingReady
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-amber-100 text-amber-700',
+              ]"
+            >
+              Pricing {{ pricingReady ? "Ready" : "Pending" }}
+            </span>
+            <span
+              :class="[
+                'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide',
+                programsReady
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-amber-100 text-amber-700',
+              ]"
+            >
+              Programs {{ programsReady ? "Ready" : "Pending" }}
+            </span>
           </div>
           <h3 class="text-3xl font-black text-primary-950 tracking-tight">
             Schedule Control Room
@@ -207,6 +227,16 @@
                   {{ session.name }}
                 </h5>
 
+                <!-- NEW: Linked Program/Template indicators -->
+                <div v-if="session.programSlug || session.pricingSessionId" class="flex gap-1 flex-wrap mt-1">
+                    <span v-if="session.programSlug" class="text-[9px] bg-indigo-50 text-indigo-700 px-1 rounded border border-indigo-100 truncate max-w-full">
+                        {{ getProgramName(session.programSlug) }}
+                    </span>
+                    <span v-if="session.pricingSessionId" class="text-[9px] bg-emerald-50 text-emerald-700 px-1 rounded border border-emerald-100 truncate max-w-full">
+                        {{ getPricingName(session.pricingSessionId) }}
+                    </span>
+                </div>
+
                 <!-- BI Metrics -->
                 <div
                   class="flex items-center gap-2 mt-2 pt-2 border-t border-slate-100"
@@ -336,8 +366,8 @@
               </optgroup>
             </select>
           </div>
-
-          <div class="grid grid-cols-2 gap-4">
+          <!-- Bulk dates and days input (same as before) -->
+           <div class="grid grid-cols-2 gap-4">
             <div>
               <label
                 class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"
@@ -361,7 +391,6 @@
               />
             </div>
           </div>
-
           <div>
             <label
               class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"
@@ -384,13 +413,7 @@
               </button>
             </div>
           </div>
-
-          <div
-            class="bg-amber-50 text-amber-800 text-xs p-3 rounded-lg border border-amber-100"
-          >
-            <strong>Note:</strong> This will create individual session entries
-            for every matching date.
-          </div>
+          <!-- ... -->
         </div>
         <div
           class="bg-slate-50 px-6 py-4 flex justify-end gap-3 border-t border-slate-200"
@@ -405,7 +428,7 @@
       </div>
     </div>
 
-    <!-- Session Editor Modal (Reused/Updated) -->
+    <!-- Session Editor Modal -->
     <div
       v-if="editingSession"
       class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
@@ -444,6 +467,42 @@
 
         <!-- Modal Body -->
         <div class="p-6 space-y-6">
+
+          <!-- NEW: Linked Configuration -->
+          <div class="bg-indigo-50/50 rounded-xl p-4 border border-indigo-100 grid sm:grid-cols-2 gap-4">
+               <div>
+                    <label class="block text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-1">Pricing Template</label>
+                    <div class="flex gap-2">
+                        <select
+                            v-model="editingSession.pricingSessionId"
+                            class="w-full rounded-lg border-indigo-200 text-sm focus:border-indigo-400 focus:ring-indigo-400"
+                            @change="handlePricingTemplateChange"
+                        >
+                            <option value="">-- None --</option>
+                            <optgroup label="Daytime">
+                                <option
+                                    v-for="(s, idx) in pricingData?.daytime?.sessions || []"
+                                    :key="s.id || idx"
+                                    :value="s.id"
+                                >
+                                    {{ s.name }}
+                                </option>
+                            </optgroup>
+                            <optgroup label="Evening">
+                                <option value="evening-main">Evening Main</option>
+                            </optgroup>
+                        </select>
+                    </div>
+               </div>
+               <div>
+                   <label class="block text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-1">Linked Program</label>
+                   <select v-model="editingSession.programSlug" class="w-full rounded-lg border-indigo-200 text-sm focus:border-indigo-400 focus:ring-indigo-400">
+                       <option value="">-- None --</option>
+                       <option v-for="p in programs" :key="p.slug" :value="p.slug">{{ p.name }}</option>
+                   </select>
+               </div>
+          </div>
+
           <!-- Metrics Inputs (Enterprise) -->
           <div
             class="bg-slate-50 rounded-xl p-4 border border-slate-100 grid grid-cols-3 gap-4"
@@ -489,56 +548,6 @@
                 placeholder="100"
               />
             </div>
-          </div>
-
-          <!-- Template Loader -->
-          <div
-            v-if="pricingData"
-            class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-6"
-          >
-            <label
-              class="block text-xs font-bold text-indigo-800 uppercase tracking-wider mb-2"
-              >Load From Pricing Template</label
-            >
-            <div class="flex gap-2">
-              <select
-                v-model="selectedTemplate"
-                class="flex-1 rounded-lg border-indigo-200 text-sm"
-              >
-                <option value="">-- Select a Template --</option>
-                <!-- Daytime Templates -->
-                <optgroup label="Daytime Sessions">
-                  <option
-                    v-for="(s, idx) in pricingData.daytime?.sessions || []"
-                    :key="s.id || idx"
-                    :value="{ type: 'daytime', data: s }"
-                  >
-                    {{ s.name }} ({{ s.timeRange }})
-                  </option>
-                </optgroup>
-                <!-- Evening Template -->
-                <optgroup label="Evening">
-                  <option
-                    :value="{ type: 'evening', data: pricingData.evening }"
-                  >
-                    Nightly Session ({{ pricingData.evening?.startTime }})
-                  </option>
-                </optgroup>
-              </select>
-              <BaseButton
-                variant="outline"
-                type="button"
-                :disabled="!selectedTemplate"
-                class-name="text-xs"
-                @click="applyTemplate"
-              >
-                Apply
-              </BaseButton>
-            </div>
-            <p class="text-[10px] text-indigo-600 mt-2">
-              Overwrites Name, Time, Description, and Jackpot with selected
-              template data.
-            </p>
           </div>
 
           <!-- Basic Info -->
@@ -611,8 +620,7 @@
               <p class="text-xs font-bold text-amber-800">One-Off Override</p>
               <p class="text-[10px] text-amber-700">
                 This session is scheduled specifically for
-                {{ editingSession.overrideDate }}. It is detached from the
-                weekly recurrence.
+                {{ editingSession.overrideDate }}.
               </p>
             </div>
           </div>
@@ -710,21 +718,34 @@ import { parseTime } from "~/utils/time.utils";
 const props = defineProps<{
   modelValue: any[];
   isSaving: boolean;
+  pricingData?: any;
+  programs?: any[];
 }>();
 
 const emit = defineEmits(["update:modelValue", "save"]);
 
 // --- State ---
 const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const currentDate = ref(new Date()); // Represents the 1st of the displayed month
+const currentDate = ref(new Date());
 const unsavedChanges = ref(false);
 const editingSession = ref<any>(null);
-const selectedTemplate = ref<any>("");
 const contextMenu = ref({ visible: false, x: 0, y: 0, session: null as any });
 const filters = ref({
   showDrafts: true,
   highlightConflicts: true,
 });
+
+const pricingReady = computed(() => {
+  const pricing = props.pricingData ?? {};
+  const daytimeSessions = pricing?.daytime?.sessions?.length ?? 0;
+  const eveningDefined =
+    Boolean(pricing?.evening?.startTime) ||
+    (pricing?.evening?.machines?.length ?? 0) > 0 ||
+    (pricing?.evening?.specialtyGames?.length ?? 0) > 0;
+  return daytimeSessions > 0 || eveningDefined;
+});
+
+const programsReady = computed(() => (props.programs?.length ?? 0) > 0);
 
 // Bulk Ops State
 const showBulkModal = ref(false);
@@ -732,7 +753,7 @@ const bulkForm = ref({
   template: null as any,
   startDate: "",
   endDate: "",
-  days: [] as number[], // 0=Mon, 6=Sun to match weekDays array index
+  days: [] as number[],
 });
 
 // --- Computed Calendar Logic ---
@@ -745,33 +766,27 @@ const calendarCells = computed(() => {
   const year = currentDate.value.getFullYear();
   const month = currentDate.value.getMonth();
 
-  // First day of month
   const firstDayOfMonth = new Date(year, month, 1);
-  // Day of week (0=Sun, 1=Mon...). We want Mon=0, Sun=6
   let startDay = firstDayOfMonth.getDay() - 1;
   if (startDay === -1) startDay = 6;
 
-  // Last day of month
   const lastDayOfMonth = new Date(year, month + 1, 0);
   const totalDays = lastDayOfMonth.getDate();
 
   const cells = [];
 
-  // Previous month padding
   const prevMonthLastDay = new Date(year, month, 0).getDate();
   for (let i = startDay - 1; i >= 0; i--) {
     const d = new Date(year, month - 1, prevMonthLastDay - i);
     cells.push(createCell(d, false));
   }
 
-  // Current month
   for (let i = 1; i <= totalDays; i++) {
     const d = new Date(year, month, i);
     cells.push(createCell(d, true));
   }
 
-  // Next month padding
-  const remaining = 42 - cells.length; // 6 rows * 7 cols
+  const remaining = 42 - cells.length;
   for (let i = 1; i <= remaining; i++) {
     const d = new Date(year, month + 1, i);
     cells.push(createCell(d, false));
@@ -785,22 +800,15 @@ const createCell = (date: Date, isCurrentMonth: boolean) => {
   const m = String(date.getMonth() + 1).padStart(2, "0");
   const d = String(date.getDate()).padStart(2, "0");
   const dateStr = `${y}-${m}-${d}`;
-  const dayName = date.toLocaleDateString("en-US", { weekday: "short" }); // Mon, Tue...
+  const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
 
-  // Find sessions
   const sessions = getSessionsForDate(dateStr, dayName);
 
-  // Check conflicts
   let hasConflict = false;
   if (sessions.length > 1) {
-    // Simple conflict check: overlapping times
-    // We'll need start/end minutes.
-    // For efficiency, assume sessions sorted by startTime.
     for (let i = 0; i < sessions.length - 1; i++) {
       const s1 = sessions[i];
       const s2 = sessions[i + 1];
-      // Assuming start/end exist and parseable. If missing, skip.
-      // Using parseTime helper
       const start1 = parseTime(s1.startTime || "");
       const end1 = parseTime(s1.endTime || "");
       const start2 = parseTime(s2.startTime || "");
@@ -825,32 +833,27 @@ const createCell = (date: Date, isCurrentMonth: boolean) => {
 };
 
 const getSessionsForDate = (dateStr: string, dayName: string) => {
-  // 1. Find overrides for this specific date
   const overrides = props.modelValue.filter((s) => s.overrideDate === dateStr);
-
-  // 2. Find recurring sessions for this dayOfWeek
   const recurring = props.modelValue.filter((s) => {
-    if (s.overrideDate) return false; // Skip one-offs
-    if (!s.availableDays?.includes(dayName)) return false; // Wrong day
-    if (s.excludedDates?.includes(dateStr)) return false; // Excluded
+    if (s.overrideDate) return false;
+    if (!s.availableDays?.includes(dayName)) return false;
+    if (s.excludedDates?.includes(dateStr)) return false;
     return true;
   });
 
   let combined = [...overrides, ...recurring];
 
-  // Filter drafts
   if (!filters.value.showDrafts) {
     combined = combined.filter((s) => !s.isDraft);
   }
 
-  // Map to include display helpers
   return combined
     .map((s) => ({
       ...s,
-      uniqueKey: s.id + "-" + dateStr, // unique key for v-for
+      uniqueKey: s.id + "-" + dateStr,
       occupancy:
         Math.round(((s.ticketsSold || 0) / (s.totalSeats || 100)) * 100) || 0,
-      hasConflict: false, // init
+      hasConflict: false,
     }))
     .sort((a, b) => {
       const ta = parseTime(a.startTime);
@@ -858,8 +861,6 @@ const getSessionsForDate = (dateStr: string, dayName: string) => {
       return ta - tb;
     });
 };
-
-// --- Actions ---
 
 const changeMonth = (delta: number) => {
   const d = new Date(currentDate.value);
@@ -869,20 +870,23 @@ const changeMonth = (delta: number) => {
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case "Live":
-      return "bg-emerald-500";
-    case "Upcoming":
-      return "bg-sky-500";
-    case "Closing":
-      return "bg-amber-500";
-    case "Sold Out":
-      return "bg-rose-500";
-    default:
-      return "bg-slate-300";
+    case "Live": return "bg-emerald-500";
+    case "Upcoming": return "bg-sky-500";
+    case "Closing": return "bg-amber-500";
+    case "Sold Out": return "bg-rose-500";
+    default: return "bg-slate-300";
   }
 };
 
 const formatMoney = (val?: number) => (val ? val.toLocaleString() : "0");
+
+const getProgramName = (slug: string) => {
+    return props.programs?.find(p => p.slug === slug)?.name || slug;
+};
+const getPricingName = (id: string) => {
+    if (id === 'evening-main') return 'Evening Main';
+    return props.pricingData?.daytime?.sessions?.find((s:any) => s.id === id)?.name || id;
+};
 
 // --- Drag and Drop ---
 const onDragStart = (e: DragEvent, session: any) => {
@@ -897,42 +901,19 @@ const onDrop = (e: DragEvent, targetDateStr: string) => {
   if (!data) return;
   const session = JSON.parse(data);
 
-  // Logic:
-  // If we drag a session to a new date:
-  // 1. If it's a one-off (has overrideDate): Just update overrideDate.
-  // 2. If it's recurring:
-  //    a. Add the source date (implied from where we dragged it?) -> Wait, we don't know the source date from the session object alone if it's recurring.
-  //    BUT, we can infer it if we pass sourceDate in drag data.
-  //    Let's simplify: "Smart" drag usually implies creating an exception.
-  //    We should create a copy with overrideDate = targetDateStr, and Exclude the original date if possible.
-  //    However, determining the "Original Date" accurately requires passing it.
-
-  // For now, let's just "Copy" the session configuration to the new date as a one-off override.
-  // This supports the "Clone" use case.
-  // To support "Move", we need to know where it came from to exclude it.
-
-  // Let's implement "Move" by checking if we can find the source date in the uniqueKey (hacky but works locally).
-  // uniqueKey format: ID-YYYY-MM-DD
-
   const parts = (session.uniqueKey || "").split("-");
-  // The ID might contain dashes, so we take the last 3 parts as date? No, date is YYYY-MM-DD (3 parts).
-  // Let's assume date is at the end.
   const sourceDateStr = parts.slice(-3).join("-");
 
-  if (sourceDateStr === targetDateStr) return; // Same day drop
+  if (sourceDateStr === targetDateStr) return;
 
-  // Update Data
   const updatedList = [...props.modelValue];
 
   if (session.overrideDate) {
-    // It was already a one-off, just move it
     const idx = updatedList.findIndex((s) => s.id === session.id);
     if (idx !== -1) {
       updatedList[idx] = { ...updatedList[idx], overrideDate: targetDateStr };
     }
   } else {
-    // It was recurring.
-    // 1. Exclude from source
     const recurringIdx = updatedList.findIndex((s) => s.id === session.id);
     if (recurringIdx !== -1) {
       const recurring = { ...updatedList[recurringIdx] };
@@ -943,12 +924,11 @@ const onDrop = (e: DragEvent, targetDateStr: string) => {
       updatedList[recurringIdx] = recurring;
     }
 
-    // 2. Create override at target
     const newOverride = {
       ...session,
       id: `override-${Date.now()}`,
       overrideDate: targetDateStr,
-      availableDays: [], // clear recurrence
+      availableDays: [],
       excludedDates: [],
       uniqueKey: undefined,
       hasConflict: false,
@@ -974,8 +954,6 @@ const openContextMenu = (e: MouseEvent, session: any) => {
     y: e.clientY,
     session,
   };
-  // Close on click elsewhere handled by a global listener or overlay usually,
-  // but here `mouseleave` on the menu helps or a click listener on window.
 };
 
 const closeContextMenu = () => {
@@ -987,7 +965,7 @@ const handleContextAction = (action: string) => {
   const s = contextMenu.value.session;
 
   if (action === "edit") editSession(s);
-  if (action === "delete") deleteSession(s); // Needs adaptation to handle recurring instance deletion
+  if (action === "delete") deleteSession(s);
   if (action === "duplicate") duplicateSession(s);
   if (action === "toggleDraft") toggleDraft(s);
 
@@ -996,7 +974,6 @@ const handleContextAction = (action: string) => {
 
 const toggleDraft = (session: any) => {
   const updatedList = [...props.modelValue];
-  // If recurring, we might need to be careful. For now, toggle the definition.
   const idx = updatedList.findIndex((x) => x.id === session.id);
   if (idx !== -1) {
     updatedList[idx] = {
@@ -1033,37 +1010,49 @@ const addNewSession = (dateStr: string) => {
     endTime: "9:00 PM",
     gameType: "Regular",
     status: "Upcoming",
-    overrideDate: dateStr, // Default to clicked date as one-off
+    overrideDate: dateStr,
     availableDays: [],
     pricing: {},
     specials: {},
-    isDraft: true, // Default to draft for safety
+    isDraft: true,
     projectedRevenue: 0,
     ticketsSold: 0,
     totalSeats: 100,
+    programSlug: "",
+    pricingSessionId: ""
   };
 };
 
 const editSession = (session: any) => {
-  // We edit the underlying definition.
-  // If the user clicked a recurring instance, they are editing the *Pattern*.
-  // We should visually indicate this or offer to "Detach".
-  // For this MVP, we edit the pattern or the override object directly.
   const realSession = props.modelValue.find((s) => s.id === session.id);
   if (realSession) {
     editingSession.value = JSON.parse(JSON.stringify(realSession));
   }
-  selectedTemplate.value = ""; // Reset template selector
 };
 
-const applyTemplate = () => {
-  if (!selectedTemplate.value || !editingSession.value) return;
+const handlePricingTemplateChange = () => {
+    if (!editingSession.value.pricingSessionId) return;
+    const pid = editingSession.value.pricingSessionId;
+    let data = null;
+    let type = 'daytime';
 
-  const { type, data } = selectedTemplate.value;
+    if (pid === 'evening-main') {
+        data = props.pricingData?.evening;
+        type = 'evening';
+    } else {
+        data = props.pricingData?.daytime?.sessions?.find((s:any) => s.id === pid);
+    }
 
+    if (data) {
+        if (confirm("Apply template settings (Name, Times, etc.) to this session?")) {
+            applyTemplateData(type, data);
+        }
+    }
+};
+
+const applyTemplateData = (type: string, data: any) => {
   if (type === "daytime") {
     editingSession.value.name = data.name;
-    // Parse timeRange "10:00 AM – 12:00 PM" -> startTime, endTime
     if (data.timeRange) {
       const parts = data.timeRange.split("–").map((s: string) => s.trim());
       if (parts.length >= 1) editingSession.value.startTime = parts[0];
@@ -1071,17 +1060,12 @@ const applyTemplate = () => {
     }
     editingSession.value.description = data.description;
     editingSession.value.jackpot = data.jackpot;
-    // Also copy specific fields if we want strong linkage?
-    // For now, copy-paste is safer.
   } else if (type === "evening") {
-    editingSession.value.name = "Evening Session"; // Or keep generic
+    editingSession.value.name = "Evening Session";
     editingSession.value.startTime = data.startTime;
     editingSession.value.description = data.scheduleNote;
-    // Evening usually ends around 10 PM
     editingSession.value.endTime = "10:00 PM";
   }
-
-  alert("Template applied! Review changes before saving.");
 };
 
 const saveSession = () => {
@@ -1129,9 +1113,6 @@ const toggleDay = (day: string) => {
   if (!editingSession.value.availableDays)
     editingSession.value.availableDays = [];
 
-  // If adding a day, we should probably clear overrideDate to make it a proper recurring pattern?
-  // Or allow hybrid? Typically hybrid is confusing.
-  // Let's assume if you add days, you want it recurring.
   if (editingSession.value.overrideDate) {
     if (
       !confirm(
@@ -1158,7 +1139,7 @@ const openBulkModal = () => {
     endDate: new Date(new Date().setMonth(new Date().getMonth() + 1))
       .toISOString()
       .slice(0, 10),
-    days: [4], // Default to Friday (Mon=0, Tue=1, Wed=2, Thu=3, Fri=4...)
+    days: [4],
   };
   showBulkModal.value = true;
 };
@@ -1179,7 +1160,6 @@ const runBulkGenerate = () => {
   const start = new Date(bulkForm.value.startDate);
   const end = new Date(bulkForm.value.endDate);
 
-  // Safety check for loop
   if (start > end) return alert("Start date must be before end date.");
   const diffTime = Math.abs(end.getTime() - start.getTime());
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -1191,28 +1171,16 @@ const runBulkGenerate = () => {
   const loopDate = new Date(start);
 
   while (loopDate <= end) {
-    // getDay(): 0=Sun, 1=Mon...
-    // weekDays array: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-    // so Mon is index 0 in weekDays, but 1 in getDay().
-    // Mapping:
-    // getDay() -> weekDays Index
-    // 1 (Mon) -> 0
-    // 2 (Tue) -> 1
-    // ...
-    // 6 (Sat) -> 5
-    // 0 (Sun) -> 6
-
     let dayIndex = loopDate.getDay() - 1;
     if (dayIndex === -1) dayIndex = 6;
 
     if (bulkForm.value.days.includes(dayIndex)) {
-      // Create Session
       const dateStr = loopDate.toISOString().slice(0, 10);
 
       const newSession = {
         id: createSessionId(),
         name: type === "daytime" ? data.name : "Evening Session",
-        category: type === "daytime" ? data.name.split(" ")[0] : "Evening", // simple heuristic
+        category: type === "daytime" ? data.name.split(" ")[0] : "Evening",
         startTime: "",
         endTime: type === "evening" ? "10:00 PM" : "",
         gameType: "Regular",
@@ -1225,6 +1193,8 @@ const runBulkGenerate = () => {
         projectedRevenue: 0,
         ticketsSold: 0,
         totalSeats: 100,
+        programSlug: "",
+        pricingSessionId: type === "evening" ? "evening-main" : data.id
       };
 
       if (type === "daytime") {
@@ -1259,21 +1229,8 @@ const runBulkGenerate = () => {
 
 // --- Conflict Validation ---
 const validateConflicts = () => {
-  // We need to check for overlaps on specific dates.
-  // 1. Recurring vs Recurring
-  // 2. Override vs Override
-  // 3. Override vs Recurring
-
-  // Simplification: Expand all sessions into a map keyed by "YYYY-MM-DD".
-  // Since infinite recurring is hard, let's just validate the *current month* view + any overrides being saved.
-  // Actually, "Prevent saving" implies a global check.
-  // A robust check iterates all overrides against each other.
-  // And recurring against recurring (Do they share a DOW?).
-
   const errors = [];
   const list = props.modelValue;
-
-  // Check Recurring vs Recurring
   const recurring = list.filter(
     (s) => !s.overrideDate && s.availableDays && s.availableDays.length > 0,
   );
@@ -1281,12 +1238,10 @@ const validateConflicts = () => {
     for (let j = i + 1; j < recurring.length; j++) {
       const s1 = recurring[i];
       const s2 = recurring[j];
-      // Check DOW overlap
       const commonDays = s1.availableDays.filter((d: string) =>
         s2.availableDays.includes(d),
       );
       if (commonDays.length > 0) {
-        // Check Time overlap
         if (checkTimeOverlap(s1, s2)) {
           errors.push(
             `Recurring conflict: "${s1.name}" vs "${s2.name}" on ${commonDays.join(", ")}`,
@@ -1296,9 +1251,7 @@ const validateConflicts = () => {
     }
   }
 
-  // Check Overrides vs Overrides (on same date)
   const overrides = list.filter((s) => s.overrideDate);
-  // Group by date
   const byDate: Record<string, any[]> = {};
   overrides.forEach((s) => {
     if (!byDate[s.overrideDate]) byDate[s.overrideDate] = [];
@@ -1319,16 +1272,11 @@ const validateConflicts = () => {
     }
   }
 
-  // Check Overrides vs Recurring (on that date)
-  // For every override, find recurring sessions active on that DOW (unless excluded).
   overrides.forEach((ov) => {
     const dateObj = new Date(ov.overrideDate);
-    // Mon=0... index mapping again
-    // date.getDay(): 0=Sun
     const dayMap = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const dow = dayMap[dateObj.getDay()];
 
-    // Find recurring for this dow
     const activeRecurring = recurring.filter(
       (r) =>
         r.availableDays.includes(dow) &&
@@ -1352,14 +1300,12 @@ const checkTimeOverlap = (s1: any, s2: any) => {
   const end1 = parseTime(s1.endTime || "");
   const start2 = parseTime(s2.startTime || "");
   const end2 = parseTime(s2.endTime || "");
-  // Standard overlap: Start1 < End2 && Start2 < End1
   return start1 < end2 && start2 < end1;
 };
 
 const saveAll = () => {
   const conflicts = validateConflicts();
   if (conflicts.length > 0) {
-    // Show first 3 errors
     alert(
       "Cannot save due to schedule conflicts:\n\n" +
         conflicts.slice(0, 3).join("\n") +

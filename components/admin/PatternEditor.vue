@@ -1,24 +1,17 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, computed } from "vue";
 import BingoPatternGrid from "~/components/bingo/BingoPatternGrid.vue";
 
-const patterns = ref<any[]>([]);
-const isLoading = ref(false);
-const isSaving = ref(false);
+const props = defineProps<{
+  patterns: any[];
+}>();
+
+const emit = defineEmits<{
+  (e: "save", pattern: any): void;
+  (e: "delete", slug: string): void;
+}>();
+
 const editingPattern = ref<any>(null); // null means list view, object means edit mode
-
-const fetchPatterns = async () => {
-  isLoading.value = true;
-  try {
-    patterns.value = await $fetch("/api/admin/patterns");
-  } catch (e) {
-    console.error(e);
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-onMounted(fetchPatterns);
 
 // Editor State
 const form = ref({
@@ -34,17 +27,33 @@ const form = ref({
 
 const currentFrameIndex = ref(0);
 
+// Helper to normalize frame data (handle legacy 5x5 or flat)
+const normalizeFrame = (frame: any): number[] => {
+  if (!frame) return Array(25).fill(0);
+  if (frame.length === 5 && Array.isArray(frame[0])) {
+    return frame.flat() as number[];
+  }
+  if (Array.isArray(frame)) {
+    return frame as number[];
+  }
+  return Array(25).fill(0);
+};
+
 const startEdit = (p?: any) => {
   if (p) {
-    form.value = JSON.parse(
-      JSON.stringify({
-        slug: p.slug,
-        name: p.name,
-        description: p.description,
-        isAnimated: p.isAnimated,
-        definition: p.definition,
-      }),
-    );
+    const def = JSON.parse(JSON.stringify(p.definition));
+    // Normalize frames to ensure they are flat arrays
+    if (def.frames && Array.isArray(def.frames)) {
+      def.frames = def.frames.map((f: any) => normalizeFrame(f));
+    }
+
+    form.value = {
+      slug: p.slug,
+      name: p.name,
+      description: p.description,
+      isAnimated: p.isAnimated,
+      definition: def,
+    };
   } else {
     // New
     form.value = {
@@ -57,7 +66,7 @@ const startEdit = (p?: any) => {
           Array(25)
             .fill(0)
             .map((_, i) => (i === 12 ? 1 : 0)),
-        ], // Default with free space? Or empty?
+        ],
         interval: 500,
       },
     };
@@ -70,49 +79,22 @@ const cancelEdit = () => {
   editingPattern.value = null;
 };
 
-const savePattern = async () => {
-  isSaving.value = true;
-  try {
-    await $fetch("/api/admin/patterns", {
-      method: "POST",
-      body: form.value,
-    });
-    await fetchPatterns();
-    editingPattern.value = null;
-  } catch (e: any) {
-    alert(e.data?.message || "Failed to save pattern");
-  } finally {
-    isSaving.value = false;
-  }
+const savePattern = () => {
+  emit("save", form.value);
+  editingPattern.value = null;
 };
 
-const deletePattern = async (slug: string) => {
+const deletePattern = (slug: string) => {
   if (!confirm("Are you sure? This may break programs using this pattern."))
     return;
-  try {
-    await $fetch(`/api/admin/patterns?slug=${slug}`, { method: "DELETE" });
-    await fetchPatterns();
-  } catch (e: any) {
-    alert(e.data?.message || "Failed to delete");
-  }
+  emit("delete", slug);
 };
 
 // Frame Editor
 const activeFrame = computed(() => {
   if (!form.value.definition.frames[currentFrameIndex.value]) {
-    // Safety fallback
     return Array(25).fill(0);
   }
-  // Flatten 2D array if stored as 2D, but DB stores as 2D?
-  // Wait, existing seed frames were: `[ [0,1,0,0,0], ... ]` (5x5).
-  // My seed code: `const rows = []; for(let i=0; i<5; i++) rows.push(f.slice(i*5, i*5+5));`
-  // So they are `number[][]` (rows).
-  // The backend Zod schema said `frames: z.array(frameSchema)` where frameSchema is `z.array(z.number()).length(25)`.
-  // Wait.
-  // My seed script: `frames: [coverallFrame]` where coverallFrame is 5 arrays of 5 numbers.
-  // My backend validation: `frameSchema = z.array(z.number().int().min(0).max(1)).length(25);`
-  // This expects a flat array of 25 numbers.
-
   return form.value.definition.frames[currentFrameIndex.value];
 });
 
@@ -136,19 +118,13 @@ const removeFrame = (idx: number) => {
 };
 
 const getPatternFrame = (p: any) => {
-  // Helper to ensure flat array if existing data is messy
-  // But for now assume data is correct or I'll fix seed.
   if (!p.definition.frames || !p.definition.frames[0]) return Array(25).fill(0);
   const f = p.definition.frames[0];
   if (f.length === 5 && Array.isArray(f[0])) {
-    // It's 5x5, flatten it
     return f.flat();
   }
   return f;
 };
-
-// I need to fix the seed script or run a migration script to fix data.
-// Since I just seeded, I can re-seed with flat arrays.
 </script>
 
 <template>
@@ -204,7 +180,6 @@ const getPatternFrame = (p: any) => {
               :definition="{ ...p.definition, frames: [getPatternFrame(p)] }"
               size="sm"
             />
-            <!-- Note: passing only first frame flattened for thumbnail if logic requires -->
           </div>
 
           <div class="flex items-center justify-between text-xs text-slate-500">
@@ -364,11 +339,10 @@ const getPatternFrame = (p: any) => {
           Cancel
         </button>
         <button
-          :disabled="isSaving"
-          class="px-6 py-2 bg-gold text-primary-900 font-bold rounded-lg shadow hover:bg-gold-400 disabled:opacity-50"
+          class="px-6 py-2 bg-gold text-primary-900 font-bold rounded-lg shadow hover:bg-gold-400"
           @click="savePattern"
         >
-          {{ isSaving ? "Saving..." : "Save Pattern" }}
+          Save Pattern
         </button>
       </div>
     </div>
