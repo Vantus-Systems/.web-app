@@ -69,7 +69,75 @@ const normalizeOpsSchema = (schema: any): OpsSchemaV2 | null => {
   };
 };
 
-export const useOpsStore = defineStore('ops', {
+const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+const currentYearRange = () => {
+  const now = new Date();
+  const start = new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
+  const end = new Date(Date.UTC(now.getUTCFullYear(), 11, 31));
+  return {
+    start: start.toISOString().slice(0, 10),
+    end: end.toISOString().slice(0, 10),
+  };
+};
+
+const normalizeOpsSchema = (schema: any): OpsSchemaV2 | null => {
+  if (!schema) return null;
+  if (schema.definitions?.rateCards) {
+    return schema as OpsSchemaV2;
+  }
+
+  const range = currentYearRange();
+  const weekdayDefaults = weekDays.reduce((acc, day) => {
+    const profileId = schema.calendar?.assignments?.[day];
+    acc[day] = profileId
+      ? ({ status: "open", profile_id: profileId } as const)
+      : ({ status: "closed" as const });
+    return acc;
+  }, {} as Record<string, { status: "closed" } | { status: "open"; profile_id: string }>);
+
+  const inventoryTiers = Object.values(schema.definitions?.inventory_tiers ?? {});
+  const bundles = Object.values(schema.definitions?.bundles ?? {});
+  const rateCards = Object.values(schema.definitions?.rate_cards ?? {});
+
+  return {
+    schema_version: schema.schema_version ?? "v2",
+    meta: {
+      name: schema.meta?.profile_name ?? "Operations Schema",
+      status: schema.meta?.status === "active" ? "live" : "draft",
+      currency: schema.meta?.currency ?? "USD",
+      timezone: schema.meta?.timezone ?? "America/Los_Angeles",
+      schema_version: schema.schema_version ?? "v2",
+    },
+    definitions: {
+      inventoryTiers: inventoryTiers as any[],
+      bundles: bundles as any[],
+      rateCards: rateCards as any[],
+    },
+    timeline: {
+      operationalHours: {
+        start: "09:00",
+        end: "03:00",
+        isOpen: true,
+      },
+      flowSegments: schema.timeline_configuration?.flow_segments ?? [],
+      overlayEvents: schema.timeline_configuration?.overlay_events ?? [],
+    },
+    logicTriggers: (schema.logic_triggers ?? []).map((trigger: any, index: number) => ({
+      id: trigger.id ?? `trigger-${index}`,
+      ...trigger,
+    })),
+    dayProfiles: schema.day_profiles ?? [],
+    calendar: {
+      range,
+      weekdayDefaults,
+      assignments: {},
+      overrides: schema.calendar?.overrides ?? {},
+    },
+  };
+};
+
+export const useOpsStore = defineStore("ops", {
   state: () => ({
     pricing: null as any,
     schedule: null as any,
@@ -92,8 +160,8 @@ export const useOpsStore = defineStore('ops', {
       pricing: false,
       schedule: false,
       opsSchema: false,
-      scheduleDayProfiles: false
-    }
+      scheduleDayProfiles: false,
+    },
   }),
 
   getters: {
@@ -104,20 +172,29 @@ export const useOpsStore = defineStore('ops', {
       state.dirty.pricing ||
       state.dirty.schedule ||
       state.dirty.opsSchema ||
-      state.dirty.scheduleDayProfiles
+      state.dirty.scheduleDayProfiles,
   },
 
   actions: {
     async loadAll() {
       this.loading = true;
       try {
-        const [pricing, schedule, patterns, programs, opsSchemaResponse, scheduleDayProfiles] = await Promise.all([
-          $fetch('/api/pricing', { credentials: 'include' }),
-          $fetch('/api/schedule', { credentials: 'include' }),
-          $fetch('/api/admin/patterns', { credentials: 'include' }),
-          $fetch('/api/admin/programs', { credentials: 'include' }),
-          $fetch('/api/admin/ops-schema', { credentials: 'include' }),
-          $fetch('/api/admin/schedule-day-profiles', { credentials: 'include' })
+        const [
+          pricing,
+          schedule,
+          patterns,
+          programs,
+          opsSchemaResponse,
+          scheduleDayProfiles,
+        ] = await Promise.all([
+          $fetch("/api/pricing", { credentials: "include" }),
+          $fetch("/api/schedule", { credentials: "include" }),
+          $fetch("/api/admin/patterns", { credentials: "include" }),
+          $fetch("/api/admin/programs", { credentials: "include" }),
+          $fetch("/api/admin/ops-schema", { credentials: "include" }),
+          $fetch("/api/admin/schedule-day-profiles", {
+            credentials: "include",
+          }),
         ]);
 
         this.pricing = pricing;
@@ -137,7 +214,7 @@ export const useOpsStore = defineStore('ops', {
         this.resetOpsSchemaDraft();
         this.resetScheduleDayProfilesDraft();
       } catch (e) {
-        console.error('Failed to load ops data', e);
+        console.error("Failed to load ops data", e);
       } finally {
         this.loading = false;
       }
@@ -156,10 +233,10 @@ export const useOpsStore = defineStore('ops', {
     },
     async savePricing() {
       if (!this.pricingDraft) return;
-      await $fetch('/api/admin/pricing', {
-        method: 'POST',
+      await $fetch("/api/admin/pricing", {
+        method: "POST",
         body: this.pricingDraft,
-        credentials: 'include'
+        credentials: "include",
       });
       this.pricing = JSON.parse(JSON.stringify(this.pricingDraft));
       this.dirty.pricing = false;
@@ -178,10 +255,10 @@ export const useOpsStore = defineStore('ops', {
     },
     async saveSchedule() {
       if (!this.scheduleDraft) return;
-      await $fetch('/api/admin/schedule', {
-        method: 'POST',
+      await $fetch("/api/admin/schedule", {
+        method: "POST",
         body: this.scheduleDraft,
-        credentials: 'include'
+        credentials: "include",
       });
       this.schedule = JSON.parse(JSON.stringify(this.scheduleDraft));
       this.dirty.schedule = false;
@@ -244,25 +321,25 @@ export const useOpsStore = defineStore('ops', {
     },
     async saveOpsSchema() {
       if (!this.opsSchemaDraft) return;
-      await $fetch('/api/admin/ops-schema', {
-        method: 'POST',
+      await $fetch("/api/admin/ops-schema", {
+        method: "POST",
         body: this.opsSchemaDraft,
-        credentials: 'include'
+        credentials: "include",
       });
       this.opsSchemaDraft = JSON.parse(JSON.stringify(this.opsSchemaDraft));
       this.dirty.opsSchema = false;
     },
     async publishOpsSchema() {
-      await $fetch('/api/admin/ops-schema/publish', {
-        method: 'POST',
-        credentials: 'include'
+      await $fetch("/api/admin/ops-schema/publish", {
+        method: "POST",
+        credentials: "include",
       });
       await this.refreshOpsSchema();
     },
     async rollbackOpsSchema() {
-      await $fetch('/api/admin/ops-schema/rollback', {
-        method: 'POST',
-        credentials: 'include'
+      await $fetch("/api/admin/ops-schema/rollback", {
+        method: "POST",
+        credentials: "include",
       });
       await this.refreshOpsSchema();
     },
@@ -277,11 +354,17 @@ export const useOpsStore = defineStore('ops', {
     // Schedule Day Profiles
     resetScheduleDayProfilesDraft() {
       if (this.scheduleDayProfiles) {
-        this.scheduleDayProfilesDraft = JSON.parse(JSON.stringify(this.scheduleDayProfiles));
+        this.scheduleDayProfilesDraft = JSON.parse(
+          JSON.stringify(this.scheduleDayProfiles),
+        );
         this.dirty.scheduleDayProfiles = false;
         return;
       }
-      this.scheduleDayProfilesDraft = { profiles: [], assignments: {}, overrides: {} };
+      this.scheduleDayProfilesDraft = {
+        profiles: [],
+        assignments: {},
+        overrides: {},
+      };
       this.dirty.scheduleDayProfiles = false;
     },
     updateScheduleDayProfilesDraft(val: any) {
@@ -290,53 +373,59 @@ export const useOpsStore = defineStore('ops', {
     },
     async saveScheduleDayProfiles() {
       if (!this.scheduleDayProfilesDraft) return;
-      await $fetch('/api/admin/schedule-day-profiles', {
-        method: 'POST',
+      await $fetch("/api/admin/schedule-day-profiles", {
+        method: "POST",
         body: this.scheduleDayProfilesDraft,
-        credentials: 'include'
+        credentials: "include",
       });
-      this.scheduleDayProfiles = JSON.parse(JSON.stringify(this.scheduleDayProfilesDraft));
+      this.scheduleDayProfiles = JSON.parse(
+        JSON.stringify(this.scheduleDayProfilesDraft),
+      );
       this.dirty.scheduleDayProfiles = false;
     },
 
     // Patterns
     async savePattern(pattern: any) {
-      await $fetch('/api/admin/patterns', {
-        method: 'POST',
+      await $fetch("/api/admin/patterns", {
+        method: "POST",
         body: pattern,
-        credentials: 'include'
+        credentials: "include",
       });
       await this.refreshPatterns();
     },
     async deletePattern(slug: string) {
       await $fetch(`/api/admin/patterns?slug=${slug}`, {
-        method: 'DELETE',
-        credentials: 'include'
+        method: "DELETE",
+        credentials: "include",
       });
       await this.refreshPatterns();
     },
     async refreshPatterns() {
-      this.patterns = await $fetch('/api/admin/patterns', { credentials: 'include' });
+      this.patterns = await $fetch("/api/admin/patterns", {
+        credentials: "include",
+      });
     },
 
     // Programs
     async saveProgram(program: any) {
-      await $fetch('/api/admin/programs', {
-        method: 'POST',
+      await $fetch("/api/admin/programs", {
+        method: "POST",
         body: program,
-        credentials: 'include'
+        credentials: "include",
       });
       await this.refreshPrograms();
     },
     async deleteProgram(slug: string) {
       await $fetch(`/api/admin/programs?slug=${slug}`, {
-        method: 'DELETE',
-        credentials: 'include'
+        method: "DELETE",
+        credentials: "include",
       });
       await this.refreshPrograms();
     },
     async refreshPrograms() {
-      this.programs = await $fetch('/api/admin/programs', { credentials: 'include' });
-    }
-  }
+      this.programs = await $fetch("/api/admin/programs", {
+        credentials: "include",
+      });
+    },
+  },
 });
