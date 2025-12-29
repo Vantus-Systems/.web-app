@@ -7,9 +7,11 @@ export default defineEventHandler(async (event) => {
   }
 
   const data = await settingsService.get("schedule_day_profiles");
-  return data || {
-    profiles: [],
-    assignments: {},
-    overrides: {},
-  };
+  return (
+    data || {
+      profiles: [],
+      assignments: {},
+      overrides: {},
+    }
+  );
 });

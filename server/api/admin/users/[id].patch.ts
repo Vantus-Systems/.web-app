@@ -31,7 +31,10 @@ export default defineEventHandler(async (event) => {
       where: { username: data.username },
     });
     if (existing && existing.id !== id) {
-      throw createError({ statusCode: 409, message: "Username already exists" });
+      throw createError({
+        statusCode: 409,
+        message: "Username already exists",
+      });
     }
   }
 
