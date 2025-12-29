@@ -44,6 +44,7 @@ import AdminShell from "~/components/admin/AdminShell.vue";
 import DailyTotals from "~/components/admin/mic/DailyTotals.vue";
 import ShiftSummary from "~/components/admin/mic/ShiftSummary.vue";
 import HolidayBanner from "~/components/admin/mic/HolidayBanner.vue";
+import type { HolidayOccurrence, ShiftRecord } from "~/types/admin";
 
 definePageMeta({
   middleware: ["auth", "role"],
@@ -53,10 +54,10 @@ definePageMeta({
 const router = useRouter();
 const session = ref<{ username: string; role: string } | null>(null);
 const selectedDate = ref(new Date().toISOString().slice(0, 10));
-const holidays = ref<any[]>([]);
-const dailyShifts = ref<any[]>([]);
-const weekShifts = ref<any[]>([]);
-const monthShifts = ref<any[]>([]);
+const holidays = ref<HolidayOccurrence[]>([]);
+const dailyShifts = ref<ShiftRecord[]>([]);
+const weekShifts = ref<ShiftRecord[]>([]);
+const monthShifts = ref<ShiftRecord[]>([]);
 
 const holidayForDate = computed(
   () =>

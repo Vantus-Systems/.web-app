@@ -20,7 +20,7 @@
         </div>
         <button
           class="text-xs font-bold text-rose-600 border border-rose-200 rounded-lg px-3 py-2"
-          @click="deleteShift"
+          @click="isDeleteOpen = true"
         >
           Delete
         </button>
@@ -35,6 +35,29 @@
         @submit="updateShift"
       />
     </div>
+
+    <BaseModal v-model="isDeleteOpen" title="Delete shift record">
+      <p class="text-sm text-slate-600">
+        This will archive the shift record and remove it from daily totals.
+        This action cannot be undone.
+      </p>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <button
+            class="px-3 py-2 text-xs font-bold text-slate-500"
+            @click="isDeleteOpen = false"
+          >
+            Cancel
+          </button>
+          <button
+            class="px-3 py-2 text-xs font-bold text-white bg-rose-600 rounded-lg"
+            @click="confirmDelete"
+          >
+            Delete Shift
+          </button>
+        </div>
+      </template>
+    </BaseModal>
   </AdminShell>
 </template>
 
@@ -42,6 +65,23 @@
 import { ref, onMounted } from "vue";
 import AdminShell from "~/components/admin/AdminShell.vue";
 import ShiftForm from "~/components/admin/mic/ShiftForm.vue";
+import BaseModal from "~/components/ui/BaseModal.vue";
+import type { ShiftRecord } from "~/types/admin";
+
+type ShiftFormValue = {
+  date: string;
+  shift: "AM" | "PM";
+  pulltabs_total: number;
+  deposit_total: number;
+  players?: number;
+  workflow_type: "NORMAL" | "NEGATIVE_BINGO_BOX" | "RECUPERATION_BOX_RETURN";
+  beginning_box?: number;
+  ending_box?: number;
+  bingo_actual?: number;
+  deposit_actual?: number;
+  notes?: string;
+  prev_shift_id?: string;
+};
 
 definePageMeta({
   middleware: ["auth", "role"],
@@ -51,8 +91,9 @@ definePageMeta({
 const router = useRouter();
 const route = useRoute();
 const session = ref<{ username: string; role: string } | null>(null);
-const record = ref<any | null>(null);
-const draft = ref<any | null>(null);
+const record = ref<ShiftRecord | null>(null);
+const draft = ref<ShiftFormValue | null>(null);
+const isDeleteOpen = ref(false);
 
 const loadSession = async () => {
   session.value = (
@@ -89,11 +130,12 @@ const updateShift = async (payload: any) => {
   });
 };
 
-const deleteShift = async () => {
+const confirmDelete = async () => {
   await $fetch(`/api/admin/shift-records/${route.params.id}`, {
     method: "DELETE",
     credentials: "include",
   });
+  isDeleteOpen.value = false;
   router.push("/admin/mic/shifts");
 };
 

@@ -24,6 +24,9 @@
             {{ option }}
           </option>
         </select>
+        <span v-if="shiftHint" class="mt-1 block text-[11px] text-slate-400">
+          {{ shiftHint }}
+        </span>
       </label>
       <label
         class="block text-xs font-bold text-slate-500 uppercase tracking-wider"
@@ -268,6 +271,7 @@ const props = defineProps<{
   modelValue: ShiftFormValue;
   availableShifts: Array<"AM" | "PM">;
   prevEndingBox?: number | null;
+  shiftHint?: string;
   submitLabel?: string;
 }>();
 

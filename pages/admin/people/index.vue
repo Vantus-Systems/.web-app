@@ -138,6 +138,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import AdminShell from "~/components/admin/AdminShell.vue";
+import type { AdminUser } from "~/types/admin";
 
 definePageMeta({
   middleware: ["auth", "role"],
@@ -146,7 +147,7 @@ definePageMeta({
 
 const router = useRouter();
 const session = ref<{ username: string; role: string } | null>(null);
-const users = ref<any[]>([]);
+const users = ref<AdminUser[]>([]);
 const newUser = ref({
   username: "",
   password: "",
