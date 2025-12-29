@@ -776,10 +776,20 @@ const saveJackpot = async () => {
 
 const addUser = async () => {
   try {
+    const payload = {
+      username: newUser.value.username,
+      firstName: newUser.value.firstName,
+      lastName: newUser.value.lastName,
+      email: newUser.value.email,
+      phone: newUser.value.phone,
+      role: newUser.value.role,
+      ...(newUser.value.password ? { password: newUser.value.password } : {}),
+    };
+
     if (userFormMode.value === "create") {
       const user = await $fetch("/api/admin/users", {
         method: "POST",
-        body: newUser.value,
+        body: payload,
         credentials: "include"
       });
       usersData.value.push(user);
@@ -790,7 +800,7 @@ const addUser = async () => {
     if (!editingUserId.value) return;
     const user = await $fetch(`/api/admin/users/${editingUserId.value}`, {
       method: "PATCH",
-      body: newUser.value,
+      body: payload,
       credentials: "include"
     });
     usersData.value = usersData.value.map((entry) =>
