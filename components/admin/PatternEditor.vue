@@ -39,17 +39,33 @@ const form = ref({
 
 const currentFrameIndex = ref(0);
 
+// Helper to normalize frame data (handle legacy 5x5 or flat)
+const normalizeFrame = (frame: any): number[] => {
+  if (!frame) return Array(25).fill(0);
+  if (frame.length === 5 && Array.isArray(frame[0])) {
+    return frame.flat() as number[];
+  }
+  if (Array.isArray(frame)) {
+    return frame as number[];
+  }
+  return Array(25).fill(0);
+};
+
 const startEdit = (p?: any) => {
   if (p) {
-    form.value = JSON.parse(
-      JSON.stringify({
-        slug: p.slug,
-        name: p.name,
-        description: p.description,
-        isAnimated: p.isAnimated,
-        definition: p.definition,
-      }),
-    );
+    const def = JSON.parse(JSON.stringify(p.definition));
+    // Normalize frames to ensure they are flat arrays
+    if (def.frames && Array.isArray(def.frames)) {
+      def.frames = def.frames.map((f: any) => normalizeFrame(f));
+    }
+
+    form.value = {
+      slug: p.slug,
+      name: p.name,
+      description: p.description,
+      isAnimated: p.isAnimated,
+      definition: def,
+    };
   } else {
     // New
     form.value = {
@@ -144,15 +160,8 @@ const removeFrame = (idx: number) => {
 };
 
 const getPatternFrame = (p: any) => {
-  // Helper to ensure flat array if existing data is messy
-  // But for now assume data is correct or I'll fix seed.
   if (!p.definition.frames || !p.definition.frames[0]) return Array(25).fill(0);
-  const f = p.definition.frames[0];
-  if (f.length === 5 && Array.isArray(f[0])) {
-    // It's 5x5, flatten it
-    return f.flat();
-  }
-  return f;
+  return normalizeFrame(p.definition.frames[0]);
 };
 
 // I need to fix the seed script or run a migration script to fix data.
