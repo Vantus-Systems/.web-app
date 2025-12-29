@@ -6,6 +6,23 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 403, message: "Forbidden" });
   }
 
-  const data = await settingsService.get("ops_schema_v2");
-  return data || null;
+  const [draft, live, history] = await Promise.all([
+    settingsService.get("ops_schema_draft"),
+    settingsService.get("ops_schema_live"),
+    settingsService.get("ops_schema_history"),
+  ]);
+
+  const historyMeta = Array.isArray(history)
+    ? history.map((entry: any) => ({
+        id: entry?.id,
+        profile_name: entry?.schema?.meta?.profile_name,
+        published_at: entry?.published_at,
+      }))
+    : [];
+
+  return {
+    draft: draft || null,
+    live: live || null,
+    historyMeta,
+  };
 });
