@@ -27,17 +27,33 @@ const form = ref({
 
 const currentFrameIndex = ref(0);
 
+// Helper to normalize frame data (handle legacy 5x5 or flat)
+const normalizeFrame = (frame: any): number[] => {
+  if (!frame) return Array(25).fill(0);
+  if (frame.length === 5 && Array.isArray(frame[0])) {
+    return frame.flat() as number[];
+  }
+  if (Array.isArray(frame)) {
+    return frame as number[];
+  }
+  return Array(25).fill(0);
+};
+
 const startEdit = (p?: any) => {
   if (p) {
-    form.value = JSON.parse(
-      JSON.stringify({
-        slug: p.slug,
-        name: p.name,
-        description: p.description,
-        isAnimated: p.isAnimated,
-        definition: p.definition,
-      }),
-    );
+    const def = JSON.parse(JSON.stringify(p.definition));
+    // Normalize frames to ensure they are flat arrays
+    if (def.frames && Array.isArray(def.frames)) {
+      def.frames = def.frames.map((f: any) => normalizeFrame(f));
+    }
+
+    form.value = {
+      slug: p.slug,
+      name: p.name,
+      description: p.description,
+      isAnimated: p.isAnimated,
+      definition: def,
+    };
   } else {
     // New
     form.value = {
