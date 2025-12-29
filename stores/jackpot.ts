@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { computed, ref, onMounted } from "vue";
+import { computed, ref } from "vue";
 import { useBusiness } from "~/composables/useBusiness";
 
 export const useJackpotStore = defineStore("jackpot", () => {
@@ -9,11 +9,10 @@ export const useJackpotStore = defineStore("jackpot", () => {
   // Timer for cycling display (outside active hours)
   // We can't rely on lifecycle hooks like onMounted in a store setup function directly for cleanup,
   // but we can start the interval.
-  let intervalId: any;
 
   // Start cycling on client side
   if (import.meta.client) {
-    intervalId = setInterval(() => {
+    setInterval(() => {
       cycleState.value = cycleState.value === "babes" ? "hornet" : "babes";
     }, 5000);
 

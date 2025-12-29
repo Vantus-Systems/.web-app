@@ -108,9 +108,7 @@ async function main() {
     return f;
   };
 
-  // 1. Regular Bingo (Static)
-  const regularBingoFrame = frameWith([]); // Just a placeholder, actually standard bingo is any line.
-  // Let's make "Coverall"
+  // 1. Coverall (Static)
   const coverallFrame = frameWith(Array.from({ length: 25 }, (_, i) => i));
 
   // 2. Letter X (Static)
@@ -119,10 +117,7 @@ async function main() {
   // 3. Four Corners (Static)
   const fourCornersFrame = frameWith([0, 4, 20, 24]);
 
-  // 4. Crazy Kite (Animated)
-  const kite1 = frameWith([4, 8, 12, 16, 17, 18, 19]); // Top right kiteish
-  const kite2 = frameWith([0, 6, 12, 18, 24, 23, 22, 21]); // etc. just random frames for animation
-  // Let's do a simple blinking box for animation
+  // 4. Pulsing Box (Animated)
   const box1 = frameWith([6, 7, 8, 11, 13, 16, 17, 18]); // inner box
   const box2 = frameWith([
     0, 1, 2, 3, 4, 5, 9, 10, 14, 15, 19, 20, 21, 22, 23, 24,

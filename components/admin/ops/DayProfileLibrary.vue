@@ -3,7 +3,9 @@
     <div class="p-4 space-y-3">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+          <p
+            class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
+          >
             Library
           </p>
           <h3 class="text-lg font-black text-primary-900">Day Profiles</h3>
@@ -27,9 +29,11 @@
         v-for="profile in filteredProfiles"
         :key="profile.id"
         class="w-full text-left rounded-xl border px-3 py-2 flex items-center justify-between gap-2"
-        :class="profile.id === selectedId
-          ? 'border-primary-500 bg-primary-50'
-          : 'border-slate-200 bg-white hover:border-slate-300'"
+        :class="
+          profile.id === selectedId
+            ? 'border-primary-500 bg-primary-50'
+            : 'border-slate-200 bg-white hover:border-slate-300'
+        "
         draggable="true"
         @dragstart="handleDragStart(profile, $event)"
         @click="$emit('select', profile.id)"
@@ -40,12 +44,15 @@
             :style="{ backgroundColor: profile.color || '#94a3b8' }"
           ></span>
           <div>
-            <div class="text-sm font-bold text-slate-900">{{ profile.name }}</div>
+            <div class="text-sm font-bold text-slate-900">
+              {{ profile.name }}
+            </div>
             <div class="text-[10px] uppercase tracking-widest text-slate-400">
               {{ profile.category }}
             </div>
             <div class="text-[10px] text-slate-400">
-              {{ profile.segment_ids.length }} segments • {{ profile.overlay_event_ids.length }} overlays
+              {{ profile.segment_ids.length }} segments •
+              {{ profile.overlay_event_ids.length }} overlays
             </div>
           </div>
         </div>

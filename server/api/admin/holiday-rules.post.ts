@@ -13,7 +13,10 @@ const holidayRuleSchema = z
     weekday: z.number().int().min(0).max(6).optional(),
     week: z.number().int().min(1).max(5).optional(),
     closure_type: z.enum(["CLOSED", "CLOSE_EARLY"]),
-    close_time: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+    close_time: z
+      .string()
+      .regex(/^\d{2}:\d{2}$/)
+      .optional(),
     start_year: z.number().int().min(2000).max(2100).optional(),
     end_year: z.number().int().min(2000).max(2100).optional(),
   })

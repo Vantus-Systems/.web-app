@@ -11,7 +11,10 @@ export const normalizeRole = (role?: string | null): NormalizedRole | null => {
   return null;
 };
 
-export const hasRole = (role: string | null | undefined, allowed: NormalizedRole[]) => {
+export const hasRole = (
+  role: string | null | undefined,
+  allowed: NormalizedRole[],
+) => {
   const normalized = normalizeRole(role);
   return normalized !== null && allowed.includes(normalized);
 };

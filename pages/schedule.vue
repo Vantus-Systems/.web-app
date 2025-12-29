@@ -89,9 +89,9 @@ watch(
   () => {
     if (mode.value === "custom" && customDate.value) {
       activeDay.value = customDate.value;
-    } else {
+    } else if (days.value.length > 0) {
       // If "today" is in the list, select it, otherwise first one
-      if (days.value.length > 0) activeDay.value = days.value[0].id;
+      activeDay.value = days.value[0].id;
     }
   },
   { immediate: true },

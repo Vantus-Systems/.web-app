@@ -1,6 +1,6 @@
 import prisma from "~/server/db/client";
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (_event) => {
   const programs = await prisma.bingoProgram.findMany({
     include: {
       _count: {

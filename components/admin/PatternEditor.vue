@@ -4,7 +4,9 @@
       <div class="p-4 space-y-3">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+            <p
+              class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
+            >
               Library
             </p>
             <h3 class="text-lg font-black text-primary-900">Patterns</h3>
@@ -22,8 +24,15 @@
           placeholder="Search patterns..."
           class="w-full rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-xs"
         />
-        <select v-model="activeCategory" class="w-full rounded-lg border-slate-200 bg-slate-50 px-2 py-1 text-xs">
-          <option v-for="category in categories" :key="category" :value="category">
+        <select
+          v-model="activeCategory"
+          class="w-full rounded-lg border-slate-200 bg-slate-50 px-2 py-1 text-xs"
+        >
+          <option
+            v-for="category in categories"
+            :key="category"
+            :value="category"
+          >
             {{ category }}
           </option>
         </select>
@@ -33,9 +42,11 @@
           v-for="p in filteredPatterns"
           :key="p.id"
           class="w-full text-left rounded-xl border px-3 py-2"
-          :class="editingPattern?.slug === p.slug
-            ? 'border-primary-500 bg-primary-50'
-            : 'border-slate-200 bg-white hover:border-slate-300'"
+          :class="
+            editingPattern?.slug === p.slug
+              ? 'border-primary-500 bg-primary-50'
+              : 'border-slate-200 bg-white hover:border-slate-300'
+          "
           @click="startEdit(p)"
         >
           <div class="text-sm font-bold text-slate-900">{{ p.name }}</div>
@@ -49,7 +60,9 @@
     <div class="flex flex-col gap-4">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+          <p
+            class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
+          >
             Pattern Studio
           </p>
           <h3 class="text-xl font-black text-primary-900">
@@ -74,44 +87,75 @@
         </div>
       </div>
 
-      <div class="bg-white border border-slate-200 rounded-xl p-6 flex flex-col items-center gap-4">
+      <div
+        class="bg-white border border-slate-200 rounded-xl p-6 flex flex-col items-center gap-4"
+      >
         <div class="flex items-center justify-between w-full">
-          <div class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400">
+          <div
+            class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400"
+          >
             Canvas
           </div>
           <div class="flex items-center gap-2">
-            <button class="text-xs font-bold text-slate-500" @click="prevFrame">Prev</button>
-            <span class="text-xs font-bold text-slate-600">Frame {{ currentFrameIndex + 1 }}</span>
-            <button class="text-xs font-bold text-slate-500" @click="nextFrame">Next</button>
+            <button class="text-xs font-bold text-slate-500" @click="prevFrame">
+              Prev
+            </button>
+            <span class="text-xs font-bold text-slate-600"
+              >Frame {{ currentFrameIndex + 1 }}</span
+            >
+            <button class="text-xs font-bold text-slate-500" @click="nextFrame">
+              Next
+            </button>
           </div>
         </div>
-        <div class="grid grid-cols-5 gap-1 bg-slate-200 p-1 rounded-lg w-64 h-64">
+        <div
+          class="grid grid-cols-5 gap-1 bg-slate-200 p-1 rounded-lg w-64 h-64"
+        >
           <div
             v-for="(val, idx) in activeFrame"
             :key="idx"
             class="bg-white flex items-center justify-center rounded cursor-pointer hover:bg-slate-50 transition-colors"
-            :style="val === 1 && idx !== 12 ? { backgroundColor: '#eab308' } : {}"
+            :style="
+              val === 1 && idx !== 12 ? { backgroundColor: '#eab308' } : {}
+            "
             @click="toggleCell(idx)"
           >
-            <span v-if="idx === 12" class="text-[10px] font-bold text-slate-400">FREE</span>
+            <span v-if="idx === 12" class="text-[10px] font-bold text-slate-400"
+              >FREE</span
+            >
           </div>
         </div>
-        <div v-if="form.definition.frames.length > 1" class="flex gap-2 overflow-x-auto pb-2">
+        <div
+          v-if="form.definition.frames.length > 1"
+          class="flex gap-2 overflow-x-auto pb-2"
+        >
           <button
             v-for="(_, idx) in form.definition.frames"
             :key="idx"
             class="px-3 py-1 rounded text-xs font-bold"
-            :class="currentFrameIndex === idx ? 'bg-primary-600 text-white' : 'bg-slate-100 text-slate-600'"
+            :class="
+              currentFrameIndex === idx
+                ? 'bg-primary-600 text-white'
+                : 'bg-slate-100 text-slate-600'
+            "
             @click="currentFrameIndex = idx"
           >
             {{ idx + 1 }}
           </button>
         </div>
         <div class="flex items-center gap-3">
-          <button class="text-xs font-bold text-slate-600" @click="addFrame" :disabled="!form.isAnimated">
+          <button
+            class="text-xs font-bold text-slate-600"
+            @click="addFrame"
+            :disabled="!form.isAnimated"
+          >
             + Frame
           </button>
-          <button class="text-xs font-bold text-rose-500" @click="removeFrame(currentFrameIndex)" :disabled="form.definition.frames.length <= 1">
+          <button
+            class="text-xs font-bold text-rose-500"
+            @click="removeFrame(currentFrameIndex)"
+            :disabled="form.definition.frames.length <= 1"
+          >
             Remove Frame
           </button>
         </div>
@@ -120,67 +164,112 @@
 
     <div class="h-full bg-white border-l border-slate-200 p-4 space-y-4">
       <div>
-        <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+        <p
+          class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
+        >
           Inspector
         </p>
         <h3 class="text-lg font-black text-primary-900">Pattern Details</h3>
       </div>
 
       <div class="space-y-3">
-        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+        <label
+          class="block text-xs font-bold text-slate-500 uppercase tracking-wider"
+        >
           Name
-          <input v-model="form.name" class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50" />
+          <input
+            v-model="form.name"
+            class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50"
+          />
         </label>
-        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+        <label
+          class="block text-xs font-bold text-slate-500 uppercase tracking-wider"
+        >
           Slug
-          <input v-model="form.slug" class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50" :disabled="!editingPattern?.isNew" />
+          <input
+            v-model="form.slug"
+            class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50"
+            :disabled="!editingPattern?.isNew"
+          />
         </label>
-        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+        <label
+          class="block text-xs font-bold text-slate-500 uppercase tracking-wider"
+        >
           Category
-          <input v-model="form.category" class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50" />
+          <input
+            v-model="form.category"
+            class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50"
+          />
         </label>
-        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+        <label
+          class="block text-xs font-bold text-slate-500 uppercase tracking-wider"
+        >
           Tags
-          <input v-model="tagsInput" class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50" />
+          <input
+            v-model="tagsInput"
+            class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50"
+          />
         </label>
-        <label class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
+        <label
+          class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider"
+        >
           <input v-model="form.isAnimated" type="checkbox" class="rounded" />
           Animated
         </label>
       </div>
 
       <div class="border-t border-slate-100 pt-4 space-y-3">
-        <div class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400">
+        <div
+          class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400"
+        >
           Rotation & Permutations
         </div>
-        <label class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
+        <label
+          class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider"
+        >
           <input v-model="rotationEnabled" type="checkbox" class="rounded" />
           Rotational Symmetry
         </label>
         <div class="flex items-center gap-2">
-          <input v-model.number="permutationLines" type="number" min="1" max="12" class="w-16 rounded-lg border-slate-200 bg-slate-50 text-xs px-2 py-1" />
+          <input
+            v-model.number="permutationLines"
+            type="number"
+            min="1"
+            max="12"
+            class="w-16 rounded-lg border-slate-200 bg-slate-50 text-xs px-2 py-1"
+          />
           <span class="text-xs text-slate-500">Lines Required</span>
         </div>
-        <button class="w-full text-xs font-bold uppercase tracking-[0.3em] border border-slate-200 py-2 rounded-lg" @click="generatePermutations">
+        <button
+          class="w-full text-xs font-bold uppercase tracking-[0.3em] border border-slate-200 py-2 rounded-lg"
+          @click="generatePermutations"
+        >
           Calculate Permutations
         </button>
         <p v-if="error" class="text-xs text-rose-600">{{ error }}</p>
       </div>
 
       <div class="border-t border-slate-100 pt-4 space-y-2">
-        <div class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400">
+        <div
+          class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400"
+        >
           Preview Player
         </div>
         <div class="flex items-center gap-2">
           <button class="text-xs font-bold text-slate-600" @click="togglePlay">
             {{ isPlaying ? "Pause" : "Play" }}
           </button>
-          <button class="text-xs font-bold text-slate-600" @click="nextFrame">Next</button>
+          <button class="text-xs font-bold text-slate-600" @click="nextFrame">
+            Next
+          </button>
         </div>
       </div>
 
       <div class="pt-4">
-        <button class="w-full bg-gold text-primary-900 text-xs font-bold uppercase tracking-[0.3em] py-2 rounded-lg" @click="savePattern">
+        <button
+          class="w-full bg-gold text-primary-900 text-xs font-bold uppercase tracking-[0.3em] py-2 rounded-lg"
+          @click="savePattern"
+        >
           Save Pattern
         </button>
       </div>
@@ -190,7 +279,10 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from "vue";
-import { generateLinePermutations, rotatePatternCells } from "~/utils/pattern.utils";
+import {
+  generateLinePermutations,
+  rotatePatternCells,
+} from "~/utils/pattern.utils";
 
 const props = defineProps<{
   patterns: any[];
@@ -215,7 +307,11 @@ const form = ref({
   tags: [] as string[],
   activeSessions: [] as string[],
   definition: {
-    frames: [Array(25).fill(0).map((_, i) => (i === 12 ? 1 : 0))],
+    frames: [
+      Array(25)
+        .fill(0)
+        .map((_, i) => (i === 12 ? 1 : 0)),
+    ],
     interval: 500,
   },
 });
@@ -263,7 +359,11 @@ const startEdit = (p?: any) => {
       tags: [],
       activeSessions: [],
       definition: {
-        frames: [Array(25).fill(0).map((_, i) => (i === 12 ? 1 : 0))],
+        frames: [
+          Array(25)
+            .fill(0)
+            .map((_, i) => (i === 12 ? 1 : 0)),
+        ],
         interval: 500,
       },
     };
@@ -292,7 +392,14 @@ const savePattern = () => {
 };
 
 const categories = computed(() => {
-  const defaults = ["All", "Regular", "Standard", "Sunday", "Double Action", "Jackpot"];
+  const defaults = [
+    "All",
+    "Regular",
+    "Standard",
+    "Sunday",
+    "Double Action",
+    "Jackpot",
+  ];
   const dynamic = props.patterns
     .map((p) => p.category)
     .filter((c) => c && typeof c === "string") as string[];

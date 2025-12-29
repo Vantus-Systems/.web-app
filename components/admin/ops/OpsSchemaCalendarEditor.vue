@@ -10,13 +10,19 @@
     <div class="flex flex-col gap-4">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+          <p
+            class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
+          >
             Paint the Calendar
           </p>
           <h3 class="text-xl font-black text-primary-900">Master Schedule</h3>
         </div>
         <div class="flex gap-2">
-          <BaseButton variant="outline" class-name="text-xs px-3 py-2" @click="toggleStats">
+          <BaseButton
+            variant="outline"
+            class-name="text-xs px-3 py-2"
+            @click="toggleStats"
+          >
             {{ showStats ? "Hide" : "Show" }} Stats
           </BaseButton>
         </div>
@@ -24,16 +30,26 @@
 
       <div v-if="showStats" class="grid grid-cols-3 gap-3 text-xs">
         <div class="bg-white border border-slate-200 rounded-lg px-3 py-2">
-          <div class="text-slate-400 uppercase tracking-widest text-[10px]">Assigned</div>
-          <div class="text-lg font-bold text-slate-900">{{ stats.assigned }}</div>
+          <div class="text-slate-400 uppercase tracking-widest text-[10px]">
+            Assigned
+          </div>
+          <div class="text-lg font-bold text-slate-900">
+            {{ stats.assigned }}
+          </div>
         </div>
         <div class="bg-white border border-slate-200 rounded-lg px-3 py-2">
-          <div class="text-slate-400 uppercase tracking-widest text-[10px]">Closed</div>
+          <div class="text-slate-400 uppercase tracking-widest text-[10px]">
+            Closed
+          </div>
           <div class="text-lg font-bold text-slate-900">{{ stats.closed }}</div>
         </div>
         <div class="bg-white border border-slate-200 rounded-lg px-3 py-2">
-          <div class="text-slate-400 uppercase tracking-widest text-[10px]">Unassigned</div>
-          <div class="text-lg font-bold text-slate-900">{{ stats.unassigned }}</div>
+          <div class="text-slate-400 uppercase tracking-widest text-[10px]">
+            Unassigned
+          </div>
+          <div class="text-lg font-bold text-slate-900">
+            {{ stats.unassigned }}
+          </div>
         </div>
       </div>
 
@@ -51,38 +67,75 @@
 
     <transition name="slide-fade">
       <div v-if="selectedDates.length || selectedProfile" class="h-full">
-        <div v-if="selectedProfile" class="bg-white border-l border-slate-200 p-4 space-y-4">
+        <div
+          v-if="selectedProfile"
+          class="bg-white border-l border-slate-200 p-4 space-y-4"
+        >
           <div>
-            <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+            <p
+              class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
+            >
               Profile Inspector
             </p>
-            <h3 class="text-lg font-black text-primary-900">{{ selectedProfile.name }}</h3>
+            <h3 class="text-lg font-black text-primary-900">
+              {{ selectedProfile.name }}
+            </h3>
           </div>
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+          <label
+            class="block text-xs font-bold text-slate-500 uppercase tracking-wider"
+          >
             Name
-            <input v-model="selectedProfile.name" class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50" />
+            <input
+              v-model="selectedProfile.name"
+              class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50"
+            />
           </label>
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+          <label
+            class="block text-xs font-bold text-slate-500 uppercase tracking-wider"
+          >
             Category
-            <select v-model="selectedProfile.category" class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50">
+            <select
+              v-model="selectedProfile.category"
+              class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50"
+            >
               <option value="weekday">Weekday</option>
               <option value="weekend">Weekend</option>
               <option value="special">Special</option>
               <option value="closed">Closed</option>
             </select>
           </label>
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+          <label
+            class="block text-xs font-bold text-slate-500 uppercase tracking-wider"
+          >
             Color
-            <input v-model="selectedProfile.color" type="color" class="mt-1 w-12 h-10 border-0 bg-transparent" />
+            <input
+              v-model="selectedProfile.color"
+              type="color"
+              class="mt-1 w-12 h-10 border-0 bg-transparent"
+            />
           </label>
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+          <label
+            class="block text-xs font-bold text-slate-500 uppercase tracking-wider"
+          >
             Description
-            <textarea v-model="selectedProfile.description" rows="2" class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50"></textarea>
+            <textarea
+              v-model="selectedProfile.description"
+              rows="2"
+              class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50"
+            ></textarea>
           </label>
           <div class="border-t border-slate-100 pt-4">
-            <p class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400 mb-2">Flow Segments</p>
+            <p
+              class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400 mb-2"
+            >
+              Flow Segments
+            </p>
             <div class="grid gap-2 md:grid-cols-2">
-              <label v-for="segment in flowSegments" :key="segment.id" class="flex items-center gap-2 text-xs">
+              <label
+                v-for="segment in flowSegments"
+                :key="segment.id"
+                class="flex items-center gap-2 text-xs"
+              >
                 <input
                   type="checkbox"
                   :checked="selectedProfile.segment_ids.includes(segment.id)"
@@ -93,12 +146,22 @@
             </div>
           </div>
           <div class="border-t border-slate-100 pt-4">
-            <p class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400 mb-2">Overlay Events</p>
+            <p
+              class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400 mb-2"
+            >
+              Overlay Events
+            </p>
             <div class="grid gap-2 md:grid-cols-2">
-              <label v-for="event in overlayEvents" :key="event.id" class="flex items-center gap-2 text-xs">
+              <label
+                v-for="event in overlayEvents"
+                :key="event.id"
+                class="flex items-center gap-2 text-xs"
+              >
                 <input
                   type="checkbox"
-                  :checked="selectedProfile.overlay_event_ids.includes(event.id)"
+                  :checked="
+                    selectedProfile.overlay_event_ids.includes(event.id)
+                  "
                   @change="toggleOverlay(event.id)"
                 />
                 {{ event.label }}
@@ -146,7 +209,8 @@ const props = defineProps<{
 const emit = defineEmits(["update:modelValue"]);
 
 const isSyncing = ref(false);
-const cloneDraft = (value: OpsSchemaV2) => JSON.parse(JSON.stringify(toRaw(value)));
+const cloneDraft = (value: OpsSchemaV2) =>
+  JSON.parse(JSON.stringify(toRaw(value)));
 const draft = ref(cloneDraft(props.modelValue));
 
 const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -165,7 +229,10 @@ const selectedProfile = computed(() =>
 const viewDate = ref(new Date());
 
 const monthLabel = computed(() =>
-  viewDate.value.toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+  viewDate.value.toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  }),
 );
 
 const calendarDays = computed(() => {
@@ -218,7 +285,9 @@ const selectDate = (payload: { date: string; multi: boolean }) => {
   selectedProfileId.value = null;
   if (payload.multi) {
     if (selectedDates.value.includes(payload.date)) {
-      selectedDates.value = selectedDates.value.filter((d) => d !== payload.date);
+      selectedDates.value = selectedDates.value.filter(
+        (d) => d !== payload.date,
+      );
     } else {
       selectedDates.value = [...selectedDates.value, payload.date];
     }
@@ -263,7 +332,9 @@ const toggleOverlay = (eventId: string) => {
   if (!selectedProfile.value) return;
   const list = selectedProfile.value.overlay_event_ids;
   if (list.includes(eventId)) {
-    selectedProfile.value.overlay_event_ids = list.filter((id) => id !== eventId);
+    selectedProfile.value.overlay_event_ids = list.filter(
+      (id) => id !== eventId,
+    );
   } else {
     selectedProfile.value.overlay_event_ids.push(eventId);
   }
@@ -286,7 +357,11 @@ const applyAssignment = (payload: { dates: string[]; assignment: any }) => {
 const applySmartFill = (payload: { day: string; profileId: string }) => {
   const start = new Date(`${draft.value.calendar.range.start}T00:00:00`);
   const end = new Date(`${draft.value.calendar.range.end}T00:00:00`);
-  for (let cursor = new Date(start); cursor <= end; cursor.setDate(cursor.getDate() + 1)) {
+  for (
+    let cursor = new Date(start);
+    cursor <= end;
+    cursor.setDate(cursor.getDate() + 1)
+  ) {
     const weekday = cursor.toLocaleDateString("en-US", { weekday: "short" });
     if (weekday === payload.day) {
       const date = cursor.toISOString().slice(0, 10);
@@ -298,16 +373,27 @@ const applySmartFill = (payload: { day: string; profileId: string }) => {
   }
 };
 
-const updateOverrides = (payload: { date: string; overrides: Array<{ id: string; profile_id: string; reason?: string }> }) => {
+const updateOverrides = (payload: {
+  date: string;
+  overrides: Array<{ id: string; profile_id: string; reason?: string }>;
+}) => {
   draft.value.calendar.overrides[payload.date] = payload.overrides;
 };
 
 const prevMonth = () => {
-  viewDate.value = new Date(viewDate.value.getFullYear(), viewDate.value.getMonth() - 1, 1);
+  viewDate.value = new Date(
+    viewDate.value.getFullYear(),
+    viewDate.value.getMonth() - 1,
+    1,
+  );
 };
 
 const nextMonth = () => {
-  viewDate.value = new Date(viewDate.value.getFullYear(), viewDate.value.getMonth() + 1, 1);
+  viewDate.value = new Date(
+    viewDate.value.getFullYear(),
+    viewDate.value.getMonth() + 1,
+    1,
+  );
 };
 
 const toggleStats = () => {

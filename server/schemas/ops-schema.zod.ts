@@ -97,6 +97,7 @@ const enumerateDates = (start: string, end: string) => {
   const dates: string[] = [];
   const cursor = new Date(`${start}T00:00:00`);
   const endDate = new Date(`${end}T00:00:00`);
+  // eslint-disable-next-line no-unmodified-loop-condition
   while (cursor <= endDate) {
     const iso = cursor.toISOString().slice(0, 10);
     dates.push(iso);
@@ -160,7 +161,9 @@ export const opsSchemaV2Schema = z
       });
     }
 
-    const rateCardIds = new Set(schema.definitions.rateCards.map((card) => card.id));
+    const rateCardIds = new Set(
+      schema.definitions.rateCards.map((card) => card.id),
+    );
     schema.timeline.flowSegments.forEach((segment, index) => {
       if (!rateCardIds.has(segment.rate_card_id)) {
         ctx.addIssue({
@@ -171,7 +174,9 @@ export const opsSchemaV2Schema = z
       }
     });
 
-    const overlayIds = new Set(schema.timeline.overlayEvents.map((event) => event.id));
+    const overlayIds = new Set(
+      schema.timeline.overlayEvents.map((event) => event.id),
+    );
     schema.logicTriggers.forEach((trigger, index) => {
       if (trigger.target_event && !overlayIds.has(trigger.target_event)) {
         ctx.addIssue({
@@ -182,7 +187,9 @@ export const opsSchemaV2Schema = z
       }
     });
 
-    const segmentIds = new Set(schema.timeline.flowSegments.map((segment) => segment.id));
+    const segmentIds = new Set(
+      schema.timeline.flowSegments.map((segment) => segment.id),
+    );
     schema.dayProfiles.forEach((profile, index) => {
       profile.segment_ids.forEach((id) => {
         if (!segmentIds.has(id)) {
@@ -259,7 +266,10 @@ export const opsSchemaV2Schema = z
       path: Array<string | number>,
       date: string,
     ) => {
-      if (!profileIds.has(assignment.profile_id ?? "") && assignment.status === "open") {
+      if (
+        !profileIds.has(assignment.profile_id ?? "") &&
+        assignment.status === "open"
+      ) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `Calendar assignment profile_id not found for ${date}`,
@@ -277,7 +287,11 @@ export const opsSchemaV2Schema = z
 
     Object.entries(schema.calendar.weekdayDefaults).forEach(
       ([day, assignment]) => {
-        validateAssignment(assignment, ["calendar", "weekdayDefaults", day], day);
+        validateAssignment(
+          assignment,
+          ["calendar", "weekdayDefaults", day],
+          day,
+        );
       },
     );
 
@@ -287,13 +301,17 @@ export const opsSchemaV2Schema = z
       },
     );
 
-    const dates = enumerateDates(schema.calendar.range.start, schema.calendar.range.end);
+    const dates = enumerateDates(
+      schema.calendar.range.start,
+      schema.calendar.range.end,
+    );
     dates.forEach((date) => {
       const weekday = new Date(`${date}T00:00:00`).toLocaleDateString("en-US", {
         weekday: "short",
       });
       const assignment =
-        schema.calendar.assignments[date] || schema.calendar.weekdayDefaults[weekday];
+        schema.calendar.assignments[date] ||
+        schema.calendar.weekdayDefaults[weekday];
       if (!assignment) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,

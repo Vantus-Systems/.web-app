@@ -7,7 +7,9 @@
     @logout="logout"
   >
     <div class="bg-white border border-slate-200 rounded-xl p-8 text-center">
-      <p class="text-xs uppercase tracking-[0.4em] text-slate-400 font-bold">Coming Soon</p>
+      <p class="text-xs uppercase tracking-[0.4em] text-slate-400 font-bold">
+        Coming Soon
+      </p>
       <h2 class="text-2xl font-black text-primary-900 mt-2">Charity Portal</h2>
       <p class="text-sm text-slate-500 mt-3">
         Placeholder for charity reporting and partnership tools.
@@ -29,7 +31,9 @@ const router = useRouter();
 const session = ref<{ username: string; role: string } | null>(null);
 
 const loadSession = async () => {
-  session.value = (await $fetch("/api/auth/user", { credentials: "include" })).user;
+  session.value = (
+    await $fetch("/api/auth/user", { credentials: "include" })
+  ).user;
 };
 
 const logout = async () => {

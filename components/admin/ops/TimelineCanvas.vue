@@ -1,6 +1,10 @@
 <template>
-  <div class="h-full flex flex-col bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
-    <div class="flex items-center justify-between px-4 py-2 border-b border-slate-200 bg-white">
+  <div
+    class="h-full flex flex-col bg-slate-50 border border-slate-200 rounded-xl overflow-hidden"
+  >
+    <div
+      class="flex items-center justify-between px-4 py-2 border-b border-slate-200 bg-white"
+    >
       <div class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400">
         Operations Canvas
       </div>
@@ -16,23 +20,27 @@
         @drop="handleDrop"
         @wheel="handleWheel"
       >
-        <div
-          class="relative h-full"
-          :style="{ width: `${canvasWidth}px` }"
-        >
+        <div class="relative h-full" :style="{ width: `${canvasWidth}px` }">
           <div class="absolute inset-0 bg-slate-50">
             <div
               v-for="(line, idx) in gridLines"
               :key="`grid-${idx}`"
               class="absolute top-0 bottom-0"
-              :class="line.isHour ? 'border-l border-slate-300' : 'border-l border-slate-200'"
+              :class="
+                line.isHour
+                  ? 'border-l border-slate-300'
+                  : 'border-l border-slate-200'
+              "
               :style="{ left: `${line.x}px` }"
             ></div>
             <div
               v-for="gap in gaps"
               :key="`gap-${gap.start}-${gap.end}`"
               class="absolute top-0 bottom-0 bg-amber-100/60"
-              :style="{ left: `${minutesToX(gap.start)}px`, width: `${minutesToX(gap.end) - minutesToX(gap.start)}px` }"
+              :style="{
+                left: `${minutesToX(gap.start)}px`,
+                width: `${minutesToX(gap.end) - minutesToX(gap.start)}px`,
+              }"
             ></div>
           </div>
 
@@ -49,28 +57,40 @@
 
           <div class="relative h-full pt-10 space-y-6">
             <div class="relative h-16">
-              <div class="absolute inset-0 rounded-xl bg-emerald-50 border border-emerald-100"></div>
-              <div class="absolute inset-0 flex items-center justify-center text-xs text-emerald-700 font-bold">
+              <div
+                class="absolute inset-0 rounded-xl bg-emerald-50 border border-emerald-100"
+              ></div>
+              <div
+                class="absolute inset-0 flex items-center justify-center text-xs text-emerald-700 font-bold"
+              >
                 Operational Status (Open)
               </div>
             </div>
 
             <div class="relative h-24">
-              <div class="absolute inset-0 rounded-xl bg-white border border-slate-200"></div>
+              <div
+                class="absolute inset-0 rounded-xl bg-white border border-slate-200"
+              ></div>
               <div
                 v-for="segment in flowSegments"
                 :key="segment.id"
                 class="absolute top-2 bottom-2 rounded-lg border shadow-sm cursor-pointer"
-                :class="segment.id === selectedId && selectedType === 'segment'
-                  ? 'border-primary-500 ring-2 ring-primary-200'
-                  : 'border-slate-200'"
+                :class="
+                  segment.id === selectedId && selectedType === 'segment'
+                    ? 'border-primary-500 ring-2 ring-primary-200'
+                    : 'border-slate-200'
+                "
                 :style="segmentStyle(segment)"
                 @click="emitSelect('segment', segment.id)"
               >
                 <div class="absolute inset-0 rounded-lg bg-white/70"></div>
-                <div class="relative h-full flex items-center justify-between px-2 text-xs font-bold text-slate-800">
+                <div
+                  class="relative h-full flex items-center justify-between px-2 text-xs font-bold text-slate-800"
+                >
                   <span class="truncate">{{ segment.label }}</span>
-                  <span class="text-[10px] text-slate-500">{{ segment.time_start }}–{{ segment.time_end }}</span>
+                  <span class="text-[10px] text-slate-500"
+                    >{{ segment.time_start }}–{{ segment.time_end }}</span
+                  >
                 </div>
                 <div
                   class="absolute left-0 top-0 bottom-0 w-1.5 cursor-ew-resize"
@@ -84,7 +104,9 @@
             </div>
 
             <div class="relative h-20">
-              <div class="absolute inset-0 rounded-xl bg-white border border-slate-200"></div>
+              <div
+                class="absolute inset-0 rounded-xl bg-white border border-slate-200"
+              ></div>
               <div
                 v-for="event in overlayEvents"
                 :key="event.id"
@@ -97,21 +119,32 @@
             </div>
 
             <div class="relative h-12">
-              <div class="absolute inset-0 rounded-xl bg-white border border-slate-200"></div>
+              <div
+                class="absolute inset-0 rounded-xl bg-white border border-slate-200"
+              ></div>
               <div
                 v-for="trigger in logicTriggers"
                 :key="trigger.id"
                 class="absolute top-1/2 -translate-y-1/2 cursor-pointer"
-                :style="{ left: `${minutesToX(toMinutes(trigger.trigger_time))}px` }"
+                :style="{
+                  left: `${minutesToX(toMinutes(trigger.trigger_time))}px`,
+                }"
                 @click="emitSelect('trigger', trigger.id)"
               >
-                <div class="w-3 h-3 bg-amber-400 rotate-45 border border-amber-600"></div>
+                <div
+                  class="w-3 h-3 bg-amber-400 rotate-45 border border-amber-600"
+                ></div>
               </div>
             </div>
           </div>
 
-          <div class="absolute bottom-2 left-2 right-2 h-2 bg-slate-200 rounded-full overflow-hidden">
-            <div class="h-full bg-slate-400/60 rounded-full" :style="{ width: `${minimapWidth}px` }"></div>
+          <div
+            class="absolute bottom-2 left-2 right-2 h-2 bg-slate-200 rounded-full overflow-hidden"
+          >
+            <div
+              class="h-full bg-slate-400/60 rounded-full"
+              :style="{ width: `${minimapWidth}px` }"
+            ></div>
           </div>
         </div>
       </div>
@@ -148,9 +181,18 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "select", payload: { type: "segment" | "overlay" | "trigger"; id: string }): void;
-  (e: "add-segment", payload: { rateCardId: string; time_start: string; time_end: string }): void;
-  (e: "update-segment", payload: { id: string; time_start: string; time_end: string }): void;
+  (
+    e: "select",
+    payload: { type: "segment" | "overlay" | "trigger"; id: string },
+  ): void;
+  (
+    e: "add-segment",
+    payload: { rateCardId: string; time_start: string; time_end: string },
+  ): void;
+  (
+    e: "update-segment",
+    payload: { id: string; time_start: string; time_end: string },
+  ): void;
   (e: "error", message: string): void;
   (e: "zoom", delta: number): void;
 }>();
@@ -174,7 +216,9 @@ const operationalRange = computed(() =>
 );
 
 const canvasWidth = computed(
-  () => (operationalRange.value.end - operationalRange.value.start) * densityScale.value,
+  () =>
+    (operationalRange.value.end - operationalRange.value.start) *
+    densityScale.value,
 );
 
 const operationalLabel = computed(
@@ -288,7 +332,9 @@ const startResize = (
 
 const handleResizeMove = (event: MouseEvent) => {
   if (!resizeState.value || !canvasRef.value) return;
-  const segment = props.flowSegments.find((item) => item.id === resizeState.value?.id);
+  const segment = props.flowSegments.find(
+    (item) => item.id === resizeState.value?.id,
+  );
   if (!segment) return;
   const rect = canvasRef.value.getBoundingClientRect();
   const rawMinutes =
@@ -303,7 +349,10 @@ const handleResizeMove = (event: MouseEvent) => {
   } else {
     nextEnd = Math.max(snapped, range.start + snapIncrement.value);
   }
-  if (nextStart < operationalRange.value.start || nextEnd > operationalRange.value.end) {
+  if (
+    nextStart < operationalRange.value.start ||
+    nextEnd > operationalRange.value.end
+  ) {
     return;
   }
   emit("update-segment", {

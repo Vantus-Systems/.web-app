@@ -177,40 +177,42 @@
 
       <div class="grid gap-3 md:grid-cols-4">
         <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
-          <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">
+          <p
+            class="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400"
+          >
             Sessions
           </p>
           <p class="text-2xl font-black text-primary-900">
             {{ scheduleSummary.totalSessions }}
           </p>
-          <p class="text-xs text-slate-500">
-            {{ currentMonthName }} coverage
-          </p>
+          <p class="text-xs text-slate-500">{{ currentMonthName }} coverage</p>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
-          <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">
+          <p
+            class="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400"
+          >
             Projected Revenue
           </p>
           <p class="text-2xl font-black text-primary-900">
             ${{ formatMoney(scheduleSummary.projectedRevenue) }}
           </p>
-          <p class="text-xs text-slate-500">
-            Based on assigned sessions
-          </p>
+          <p class="text-xs text-slate-500">Based on assigned sessions</p>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
-          <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">
+          <p
+            class="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400"
+          >
             Avg. Occupancy
           </p>
           <p class="text-2xl font-black text-primary-900">
             {{ scheduleSummary.occupancyAvg }}%
           </p>
-          <p class="text-xs text-slate-500">
-            Auto-calculated
-          </p>
+          <p class="text-xs text-slate-500">Auto-calculated</p>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
-          <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">
+          <p
+            class="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400"
+          >
             Conflict Days
           </p>
           <p class="text-2xl font-black text-primary-900">
@@ -343,7 +345,9 @@
           :key="date.toISOString()"
           class="space-y-3"
         >
-          <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+          <div
+            class="text-xs font-bold text-slate-500 uppercase tracking-wider"
+          >
             {{ date.toLocaleDateString("en-US", { weekday: "short" }) }}
             {{ date.getDate() }}
           </div>
@@ -356,7 +360,9 @@
             class="rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs"
           >
             <div class="font-bold text-primary-900">{{ session.name }}</div>
-            <div class="text-slate-500">{{ session.startTime }} - {{ session.endTime }}</div>
+            <div class="text-slate-500">
+              {{ session.startTime }} - {{ session.endTime }}
+            </div>
             <div
               v-if="filters.showMetrics"
               class="mt-2 rounded border border-slate-100 bg-white px-2 py-1 text-[10px] text-slate-500"
@@ -493,7 +499,7 @@
             </select>
           </div>
           <!-- Bulk dates and days input (same as before) -->
-           <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-2 gap-4">
             <div>
               <label
                 class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"
@@ -593,40 +599,52 @@
 
         <!-- Modal Body -->
         <div class="p-6 space-y-6">
-
           <!-- NEW: Linked Configuration -->
-          <div class="bg-indigo-50/50 rounded-xl p-4 border border-indigo-100 grid sm:grid-cols-2 gap-4">
-               <div>
-                    <label class="block text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-1">Pricing Template</label>
-                    <div class="flex gap-2">
-                        <select
-                            v-model="editingSession.pricingSessionId"
-                            class="w-full rounded-lg border-indigo-200 text-sm focus:border-indigo-400 focus:ring-indigo-400"
-                            @change="handlePricingTemplateChange"
-                        >
-                            <option value="">-- None --</option>
-                            <optgroup label="Daytime">
-                                <option
-                                    v-for="(s, idx) in pricingData?.daytime?.sessions || []"
-                                    :key="s.id || idx"
-                                    :value="s.id"
-                                >
-                                    {{ s.name }}
-                                </option>
-                            </optgroup>
-                            <optgroup label="Evening">
-                                <option value="evening-main">Evening Main</option>
-                            </optgroup>
-                        </select>
-                    </div>
-               </div>
-               <div>
-                   <label class="block text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-1">Linked Program</label>
-                   <select v-model="editingSession.programSlug" class="w-full rounded-lg border-indigo-200 text-sm focus:border-indigo-400 focus:ring-indigo-400">
-                       <option value="">-- None --</option>
-                       <option v-for="p in programs" :key="p.slug" :value="p.slug">{{ p.name }}</option>
-                   </select>
-               </div>
+          <div
+            class="bg-indigo-50/50 rounded-xl p-4 border border-indigo-100 grid sm:grid-cols-2 gap-4"
+          >
+            <div>
+              <label
+                class="block text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-1"
+                >Pricing Template</label
+              >
+              <div class="flex gap-2">
+                <select
+                  v-model="editingSession.pricingSessionId"
+                  class="w-full rounded-lg border-indigo-200 text-sm focus:border-indigo-400 focus:ring-indigo-400"
+                  @change="handlePricingTemplateChange"
+                >
+                  <option value="">-- None --</option>
+                  <optgroup label="Daytime">
+                    <option
+                      v-for="(s, idx) in pricingData?.daytime?.sessions || []"
+                      :key="s.id || idx"
+                      :value="s.id"
+                    >
+                      {{ s.name }}
+                    </option>
+                  </optgroup>
+                  <optgroup label="Evening">
+                    <option value="evening-main">Evening Main</option>
+                  </optgroup>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label
+                class="block text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-1"
+                >Linked Program</label
+              >
+              <select
+                v-model="editingSession.programSlug"
+                class="w-full rounded-lg border-indigo-200 text-sm focus:border-indigo-400 focus:ring-indigo-400"
+              >
+                <option value="">-- None --</option>
+                <option v-for="p in programs" :key="p.slug" :value="p.slug">
+                  {{ p.name }}
+                </option>
+              </select>
+            </div>
           </div>
 
           <!-- Metrics Inputs (Enterprise) -->
@@ -834,9 +852,13 @@
       <div
         class="relative bg-white h-full w-full max-w-md shadow-2xl border-l border-slate-200 flex flex-col"
       >
-        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div
+          class="px-6 py-4 border-b border-slate-100 flex items-center justify-between"
+        >
           <div>
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <p
+              class="text-xs font-bold text-slate-500 uppercase tracking-wider"
+            >
               Day Profile Sessions
             </p>
             <h3 class="text-lg font-black text-primary-900">
@@ -854,14 +876,18 @@
           <div
             v-for="session in getSessionsForDate(
               profileDrawerDate,
-              new Date(profileDrawerDate).toLocaleDateString('en-US', { weekday: 'short' }),
+              new Date(profileDrawerDate).toLocaleDateString('en-US', {
+                weekday: 'short',
+              }),
             )"
             :key="session.uniqueKey"
             class="rounded-lg border border-slate-200 p-3"
           >
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm font-bold text-primary-900">{{ session.name }}</p>
+                <p class="text-sm font-bold text-primary-900">
+                  {{ session.name }}
+                </p>
                 <p class="text-xs text-slate-500">
                   {{ session.startTime }} - {{ session.endTime }}
                 </p>
@@ -874,10 +900,17 @@
               </button>
             </div>
           </div>
-          <div v-if="getSessionsForDate(
-              profileDrawerDate,
-              new Date(profileDrawerDate).toLocaleDateString('en-US', { weekday: 'short' }),
-            ).length === 0" class="text-sm text-slate-400">
+          <div
+            v-if="
+              getSessionsForDate(
+                profileDrawerDate,
+                new Date(profileDrawerDate).toLocaleDateString('en-US', {
+                  weekday: 'short',
+                }),
+              ).length === 0
+            "
+            class="text-sm text-slate-400"
+          >
             No sessions assigned.
           </div>
         </div>
@@ -1161,22 +1194,30 @@ const changeMonth = (delta: number) => {
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case "Live": return "bg-emerald-500";
-    case "Upcoming": return "bg-sky-500";
-    case "Closing": return "bg-amber-500";
-    case "Sold Out": return "bg-rose-500";
-    default: return "bg-slate-300";
+    case "Live":
+      return "bg-emerald-500";
+    case "Upcoming":
+      return "bg-sky-500";
+    case "Closing":
+      return "bg-amber-500";
+    case "Sold Out":
+      return "bg-rose-500";
+    default:
+      return "bg-slate-300";
   }
 };
 
 const formatMoney = (val?: number) => (val ? val.toLocaleString() : "0");
 
 const getProgramName = (slug: string) => {
-    return props.programs?.find(p => p.slug === slug)?.name || slug;
+  return props.programs?.find((p) => p.slug === slug)?.name || slug;
 };
 const getPricingName = (id: string) => {
-    if (id === 'evening-main') return 'Evening Main';
-    return props.pricingData?.daytime?.sessions?.find((s:any) => s.id === id)?.name || id;
+  if (id === "evening-main") return "Evening Main";
+  return (
+    props.pricingData?.daytime?.sessions?.find((s: any) => s.id === id)?.name ||
+    id
+  );
 };
 
 // --- Drag and Drop ---
@@ -1311,7 +1352,7 @@ const addNewSession = (dateStr: string) => {
     ticketsSold: 0,
     totalSeats: 100,
     programSlug: "",
-    pricingSessionId: ""
+    pricingSessionId: "",
   };
 };
 
@@ -1323,23 +1364,25 @@ const editSession = (session: any) => {
 };
 
 const handlePricingTemplateChange = () => {
-    if (!editingSession.value.pricingSessionId) return;
-    const pid = editingSession.value.pricingSessionId;
-    let data = null;
-    let type = 'daytime';
+  if (!editingSession.value.pricingSessionId) return;
+  const pid = editingSession.value.pricingSessionId;
+  let data = null;
+  let type = "daytime";
 
-    if (pid === 'evening-main') {
-        data = props.pricingData?.evening;
-        type = 'evening';
-    } else {
-        data = props.pricingData?.daytime?.sessions?.find((s:any) => s.id === pid);
-    }
+  if (pid === "evening-main") {
+    data = props.pricingData?.evening;
+    type = "evening";
+  } else {
+    data = props.pricingData?.daytime?.sessions?.find((s: any) => s.id === pid);
+  }
 
-    if (data) {
-        if (confirm("Apply template settings (Name, Times, etc.) to this session?")) {
-            applyTemplateData(type, data);
-        }
+  if (data) {
+    if (
+      confirm("Apply template settings (Name, Times, etc.) to this session?")
+    ) {
+      applyTemplateData(type, data);
     }
+  }
 };
 
 const applyTemplateData = (type: string, data: any) => {
@@ -1486,7 +1529,7 @@ const runBulkGenerate = () => {
         ticketsSold: 0,
         totalSeats: 100,
         programSlug: "",
-        pricingSessionId: type === "evening" ? "evening-main" : data.id
+        pricingSessionId: type === "evening" ? "evening-main" : data.id,
       };
 
       if (type === "daytime") {

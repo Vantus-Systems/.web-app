@@ -832,7 +832,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
 import { useJackpotStore } from "~/stores/jackpot";
 import { useBusiness } from "~/composables/useBusiness";
 

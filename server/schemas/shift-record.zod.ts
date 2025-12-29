@@ -26,7 +26,13 @@ export const shiftRecordUpdateSchema = shiftRecordInputSchema.partial().extend({
 });
 
 export const shiftRecordQuerySchema = z.object({
-  start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-  end: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  start: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+  end: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
   userId: z.string().optional(),
 });

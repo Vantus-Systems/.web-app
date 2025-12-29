@@ -10,7 +10,9 @@
     <div class="flex flex-col gap-4">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+          <p
+            class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
+          >
             Timeline Controls
           </p>
           <h3 class="text-xl font-black text-primary-900">
@@ -18,16 +20,27 @@
           </h3>
         </div>
         <div class="flex gap-2">
-          <BaseButton variant="outline" class-name="text-xs px-3 py-2" @click="addOverlayEvent">
+          <BaseButton
+            variant="outline"
+            class-name="text-xs px-3 py-2"
+            @click="addOverlayEvent"
+          >
             + Overlay
           </BaseButton>
-          <BaseButton variant="outline" class-name="text-xs px-3 py-2" @click="addTrigger">
+          <BaseButton
+            variant="outline"
+            class-name="text-xs px-3 py-2"
+            @click="addTrigger"
+          >
             + Trigger
           </BaseButton>
         </div>
       </div>
 
-      <div v-if="error" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
+      <div
+        v-if="error"
+        class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700"
+      >
         {{ error }}
       </div>
 
@@ -89,9 +102,10 @@ const cloneDraft = (value: OpsSchemaV2) =>
   JSON.parse(JSON.stringify(toRaw(value)));
 const draft = ref(cloneDraft(props.modelValue));
 
-type Selected =
-  | { type: "rateCard" | "segment" | "overlay" | "trigger"; id: string }
-  | null;
+type Selected = {
+  type: "rateCard" | "segment" | "overlay" | "trigger";
+  id: string;
+} | null;
 const selected = ref<Selected>(null);
 const error = ref("");
 
@@ -120,7 +134,11 @@ const setError = (message: string) => {
 };
 
 const handleZoom = (delta: number) => {
-  const order: Array<"compact" | "standard" | "detail"> = ["compact", "standard", "detail"];
+  const order: Array<"compact" | "standard" | "detail"> = [
+    "compact",
+    "standard",
+    "detail",
+  ];
   const currentIndex = order.indexOf(props.density);
   const nextIndex = delta > 0 ? currentIndex - 1 : currentIndex + 1;
   const next = order[Math.max(0, Math.min(order.length - 1, nextIndex))];
@@ -149,7 +167,9 @@ const addSegmentFromDrop = (payload: {
   time_start: string;
   time_end: string;
 }) => {
-  const rateCard = rateCards.value.find((card) => card.id === payload.rateCardId);
+  const rateCard = rateCards.value.find(
+    (card) => card.id === payload.rateCardId,
+  );
   const id = `segment-${Date.now()}`;
   draft.value.timeline.flowSegments.push({
     id,
@@ -162,8 +182,14 @@ const addSegmentFromDrop = (payload: {
   handleSelect({ type: "segment", id });
 };
 
-const updateSegmentTime = (payload: { id: string; time_start: string; time_end: string }) => {
-  const target = flowSegments.value.find((segment) => segment.id === payload.id);
+const updateSegmentTime = (payload: {
+  id: string;
+  time_start: string;
+  time_end: string;
+}) => {
+  const target = flowSegments.value.find(
+    (segment) => segment.id === payload.id,
+  );
   if (!target) return;
   target.time_start = payload.time_start;
   target.time_end = payload.time_end;
@@ -197,7 +223,9 @@ const updateRateCard = (updated: any) => {
 };
 
 const updateSegment = (updated: any) => {
-  const idx = flowSegments.value.findIndex((segment) => segment.id === updated.id);
+  const idx = flowSegments.value.findIndex(
+    (segment) => segment.id === updated.id,
+  );
   if (idx >= 0) draft.value.timeline.flowSegments[idx] = updated;
 };
 
@@ -207,7 +235,9 @@ const updateOverlay = (updated: any) => {
 };
 
 const updateTrigger = (updated: any) => {
-  const idx = logicTriggers.value.findIndex((trigger) => trigger.id === updated.id);
+  const idx = logicTriggers.value.findIndex(
+    (trigger) => trigger.id === updated.id,
+  );
   if (idx >= 0) draft.value.logicTriggers[idx] = updated;
 };
 

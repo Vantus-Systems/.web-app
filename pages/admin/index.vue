@@ -438,33 +438,33 @@
                           >
                             <span
                               :class="[
-                                user.role === 'admin'
+                                normalizeRole(user.role) === 'OWNER'
                                   ? 'bg-gold-100 text-gold-800'
-                                  : 'bg-blue-100 text-blue-800',
-                                'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize',
+                                  : normalizeRole(user.role) === 'CHARITY'
+                                    ? 'bg-emerald-100 text-emerald-800'
+                                    : 'bg-blue-100 text-blue-800',
+                                'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
                               ]"
                             >
-                                <span
-                                :class="[
-                                    normalizeRole(user.role) === 'OWNER'
-                                    ? 'bg-gold-100 text-gold-800'
-                                    : normalizeRole(user.role) === 'CHARITY'
-                                      ? 'bg-emerald-100 text-emerald-800'
-                                      : 'bg-blue-100 text-blue-800',
-                                    'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-                                ]"
-                                >
-                                {{ roleLabel(user.role) }}
-                                </span>
-                                <div
-                                  class="mt-1 text-[10px] uppercase tracking-widest"
-                                  :class="user.is_active ? 'text-emerald-600' : 'text-rose-500'"
-                                >
-                                  {{ user.is_active ? "Active" : "Inactive" }}
-                                </div>
-                            </td>
-                            <td
-                                class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
+                              {{ roleLabel(user.role) }}
+                            </span>
+                            <div
+                              class="mt-1 text-[10px] uppercase tracking-widest"
+                              :class="
+                                user.is_active
+                                  ? 'text-emerald-600'
+                                  : 'text-rose-500'
+                              "
+                            >
+                              {{ user.is_active ? "Active" : "Inactive" }}
+                            </div>
+                          </td>
+                          <td
+                            class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
+                          >
+                            <button
+                              class="text-blue-600 hover:text-blue-900 font-bold mr-3"
+                              @click="editUser(user)"
                             >
                               Edit
                             </button>
@@ -552,73 +552,11 @@
                             placeholder="Doe"
                           />
                         </div>
-                        <div>
-                            <label
-                            class="block text-sm font-medium text-gray-300 mb-1"
-                            >Password</label
-                            >
-                            <input
-                            v-model="newUser.password"
-                            type="password"
-                            :required="userFormMode === 'create'"
-                            class="block w-full bg-primary-800 border-primary-700 rounded-lg text-white placeholder-primary-400 focus:ring-gold focus:border-gold p-2.5"
-                            :placeholder="userFormMode === 'create' ? '••••••••' : 'Leave blank to keep current'"
-                            />
-                        </div>
-                        <div>
-                            <label
-                            class="block text-sm font-medium text-gray-300 mb-1"
-                            >Role</label
-                            >
-                            <select
-                            v-model="newUser.role"
-                            class="block w-full bg-primary-800 border-primary-700 rounded-lg text-white focus:ring-gold focus:border-gold p-2.5"
-                            >
-                            <option value="OWNER">Owner</option>
-                            <option value="MIC">MIC</option>
-                            <option value="CHARITY">Charity</option>
-                            </select>
-                        </div>
-                        <div class="flex items-center gap-2">
-                          <input
-                            id="user-active"
-                            v-model="newUser.isActive"
-                            type="checkbox"
-                            class="rounded text-gold focus:ring-gold"
-                          />
-                          <label for="user-active" class="text-sm font-medium text-gray-300">
-                            Active Account
-                          </label>
-                        </div>
-                        <div class="flex gap-3">
-                          <button
-                              type="submit"
-                              class="flex-1 bg-gold hover:bg-gold-600 text-primary-900 font-black py-3 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
-                          >
-                              {{ userFormMode === "create" ? "Create Account" : "Save Changes" }}
-                          </button>
-                          <button
-                              v-if="userFormMode === 'edit'"
-                              type="button"
-                              class="flex-1 border border-white/30 text-white font-bold py-3 rounded-lg"
-                              @click="resetUserForm"
-                          >
-                              Cancel
-                          </button>
-                        </div>
-                        </form>
-                    </div>
-
-                    <!-- Trust Signal -->
-                    <div
-                        class="mt-6 p-4 bg-gold-50 border border-gold-100 rounded-lg flex items-start"
-                    >
-                        <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-5 w-5 text-gold-600 mr-3 mt-0.5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
+                      </div>
+                      <div>
+                        <label
+                          class="block text-sm font-medium text-gray-300 mb-1"
+                          >Email</label
                         >
                         <input
                           v-model="newUser.email"
@@ -665,9 +603,24 @@
                           v-model="newUser.role"
                           class="block w-full bg-primary-800 border-primary-700 rounded-lg text-white focus:ring-gold focus:border-gold p-2.5"
                         >
-                          <option value="mic">MIC (Caller)</option>
-                          <option value="admin">Administrator</option>
+                          <option value="OWNER">Owner</option>
+                          <option value="MIC">MIC</option>
+                          <option value="CHARITY">Charity</option>
                         </select>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <input
+                          id="user-active"
+                          v-model="newUser.isActive"
+                          type="checkbox"
+                          class="rounded text-gold focus:ring-gold"
+                        />
+                        <label
+                          for="user-active"
+                          class="text-sm font-medium text-gray-300"
+                        >
+                          Active Account
+                        </label>
                       </div>
                       <div class="flex gap-3">
                         <button
@@ -690,30 +643,30 @@
                         </button>
                       </div>
                     </form>
-                  </div>
 
-                  <!-- Trust Signal -->
-                  <div
-                    class="mt-6 p-4 bg-gold-50 border border-gold-100 rounded-lg flex items-start"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-5 w-5 text-gold-600 mr-3 mt-0.5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                    <!-- Trust Signal -->
+                    <div
+                      class="mt-6 p-4 bg-gold-50 border border-gold-100 rounded-lg flex items-start"
                     >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <p class="text-xs text-gold-800 leading-relaxed">
-                      <strong>Security Note:</strong> Password changes take
-                      effect immediately.
-                    </p>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-5 w-5 text-gold-600 mr-3 mt-0.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <p class="text-xs text-gold-800 leading-relaxed">
+                        <strong>Security Note:</strong> Password changes take
+                        effect immediately.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -796,7 +749,7 @@ const verifyAdminSession = async () => {
       throw new Error("Unauthorized");
     }
     return response.user;
-  } catch (error) {
+  } catch {
     await $fetch("/api/auth/logout", { method: "POST" }).catch(() => undefined);
     await router.push("/admin/login");
     return null;
@@ -866,7 +819,7 @@ const saveJackpot = async () => {
       credentials: "include",
     });
     alert("Progressives Updated!");
-  } catch (e) {
+  } catch {
     alert("Failed to update progressives.");
   } finally {
     isSavingJackpot.value = false;

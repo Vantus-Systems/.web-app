@@ -5,10 +5,9 @@ export default defineNuxtRouteMiddleware(async (to, _from) => {
 
   try {
     const headers = useRequestHeaders(["cookie"]);
-    const response = await $fetch<{ user: { role?: string; is_active?: boolean } }>(
-      "/api/auth/user",
-      { headers, credentials: "include" },
-    );
+    const response = await $fetch<{
+      user: { role?: string; is_active?: boolean };
+    }>("/api/auth/user", { headers, credentials: "include" });
     if (!response?.user?.role || response?.user?.is_active === false) {
       return navigateTo("/admin/login");
     }

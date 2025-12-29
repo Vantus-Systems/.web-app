@@ -9,7 +9,9 @@
     <div class="bg-white border border-slate-200 rounded-xl p-6 space-y-4">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+          <p
+            class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
+          >
             Shift Record
           </p>
           <h3 class="text-xl font-black text-primary-900">
@@ -53,7 +55,9 @@ const record = ref<any | null>(null);
 const draft = ref<any | null>(null);
 
 const loadSession = async () => {
-  session.value = (await $fetch("/api/auth/user", { credentials: "include" })).user;
+  session.value = (
+    await $fetch("/api/auth/user", { credentials: "include" })
+  ).user;
 };
 
 const loadShift = async () => {

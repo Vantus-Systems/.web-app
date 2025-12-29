@@ -8,9 +8,15 @@
   >
     <div class="space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+        <label
+          class="block text-xs font-bold text-slate-500 uppercase tracking-wider"
+        >
           Date
-          <input v-model="selectedDate" type="date" class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50" />
+          <input
+            v-model="selectedDate"
+            type="date"
+            class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50"
+          />
         </label>
         <div class="flex items-end gap-2">
           <NuxtLink
@@ -52,12 +58,16 @@ const dailyShifts = ref<any[]>([]);
 const weekShifts = ref<any[]>([]);
 const monthShifts = ref<any[]>([]);
 
-const holidayForDate = computed(() =>
-  holidays.value.find((holiday) => holiday.date === selectedDate.value) ?? null,
+const holidayForDate = computed(
+  () =>
+    holidays.value.find((holiday) => holiday.date === selectedDate.value) ??
+    null,
 );
 
 const loadSession = async () => {
-  session.value = (await $fetch("/api/auth/user", { credentials: "include" })).user;
+  session.value = (
+    await $fetch("/api/auth/user", { credentials: "include" })
+  ).user;
 };
 
 const loadHolidays = async () => {
@@ -91,8 +101,12 @@ const loadWeekSummary = async () => {
 
 const loadMonthSummary = async () => {
   const date = new Date(`${selectedDate.value}T00:00:00Z`);
-  const start = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
-  const end = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0));
+  const start = new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1),
+  );
+  const end = new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0),
+  );
   const startStr = start.toISOString().slice(0, 10);
   const endStr = end.toISOString().slice(0, 10);
   monthShifts.value = await $fetch(

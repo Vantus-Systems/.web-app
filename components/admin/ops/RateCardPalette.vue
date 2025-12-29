@@ -3,7 +3,9 @@
     <div class="p-4 space-y-3">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+          <p
+            class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
+          >
             Palette
           </p>
           <h3 class="text-lg font-black text-primary-900">Rate Cards</h3>
@@ -27,9 +29,11 @@
         v-for="card in filteredCards"
         :key="card.id"
         class="w-full text-left rounded-full border px-3 py-2 flex items-center justify-between gap-2"
-        :class="card.id === selectedId
-          ? 'border-primary-500 bg-primary-50'
-          : 'border-slate-200 bg-white hover:border-slate-300'"
+        :class="
+          card.id === selectedId
+            ? 'border-primary-500 bg-primary-50'
+            : 'border-slate-200 bg-white hover:border-slate-300'
+        "
         draggable="true"
         @dragstart="handleDragStart(card, $event)"
         @click="$emit('select', { type: 'rateCard', id: card.id })"

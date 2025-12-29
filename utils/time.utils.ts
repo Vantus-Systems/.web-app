@@ -9,7 +9,7 @@ export const parseTime = (t: string): number => {
   const trimmed = t.trim();
   const match12 = trimmed.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
   if (match12) {
-    const [_, h, m, ap] = match12;
+    const [, h, m, ap] = match12;
     let hour = parseInt(h);
     const min = parseInt(m);
     if (ap.toUpperCase() === "PM" && hour !== 12) hour += 12;

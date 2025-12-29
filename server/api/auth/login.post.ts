@@ -1,8 +1,8 @@
 import { randomBytes } from "crypto";
 import { defineEventHandler, readBody, createError, setCookie } from "h3";
+import { z } from "zod";
 import { authService } from "@server/services/auth.service";
 import { normalizeRole } from "~/utils/roles";
-import { z } from "zod";
 
 const loginSchema = z.object({
   username: z.string(),

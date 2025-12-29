@@ -26,7 +26,9 @@ const router = useRouter();
 const session = ref<{ username: string; role: string } | null>(null);
 
 const loadSession = async () => {
-  session.value = (await $fetch("/api/auth/user", { credentials: "include" })).user;
+  session.value = (
+    await $fetch("/api/auth/user", { credentials: "include" })
+  ).user;
 };
 
 const logout = async () => {

@@ -1,10 +1,13 @@
-import prisma from "~/server/db/client";
-import { createError } from "h3";
 import type { ShiftWorkflowType, ShiftDesignation } from "@prisma/client";
+import { createError } from "h3";
+import prisma from "~/server/db/client";
 
 const toDate = (date: string) => new Date(`${date}T00:00:00Z`);
 
-export const findPreviousShift = async (date: string, shift: ShiftDesignation) => {
+export const findPreviousShift = async (
+  date: string,
+  shift: ShiftDesignation,
+) => {
   const targetDate = toDate(date);
   const where =
     shift === "PM"
@@ -17,7 +20,7 @@ export const findPreviousShift = async (date: string, shift: ShiftDesignation) =
           date: { lt: targetDate },
         };
 
-  return prisma.shiftRecord.findFirst({
+  return await prisma.shiftRecord.findFirst({
     where,
     orderBy: [{ date: "desc" }, { shift: "desc" }],
   });
@@ -66,7 +69,10 @@ export const computeShiftTotals = async (input: {
   }
 
   if (payload.workflow_type === "NEGATIVE_BINGO_BOX") {
-    if (payload.beginning_box === undefined || payload.ending_box === undefined) {
+    if (
+      payload.beginning_box === undefined ||
+      payload.ending_box === undefined
+    ) {
       throw createError({
         statusCode: 400,
         message: "Beginning and ending box are required for negative bingo.",
@@ -85,10 +91,14 @@ export const computeShiftTotals = async (input: {
       });
     }
     if (!beginningBox) {
-      if (prevShift?.ending_box === null || prevShift?.ending_box === undefined) {
+      if (
+        prevShift?.ending_box === null ||
+        prevShift?.ending_box === undefined
+      ) {
         throw createError({
           statusCode: 400,
-          message: "Previous shift with ending box is required for recuperation.",
+          message:
+            "Previous shift with ending box is required for recuperation.",
         });
       }
       beginningBox = prevShift.ending_box;

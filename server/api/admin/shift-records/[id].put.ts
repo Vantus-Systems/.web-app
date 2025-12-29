@@ -50,7 +50,8 @@ export default defineEventHandler(async (event) => {
       bingo_actual: data.bingo_actual ?? existing.bingo_actual,
       deposit_actual: data.deposit_actual ?? existing.deposit_actual,
       notes: data.notes ?? existing.notes,
-      prev_shift_id: data.prev_shift_id ?? prevShift?.id ?? existing.prev_shift_id,
+      prev_shift_id:
+        data.prev_shift_id ?? prevShift?.id ?? existing.prev_shift_id,
     },
   });
 

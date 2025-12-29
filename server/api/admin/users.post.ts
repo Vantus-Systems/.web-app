@@ -20,8 +20,16 @@ export default defineEventHandler(async (event) => {
   assertRole(event.context.user?.role, ["OWNER"]);
 
   const body = await readBody(event);
-  const { username, password, role, firstName, lastName, email, phone, isActive } =
-    userSchema.parse(body);
+  const {
+    username,
+    password,
+    role,
+    firstName,
+    lastName,
+    email,
+    phone,
+    isActive,
+  } = userSchema.parse(body);
   const normalizedRole = normalizeRole(role);
   if (!normalizedRole) {
     throw createError({ statusCode: 400, message: "Invalid role" });

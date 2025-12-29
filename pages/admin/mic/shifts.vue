@@ -8,11 +8,19 @@
   >
     <div class="space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+        <label
+          class="block text-xs font-bold text-slate-500 uppercase tracking-wider"
+        >
           Date
-          <input v-model="selectedDate" type="date" class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50" />
+          <input
+            v-model="selectedDate"
+            type="date"
+            class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50"
+          />
         </label>
-        <label class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
+        <label
+          class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider"
+        >
           <input v-model="overrideClosed" type="checkbox" class="rounded" />
           Override closure
         </label>
@@ -20,11 +28,15 @@
 
       <HolidayBanner :holiday="holidayForDate" />
 
-      <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-6">
+      <div
+        class="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-6"
+      >
         <div class="bg-white border border-slate-200 rounded-xl p-6 space-y-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+              <p
+                class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
+              >
                 Shifts
               </p>
               <h3 class="text-xl font-black text-primary-900">Daily List</h3>
@@ -32,7 +44,9 @@
           </div>
           <div class="overflow-x-auto">
             <table class="min-w-full text-xs">
-              <thead class="text-slate-500 uppercase tracking-widest bg-slate-50">
+              <thead
+                class="text-slate-500 uppercase tracking-widest bg-slate-50"
+              >
                 <tr>
                   <th class="px-3 py-2 text-left">Shift</th>
                   <th class="px-3 py-2 text-right">Pull Tabs</th>
@@ -42,13 +56,28 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="shift in shifts" :key="shift.id" class="border-t border-slate-200">
-                  <td class="px-3 py-2 font-semibold text-slate-700">{{ shift.shift }}</td>
-                  <td class="px-3 py-2 text-right">${{ shift.pulltabs_total.toFixed(2) }}</td>
-                  <td class="px-3 py-2 text-right">${{ shift.deposit_total.toFixed(2) }}</td>
-                  <td class="px-3 py-2 text-right">{{ shift.bingo_total.toFixed(2) }}</td>
+                <tr
+                  v-for="shift in shifts"
+                  :key="shift.id"
+                  class="border-t border-slate-200"
+                >
+                  <td class="px-3 py-2 font-semibold text-slate-700">
+                    {{ shift.shift }}
+                  </td>
                   <td class="px-3 py-2 text-right">
-                    <NuxtLink :to="`/admin/mic/shifts/${shift.id}`" class="text-primary-700 font-bold">
+                    ${{ shift.pulltabs_total.toFixed(2) }}
+                  </td>
+                  <td class="px-3 py-2 text-right">
+                    ${{ shift.deposit_total.toFixed(2) }}
+                  </td>
+                  <td class="px-3 py-2 text-right">
+                    {{ shift.bingo_total.toFixed(2) }}
+                  </td>
+                  <td class="px-3 py-2 text-right">
+                    <NuxtLink
+                      :to="`/admin/mic/shifts/${shift.id}`"
+                      class="text-primary-700 font-bold"
+                    >
                       View
                     </NuxtLink>
                   </td>
@@ -65,7 +94,9 @@
 
         <div class="bg-white border border-slate-200 rounded-xl p-6 space-y-4">
           <div>
-            <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+            <p
+              class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
+            >
               New Shift
             </p>
             <h3 class="text-lg font-black text-primary-900">Record Totals</h3>
@@ -117,7 +148,9 @@ const draft = ref({
 });
 
 const holidayForDate = computed(
-  () => holidays.value.find((holiday) => holiday.date === selectedDate.value) ?? null,
+  () =>
+    holidays.value.find((holiday) => holiday.date === selectedDate.value) ??
+    null,
 );
 
 const availableShifts = computed(() => {
@@ -127,7 +160,9 @@ const availableShifts = computed(() => {
 });
 
 const loadSession = async () => {
-  session.value = (await $fetch("/api/auth/user", { credentials: "include" })).user;
+  session.value = (
+    await $fetch("/api/auth/user", { credentials: "include" })
+  ).user;
 };
 
 const loadHolidays = async () => {
