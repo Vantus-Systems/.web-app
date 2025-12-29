@@ -72,7 +72,7 @@
 
         <div class="space-y-6">
           <article
-            v-for="(session, index) in modelValue.daytime?.sessions ?? []"
+            v-for="(session, index) in draft.daytime?.sessions ?? []"
             :key="session.id ?? index"
             class="rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm transition hover:shadow-md"
           >
@@ -354,7 +354,7 @@
             </div>
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div
-                v-for="(jackpot, index) in modelValue.daytime?.jackpots ?? []"
+                v-for="(jackpot, index) in draft.daytime?.jackpots ?? []"
                 :key="`jackpot-${index}`"
                 class="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3 backdrop-blur-sm"
               >
@@ -404,7 +404,7 @@
                   >Start Time</span
                 >
                 <input
-                  v-model="modelValue.evening.startTime"
+                  v-model="draft.evening.startTime"
                   type="text"
                   class="mt-1 w-full rounded-xl border-slate-200 bg-slate-50"
                 />
@@ -415,7 +415,7 @@
                   >Value Prop</span
                 >
                 <textarea
-                  v-model="modelValue.evening.valueProposition"
+                  v-model="draft.evening.valueProposition"
                   rows="2"
                   class="mt-1 w-full rounded-xl border-slate-200 bg-slate-50"
                 ></textarea>
@@ -426,7 +426,7 @@
                   >Schedule Note</span
                 >
                 <textarea
-                  v-model="modelValue.evening.scheduleNote"
+                  v-model="draft.evening.scheduleNote"
                   rows="2"
                   class="mt-1 w-full rounded-xl border-slate-200 bg-slate-50"
                 ></textarea>
@@ -448,7 +448,7 @@
             </div>
             <div class="space-y-3">
               <div
-                v-for="(machine, index) in modelValue.evening?.machines ?? []"
+                v-for="(machine, index) in draft.evening?.machines ?? []"
                 :key="`evening-machine-${index}`"
                 class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm"
               >
@@ -500,7 +500,7 @@
           </div>
           <div class="grid md:grid-cols-2 gap-4">
             <div
-              v-for="(game, index) in modelValue.evening?.specialtyGames ?? []"
+              v-for="(game, index) in draft.evening?.specialtyGames ?? []"
               :key="`specialty-game-${index}`"
               class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm"
             >
@@ -546,12 +546,12 @@
           </h4>
           <div class="grid gap-4 md:grid-cols-2">
             <input
-              v-model="modelValue.sunday.title"
+              v-model="draft.sunday.title"
               placeholder="Sunday Title"
               class="rounded-xl border-gold/20 bg-white"
             />
             <input
-              v-model="modelValue.sunday.note"
+              v-model="draft.sunday.note"
               placeholder="Note"
               class="rounded-xl border-gold/20 bg-white"
             />
@@ -572,7 +572,7 @@
             </div>
             <div class="space-y-3">
               <div
-                v-for="(special, index) in modelValue.sunday?.specials ?? []"
+                v-for="(special, index) in draft.sunday?.specials ?? []"
                 :key="`sunday-special-${index}`"
                 class="bg-white p-4 rounded-xl border border-gold/10 shadow-sm"
               >
@@ -630,7 +630,7 @@
         </div>
         <div class="space-y-4">
           <div
-            v-for="(faq, index) in modelValue.faqs ?? []"
+          v-for="(faq, index) in draft.faqs ?? []"
             :key="`faq-${index}`"
             class="bg-white border border-slate-200 rounded-xl p-4 transition focus-within:ring-2 ring-gold/50"
           >
@@ -661,7 +661,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { nextTick, ref, watch } from "vue";
 import { Trash2, Sun, Moon, Clock, Star, Sparkles } from "lucide-vue-next";
 import BaseCard from "~/components/ui/BaseCard.vue";
 import BaseButton from "~/components/ui/BaseButton.vue";
@@ -672,6 +672,17 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(["update:modelValue", "save"]);
+const isSyncing = ref(false);
+const cloneDraft = (value: any) => {
+  if (!value || typeof value !== "object") {
+    return value ?? {};
+  }
+  if (typeof structuredClone === "function") {
+    return structuredClone(value);
+  }
+  return JSON.parse(JSON.stringify(value));
+};
+const draft = ref(cloneDraft(props.modelValue));
 
 const activeTab = ref("daytime");
 const tabs = [
@@ -707,11 +718,37 @@ const ensureArray = (val: any) => (Array.isArray(val) ? val : []);
 const createSessionId = () =>
   `session-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
+const syncDraftFromProps = (value: any) => {
+  isSyncing.value = true;
+  draft.value = cloneDraft(value);
+  nextTick(() => {
+    isSyncing.value = false;
+  });
+};
+
+watch(
+  () => props.modelValue,
+  (value) => {
+    syncDraftFromProps(value);
+  },
+  { deep: true, immediate: true },
+);
+
+watch(
+  draft,
+  (value) => {
+    if (!isSyncing.value) {
+      emit("update:modelValue", cloneDraft(value));
+    }
+  },
+  { deep: true },
+);
+
 const addDaytimeSession = () => {
   const newSession = {
     id: createSessionId(),
     name: "New Daytime Session",
-    timeRange: "10:00 AM – 12:00 PM",
+    timeRange: "10:00 – 12:00",
     icon: "sun",
     jackpot: "",
     description: "",
@@ -735,14 +772,13 @@ const addDaytimeSession = () => {
       description: "Spend $2+ to unlock unlimited cards",
     },
   };
-  if (!props.modelValue.daytime) props.modelValue.daytime = { sessions: [] };
-  if (!props.modelValue.daytime.sessions)
-    props.modelValue.daytime.sessions = [];
-  props.modelValue.daytime.sessions.push(newSession);
+  if (!draft.value.daytime) draft.value.daytime = { sessions: [] };
+  if (!draft.value.daytime.sessions) draft.value.daytime.sessions = [];
+  draft.value.daytime.sessions.push(newSession);
 };
 
 const removeDaytimeSession = (index: number) => {
-  props.modelValue.daytime.sessions.splice(index, 1);
+  draft.value.daytime.sessions.splice(index, 1);
 };
 
 const addSessionVibe = (session: any) => {
@@ -767,10 +803,9 @@ const removeMachineFromSession = (session: any, index: number) => {
 };
 
 const addDaytimeJackpot = () => {
-  if (!props.modelValue.daytime) props.modelValue.daytime = { jackpots: [] };
-  if (!props.modelValue.daytime.jackpots)
-    props.modelValue.daytime.jackpots = [];
-  props.modelValue.daytime.jackpots.push({
+  if (!draft.value.daytime) draft.value.daytime = { jackpots: [] };
+  if (!draft.value.daytime.jackpots) draft.value.daytime.jackpots = [];
+  draft.value.daytime.jackpots.push({
     name: "",
     time: "",
     prize: "",
@@ -778,14 +813,13 @@ const addDaytimeJackpot = () => {
   });
 };
 const removeDaytimeJackpot = (index: number) => {
-  props.modelValue.daytime.jackpots.splice(index, 1);
+  draft.value.daytime.jackpots.splice(index, 1);
 };
 
 const addEveningMachine = () => {
-  if (!props.modelValue.evening) props.modelValue.evening = { machines: [] };
-  if (!props.modelValue.evening.machines)
-    props.modelValue.evening.machines = [];
-  props.modelValue.evening.machines.push({
+  if (!draft.value.evening) draft.value.evening = { machines: [] };
+  if (!draft.value.evening.machines) draft.value.evening.machines = [];
+  draft.value.evening.machines.push({
     description: "",
     price: "",
     type: "bundle",
@@ -793,14 +827,14 @@ const addEveningMachine = () => {
   });
 };
 const removeEveningMachine = (index: number) => {
-  props.modelValue.evening.machines.splice(index, 1);
+  draft.value.evening.machines.splice(index, 1);
 };
 
 const addSpecialtyGame = () => {
-  if (!props.modelValue.evening) props.modelValue.evening = {};
-  if (!props.modelValue.evening.specialtyGames)
-    props.modelValue.evening.specialtyGames = [];
-  props.modelValue.evening.specialtyGames.push({
+  if (!draft.value.evening) draft.value.evening = {};
+  if (!draft.value.evening.specialtyGames)
+    draft.value.evening.specialtyGames = [];
+  draft.value.evening.specialtyGames.push({
     name: "",
     price: "",
     description: "",
@@ -808,13 +842,13 @@ const addSpecialtyGame = () => {
 };
 
 const removeSpecialtyGame = (index: number) => {
-  props.modelValue.evening.specialtyGames.splice(index, 1);
+  draft.value.evening.specialtyGames.splice(index, 1);
 };
 
 const addSundaySpecial = () => {
-  if (!props.modelValue.sunday) props.modelValue.sunday = { specials: [] };
-  if (!props.modelValue.sunday.specials) props.modelValue.sunday.specials = [];
-  props.modelValue.sunday.specials.push({
+  if (!draft.value.sunday) draft.value.sunday = { specials: [] };
+  if (!draft.value.sunday.specials) draft.value.sunday.specials = [];
+  draft.value.sunday.specials.push({
     name: "",
     optionOne: "",
     optionTwo: "",
@@ -823,14 +857,14 @@ const addSundaySpecial = () => {
   });
 };
 const removeSundaySpecial = (index: number) => {
-  props.modelValue.sunday.specials.splice(index, 1);
+  draft.value.sunday.specials.splice(index, 1);
 };
 
 const addFaq = () => {
-  if (!props.modelValue.faqs) props.modelValue.faqs = [];
-  props.modelValue.faqs.push({ question: "", answer: "" });
+  if (!draft.value.faqs) draft.value.faqs = [];
+  draft.value.faqs.push({ question: "", answer: "" });
 };
 const removeFaq = (index: number) => {
-  props.modelValue.faqs.splice(index, 1);
+  draft.value.faqs.splice(index, 1);
 };
 </script>

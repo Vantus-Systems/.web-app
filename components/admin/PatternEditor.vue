@@ -19,6 +19,9 @@ const form = ref({
   name: "",
   description: "",
   isAnimated: false,
+  category: "",
+  tags: [] as string[],
+  activeSessions: [] as string[],
   definition: {
     frames: [] as number[][][],
     interval: 500,
@@ -26,6 +29,8 @@ const form = ref({
 });
 
 const currentFrameIndex = ref(0);
+const searchTerm = ref("");
+const activeFilter = ref("All");
 
 // Helper to normalize frame data (handle legacy 5x5 or flat)
 const normalizeFrame = (frame: any): number[] => {
@@ -52,6 +57,9 @@ const startEdit = (p?: any) => {
       name: p.name,
       description: p.description,
       isAnimated: p.isAnimated,
+      category: p.category || "",
+      tags: p.tags || [],
+      activeSessions: p.activeSessions || [],
       definition: def,
     };
   } else {
@@ -61,6 +69,9 @@ const startEdit = (p?: any) => {
       name: "",
       description: "",
       isAnimated: false,
+      category: "",
+      tags: [],
+      activeSessions: [],
       definition: {
         frames: [
           Array(25)
@@ -88,6 +99,13 @@ const deletePattern = (slug: string) => {
   if (!confirm("Are you sure? This may break programs using this pattern."))
     return;
   emit("delete", slug);
+};
+
+const duplicatePattern = (pattern: any) => {
+  startEdit(pattern);
+  form.value.slug = `${pattern.slug}-copy`;
+  form.value.name = `${pattern.name} (Copy)`;
+  editingPattern.value = { isNew: true };
 };
 
 // Frame Editor
@@ -125,6 +143,49 @@ const getPatternFrame = (p: any) => {
   }
   return f;
 };
+
+const categories = computed(() => {
+  const defaults = ["All", "Regular", "Standard", "Sunday", "Double Action", "Jackpot"];
+  const dynamic = props.patterns
+    .map((p) => p.category)
+    .filter((c) => c && typeof c === "string") as string[];
+  return Array.from(new Set([...defaults, ...dynamic]));
+});
+
+const filteredPatterns = computed(() => {
+  const term = searchTerm.value.trim().toLowerCase();
+  return props.patterns.filter((p) => {
+    const matchesCategory =
+      activeFilter.value === "All" ||
+      (p.category && p.category === activeFilter.value);
+    const matchesSearch =
+      !term ||
+      p.name?.toLowerCase().includes(term) ||
+      p.slug?.toLowerCase().includes(term) ||
+      (p.tags || []).some((tag: string) => tag.toLowerCase().includes(term));
+    return matchesCategory && matchesSearch;
+  });
+});
+
+const tagsInput = computed({
+  get: () => form.value.tags.join(", "),
+  set: (value: string) => {
+    form.value.tags = value
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+  },
+});
+
+const activeSessionsInput = computed({
+  get: () => form.value.activeSessions.join(", "),
+  set: (value: string) => {
+    form.value.activeSessions = value
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+  },
+});
 </script>
 
 <template>
@@ -141,34 +202,63 @@ const getPatternFrame = (p: any) => {
         </button>
       </div>
 
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="category in categories"
+            :key="category"
+            class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border"
+            :class="
+              activeFilter === category
+                ? 'bg-primary-900 text-white border-primary-900'
+                : 'bg-white text-slate-500 border-slate-200'
+            "
+            @click="activeFilter = category"
+          >
+            {{ category }}
+          </button>
+        </div>
+        <input
+          v-model="searchTerm"
+          type="text"
+          placeholder="Search patterns..."
+          class="w-full lg:w-64 rounded-lg border-slate-200 bg-white px-3 py-2 text-sm"
+        />
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div
-          v-for="p in patterns"
+          v-for="p in filteredPatterns"
           :key="p.id"
           class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow"
         >
           <div class="flex justify-between items-start mb-4">
             <h3 class="font-bold text-slate-900">{{ p.name }}</h3>
-            <button
-              class="text-red-400 hover:text-red-600"
-              @click="deletePattern(p.slug)"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M3 6h18" />
-                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-              </svg>
-            </button>
+            <details class="relative">
+              <summary class="list-none cursor-pointer text-slate-400 hover:text-slate-600">
+                •••
+              </summary>
+              <div class="absolute right-0 mt-2 w-36 rounded-lg border border-slate-200 bg-white shadow-lg z-10">
+                <button
+                  class="w-full text-left px-3 py-2 text-xs hover:bg-slate-50"
+                  @click="startEdit(p)"
+                >
+                  Edit
+                </button>
+                <button
+                  class="w-full text-left px-3 py-2 text-xs hover:bg-slate-50"
+                  @click="duplicatePattern(p)"
+                >
+                  Duplicate
+                </button>
+                <button
+                  class="w-full text-left px-3 py-2 text-xs text-rose-600 hover:bg-rose-50"
+                  @click="deletePattern(p.slug)"
+                >
+                  Delete
+                </button>
+              </div>
+            </details>
           </div>
 
           <div
@@ -182,13 +272,25 @@ const getPatternFrame = (p: any) => {
             />
           </div>
 
-          <div class="flex items-center justify-between text-xs text-slate-500">
+          <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500">
             <span>{{ p.slug }}</span>
+            <span
+              v-if="p.category"
+              class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded"
+              >{{ p.category }}</span
+            >
             <span
               v-if="p.isAnimated"
               class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded"
               >Animated</span
             >
+            <span
+              v-for="tag in (p.tags || []).slice(0, 2)"
+              :key="`${p.slug}-${tag}`"
+              class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded"
+            >
+              {{ tag }}
+            </span>
           </div>
         </div>
       </div>
@@ -247,6 +349,41 @@ const getPatternFrame = (p: any) => {
             class="w-full border-slate-300 rounded-lg p-2"
             rows="2"
           ></textarea>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-1"
+              >Category</label
+            >
+            <input
+              v-model="form.category"
+              type="text"
+              class="w-full border-slate-300 rounded-lg p-2"
+              placeholder="e.g. Sunday"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-1"
+              >Tags (comma separated)</label
+            >
+            <input
+              v-model="tagsInput"
+              type="text"
+              class="w-full border-slate-300 rounded-lg p-2"
+              placeholder="animated, high-stakes"
+            />
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-bold text-slate-700 mb-1"
+            >Active Sessions (comma separated)</label
+          >
+          <input
+            v-model="activeSessionsInput"
+            type="text"
+            class="w-full border-slate-300 rounded-lg p-2"
+            placeholder="Morning, Sunday Premier"
+          />
         </div>
 
         <div v-if="form.isAnimated">

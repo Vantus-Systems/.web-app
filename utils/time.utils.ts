@@ -1,19 +1,29 @@
 // utils/time.utils.ts
 
 /**
- * Parses a 12-hour time string (e.g. "10:30 AM", "6:00 PM") into minutes from midnight.
- * Useful for sorting.
+ * Parses a time string into minutes from midnight.
+ * Accepts "HH:MM" (24h) or "HH:MM AM/PM" (12h).
  */
 export const parseTime = (t: string): number => {
   if (!t) return 0;
-  const match = t.match(/(\d+):(\d+)\s*(AM|PM)/i);
-  if (!match) return 0;
-  const [_, h, m, ap] = match;
-  let hour = parseInt(h);
-  const min = parseInt(m);
-  if (ap.toUpperCase() === "PM" && hour !== 12) hour += 12;
-  if (ap.toUpperCase() === "AM" && hour === 12) hour = 0;
-  return hour * 60 + min;
+  const trimmed = t.trim();
+  const match12 = trimmed.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+  if (match12) {
+    const [_, h, m, ap] = match12;
+    let hour = parseInt(h);
+    const min = parseInt(m);
+    if (ap.toUpperCase() === "PM" && hour !== 12) hour += 12;
+    if (ap.toUpperCase() === "AM" && hour === 12) hour = 0;
+    return hour * 60 + min;
+  }
+
+  const match24 = trimmed.match(/^(\d{1,2}):(\d{2})$/);
+  if (match24) {
+    const hour = parseInt(match24[1]);
+    const min = parseInt(match24[2]);
+    return hour * 60 + min;
+  }
+  return 0;
 };
 
 /**

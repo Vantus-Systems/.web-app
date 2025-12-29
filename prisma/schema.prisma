@@ -77,14 +77,17 @@ model setting {
 }
 
 model bingoPattern {
-  id          String   @id @default(uuid())
-  slug        String   @unique
-  name        String
-  description String?
-  isAnimated  Boolean  @default(false)
-  definition  String   // JSON string { frames: number[][]; interval?: number }
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  id              String   @id @default(uuid())
+  slug            String   @unique
+  name            String
+  description     String?
+  isAnimated      Boolean  @default(false)
+  definition      String   // JSON string { frames: number[][]; interval?: number }
+  category        String?
+  tags            String?
+  active_sessions String?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 
   games       bingoGame[]
 
