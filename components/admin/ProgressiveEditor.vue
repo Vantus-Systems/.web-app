@@ -121,7 +121,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, watch, nextTick, toRaw } from "vue";
 import BaseCard from "~/components/ui/BaseCard.vue";
 import BaseButton from "~/components/ui/BaseButton.vue";
 
@@ -132,15 +132,52 @@ const props = defineProps<{
 
 const emit = defineEmits(["update:modelValue", "save"]);
 
+const isSyncing = ref(false);
+const cloneDraft = (value: any) => {
+  if (!value || typeof value !== "object") {
+    return value ?? {};
+  }
+  const rawValue = toRaw(value);
+  return JSON.parse(JSON.stringify(rawValue));
+};
+
+const draft = ref(cloneDraft(props.modelValue));
+
 // Filter out non-progressive keys like lastUpdated
 const filteredProgressives = computed(() => {
-  if (!props.modelValue) return {};
-  const { lastUpdated, ...rest } = props.modelValue;
+  if (!draft.value) return {};
+  const { lastUpdated, ...rest } = draft.value;
   return rest;
 });
 
+const syncDraftFromProps = (value: any) => {
+  isSyncing.value = true;
+  draft.value = cloneDraft(value);
+  nextTick(() => {
+    isSyncing.value = false;
+  });
+};
+
+watch(
+  () => props.modelValue,
+  (value) => {
+    syncDraftFromProps(value);
+  },
+  { deep: true, immediate: true },
+);
+
+watch(
+  draft,
+  (value) => {
+    if (!isSyncing.value) {
+      emit("update:modelValue", cloneDraft(value));
+    }
+  },
+  { deep: true },
+);
+
 const playNoWinner = (key: string) => {
-  const progressive = props.modelValue[key];
+  const progressive = draft.value?.[key];
   if (!progressive) return;
 
   if (progressive.current < 5000) {

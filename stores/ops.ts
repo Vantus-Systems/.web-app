@@ -6,13 +6,16 @@ export const useOpsStore = defineStore('ops', {
     schedule: null as any,
     patterns: [] as any[],
     programs: [] as any[],
-    opsSchema: null as any,
+    opsSchemaDraft: null as any,
+    opsSchemaLive: null as any,
+    opsSchemaHistoryMeta: [] as any[],
     scheduleDayProfiles: null as any,
+    derivedPricingPreview: null as any,
+    derivedSchedulePreview: null as any,
 
     // Drafts for validation/editing
     pricingDraft: null as any,
     scheduleDraft: null as any,
-    opsSchemaDraft: null as any,
     scheduleDayProfilesDraft: null as any,
 
     loading: false,
@@ -39,7 +42,7 @@ export const useOpsStore = defineStore('ops', {
     async loadAll() {
       this.loading = true;
       try {
-        const [pricing, schedule, patterns, programs, opsSchema, scheduleDayProfiles] = await Promise.all([
+        const [pricing, schedule, patterns, programs, opsSchemaResponse, scheduleDayProfiles] = await Promise.all([
           $fetch('/api/pricing', { credentials: 'include' }),
           $fetch('/api/schedule', { credentials: 'include' }),
           $fetch('/api/admin/patterns', { credentials: 'include' }),
@@ -52,8 +55,12 @@ export const useOpsStore = defineStore('ops', {
         this.schedule = schedule;
         this.patterns = patterns;
         this.programs = programs;
-        this.opsSchema = opsSchema;
+        this.opsSchemaDraft = opsSchemaResponse?.draft ?? null;
+        this.opsSchemaLive = opsSchemaResponse?.live ?? null;
+        this.opsSchemaHistoryMeta = opsSchemaResponse?.historyMeta ?? [];
         this.scheduleDayProfiles = scheduleDayProfiles;
+        this.derivedPricingPreview = pricing;
+        this.derivedSchedulePreview = schedule;
 
         // Initialize drafts
         this.resetPricingDraft();
@@ -113,29 +120,39 @@ export const useOpsStore = defineStore('ops', {
 
     // Ops Schema
     resetOpsSchemaDraft() {
-      if (this.opsSchema) {
-        this.opsSchemaDraft = JSON.parse(JSON.stringify(this.opsSchema));
+      if (this.opsSchemaDraft) {
+        this.opsSchemaDraft = JSON.parse(JSON.stringify(this.opsSchemaDraft));
+        this.dirty.opsSchema = false;
+        return;
+      }
+      if (this.opsSchemaLive) {
+        this.opsSchemaDraft = JSON.parse(JSON.stringify(this.opsSchemaLive));
         this.dirty.opsSchema = false;
         return;
       }
       this.opsSchemaDraft = {
+        schema_version: "v2",
         meta: {
-          name: "Default Ops Schema",
-          status: "Draft",
-          version: 1,
-          updatedAt: new Date().toISOString(),
+          profile_name: "Default Ops Schema",
+          status: "draft",
+          currency: "USD",
+          timezone: "America/Los_Angeles",
         },
         definitions: {
-          rateCards: [],
-          bundles: [],
-          inventoryTiers: [],
+          inventory_tiers: {},
+          bundles: {},
+          rate_cards: {},
         },
-        timelineConfiguration: {
-          flowSegments: [],
-          overlayEvents: [],
+        timeline_configuration: {
+          flow_segments: [],
+          overlay_events: [],
         },
-        logicTriggers: [],
-        dayProfiles: [],
+        logic_triggers: [],
+        day_profiles: [],
+        calendar: {
+          assignments: {},
+          overrides: {},
+        },
       };
       this.dirty.opsSchema = false;
     },
@@ -150,7 +167,28 @@ export const useOpsStore = defineStore('ops', {
         body: this.opsSchemaDraft,
         credentials: 'include'
       });
-      this.opsSchema = JSON.parse(JSON.stringify(this.opsSchemaDraft));
+      this.opsSchemaDraft = JSON.parse(JSON.stringify(this.opsSchemaDraft));
+      this.dirty.opsSchema = false;
+    },
+    async publishOpsSchema() {
+      await $fetch('/api/admin/ops-schema/publish', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      await this.refreshOpsSchema();
+    },
+    async rollbackOpsSchema() {
+      await $fetch('/api/admin/ops-schema/rollback', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      await this.refreshOpsSchema();
+    },
+    async refreshOpsSchema() {
+      const response = await $fetch('/api/admin/ops-schema', { credentials: 'include' });
+      this.opsSchemaDraft = response?.draft ?? null;
+      this.opsSchemaLive = response?.live ?? null;
+      this.opsSchemaHistoryMeta = response?.historyMeta ?? [];
       this.dirty.opsSchema = false;
     },
 

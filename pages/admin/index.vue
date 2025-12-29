@@ -594,11 +594,6 @@ const isSavingJackpot = ref(false);
 const lastSystemSync = ref("");
 let lastSyncInterval: ReturnType<typeof setInterval> | null = null;
 
-const clearAuthState = () => {
-  const authCookie = useCookie("admin_auth", { path: "/" });
-  authCookie.value = null;
-};
-
 const verifyAdminSession = async () => {
   try {
     const response = await $fetch<{ user: { role?: string } }>(
@@ -610,7 +605,7 @@ const verifyAdminSession = async () => {
     }
     return response.user;
   } catch (error) {
-    clearAuthState();
+    await $fetch("/api/auth/logout", { method: "POST" }).catch(() => undefined);
     await router.push("/admin/login");
     return null;
   }

@@ -22,6 +22,18 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: "Pattern not found" });
   }
 
+  const usageCount = await prisma.bingoGame.count({
+    where: { pattern_id: before.id },
+  });
+
+  if (usageCount > 0) {
+    throw createError({
+      statusCode: 409,
+      message:
+        "Pattern is assigned to existing programs. Remove it from programs before deleting.",
+    });
+  }
+
   await prisma.bingoPattern.delete({
     where: { slug },
   });

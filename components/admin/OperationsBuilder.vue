@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useOpsStore } from '~/stores/ops';
-import PricingEditor from './PricingEditor.vue';
+import OpsSchemaPricingEditor from './ops/OpsSchemaPricingEditor.vue';
+import OpsSchemaCalendarEditor from './ops/OpsSchemaCalendarEditor.vue';
 import PatternEditor from './PatternEditor.vue';
 import ProgramEditor from './ProgramEditor.vue';
-import ScheduleEditor from './ScheduleEditor.vue';
 import { Save } from 'lucide-vue-next';
 
 const opsStore = useOpsStore();
@@ -15,21 +15,18 @@ onMounted(() => {
 });
 
 const steps = [
-  { id: 'pricing', label: 'Pricing Templates' },
+  { id: 'pricing', label: 'Rate Cards + Timeline' },
+  { id: 'schedule', label: 'Day Profiles + Calendar' },
   { id: 'patterns', label: 'Pattern Library' },
   { id: 'programs', label: 'Program Builder' },
-  { id: 'schedule', label: 'Calendar / Schedule' }
 ];
 
 const opsSchemaMeta = computed(() => opsStore.opsSchemaDraft?.meta);
-const opsSchemaStatus = computed(() => opsSchemaMeta.value?.status || "Draft");
-const opsSchemaName = computed(() => opsSchemaMeta.value?.name || "Operations Schema");
+const opsSchemaStatus = computed(() => opsSchemaMeta.value?.status || "draft");
+const opsSchemaName = computed(() => opsSchemaMeta.value?.profile_name || "Operations Schema");
 
 const handleSave = async () => {
-    if (opsStore.dirty.pricing) await opsStore.savePricing();
-    if (opsStore.dirty.schedule) await opsStore.saveSchedule();
     if (opsStore.dirty.opsSchema) await opsStore.saveOpsSchema();
-    if (opsStore.dirty.scheduleDayProfiles) await opsStore.saveScheduleDayProfiles();
 };
 
 const handlePatternSave = (p: any) => opsStore.savePattern(p);
@@ -44,22 +41,21 @@ const updateOpsSchemaMeta = (updates: Record<string, any>) => {
     meta: {
       ...opsStore.opsSchemaDraft.meta,
       ...updates,
-      updatedAt: new Date().toISOString(),
     },
   });
 };
 
 const createDraft = () => {
-  updateOpsSchemaMeta({ status: "Draft" });
+  updateOpsSchemaMeta({ status: "draft" });
 };
 
 const publishSchema = async () => {
   if (!opsStore.opsSchemaDraft) return;
   const errors = [];
-  if (!opsStore.opsSchemaDraft.definitions?.rateCards?.length) {
+  if (!Object.keys(opsStore.opsSchemaDraft.definitions?.rate_cards ?? {}).length) {
     errors.push("At least one rate card is required.");
   }
-  if (!opsStore.opsSchemaDraft.timelineConfiguration?.flowSegments?.length) {
+  if (!opsStore.opsSchemaDraft.timeline_configuration?.flow_segments?.length) {
     errors.push("At least one flow segment is required.");
   }
   if (!opsStore.programs.length) {
@@ -69,12 +65,11 @@ const publishSchema = async () => {
     alert(`Cannot publish:\n\n${errors.join("\n")}`);
     return;
   }
-  updateOpsSchemaMeta({ status: "Live", version: opsStore.opsSchemaDraft.meta.version + 1 });
-  await opsStore.saveOpsSchema();
+  await opsStore.publishOpsSchema();
 };
 
 const rollbackSchema = () => {
-  opsStore.resetOpsSchemaDraft();
+  opsStore.rollbackOpsSchema();
 };
 </script>
 
@@ -107,7 +102,7 @@ const rollbackSchema = () => {
                   <span
                     :class="[
                       'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide',
-                      opsSchemaStatus === 'Live'
+                      opsSchemaStatus === 'active'
                         ? 'bg-emerald-100 text-emerald-700'
                         : 'bg-amber-100 text-amber-700',
                     ]"
@@ -116,7 +111,7 @@ const rollbackSchema = () => {
                   </span>
                 </div>
                 <p class="text-xs text-slate-500">
-                  Version {{ opsSchemaMeta?.version ?? 1 }} • Updated {{ opsSchemaMeta?.updatedAt ?? "—" }}
+                  {{ opsSchemaMeta?.timezone ?? "—" }} • {{ opsSchemaMeta?.currency ?? "—" }}
                 </p>
               </div>
 
@@ -180,12 +175,10 @@ const rollbackSchema = () => {
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-900"></div>
             </div>
             <div v-else>
-                <div v-if="currentStep === 'pricing' && opsStore.pricingDraft" class="fade-enter-active">
-                    <PricingEditor
-                        :modelValue="opsStore.pricingDraft"
-                        :isSaving="false"
-                        @update:modelValue="opsStore.updatePricingDraft"
-                        @save="handleSave"
+                <div v-if="currentStep === 'pricing' && opsStore.opsSchemaDraft" class="fade-enter-active">
+                    <OpsSchemaPricingEditor
+                        :modelValue="opsStore.opsSchemaDraft"
+                        @update:modelValue="opsStore.updateOpsSchemaDraft"
                     />
                 </div>
 
@@ -207,16 +200,10 @@ const rollbackSchema = () => {
                     />
                 </div>
 
-                <div v-if="currentStep === 'schedule' && opsStore.scheduleDraft">
-                    <ScheduleEditor
-                        :modelValue="opsStore.scheduleDraft"
-                        :isSaving="false"
-                        :pricingData="opsStore.pricingDraft"
-                        :programs="opsStore.programs"
-                        :dayProfiles="opsStore.scheduleDayProfilesDraft"
-                        @update:modelValue="opsStore.updateScheduleDraft"
-                        @update:dayProfiles="opsStore.updateScheduleDayProfilesDraft"
-                        @save="handleSave"
+                <div v-if="currentStep === 'schedule' && opsStore.opsSchemaDraft">
+                    <OpsSchemaCalendarEditor
+                        :modelValue="opsStore.opsSchemaDraft"
+                        @update:modelValue="opsStore.updateOpsSchemaDraft"
                     />
                 </div>
             </div>
