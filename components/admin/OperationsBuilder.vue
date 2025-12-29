@@ -22,8 +22,8 @@ const steps = [
 ];
 
 const opsSchemaMeta = computed(() => opsStore.opsSchemaDraft?.meta);
-const opsSchemaStatus = computed(() => opsSchemaMeta.value?.status || "Draft");
-const opsSchemaName = computed(() => opsSchemaMeta.value?.name || "Operations Schema");
+const opsSchemaStatus = computed(() => opsSchemaMeta.value?.status || "draft");
+const opsSchemaName = computed(() => opsSchemaMeta.value?.profile_name || "Operations Schema");
 
 const handleSave = async () => {
     if (opsStore.dirty.pricing) await opsStore.savePricing();
@@ -44,22 +44,21 @@ const updateOpsSchemaMeta = (updates: Record<string, any>) => {
     meta: {
       ...opsStore.opsSchemaDraft.meta,
       ...updates,
-      updatedAt: new Date().toISOString(),
     },
   });
 };
 
 const createDraft = () => {
-  updateOpsSchemaMeta({ status: "Draft" });
+  updateOpsSchemaMeta({ status: "draft" });
 };
 
 const publishSchema = async () => {
   if (!opsStore.opsSchemaDraft) return;
   const errors = [];
-  if (!opsStore.opsSchemaDraft.definitions?.rateCards?.length) {
+  if (!Object.keys(opsStore.opsSchemaDraft.definitions?.rate_cards ?? {}).length) {
     errors.push("At least one rate card is required.");
   }
-  if (!opsStore.opsSchemaDraft.timelineConfiguration?.flowSegments?.length) {
+  if (!opsStore.opsSchemaDraft.timeline_configuration?.flow_segments?.length) {
     errors.push("At least one flow segment is required.");
   }
   if (!opsStore.programs.length) {
@@ -69,12 +68,11 @@ const publishSchema = async () => {
     alert(`Cannot publish:\n\n${errors.join("\n")}`);
     return;
   }
-  updateOpsSchemaMeta({ status: "Live", version: opsStore.opsSchemaDraft.meta.version + 1 });
-  await opsStore.saveOpsSchema();
+  await opsStore.publishOpsSchema();
 };
 
 const rollbackSchema = () => {
-  opsStore.resetOpsSchemaDraft();
+  opsStore.rollbackOpsSchema();
 };
 </script>
 
@@ -107,7 +105,7 @@ const rollbackSchema = () => {
                   <span
                     :class="[
                       'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide',
-                      opsSchemaStatus === 'Live'
+                      opsSchemaStatus === 'active'
                         ? 'bg-emerald-100 text-emerald-700'
                         : 'bg-amber-100 text-amber-700',
                     ]"
@@ -116,7 +114,7 @@ const rollbackSchema = () => {
                   </span>
                 </div>
                 <p class="text-xs text-slate-500">
-                  Version {{ opsSchemaMeta?.version ?? 1 }} • Updated {{ opsSchemaMeta?.updatedAt ?? "—" }}
+                  {{ opsSchemaMeta?.timezone ?? "—" }} • {{ opsSchemaMeta?.currency ?? "—" }}
                 </p>
               </div>
 

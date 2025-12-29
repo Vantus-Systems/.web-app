@@ -12,7 +12,7 @@
               Pricing Command Center
             </p>
             <h3 class="text-3xl font-black text-primary-950">
-              Fortune 1000 Pricing Matrix
+              Enterprise Pricing Matrix
             </h3>
             <p class="text-sm text-slate-500">
               Curate the session tiers, jackpot drops, and premium bundles with
