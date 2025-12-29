@@ -661,7 +661,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, ref, watch } from "vue";
+import { nextTick, ref, watch, toRaw } from "vue";
 import { Trash2, Sun, Moon, Clock, Star, Sparkles } from "lucide-vue-next";
 import BaseCard from "~/components/ui/BaseCard.vue";
 import BaseButton from "~/components/ui/BaseButton.vue";
@@ -677,10 +677,8 @@ const cloneDraft = (value: any) => {
   if (!value || typeof value !== "object") {
     return value ?? {};
   }
-  if (typeof structuredClone === "function") {
-    return structuredClone(value);
-  }
-  return JSON.parse(JSON.stringify(value));
+  const rawValue = toRaw(value);
+  return JSON.parse(JSON.stringify(rawValue));
 };
 const draft = ref(cloneDraft(props.modelValue));
 
