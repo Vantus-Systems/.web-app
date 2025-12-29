@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useOpsStore } from '~/stores/ops';
-import PricingEditor from './PricingEditor.vue';
+import OpsSchemaPricingEditor from './ops/OpsSchemaPricingEditor.vue';
+import OpsSchemaCalendarEditor from './ops/OpsSchemaCalendarEditor.vue';
 import PatternEditor from './PatternEditor.vue';
 import ProgramEditor from './ProgramEditor.vue';
-import ScheduleEditor from './ScheduleEditor.vue';
 import { Save } from 'lucide-vue-next';
 
 const opsStore = useOpsStore();
@@ -15,10 +15,10 @@ onMounted(() => {
 });
 
 const steps = [
-  { id: 'pricing', label: 'Pricing Templates' },
+  { id: 'pricing', label: 'Rate Cards + Timeline' },
+  { id: 'schedule', label: 'Day Profiles + Calendar' },
   { id: 'patterns', label: 'Pattern Library' },
   { id: 'programs', label: 'Program Builder' },
-  { id: 'schedule', label: 'Calendar / Schedule' }
 ];
 
 const opsSchemaMeta = computed(() => opsStore.opsSchemaDraft?.meta);
@@ -26,10 +26,7 @@ const opsSchemaStatus = computed(() => opsSchemaMeta.value?.status || "draft");
 const opsSchemaName = computed(() => opsSchemaMeta.value?.profile_name || "Operations Schema");
 
 const handleSave = async () => {
-    if (opsStore.dirty.pricing) await opsStore.savePricing();
-    if (opsStore.dirty.schedule) await opsStore.saveSchedule();
     if (opsStore.dirty.opsSchema) await opsStore.saveOpsSchema();
-    if (opsStore.dirty.scheduleDayProfiles) await opsStore.saveScheduleDayProfiles();
 };
 
 const handlePatternSave = (p: any) => opsStore.savePattern(p);
@@ -178,12 +175,10 @@ const rollbackSchema = () => {
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-900"></div>
             </div>
             <div v-else>
-                <div v-if="currentStep === 'pricing'" class="fade-enter-active">
-                    <PricingEditor
+                <div v-if="currentStep === 'pricing' && opsStore.opsSchemaDraft" class="fade-enter-active">
+                    <OpsSchemaPricingEditor
                         :modelValue="opsStore.opsSchemaDraft"
-                        :isSaving="false"
                         @update:modelValue="opsStore.updateOpsSchemaDraft"
-                        @save="handleSave"
                     />
                 </div>
 
@@ -205,16 +200,10 @@ const rollbackSchema = () => {
                     />
                 </div>
 
-                <div v-if="currentStep === 'schedule' && opsStore.scheduleDraft">
-                    <ScheduleEditor
-                        :modelValue="opsStore.scheduleDraft"
-                        :isSaving="false"
-                        :pricingData="opsStore.pricingDraft"
-                        :programs="opsStore.programs"
-                        :dayProfiles="opsStore.scheduleDayProfilesDraft"
-                        @update:modelValue="opsStore.updateScheduleDraft"
-                        @update:dayProfiles="opsStore.updateScheduleDayProfilesDraft"
-                        @save="handleSave"
+                <div v-if="currentStep === 'schedule' && opsStore.opsSchemaDraft">
+                    <OpsSchemaCalendarEditor
+                        :modelValue="opsStore.opsSchemaDraft"
+                        @update:modelValue="opsStore.updateOpsSchemaDraft"
                     />
                 </div>
             </div>
