@@ -1,40 +1,20 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, inject } from "vue";
+import { ref, computed } from "vue";
 import BingoPatternGrid from "~/components/bingo/BingoPatternGrid.vue";
 
-const programs = ref<any[]>([]);
-const patterns = ref<any[]>([]);
-const isLoading = ref(false);
-const isSaving = ref(false);
+const props = defineProps<{
+  programs: any[];
+  patterns: any[];
+}>();
+
+const emit = defineEmits<{
+  (e: "save", program: any): void;
+  (e: "delete", slug: string): void;
+  (e: "navigate", step: string): void;
+}>();
+
 const editingProgram = ref<any>(null);
-const setAdminTab = inject<((tabId: string) => void) | null>(
-  "setAdminTab",
-  null,
-);
-const refreshAdminCounts = inject<(() => Promise<void>) | null>(
-  "refreshAdminCounts",
-  null,
-);
-const patternsReady = computed(() => patterns.value.length > 0);
-
-const fetchPrograms = async () => {
-  isLoading.value = true;
-  try {
-    const [progs, pats] = await Promise.all([
-      $fetch("/api/admin/programs", { credentials: "include" }),
-      $fetch("/api/admin/patterns", { credentials: "include" }),
-    ]);
-    programs.value = progs;
-    patterns.value = pats;
-    await refreshAdminCounts?.();
-  } catch (e) {
-    console.error(e);
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-onMounted(fetchPrograms);
+const patternsReady = computed(() => props.patterns.length > 0);
 
 const form = ref({
   slug: "",
@@ -71,36 +51,16 @@ const cancelEdit = () => {
   editingProgram.value = null;
 };
 
-const saveProgram = async () => {
-  isSaving.value = true;
-  try {
-    // Re-index sort order just in case
-    form.value.games.forEach((g, i) => (g.sortOrder = i + 1));
-
-    await $fetch("/api/admin/programs", {
-      method: "POST",
-      body: form.value,
-      credentials: "include"
-    });
-    await fetchPrograms();
-    editingProgram.value = null;
-    await refreshAdminCounts?.();
-  } catch (e: any) {
-    alert(e.data?.message || "Failed to save program");
-  } finally {
-    isSaving.value = false;
-  }
+const saveProgram = () => {
+  // Re-index sort order just in case
+  form.value.games.forEach((g, i) => (g.sortOrder = i + 1));
+  emit("save", form.value);
+  editingProgram.value = null;
 };
 
-const deleteProgram = async (slug: string) => {
+const deleteProgram = (slug: string) => {
   if (!confirm("Are you sure?")) return;
-  try {
-    await $fetch(`/api/admin/programs?slug=${slug}`, { method: "DELETE", credentials: "include" });
-    await fetchPrograms();
-    await refreshAdminCounts?.();
-  } catch (e: any) {
-    alert(e.data?.message || "Failed to delete");
-  }
+  emit("delete", slug);
 };
 
 // Game Management
@@ -110,7 +70,7 @@ const addGame = () => {
     title: "New Game",
     paperColor: "#ffffff",
     notes: "",
-    patternSlug: patterns.value.length > 0 ? patterns.value[0].slug : "",
+    patternSlug: props.patterns.length > 0 ? props.patterns[0].slug : "",
   });
 };
 
@@ -126,7 +86,7 @@ const moveGame = (idx: number, dir: number) => {
 };
 
 const getPattern = (slug: string) =>
-  patterns.value.find((p) => p.slug === slug);
+  props.patterns.find((p) => p.slug === slug);
 </script>
 
 <template>
@@ -141,7 +101,7 @@ const getPattern = (slug: string) =>
       <div class="mt-3 flex flex-wrap gap-3">
         <button
           class="bg-gold text-primary-900 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-[0.3em] hover:bg-gold-400 transition-colors"
-          @click="setAdminTab?.('patterns')"
+          @click="emit('navigate', 'patterns')"
         >
           Create Patterns
         </button>
@@ -399,11 +359,10 @@ const getPattern = (slug: string) =>
           Cancel
         </button>
         <button
-          :disabled="isSaving"
           class="px-6 py-2 bg-gold text-primary-900 font-bold rounded-lg shadow hover:bg-gold-400 disabled:opacity-50"
           @click="saveProgram"
         >
-          {{ isSaving ? "Saving..." : "Save Program" }}
+          Save Program
         </button>
       </div>
     </div>
