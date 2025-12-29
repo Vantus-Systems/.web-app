@@ -109,7 +109,12 @@ export const opsSchemaV2Schema = z
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `Flow segment rate_card_id not found: ${segment.rate_card_id}`,
-          path: ["timeline_configuration", "flow_segments", index, "rate_card_id"],
+          path: [
+            "timeline_configuration",
+            "flow_segments",
+            index,
+            "rate_card_id",
+          ],
         });
       }
     });
