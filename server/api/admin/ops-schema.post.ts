@@ -1,29 +1,8 @@
 import { createError, defineEventHandler, readBody } from "h3";
-import { z } from "zod";
 import { settingsService } from "@server/services/settings.service";
 import { auditService } from "@server/services/audit.service";
-
-const opsSchemaMetaSchema = z.object({
-  name: z.string().min(1),
-  status: z.enum(["Draft", "Live"]),
-  version: z.number().int().min(1),
-  updatedAt: z.string().min(1),
-});
-
-const opsSchemaSchema = z.object({
-  meta: opsSchemaMetaSchema,
-  definitions: z.object({
-    rateCards: z.array(z.any()),
-    bundles: z.array(z.any()),
-    inventoryTiers: z.array(z.any()),
-  }),
-  timelineConfiguration: z.object({
-    flowSegments: z.array(z.any()),
-    overlayEvents: z.array(z.any()),
-  }),
-  logicTriggers: z.array(z.any()),
-  dayProfiles: z.array(z.any()),
-});
+import { opsSchemaV2Schema } from "@server/schemas/ops-schema.zod";
+import { ZodError } from "zod";
 
 export default defineEventHandler(async (event) => {
   if (!event.context.user || event.context.user.role !== "admin") {
@@ -31,15 +10,27 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = await readBody(event);
-  const parsed = opsSchemaSchema.parse(body);
-  const before = await settingsService.get("ops_schema_v2");
+  let parsed;
+  try {
+    parsed = opsSchemaV2Schema.parse(body);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw createError({
+        statusCode: 400,
+        message: "Invalid ops schema payload.",
+        data: error.flatten(),
+      });
+    }
+    throw error;
+  }
+  const before = await settingsService.get("ops_schema_draft");
 
-  await settingsService.set("ops_schema_v2", parsed);
+  await settingsService.set("ops_schema_draft", parsed);
 
   await auditService.log({
     actorUserId: event.context.user.id,
     action: "UPDATE_SETTING",
-    entity: "setting:ops_schema_v2",
+    entity: "setting:ops_schema_draft",
     before,
     after: parsed,
   });

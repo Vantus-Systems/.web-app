@@ -7,6 +7,10 @@ const userSchema = z.object({
   username: z.string().min(3),
   password: z.string().min(6),
   role: z.enum(["admin", "mic"]),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  email: z.string().email().optional(),
+  phone: z.string().optional(),
 });
 
 export default defineEventHandler(async (event) => {
@@ -15,7 +19,8 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = await readBody(event);
-  const { username, password, role } = userSchema.parse(body);
+  const { username, password, role, firstName, lastName, email, phone } =
+    userSchema.parse(body);
 
   const existing = await authService.getUserByUsername(username);
   if (existing) {
@@ -29,8 +34,20 @@ export default defineEventHandler(async (event) => {
       username,
       password_hash: hash,
       role,
+      first_name: firstName || null,
+      last_name: lastName || null,
+      email: email || null,
+      phone: phone || null,
     },
   });
 
-  return { id: user.id, username: user.username, role: user.role };
+  return {
+    id: user.id,
+    username: user.username,
+    first_name: user.first_name,
+    last_name: user.last_name,
+    email: user.email,
+    phone: user.phone,
+    role: user.role,
+  };
 });

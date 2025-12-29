@@ -367,7 +367,13 @@
                                 scope="col"
                                 class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
                             >
-                                Username
+                                User
+                            </th>
+                            <th
+                                scope="col"
+                                class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                            >
+                                Contact
                             </th>
                             <th
                                 scope="col"
@@ -400,8 +406,21 @@
                                 >
                                     {{ user.username.charAt(0).toUpperCase() }}
                                 </div>
-                                {{ user.username }}
+                                <div>
+                                  <div class="text-sm font-semibold text-slate-900">
+                                    {{ user.first_name || user.last_name ? `${user.first_name || ""} ${user.last_name || ""}`.trim() : user.username }}
+                                  </div>
+                                  <div class="text-xs text-slate-500">
+                                    {{ user.username }}
+                                  </div>
                                 </div>
+                                </div>
+                            </td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              <div class="space-y-1">
+                                <div>{{ user.email || "—" }}</div>
+                                <div class="text-xs text-slate-400">{{ user.phone || "—" }}</div>
+                              </div>
                             </td>
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
@@ -431,6 +450,12 @@
                             <td
                                 class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6"
                             >
+                                <button
+                                class="text-primary-700 hover:text-primary-900 font-bold mr-4"
+                                @click="editUser(user)"
+                                >
+                                Edit
+                                </button>
                                 <button
                                 class="text-red-600 hover:text-red-900 font-bold"
                                 @click="deleteUser(user.id)"
@@ -469,7 +494,7 @@
                             d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
                             />
                         </svg>
-                        Add New Member
+                        {{ userFormMode === "create" ? "Add New Member" : "Edit Member" }}
                         </h2>
 
                         <form class="space-y-4" @submit.prevent="addUser">
@@ -486,6 +511,56 @@
                             placeholder="jdoe"
                             />
                         </div>
+                        <div class="grid grid-cols-2 gap-3">
+                          <div>
+                            <label
+                              class="block text-sm font-medium text-gray-300 mb-1"
+                              >First Name</label
+                            >
+                            <input
+                              v-model="newUser.firstName"
+                              type="text"
+                              class="block w-full bg-primary-800 border-primary-700 rounded-lg text-white placeholder-primary-400 focus:ring-gold focus:border-gold p-2.5"
+                              placeholder="Jane"
+                            />
+                          </div>
+                          <div>
+                            <label
+                              class="block text-sm font-medium text-gray-300 mb-1"
+                              >Last Name</label
+                            >
+                            <input
+                              v-model="newUser.lastName"
+                              type="text"
+                              class="block w-full bg-primary-800 border-primary-700 rounded-lg text-white placeholder-primary-400 focus:ring-gold focus:border-gold p-2.5"
+                              placeholder="Doe"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label
+                            class="block text-sm font-medium text-gray-300 mb-1"
+                            >Email</label
+                          >
+                          <input
+                            v-model="newUser.email"
+                            type="email"
+                            class="block w-full bg-primary-800 border-primary-700 rounded-lg text-white placeholder-primary-400 focus:ring-gold focus:border-gold p-2.5"
+                            placeholder="jane@example.com"
+                          />
+                        </div>
+                        <div>
+                          <label
+                            class="block text-sm font-medium text-gray-300 mb-1"
+                            >Phone</label
+                          >
+                          <input
+                            v-model="newUser.phone"
+                            type="tel"
+                            class="block w-full bg-primary-800 border-primary-700 rounded-lg text-white placeholder-primary-400 focus:ring-gold focus:border-gold p-2.5"
+                            placeholder="(555) 555-1234"
+                          />
+                        </div>
                         <div>
                             <label
                             class="block text-sm font-medium text-gray-300 mb-1"
@@ -494,9 +569,9 @@
                             <input
                             v-model="newUser.password"
                             type="password"
-                            required
+                            :required="userFormMode === 'create'"
                             class="block w-full bg-primary-800 border-primary-700 rounded-lg text-white placeholder-primary-400 focus:ring-gold focus:border-gold p-2.5"
-                            placeholder="••••••••"
+                            :placeholder="userFormMode === 'create' ? '••••••••' : 'Leave blank to keep current'"
                             />
                         </div>
                         <div>
@@ -512,16 +587,26 @@
                             <option value="admin">Administrator</option>
                             </select>
                         </div>
-                        <button
-                            type="submit"
-                            class="w-full bg-gold hover:bg-gold-600 text-primary-900 font-black py-3 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
-                        >
-                            Create Account
-                        </button>
+                        <div class="flex gap-3">
+                          <button
+                              type="submit"
+                              class="flex-1 bg-gold hover:bg-gold-600 text-primary-900 font-black py-3 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+                          >
+                              {{ userFormMode === "create" ? "Create Account" : "Save Changes" }}
+                          </button>
+                          <button
+                              v-if="userFormMode === 'edit'"
+                              type="button"
+                              class="flex-1 border border-white/30 text-white font-bold py-3 rounded-lg"
+                              @click="resetUserForm"
+                          >
+                              Cancel
+                          </button>
+                        </div>
                         </form>
                     </div>
 
-                    <!-- Fortune-1000 Trust Signal -->
+                    <!-- Trust Signal -->
                     <div
                         class="mt-6 p-4 bg-gold-50 border border-gold-100 rounded-lg flex items-start"
                     >
@@ -540,8 +625,8 @@
                         />
                         </svg>
                         <p class="text-xs text-gold-800 leading-relaxed">
-                        <strong>Security Note:</strong> New accounts are active
-                        immediately.
+                          <strong>Security Note:</strong> Password changes take
+                          effect immediately.
                         </p>
                     </div>
                     </div>
@@ -585,24 +670,26 @@ const messagesData = ref<any[]>([]);
 const usersData = ref<any[]>([]);
 const newUser = ref({
   username: "",
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
   password: "",
   role: "mic",
 });
+const userFormMode = ref<"create" | "edit">("create");
+const editingUserId = ref<string | null>(null);
 
 const pending = ref(true);
 const isSavingJackpot = ref(false);
 const lastSystemSync = ref("");
 let lastSyncInterval: ReturnType<typeof setInterval> | null = null;
 
-const clearAuthState = () => {
-  const authCookie = useCookie("admin_auth", { path: "/" });
-  authCookie.value = null;
-};
-
 const verifyAdminSession = async () => {
   try {
     const response = await $fetch<{ user: { role?: string } }>(
       "/api/auth/user",
+      { credentials: "include" },
     );
     const role = response?.user?.role;
     if (!role || role !== "admin") {
@@ -610,7 +697,7 @@ const verifyAdminSession = async () => {
     }
     return response.user;
   } catch (error) {
-    clearAuthState();
+    await $fetch("/api/auth/logout", { method: "POST" }).catch(() => undefined);
     await router.push("/admin/login");
     return null;
   }
@@ -624,10 +711,10 @@ const loadData = async () => {
     if (!user) return;
     const [biz, jack, msgs, users] =
       await Promise.all([
-      $fetch("/api/business"),
-      $fetch("/api/jackpot"),
-      $fetch("/api/admin/messages"),
-      $fetch("/api/admin/users"),
+      $fetch("/api/business", { credentials: "include" }),
+      $fetch("/api/jackpot", { credentials: "include" }),
+      $fetch("/api/admin/messages", { credentials: "include" }),
+      $fetch("/api/admin/users", { credentials: "include" }),
     ]);
 
     businessData.value = biz;
@@ -689,14 +776,38 @@ const saveJackpot = async () => {
 
 const addUser = async () => {
   try {
-    const user = await $fetch("/api/admin/users", {
-      method: "POST",
-      body: newUser.value,
+    const payload = {
+      username: newUser.value.username,
+      firstName: newUser.value.firstName,
+      lastName: newUser.value.lastName,
+      email: newUser.value.email,
+      phone: newUser.value.phone,
+      role: newUser.value.role,
+      ...(newUser.value.password ? { password: newUser.value.password } : {}),
+    };
+
+    if (userFormMode.value === "create") {
+      const user = await $fetch("/api/admin/users", {
+        method: "POST",
+        body: payload,
+        credentials: "include"
+      });
+      usersData.value.push(user);
+      resetUserForm();
+      alert("User added successfully!");
+      return;
+    }
+    if (!editingUserId.value) return;
+    const user = await $fetch(`/api/admin/users/${editingUserId.value}`, {
+      method: "PATCH",
+      body: payload,
       credentials: "include"
     });
-    usersData.value.push(user);
-    newUser.value = { username: "", password: "", role: "mic" };
-    alert("User added successfully!");
+    usersData.value = usersData.value.map((entry) =>
+      entry.id === user.id ? user : entry,
+    );
+    resetUserForm();
+    alert("User updated successfully!");
   } catch (e: any) {
     alert(e.data?.message || "Failed to add user");
   }
@@ -716,9 +827,36 @@ const deleteUser = async (id: string) => {
   }
 };
 
+const editUser = (user: any) => {
+  userFormMode.value = "edit";
+  editingUserId.value = user.id;
+  newUser.value = {
+    username: user.username || "",
+    firstName: user.first_name || "",
+    lastName: user.last_name || "",
+    email: user.email || "",
+    phone: user.phone || "",
+    password: "",
+    role: user.role || "mic",
+  };
+};
+
+const resetUserForm = () => {
+  userFormMode.value = "create";
+  editingUserId.value = null;
+  newUser.value = {
+    username: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    password: "",
+    role: "mic",
+  };
+};
+
 const logout = async () => {
-  await $fetch("/api/auth/logout", { method: "POST" });
-  clearAuthState();
+  await $fetch("/api/auth/logout", { method: "POST", credentials: "include" });
   router.push("/admin/login");
 };
 </script>
