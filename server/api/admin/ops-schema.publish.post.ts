@@ -3,6 +3,7 @@ import { settingsService } from "@server/services/settings.service";
 import { auditService } from "@server/services/audit.service";
 import { compileOpsSchema } from "@server/services/opsSchemaCompiler";
 import { opsSchemaV2Schema } from "@server/schemas/ops-schema.zod";
+import { ZodError } from "zod";
 
 export default defineEventHandler(async (event) => {
   if (!event.context.user || event.context.user.role !== "admin") {
@@ -17,10 +18,22 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const parsed = opsSchemaV2Schema.parse(draft);
+  let parsed;
+  try {
+    parsed = opsSchemaV2Schema.parse(draft);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw createError({
+        statusCode: 400,
+        message: "Invalid ops schema payload.",
+        data: error.flatten(),
+      });
+    }
+    throw error;
+  }
   const publishedSchema = {
     ...parsed,
-    meta: { ...parsed.meta, status: "active" },
+    meta: { ...parsed.meta, status: "live" },
   };
 
   const [history, currentPricing, currentSchedule] = await Promise.all([

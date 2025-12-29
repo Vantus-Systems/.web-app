@@ -1,29 +1,31 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
-import { useOpsStore } from '~/stores/ops';
-import OpsSchemaPricingEditor from './ops/OpsSchemaPricingEditor.vue';
-import OpsSchemaCalendarEditor from './ops/OpsSchemaCalendarEditor.vue';
-import PatternEditor from './PatternEditor.vue';
-import ProgramEditor from './ProgramEditor.vue';
-import { Save } from 'lucide-vue-next';
+import { ref, onMounted, computed } from "vue";
+import { useOpsStore } from "~/stores/ops";
+import OpsSchemaPricingEditor from "./ops/OpsSchemaPricingEditor.vue";
+import OpsSchemaCalendarEditor from "./ops/OpsSchemaCalendarEditor.vue";
+import PatternEditor from "./PatternEditor.vue";
+import ProgramEditor from "./ProgramEditor.vue";
+import { Save } from "lucide-vue-next";
 
 const opsStore = useOpsStore();
-const currentStep = ref('pricing'); // pricing | patterns | programs | schedule
+const currentStep = ref("pricing"); // pricing | patterns | programs | schedule
+type Density = "compact" | "standard" | "detail";
+const density = ref<Density>("standard");
 
 onMounted(() => {
   opsStore.loadAll();
 });
 
 const steps = [
-  { id: 'pricing', label: 'Rate Cards + Timeline' },
-  { id: 'schedule', label: 'Day Profiles + Calendar' },
-  { id: 'patterns', label: 'Pattern Library' },
-  { id: 'programs', label: 'Program Builder' },
+  { id: "pricing", label: "Rate Cards + Timeline" },
+  { id: "schedule", label: "Day Profiles + Calendar" },
+  { id: "patterns", label: "Pattern Studio" },
+  { id: "programs", label: "Program Orchestrator" },
 ];
 
 const opsSchemaMeta = computed(() => opsStore.opsSchemaDraft?.meta);
 const opsSchemaStatus = computed(() => opsSchemaMeta.value?.status || "draft");
-const opsSchemaName = computed(() => opsSchemaMeta.value?.profile_name || "Operations Schema");
+const opsSchemaName = computed(() => opsSchemaMeta.value?.name || "Operations Schema");
 
 const handleSave = async () => {
     if (opsStore.dirty.opsSchema) await opsStore.saveOpsSchema();
@@ -45,6 +47,10 @@ const updateOpsSchemaMeta = (updates: Record<string, any>) => {
   });
 };
 
+const setDensity = (value: Density) => {
+  density.value = value;
+};
+
 const createDraft = () => {
   updateOpsSchemaMeta({ status: "draft" });
 };
@@ -52,10 +58,10 @@ const createDraft = () => {
 const publishSchema = async () => {
   if (!opsStore.opsSchemaDraft) return;
   const errors = [];
-  if (!Object.keys(opsStore.opsSchemaDraft.definitions?.rate_cards ?? {}).length) {
+  if (!opsStore.opsSchemaDraft.definitions?.rateCards?.length) {
     errors.push("At least one rate card is required.");
   }
-  if (!opsStore.opsSchemaDraft.timeline_configuration?.flow_segments?.length) {
+  if (!opsStore.opsSchemaDraft.timeline?.flowSegments?.length) {
     errors.push("At least one flow segment is required.");
   }
   if (!opsStore.programs.length) {
@@ -102,7 +108,7 @@ const rollbackSchema = () => {
                   <span
                     :class="[
                       'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide',
-                      opsSchemaStatus === 'active'
+                      opsSchemaStatus === 'live'
                         ? 'bg-emerald-100 text-emerald-700'
                         : 'bg-amber-100 text-amber-700',
                     ]"
@@ -116,11 +122,28 @@ const rollbackSchema = () => {
               </div>
 
               <div class="flex flex-wrap gap-2 items-center">
+                <div class="flex items-center rounded-lg border border-slate-200 overflow-hidden">
+                  <button
+                    v-for="mode in ['compact', 'standard', 'detail']"
+                    :key="mode"
+                    class="px-3 py-2 text-xs font-bold uppercase tracking-[0.2em]"
+                    :class="density === mode ? 'bg-primary-900 text-white' : 'text-slate-500 hover:bg-slate-50'"
+                    @click="setDensity(mode as Density)"
+                  >
+                    {{ mode }}
+                  </button>
+                </div>
                 <button
                   class="px-3 py-2 text-xs font-bold uppercase tracking-[0.3em] rounded-lg border border-slate-200 text-slate-500 hover:text-slate-700 hover:border-slate-300"
                   @click="createDraft"
                 >
                   Create Draft
+                </button>
+                <button
+                  class="px-3 py-2 text-xs font-bold uppercase tracking-[0.3em] rounded-lg border border-slate-200 text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                  @click="handleSave"
+                >
+                  Save Draft
                 </button>
                 <button
                   class="px-3 py-2 text-xs font-bold uppercase tracking-[0.3em] rounded-lg border border-slate-200 text-slate-500 hover:text-slate-700 hover:border-slate-300"
@@ -178,7 +201,9 @@ const rollbackSchema = () => {
                 <div v-if="currentStep === 'pricing' && opsStore.opsSchemaDraft" class="fade-enter-active">
                     <OpsSchemaPricingEditor
                         :modelValue="opsStore.opsSchemaDraft"
+                        :density="density"
                         @update:modelValue="opsStore.updateOpsSchemaDraft"
+                        @update:density="density = $event"
                     />
                 </div>
 

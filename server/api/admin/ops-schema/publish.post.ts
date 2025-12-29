@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
   }
   const publishedSchema = {
     ...parsed,
-    meta: { ...parsed.meta, status: "active" },
+    meta: { ...parsed.meta, status: "live" },
   };
 
   const [history, currentPricing, currentSchedule] = await Promise.all([

@@ -1,79 +1,115 @@
-export type OpsSchemaStatus = "draft" | "active";
+export type OpsSchemaStatus = "draft" | "live";
+
+export type OpsSchemaInventoryTier = {
+  id: string;
+  name: string;
+  price: number;
+};
+
+export type OpsSchemaBundle = {
+  id: string;
+  name: string;
+  items: string[];
+  price: number;
+  discount_label?: string;
+  savings?: number;
+};
+
+export type OpsSchemaRateCard = {
+  id: string;
+  name: string;
+  category?: string;
+  color?: string;
+  yield_configuration: {
+    mode: "fixed_rate" | "standard_rate" | "reduced_rate";
+    active_bundles: string[];
+    qualifying_criteria?: {
+      min_spend?: number;
+      free_unit_ratio?: string;
+    };
+  };
+};
+
+export type OpsSchemaFlowSegment = {
+  id: string;
+  label: string;
+  time_start: string;
+  time_end: string;
+  rate_card_id: string;
+  color_code?: string;
+  allow_overlap?: boolean;
+};
+
+export type OpsSchemaOverlayEvent = {
+  id: string;
+  label: string;
+  time_start: string;
+  time_end: string;
+  is_hard_ticket: boolean;
+  pricing_override?: Record<string, unknown>;
+};
+
+export type OpsSchemaLogicTrigger = {
+  id: string;
+  trigger_time: string;
+  type: "hard_reset" | "sales_window_open";
+  target_event?: string;
+  description?: string;
+};
+
+export type OpsSchemaDayProfile = {
+  id: string;
+  name: string;
+  category: "weekday" | "weekend" | "special" | "closed";
+  segment_ids: string[];
+  overlay_event_ids: string[];
+  description?: string;
+  color?: string;
+};
+
+export type OpsSchemaCalendarAssignment = {
+  status: "open" | "closed";
+  profile_id?: string;
+};
+
+export type OpsSchemaCalendarOverride = {
+  id: string;
+  profile_id: string;
+  reason?: string;
+};
 
 export type OpsSchemaV2 = {
   schema_version: string;
   meta: {
-    profile_name: string;
+    name: string;
     status: OpsSchemaStatus;
     currency: string;
     timezone: string;
+    schema_version: string;
   };
   definitions: {
-    inventory_tiers: Record<
-      string,
-      { id: string; name: string; price: number }
-    >;
-    bundles: Record<
-      string,
-      {
-        id: string;
-        name: string;
-        items: string[];
-        price: number;
-        discount_label?: string;
-        savings?: number;
-      }
-    >;
-    rate_cards: Record<
-      string,
-      {
-        id: string;
-        name: string;
-        yield_configuration: {
-          mode: "fixed_rate" | "standard_rate" | "reduced_rate";
-          active_bundles: string[];
-          qualifying_criteria?: {
-            min_spend?: number;
-            free_unit_ratio?: string;
-          };
-        };
-      }
-    >;
+    inventoryTiers: OpsSchemaInventoryTier[];
+    bundles: OpsSchemaBundle[];
+    rateCards: OpsSchemaRateCard[];
   };
-  timeline_configuration: {
-    flow_segments: Array<{
-      id: string;
-      label: string;
-      time_start: string;
-      time_end: string;
-      rate_card_id: string;
-      color_code?: string;
-    }>;
-    overlay_events: Array<{
-      id: string;
-      label: string;
-      time_start: string;
-      time_end: string;
-      is_hard_ticket: boolean;
-      pricing_override?: Record<string, unknown>;
-    }>;
+  timeline: {
+    operationalHours: {
+      start: string;
+      end: string;
+      isOpen: boolean;
+    };
+    flowSegments: OpsSchemaFlowSegment[];
+    overlayEvents: OpsSchemaOverlayEvent[];
   };
-  logic_triggers: Array<{
-    trigger_time: string;
-    type: "hard_reset" | "sales_window_open";
-    target_event?: string;
-    description?: string;
-  }>;
-  day_profiles: Array<{
-    id: string;
-    name: string;
-    category: "weekday" | "weekend" | "special" | "closed";
-    segment_ids: string[];
-    overlay_event_ids: string[];
-    description?: string;
-  }>;
+  logicTriggers: OpsSchemaLogicTrigger[];
+  dayProfiles: OpsSchemaDayProfile[];
   calendar: {
-    assignments: Record<string, string>;
-    overrides: Record<string, Array<{ id: string; profile_id: string }>>;
+    range: {
+      start: string;
+      end: string;
+    };
+    weekdayDefaults: Record<string, OpsSchemaCalendarAssignment>;
+    assignments: Record<string, OpsSchemaCalendarAssignment>;
+    overrides: Record<string, OpsSchemaCalendarOverride[]>;
   };
 };

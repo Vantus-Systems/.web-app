@@ -1,4 +1,73 @@
 import { defineStore } from "pinia";
+import type { OpsSchemaV2 } from "~/types/ops-schema";
+
+const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+const currentYearRange = () => {
+  const now = new Date();
+  const start = new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
+  const end = new Date(Date.UTC(now.getUTCFullYear(), 11, 31));
+  return {
+    start: start.toISOString().slice(0, 10),
+    end: end.toISOString().slice(0, 10),
+  };
+};
+
+const normalizeOpsSchema = (schema: any): OpsSchemaV2 | null => {
+  if (!schema) return null;
+  if (schema.definitions?.rateCards) {
+    return schema as OpsSchemaV2;
+  }
+
+  const range = currentYearRange();
+  const weekdayDefaults = weekDays.reduce((acc, day) => {
+    const profileId = schema.calendar?.assignments?.[day];
+    acc[day] = profileId
+      ? ({ status: "open", profile_id: profileId } as const)
+      : ({ status: "closed" as const });
+    return acc;
+  }, {} as Record<string, { status: "closed" } | { status: "open"; profile_id: string }>);
+
+  const inventoryTiers = Object.values(schema.definitions?.inventory_tiers ?? {});
+  const bundles = Object.values(schema.definitions?.bundles ?? {});
+  const rateCards = Object.values(schema.definitions?.rate_cards ?? {});
+
+  return {
+    schema_version: schema.schema_version ?? "v2",
+    meta: {
+      name: schema.meta?.profile_name ?? "Operations Schema",
+      status: schema.meta?.status === "active" ? "live" : "draft",
+      currency: schema.meta?.currency ?? "USD",
+      timezone: schema.meta?.timezone ?? "America/Los_Angeles",
+      schema_version: schema.schema_version ?? "v2",
+    },
+    definitions: {
+      inventoryTiers: inventoryTiers as any[],
+      bundles: bundles as any[],
+      rateCards: rateCards as any[],
+    },
+    timeline: {
+      operationalHours: {
+        start: "09:00",
+        end: "03:00",
+        isOpen: true,
+      },
+      flowSegments: schema.timeline_configuration?.flow_segments ?? [],
+      overlayEvents: schema.timeline_configuration?.overlay_events ?? [],
+    },
+    logicTriggers: (schema.logic_triggers ?? []).map((trigger: any, index: number) => ({
+      id: trigger.id ?? `trigger-${index}`,
+      ...trigger,
+    })),
+    dayProfiles: schema.day_profiles ?? [],
+    calendar: {
+      range,
+      weekdayDefaults,
+      assignments: {},
+      overrides: schema.calendar?.overrides ?? {},
+    },
+  };
+};
 
 export const useOpsStore = defineStore("ops", {
   state: () => ({
@@ -64,8 +133,8 @@ export const useOpsStore = defineStore("ops", {
         this.schedule = schedule;
         this.patterns = patterns;
         this.programs = programs;
-        this.opsSchemaDraft = opsSchemaResponse?.draft ?? null;
-        this.opsSchemaLive = opsSchemaResponse?.live ?? null;
+        this.opsSchemaDraft = normalizeOpsSchema(opsSchemaResponse?.draft);
+        this.opsSchemaLive = normalizeOpsSchema(opsSchemaResponse?.live);
         this.opsSchemaHistoryMeta = opsSchemaResponse?.historyMeta ?? [];
         this.scheduleDayProfiles = scheduleDayProfiles;
         this.derivedPricingPreview = pricing;
@@ -139,26 +208,39 @@ export const useOpsStore = defineStore("ops", {
         this.dirty.opsSchema = false;
         return;
       }
+      const range = currentYearRange();
+      const weekdayDefaults = weekDays.reduce((acc, day) => {
+        acc[day] = { status: "closed" as const };
+        return acc;
+      }, {} as Record<string, { status: "closed" }>);
       this.opsSchemaDraft = {
         schema_version: "v2",
         meta: {
-          profile_name: "Default Ops Schema",
+          name: "Operations Schema",
           status: "draft",
           currency: "USD",
           timezone: "America/Los_Angeles",
+          schema_version: "v2",
         },
         definitions: {
-          inventory_tiers: {},
-          bundles: {},
-          rate_cards: {},
+          inventoryTiers: [],
+          bundles: [],
+          rateCards: [],
         },
-        timeline_configuration: {
-          flow_segments: [],
-          overlay_events: [],
+        timeline: {
+          operationalHours: {
+            start: "09:00",
+            end: "03:00",
+            isOpen: true,
+          },
+          flowSegments: [],
+          overlayEvents: [],
         },
-        logic_triggers: [],
-        day_profiles: [],
+        logicTriggers: [],
+        dayProfiles: [],
         calendar: {
+          range,
+          weekdayDefaults,
           assignments: {},
           overrides: {},
         },
@@ -194,11 +276,9 @@ export const useOpsStore = defineStore("ops", {
       await this.refreshOpsSchema();
     },
     async refreshOpsSchema() {
-      const response = await $fetch("/api/admin/ops-schema", {
-        credentials: "include",
-      });
-      this.opsSchemaDraft = response?.draft ?? null;
-      this.opsSchemaLive = response?.live ?? null;
+      const response = await $fetch('/api/admin/ops-schema', { credentials: 'include' });
+      this.opsSchemaDraft = normalizeOpsSchema(response?.draft);
+      this.opsSchemaLive = normalizeOpsSchema(response?.live);
       this.opsSchemaHistoryMeta = response?.historyMeta ?? [];
       this.dirty.opsSchema = false;
     },
