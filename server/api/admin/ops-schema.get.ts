@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
   const historyMeta = Array.isArray(history)
     ? history.map((entry: any) => ({
         id: entry?.id,
-        profile_name: entry?.schema?.meta?.profile_name,
+        profile_name: entry?.schema?.meta?.name,
         published_at: entry?.published_at,
       }))
     : [];

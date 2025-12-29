@@ -1,58 +1,63 @@
 <template>
-  <div class="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)_320px]">
-    <BaseCard class-name="p-4 space-y-4">
+  <div class="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)_320px] h-[720px]">
+    <DayProfileLibrary
+      :profiles="dayProfiles"
+      :selected-id="selectedProfileId"
+      @select="selectProfile"
+      @add="addProfile"
+    />
+
+    <div class="flex flex-col gap-4">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400">
-            Day Profiles
+          <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+            Paint the Calendar
           </p>
-          <h3 class="text-lg font-black text-primary-900">Library</h3>
+          <h3 class="text-xl font-black text-primary-900">Master Schedule</h3>
         </div>
-        <BaseButton variant="outline" class-name="text-xs px-3 py-2" @click="addProfile">
-          + Add
-        </BaseButton>
-      </div>
-
-      <div class="space-y-2">
-        <button
-          v-for="profile in dayProfiles"
-          :key="profile.id"
-          class="w-full text-left rounded-xl border px-3 py-3 transition"
-          :class="selectedProfileId === profile.id
-            ? 'border-primary-500 bg-primary-50'
-            : 'border-slate-200 bg-white hover:border-slate-300'"
-          @click="selectedProfileId = profile.id"
-        >
-          <p class="text-sm font-bold text-primary-900">{{ profile.name }}</p>
-          <p class="text-[10px] uppercase tracking-widest text-slate-400">
-            {{ profile.category }}
-          </p>
-        </button>
-      </div>
-    </BaseCard>
-
-    <BaseCard class-name="p-6 space-y-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400">
-            Profile Builder
-          </p>
-          <h3 class="text-xl font-black text-primary-900">
-            {{ selectedProfile?.name || "Select a Profile" }}
-          </h3>
+        <div class="flex gap-2">
+          <BaseButton variant="outline" class-name="text-xs px-3 py-2" @click="toggleStats">
+            {{ showStats ? "Hide" : "Show" }} Stats
+          </BaseButton>
         </div>
-        <BaseButton
-          v-if="selectedProfile"
-          variant="outline"
-          class-name="text-xs px-3 py-2 text-rose-600 border-rose-200"
-          @click="removeProfile"
-        >
-          Remove
-        </BaseButton>
       </div>
 
-      <div v-if="selectedProfile" class="space-y-4">
-        <div class="grid grid-cols-2 gap-4">
+      <div v-if="showStats" class="grid grid-cols-3 gap-3 text-xs">
+        <div class="bg-white border border-slate-200 rounded-lg px-3 py-2">
+          <div class="text-slate-400 uppercase tracking-widest text-[10px]">Assigned</div>
+          <div class="text-lg font-bold text-slate-900">{{ stats.assigned }}</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-lg px-3 py-2">
+          <div class="text-slate-400 uppercase tracking-widest text-[10px]">Closed</div>
+          <div class="text-lg font-bold text-slate-900">{{ stats.closed }}</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-lg px-3 py-2">
+          <div class="text-slate-400 uppercase tracking-widest text-[10px]">Unassigned</div>
+          <div class="text-lg font-bold text-slate-900">{{ stats.unassigned }}</div>
+        </div>
+      </div>
+
+      <MasterCalendarCanvas
+        :month-label="monthLabel"
+        :days="calendarDays"
+        :week-days="weekDays"
+        :selected-dates="selectedDates"
+        @select="selectDate"
+        @assign="assignDate"
+        @prev="prevMonth"
+        @next="nextMonth"
+      />
+    </div>
+
+    <transition name="slide-fade">
+      <div v-if="selectedDates.length || selectedProfile" class="h-full">
+        <div v-if="selectedProfile" class="bg-white border-l border-slate-200 p-4 space-y-4">
+          <div>
+            <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+              Profile Inspector
+            </p>
+            <h3 class="text-lg font-black text-primary-900">{{ selectedProfile.name }}</h3>
+          </div>
           <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
             Name
             <input v-model="selectedProfile.name" class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50" />
@@ -66,119 +71,73 @@
               <option value="closed">Closed</option>
             </select>
           </label>
-        </div>
-
-        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
-          Description
-          <textarea v-model="selectedProfile.description" rows="2" class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50"></textarea>
-        </label>
-
-        <div class="border-t border-slate-100 pt-4">
-          <p class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400 mb-3">
-            Flow Segments
-          </p>
-          <div class="grid gap-2 md:grid-cols-2">
-            <label v-for="segment in flowSegments" :key="segment.id" class="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                :checked="selectedProfile.segment_ids.includes(segment.id)"
-                @change="toggleSegment(segment.id)"
-              />
-              {{ segment.label }} ({{ segment.time_start }} → {{ segment.time_end }})
-            </label>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+            Color
+            <input v-model="selectedProfile.color" type="color" class="mt-1 w-12 h-10 border-0 bg-transparent" />
+          </label>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+            Description
+            <textarea v-model="selectedProfile.description" rows="2" class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50"></textarea>
+          </label>
+          <div class="border-t border-slate-100 pt-4">
+            <p class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400 mb-2">Flow Segments</p>
+            <div class="grid gap-2 md:grid-cols-2">
+              <label v-for="segment in flowSegments" :key="segment.id" class="flex items-center gap-2 text-xs">
+                <input
+                  type="checkbox"
+                  :checked="selectedProfile.segment_ids.includes(segment.id)"
+                  @change="toggleSegment(segment.id)"
+                />
+                {{ segment.label }}
+              </label>
+            </div>
           </div>
-        </div>
-
-        <div class="border-t border-slate-100 pt-4">
-          <p class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400 mb-3">
-            Overlay Events
-          </p>
-          <div class="grid gap-2 md:grid-cols-2">
-            <label v-for="event in overlayEvents" :key="event.id" class="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                :checked="selectedProfile.overlay_event_ids.includes(event.id)"
-                @change="toggleOverlay(event.id)"
-              />
-              {{ event.label }} ({{ event.time_start }} → {{ event.time_end }})
-            </label>
+          <div class="border-t border-slate-100 pt-4">
+            <p class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400 mb-2">Overlay Events</p>
+            <div class="grid gap-2 md:grid-cols-2">
+              <label v-for="event in overlayEvents" :key="event.id" class="flex items-center gap-2 text-xs">
+                <input
+                  type="checkbox"
+                  :checked="selectedProfile.overlay_event_ids.includes(event.id)"
+                  @change="toggleOverlay(event.id)"
+                />
+                {{ event.label }}
+              </label>
+            </div>
           </div>
-        </div>
-      </div>
-
-      <p v-else class="text-sm text-slate-400">
-        Select a profile to assign segments and overlay events.
-      </p>
-    </BaseCard>
-
-    <BaseCard class-name="p-4 space-y-6">
-      <div>
-        <p class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400">
-          Calendar Assignments
-        </p>
-        <h3 class="text-lg font-black text-primary-900">Weekday Grid</h3>
-      </div>
-
-      <div class="space-y-3">
-        <div v-for="day in weekDays" :key="day" class="flex items-center justify-between gap-3">
-          <span class="text-xs font-bold uppercase tracking-wider text-slate-500">
-            {{ day }}
-          </span>
-          <select
-            class="flex-1 rounded-lg border-slate-200 bg-slate-50 text-xs"
-            :value="calendarAssignments[day] || ''"
-            @change="setWeekdayAssignment(day, ($event.target as HTMLSelectElement).value)"
-          >
-            <option value="">Unassigned</option>
-            <option v-for="profile in dayProfiles" :key="profile.id" :value="profile.id">
-              {{ profile.name }}
-            </option>
-          </select>
-        </div>
-      </div>
-
-      <div class="border-t border-slate-100 pt-4 space-y-3">
-        <div class="flex items-center justify-between">
-          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">
-            Date Overrides
-          </h4>
-          <BaseButton variant="outline" class-name="text-xs px-2 py-1" @click="addOverride">
-            + Add
-          </BaseButton>
-        </div>
-
-        <div v-for="override in overrideEntries" :key="override.id" class="rounded-lg border border-slate-200 bg-white p-3 space-y-2">
-          <input
-            v-model="override.date"
-            type="date"
-            class="w-full rounded-lg border-slate-200 bg-slate-50 text-xs"
-          />
-          <select
-            v-model="override.profileId"
-            class="w-full rounded-lg border-slate-200 bg-slate-50 text-xs"
-          >
-            <option value="">Select Profile</option>
-            <option v-for="profile in dayProfiles" :key="profile.id" :value="profile.id">
-              {{ profile.name }}
-            </option>
-          </select>
           <button
-            class="text-xs font-bold text-rose-500"
-            @click="removeOverride(override.id)"
+            class="text-xs font-bold text-rose-500 border border-rose-200 rounded-lg px-2 py-2"
+            @click="removeProfile"
           >
-            Remove
+            Remove Profile
           </button>
         </div>
+
+        <DayProfileInspector
+          v-else
+          :selected-dates="selectedDates"
+          :profiles="dayProfiles"
+          :assignments="draft.calendar.assignments"
+          :weekday-defaults="draft.calendar.weekdayDefaults"
+          :overrides="draft.calendar.overrides"
+          :flow-segments="flowSegments"
+          :overlay-events="overlayEvents"
+          @apply="applyAssignment"
+          @smart-fill="applySmartFill"
+          @update-overrides="updateOverrides"
+        />
       </div>
-    </BaseCard>
+    </transition>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, nextTick, ref, toRaw, watch } from "vue";
-import BaseCard from "~/components/ui/BaseCard.vue";
 import BaseButton from "~/components/ui/BaseButton.vue";
 import type { OpsSchemaV2 } from "~/types/ops-schema";
+import DayProfileLibrary from "~/components/admin/ops/DayProfileLibrary.vue";
+import MasterCalendarCanvas from "~/components/admin/ops/MasterCalendarCanvas.vue";
+import DayProfileInspector from "~/components/admin/ops/DayProfileInspector.vue";
 
 const props = defineProps<{
   modelValue: OpsSchemaV2;
@@ -192,32 +151,99 @@ const draft = ref(cloneDraft(props.modelValue));
 
 const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const selectedProfileId = ref<string | null>(null);
+const selectedDates = ref<string[]>([]);
+const showStats = ref(false);
 
-const dayProfiles = computed(() => draft.value.day_profiles ?? []);
-const flowSegments = computed(() => draft.value.timeline_configuration.flow_segments ?? []);
-const overlayEvents = computed(() => draft.value.timeline_configuration.overlay_events ?? []);
-const calendarAssignments = computed(() => draft.value.calendar.assignments ?? {});
+const dayProfiles = computed(() => draft.value.dayProfiles ?? []);
+const flowSegments = computed(() => draft.value.timeline.flowSegments ?? []);
+const overlayEvents = computed(() => draft.value.timeline.overlayEvents ?? []);
 
 const selectedProfile = computed(() =>
   dayProfiles.value.find((profile) => profile.id === selectedProfileId.value),
 );
 
+const viewDate = ref(new Date());
+
+const monthLabel = computed(() =>
+  viewDate.value.toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+);
+
+const calendarDays = computed(() => {
+  const year = viewDate.value.getFullYear();
+  const month = viewDate.value.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const startDay = new Date(firstDay);
+  startDay.setDate(firstDay.getDate() - firstDay.getDay());
+  const days = [];
+  for (let i = 0; i < 42; i += 1) {
+    const date = new Date(startDay);
+    date.setDate(startDay.getDate() + i);
+    const iso = date.toISOString().slice(0, 10);
+    const directAssignment = draft.value.calendar.assignments[iso];
+    const weekday = date.toLocaleDateString("en-US", { weekday: "short" });
+    const fallbackAssignment = draft.value.calendar.weekdayDefaults[weekday];
+    const assignment = directAssignment || fallbackAssignment;
+    const profile = assignment?.profile_id
+      ? dayProfiles.value.find((p) => p.id === assignment.profile_id)
+      : undefined;
+    days.push({
+      date: iso,
+      day: date.getDate(),
+      isCurrentMonth: date.getMonth() === month,
+      assignment,
+      profile,
+      isFallback: !directAssignment,
+    });
+  }
+  return days;
+});
+
+const stats = computed(() => {
+  const assigned = calendarDays.value.filter(
+    (day) => day.assignment?.status === "open" && day.assignment.profile_id,
+  ).length;
+  const closed = calendarDays.value.filter(
+    (day) => day.assignment?.status === "closed",
+  ).length;
+  const unassigned = calendarDays.value.length - assigned - closed;
+  return { assigned, closed, unassigned };
+});
+
+const selectProfile = (id: string) => {
+  selectedProfileId.value = id;
+  selectedDates.value = [];
+};
+
+const selectDate = (payload: { date: string; multi: boolean }) => {
+  selectedProfileId.value = null;
+  if (payload.multi) {
+    if (selectedDates.value.includes(payload.date)) {
+      selectedDates.value = selectedDates.value.filter((d) => d !== payload.date);
+    } else {
+      selectedDates.value = [...selectedDates.value, payload.date];
+    }
+    return;
+  }
+  selectedDates.value = [payload.date];
+};
+
 const addProfile = () => {
   const id = `profile-${Date.now()}`;
-  draft.value.day_profiles.push({
+  draft.value.dayProfiles.push({
     id,
     name: "New Profile",
     category: "weekday",
     segment_ids: [],
     overlay_event_ids: [],
     description: "",
+    color: "#64748b",
   });
   selectedProfileId.value = id;
 };
 
 const removeProfile = () => {
   if (!selectedProfile.value) return;
-  draft.value.day_profiles = dayProfiles.value.filter(
+  draft.value.dayProfiles = dayProfiles.value.filter(
     (profile) => profile.id !== selectedProfile.value?.id,
   );
   selectedProfileId.value = null;
@@ -243,40 +269,49 @@ const toggleOverlay = (eventId: string) => {
   }
 };
 
-const setWeekdayAssignment = (day: string, profileId: string) => {
-  draft.value.calendar.assignments = {
-    ...draft.value.calendar.assignments,
-    [day]: profileId || undefined,
+const assignDate = (payload: { date: string; profileId: string }) => {
+  draft.value.calendar.assignments[payload.date] = {
+    status: "open",
+    profile_id: payload.profileId,
   };
-  if (!profileId) {
-    delete draft.value.calendar.assignments[day];
+  selectedDates.value = [payload.date];
+};
+
+const applyAssignment = (payload: { dates: string[]; assignment: any }) => {
+  payload.dates.forEach((date) => {
+    draft.value.calendar.assignments[date] = payload.assignment;
+  });
+};
+
+const applySmartFill = (payload: { day: string; profileId: string }) => {
+  const start = new Date(`${draft.value.calendar.range.start}T00:00:00`);
+  const end = new Date(`${draft.value.calendar.range.end}T00:00:00`);
+  for (let cursor = new Date(start); cursor <= end; cursor.setDate(cursor.getDate() + 1)) {
+    const weekday = cursor.toLocaleDateString("en-US", { weekday: "short" });
+    if (weekday === payload.day) {
+      const date = cursor.toISOString().slice(0, 10);
+      draft.value.calendar.assignments[date] = {
+        status: "open",
+        profile_id: payload.profileId,
+      };
+    }
   }
 };
 
-type OverrideEntry = { id: string; date: string; profileId: string };
-const overrideEntries = ref<OverrideEntry[]>([]);
-
-const syncOverrideEntries = () => {
-  const entries: OverrideEntry[] = [];
-  Object.entries(draft.value.calendar.overrides ?? {}).forEach(
-    ([date, overrides]) => {
-      overrides.forEach((entry: any) => {
-        entries.push({ id: entry.id, date, profileId: entry.profile_id });
-      });
-    },
-  );
-  overrideEntries.value = entries;
+const updateOverrides = (payload: { date: string; overrides: Array<{ id: string; profile_id: string; reason?: string }> }) => {
+  draft.value.calendar.overrides[payload.date] = payload.overrides;
 };
 
-const addOverride = () => {
-  overrideEntries.value = [
-    ...overrideEntries.value,
-    { id: `override-${Date.now()}`, date: "", profileId: "" },
-  ];
+const prevMonth = () => {
+  viewDate.value = new Date(viewDate.value.getFullYear(), viewDate.value.getMonth() - 1, 1);
 };
 
-const removeOverride = (id: string) => {
-  overrideEntries.value = overrideEntries.value.filter((entry) => entry.id !== id);
+const nextMonth = () => {
+  viewDate.value = new Date(viewDate.value.getFullYear(), viewDate.value.getMonth() + 1, 1);
+};
+
+const toggleStats = () => {
+  showStats.value = !showStats.value;
 };
 
 watch(
@@ -284,26 +319,11 @@ watch(
   (value) => {
     isSyncing.value = true;
     draft.value = cloneDraft(value);
-    syncOverrideEntries();
     nextTick(() => {
       isSyncing.value = false;
     });
   },
   { deep: true, immediate: true },
-);
-
-watch(
-  overrideEntries,
-  (entries) => {
-    const overrides: Record<string, Array<{ id: string; profile_id: string }>> = {};
-    entries.forEach((entry) => {
-      if (!entry.date || !entry.profileId) return;
-      if (!overrides[entry.date]) overrides[entry.date] = [];
-      overrides[entry.date].push({ id: entry.id, profile_id: entry.profileId });
-    });
-    draft.value.calendar.overrides = overrides;
-  },
-  { deep: true },
 );
 
 watch(
@@ -316,3 +336,15 @@ watch(
   { deep: true },
 );
 </script>
+
+<style scoped>
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: all 0.25s ease;
+}
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  opacity: 0;
+  transform: translateX(12px);
+}
+</style>

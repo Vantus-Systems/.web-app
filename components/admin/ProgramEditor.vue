@@ -1,5 +1,205 @@
+<template>
+  <div class="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)_320px] h-[720px]">
+    <div class="h-full flex flex-col bg-white border-r border-slate-200">
+      <div class="p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+              Library
+            </p>
+            <h3 class="text-lg font-black text-primary-900">Programs</h3>
+          </div>
+          <button
+            class="text-xs font-bold text-primary-700 border border-slate-200 rounded-lg px-2 py-1 hover:bg-slate-50"
+            @click="startEdit()"
+            :disabled="!patternsReady"
+          >
+            + New
+          </button>
+        </div>
+        <input
+          v-model="programSearch"
+          type="text"
+          placeholder="Search programs..."
+          class="w-full rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-xs"
+        />
+        <div
+          v-if="!patternsReady"
+          class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[10px] font-bold text-amber-700"
+        >
+          Add patterns before creating programs.
+        </div>
+      </div>
+      <div class="px-4 pb-4 space-y-2 overflow-y-auto">
+        <button
+          v-for="p in filteredPrograms"
+          :key="p.slug"
+          class="w-full text-left rounded-xl border px-3 py-2"
+          :class="editingProgram?.slug === p.slug
+            ? 'border-primary-500 bg-primary-50'
+            : 'border-slate-200 bg-white hover:border-slate-300'"
+          @click="startEdit(p)"
+        >
+          <div class="text-sm font-bold text-slate-900">{{ p.name }}</div>
+          <div class="text-[10px] uppercase tracking-widest text-slate-400">
+            {{ p.games.length }} games
+          </div>
+          <button
+            class="mt-2 text-[10px] font-bold text-rose-500"
+            @click.stop="deleteProgram(p.slug)"
+          >
+            Delete
+          </button>
+        </button>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+            Program Orchestrator
+          </p>
+          <h3 class="text-xl font-black text-primary-900">
+            {{ form.name || "Select a Program" }}
+          </h3>
+        </div>
+        <div class="text-xs text-slate-500 font-bold">
+          Total Payout: ${{ totalPayout }}
+        </div>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-xl p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+          Name
+          <input v-model="form.name" class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50" />
+        </label>
+        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+          Slug
+          <input v-model="form.slug" class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50" :disabled="!editingProgram?.isNew" />
+        </label>
+        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+          Description
+          <input v-model="form.description" class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50" />
+        </label>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-xl p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400">
+            Setlist
+          </div>
+          <div class="flex gap-2">
+            <button class="text-xs font-bold border border-slate-200 rounded-lg px-2 py-1" @click="addGame">
+              + Game
+            </button>
+            <button class="text-xs font-bold border border-dashed border-slate-300 rounded-lg px-2 py-1" @click="addBreak">
+              + Break
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-2 max-h-[520px] overflow-y-auto pr-1">
+          <div
+            v-for="(game, idx) in form.games"
+            :key="`${game.title}-${idx}`"
+            class="flex items-center gap-3 rounded-lg border px-3 py-2"
+            :class="isBreak(game) ? 'border-dashed border-slate-300 bg-slate-50' : 'border-slate-200 bg-white'"
+            draggable="true"
+            @dragstart="dragIndex = idx"
+            @dragover.prevent
+            @drop="reorder(idx)"
+            @click="selectGame(idx)"
+          >
+            <div class="text-xs font-bold text-slate-500 w-6 text-center">{{ idx + 1 }}</div>
+            <div class="flex-1">
+              <div class="text-sm font-bold text-slate-900">{{ game.title }}</div>
+              <div class="text-[10px] uppercase tracking-widest text-slate-400">
+                {{ game.patternSlug || "No Pattern" }}
+              </div>
+            </div>
+            <button class="text-xs font-bold text-rose-500" @click.stop="removeGame(idx)">
+              Remove
+            </button>
+          </div>
+
+          <div v-if="form.games.length === 0" class="text-center text-xs text-slate-400 py-8">
+            No games yet. Add a game to start building.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="h-full bg-white border-l border-slate-200 p-4 space-y-4">
+      <div>
+        <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+          Inspector
+        </p>
+        <h3 class="text-lg font-black text-primary-900">
+          {{ selectedGame ? selectedGame.title : "No Game Selected" }}
+        </h3>
+      </div>
+
+      <div v-if="selectedGame" class="space-y-3">
+        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+          Title
+          <input v-model="selectedGame.title" class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50" />
+        </label>
+        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+          Paper Color
+          <input v-model="selectedGame.paperColor" type="color" class="mt-1 w-12 h-10 border-0 bg-transparent" />
+        </label>
+        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+          Notes
+          <input v-model="selectedGame.notes" class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50" />
+        </label>
+
+        <div class="border-t border-slate-100 pt-3">
+          <div class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400 mb-2">
+            Pattern Picker
+          </div>
+          <input
+            v-model="patternSearch"
+            type="text"
+            placeholder="Search patterns..."
+            class="w-full rounded-lg border-slate-200 bg-slate-50 px-2 py-1 text-xs"
+          />
+          <select v-model="patternCategory" class="w-full rounded-lg border-slate-200 bg-slate-50 px-2 py-1 text-xs mt-2">
+            <option v-for="category in patternCategories" :key="category" :value="category">
+              {{ category }}
+            </option>
+          </select>
+          <div class="mt-2 grid grid-cols-2 gap-2 max-h-[240px] overflow-y-auto">
+            <button
+              v-for="pattern in filteredPatterns"
+              :key="pattern.slug"
+              class="border rounded-lg p-2 text-left"
+              :class="pattern.slug === selectedGame.patternSlug ? 'border-primary-500 bg-primary-50' : 'border-slate-200'"
+              @click="selectedGame.patternSlug = pattern.slug"
+            >
+              <div class="text-xs font-bold text-slate-800">{{ pattern.name }}</div>
+              <BingoPatternGrid
+                :name="pattern.name"
+                :definition="pattern.definition"
+                :fill-color="selectedGame.paperColor"
+                size="xs"
+              />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-4">
+        <button class="w-full bg-gold text-primary-900 text-xs font-bold uppercase tracking-[0.3em] py-2 rounded-lg" @click="saveProgram">
+          Save Program
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { computed, ref } from "vue";
 import BingoPatternGrid from "~/components/bingo/BingoPatternGrid.vue";
 
 const props = defineProps<{
@@ -14,9 +214,13 @@ const emit = defineEmits<{
 }>();
 
 const editingProgram = ref<any>(null);
-const patternsReady = computed(() => props.patterns.length > 0);
+const programSearch = ref("");
 const patternSearch = ref("");
 const patternCategory = ref("All");
+const dragIndex = ref<number | null>(null);
+const selectedGameIndex = ref<number | null>(null);
+
+const patternsReady = computed(() => props.patterns.length > 0);
 
 const form = ref({
   slug: "",
@@ -25,16 +229,52 @@ const form = ref({
   games: [] as any[],
 });
 
-const startEdit = (p?: any) => {
-  if (p) {
+const filteredPrograms = computed(() => {
+  const term = programSearch.value.trim().toLowerCase();
+  return props.programs.filter((program) => {
+    if (!term) return true;
+    return (
+      program.name?.toLowerCase().includes(term) ||
+      program.slug?.toLowerCase().includes(term)
+    );
+  });
+});
+
+const patternCategories = computed(() => {
+  const categories = props.patterns
+    .map((pattern) => pattern.category)
+    .filter((c) => c && typeof c === "string") as string[];
+  return Array.from(new Set(["All", ...categories]));
+});
+
+const filteredPatterns = computed(() => {
+  const term = patternSearch.value.trim().toLowerCase();
+  const allowed = patternCategories.value.includes(patternCategory.value)
+    ? patternCategory.value
+    : "All";
+  return props.patterns.filter((pattern) => {
+    const matchesCategory =
+      allowed === "All" ||
+      (pattern.category && pattern.category === allowed);
+    if (!term) return true;
+    return (
+      matchesCategory &&
+      (pattern.name?.toLowerCase().includes(term) ||
+        pattern.slug?.toLowerCase().includes(term))
+    );
+  });
+});
+
+const startEdit = (program?: any) => {
+  if (program) {
     form.value = JSON.parse(
       JSON.stringify({
-        slug: p.slug,
-        name: p.name,
-        description: p.description,
-        games: p.games.map((g: any) => ({
-          ...g,
-          sortOrder: g.sortOrder,
+        slug: program.slug,
+        name: program.name,
+        description: program.description,
+        games: program.games.map((game: any) => ({
+          ...game,
+          sortOrder: game.sortOrder,
         })),
       }),
     );
@@ -46,378 +286,68 @@ const startEdit = (p?: any) => {
       games: [],
     };
   }
-  editingProgram.value = p || { isNew: true };
+  editingProgram.value = program || { isNew: true };
+  selectedGameIndex.value = form.value.games.length ? 0 : null;
 };
 
-const cancelEdit = () => {
-  editingProgram.value = null;
-};
-
-const saveProgram = () => {
-  // Re-index sort order just in case
-  form.value.games.forEach((g, i) => (g.sortOrder = i + 1));
-  emit("save", form.value);
-  editingProgram.value = null;
-};
-
-const deleteProgram = (slug: string) => {
-  if (!confirm("Are you sure?")) return;
-  emit("delete", slug);
-};
-
-// Game Management
 const addGame = () => {
+  if (!patternsReady.value) return;
   form.value.games.push({
     sortOrder: form.value.games.length + 1,
     title: "New Game",
     paperColor: "#ffffff",
     notes: "",
-    patternSlug: props.patterns.length > 0 ? props.patterns[0].slug : "",
+    patternSlug: props.patterns[0]?.slug || "",
   });
+  selectedGameIndex.value = form.value.games.length - 1;
+};
+
+const addBreak = () => {
+  form.value.games.push({
+    sortOrder: form.value.games.length + 1,
+    title: "Break",
+    paperColor: "#f8fafc",
+    notes: "Break",
+    patternSlug: props.patterns[0]?.slug || "",
+  });
+  selectedGameIndex.value = form.value.games.length - 1;
 };
 
 const removeGame = (idx: number) => {
   form.value.games.splice(idx, 1);
+  if (selectedGameIndex.value === idx) {
+    selectedGameIndex.value = null;
+  }
 };
 
-const moveGame = (idx: number, dir: number) => {
-  if (idx + dir < 0 || idx + dir >= form.value.games.length) return;
-  const temp = form.value.games[idx];
-  form.value.games[idx] = form.value.games[idx + dir];
-  form.value.games[idx + dir] = temp;
+const reorder = (targetIndex: number) => {
+  if (dragIndex.value === null) return;
+  const [moved] = form.value.games.splice(dragIndex.value, 1);
+  form.value.games.splice(targetIndex, 0, moved);
+  form.value.games.forEach((game, i) => (game.sortOrder = i + 1));
+  dragIndex.value = null;
 };
 
-const getPattern = (slug: string) =>
-  props.patterns.find((p) => p.slug === slug);
+const selectGame = (idx: number) => {
+  selectedGameIndex.value = idx;
+};
 
-const patternCategories = computed(() => {
-  const defaults = ["All"];
-  const dynamic = props.patterns
-    .map((p) => p.category)
-    .filter((c) => c && typeof c === "string") as string[];
-  return Array.from(new Set([...defaults, ...dynamic]));
-});
+const selectedGame = computed(() =>
+  selectedGameIndex.value !== null
+    ? form.value.games[selectedGameIndex.value]
+    : null,
+);
 
-const filteredPatterns = computed(() => {
-  const term = patternSearch.value.trim().toLowerCase();
-  return props.patterns.filter((p) => {
-    const matchesCategory =
-      patternCategory.value === "All" ||
-      (p.category && p.category === patternCategory.value);
-    const matchesSearch =
-      !term ||
-      p.name?.toLowerCase().includes(term) ||
-      p.slug?.toLowerCase().includes(term) ||
-      (p.tags || []).some((tag: string) => tag.toLowerCase().includes(term));
-    return matchesCategory && matchesSearch;
-  });
-});
+const saveProgram = () => {
+  form.value.games.forEach((game, i) => (game.sortOrder = i + 1));
+  emit("save", form.value);
+};
+
+const deleteProgram = (slug: string) => {
+  emit("delete", slug);
+};
+
+const isBreak = (game: any) => game.title.toLowerCase().includes("break");
+
+const totalPayout = computed(() => form.value.games.length * 0);
 </script>
-
-<template>
-  <div>
-    <div v-if="!patternsReady" class="mb-6">
-      <div
-        class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-800"
-      >
-        Patterns are required before you can build programs. Add at least one
-        pattern to unlock program creation.
-      </div>
-      <div class="mt-3 flex flex-wrap gap-3">
-        <button
-          class="bg-gold text-primary-900 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-[0.3em] hover:bg-gold-400 transition-colors"
-          @click="emit('navigate', 'patterns')"
-        >
-          Create Patterns
-        </button>
-      </div>
-    </div>
-
-    <!-- List View -->
-    <div v-if="!editingProgram" class="space-y-6">
-      <div class="flex justify-between items-center">
-        <h2 class="text-xl font-bold text-slate-900">Bingo Programs</h2>
-        <button
-          class="bg-gold text-primary-900 px-4 py-2 rounded-lg font-bold hover:bg-gold-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          @click="startEdit()"
-          :disabled="!patternsReady"
-        >
-          New Program
-        </button>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div
-          v-for="p in programs"
-          :key="p.slug"
-          class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow"
-        >
-          <div class="flex justify-between items-start mb-4">
-            <div>
-              <h3 class="font-bold text-lg text-slate-900">{{ p.name }}</h3>
-              <p class="text-xs text-slate-500">{{ p.description }}</p>
-            </div>
-            <button
-              class="text-red-400 hover:text-red-600"
-              @click="deleteProgram(p.slug)"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M3 6h18" />
-                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-              </svg>
-            </button>
-          </div>
-
-          <div class="space-y-2 mb-6 max-h-48 overflow-y-auto">
-            <div
-              v-for="g in p.games"
-              :key="g.id"
-              class="flex items-center gap-2 text-sm border-b border-slate-50 py-1"
-            >
-              <div
-                class="w-3 h-3 rounded-full border border-black/10"
-                :style="{ backgroundColor: g.paperColor }"
-              ></div>
-              <span class="flex-1 truncate">{{ g.title }}</span>
-              <span class="text-xs text-slate-400">{{ g.pattern.name }}</span>
-            </div>
-          </div>
-
-          <button
-            class="w-full py-2 rounded-lg border border-primary-100 text-primary-700 font-bold hover:bg-primary-50 transition-colors"
-            @click="startEdit(p)"
-          >
-            Edit Program
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Edit View -->
-    <div
-      v-else
-      class="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-xl border border-slate-100"
-    >
-      <h2 class="text-2xl font-bold mb-6">
-        {{ form.slug ? "Edit Program" : "Create Program" }}
-      </h2>
-
-      <div class="grid grid-cols-2 gap-6 mb-8">
-        <div class="col-span-2 md:col-span-1">
-          <label class="block text-sm font-bold text-slate-700 mb-1"
-            >Name</label
-          >
-          <input
-            v-model="form.name"
-            type="text"
-            class="w-full border-slate-300 rounded-lg p-2"
-          />
-        </div>
-        <div class="col-span-2 md:col-span-1">
-          <label class="block text-sm font-bold text-slate-700 mb-1"
-            >Slug</label
-          >
-          <input
-            v-model="form.slug"
-            type="text"
-            class="w-full border-slate-300 rounded-lg p-2"
-            :disabled="!editingProgram.isNew"
-          />
-        </div>
-        <div class="col-span-2">
-          <label class="block text-sm font-bold text-slate-700 mb-1"
-            >Description</label
-          >
-          <input
-            v-model="form.description"
-            type="text"
-            class="w-full border-slate-300 rounded-lg p-2"
-          />
-        </div>
-      </div>
-
-      <!-- Games Editor -->
-      <div class="mb-8">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="font-bold text-lg text-slate-900">Games Sequence</h3>
-          <button
-            class="bg-primary-600 text-white px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-primary-700"
-            @click="addGame"
-          >
-            + Add Game
-          </button>
-        </div>
-
-        <div class="flex flex-col gap-3 mb-4 md:flex-row md:items-center md:justify-between">
-          <div class="flex gap-2 flex-wrap">
-            <button
-              v-for="category in patternCategories"
-              :key="category"
-              class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border"
-              :class="
-                patternCategory === category
-                  ? 'bg-primary-900 text-white border-primary-900'
-                  : 'bg-white text-slate-500 border-slate-200'
-              "
-              @click="patternCategory = category"
-            >
-              {{ category }}
-            </button>
-          </div>
-          <input
-            v-model="patternSearch"
-            type="text"
-            placeholder="Search patterns..."
-            class="w-full md:w-64 rounded-lg border-slate-200 bg-white px-3 py-2 text-sm"
-          />
-        </div>
-
-        <div class="space-y-3">
-          <div
-            v-for="(game, idx) in form.games"
-            :key="idx"
-            class="flex flex-col md:flex-row gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200 items-start md:items-center"
-          >
-            <div class="flex flex-col gap-1">
-              <button
-                :disabled="idx === 0"
-                class="text-slate-400 hover:text-slate-700 disabled:opacity-20"
-                @click="moveGame(idx, -1)"
-              >
-                ▲
-              </button>
-              <span class="text-center font-bold text-xs text-slate-500">{{
-                idx + 1
-              }}</span>
-              <button
-                :disabled="idx === form.games.length - 1"
-                class="text-slate-400 hover:text-slate-700 disabled:opacity-20"
-                @click="moveGame(idx, 1)"
-              >
-                ▼
-              </button>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1 w-full">
-              <div class="col-span-1">
-                <label
-                  class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1"
-                  >Title</label
-                >
-                <input
-                  v-model="game.title"
-                  type="text"
-                  class="w-full border-slate-300 rounded p-1.5 text-sm"
-                />
-              </div>
-
-              <div class="col-span-1">
-                <label
-                  class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1"
-                  >Paper Color</label
-                >
-                <div class="flex gap-2">
-                  <input
-                    v-model="game.paperColor"
-                    type="color"
-                    class="h-8 w-10 p-0 border-0 rounded"
-                  />
-                  <input
-                    v-model="game.paperColor"
-                    type="text"
-                    class="w-full border-slate-300 rounded p-1.5 text-sm"
-                    placeholder="#RRGGBB"
-                  />
-                </div>
-              </div>
-
-              <div class="col-span-1">
-                <label
-                  class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1"
-                  >Pattern</label
-                >
-                <select
-                  v-model="game.patternSlug"
-                  class="w-full border-slate-300 rounded p-1.5 text-sm"
-                >
-                  <option
-                    v-for="p in filteredPatterns"
-                    :key="p.slug"
-                    :value="p.slug"
-                  >
-                    {{ p.name }}
-                  </option>
-                </select>
-              </div>
-
-              <div class="col-span-1">
-                <label
-                  class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1"
-                  >Notes</label
-                >
-                <input
-                  v-model="game.notes"
-                  type="text"
-                  class="w-full border-slate-300 rounded p-1.5 text-sm"
-                  placeholder="Optional..."
-                />
-              </div>
-            </div>
-
-            <div class="flex flex-col items-center">
-              <div v-if="game.patternSlug" class="mb-2">
-                <!-- Small Preview -->
-                <BingoPatternGrid
-                  v-if="getPattern(game.patternSlug)"
-                  :name="getPattern(game.patternSlug).name"
-                  :definition="getPattern(game.patternSlug).definition"
-                  :fill-color="game.paperColor"
-                  size="xs"
-                />
-              </div>
-              <button
-                class="text-red-400 hover:text-red-600 text-xs font-bold"
-                @click="removeGame(idx)"
-              >
-                Remove
-              </button>
-            </div>
-          </div>
-
-          <div
-            v-if="form.games.length === 0"
-            class="text-center py-8 text-slate-400 italic"
-          >
-            No games added yet.
-          </div>
-        </div>
-      </div>
-
-      <div class="flex justify-end gap-4">
-        <button
-          class="px-6 py-2 text-slate-500 font-bold hover:text-slate-700"
-          @click="cancelEdit"
-        >
-          Cancel
-        </button>
-        <button
-          class="px-6 py-2 bg-gold text-primary-900 font-bold rounded-lg shadow hover:bg-gold-400 disabled:opacity-50"
-          @click="saveProgram"
-        >
-          Save Program
-        </button>
-      </div>
-    </div>
-  </div>
-</template>
