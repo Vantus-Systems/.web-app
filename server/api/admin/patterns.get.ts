@@ -12,5 +12,7 @@ export default defineEventHandler(async (event) => {
   return patterns.map((p) => ({
     ...p,
     definition: JSON.parse(p.definition),
+    tags: p.tags ? JSON.parse(p.tags) : [],
+    activeSessions: p.active_sessions ? JSON.parse(p.active_sessions) : [],
   }));
 });

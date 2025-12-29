@@ -15,6 +15,8 @@ const emit = defineEmits<{
 
 const editingProgram = ref<any>(null);
 const patternsReady = computed(() => props.patterns.length > 0);
+const patternSearch = ref("");
+const patternCategory = ref("All");
 
 const form = ref({
   slug: "",
@@ -87,6 +89,29 @@ const moveGame = (idx: number, dir: number) => {
 
 const getPattern = (slug: string) =>
   props.patterns.find((p) => p.slug === slug);
+
+const patternCategories = computed(() => {
+  const defaults = ["All"];
+  const dynamic = props.patterns
+    .map((p) => p.category)
+    .filter((c) => c && typeof c === "string") as string[];
+  return Array.from(new Set([...defaults, ...dynamic]));
+});
+
+const filteredPatterns = computed(() => {
+  const term = patternSearch.value.trim().toLowerCase();
+  return props.patterns.filter((p) => {
+    const matchesCategory =
+      patternCategory.value === "All" ||
+      (p.category && p.category === patternCategory.value);
+    const matchesSearch =
+      !term ||
+      p.name?.toLowerCase().includes(term) ||
+      p.slug?.toLowerCase().includes(term) ||
+      (p.tags || []).some((tag: string) => tag.toLowerCase().includes(term));
+    return matchesCategory && matchesSearch;
+  });
+});
 </script>
 
 <template>
@@ -234,6 +259,30 @@ const getPattern = (slug: string) =>
           </button>
         </div>
 
+        <div class="flex flex-col gap-3 mb-4 md:flex-row md:items-center md:justify-between">
+          <div class="flex gap-2 flex-wrap">
+            <button
+              v-for="category in patternCategories"
+              :key="category"
+              class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border"
+              :class="
+                patternCategory === category
+                  ? 'bg-primary-900 text-white border-primary-900'
+                  : 'bg-white text-slate-500 border-slate-200'
+              "
+              @click="patternCategory = category"
+            >
+              {{ category }}
+            </button>
+          </div>
+          <input
+            v-model="patternSearch"
+            type="text"
+            placeholder="Search patterns..."
+            class="w-full md:w-64 rounded-lg border-slate-200 bg-white px-3 py-2 text-sm"
+          />
+        </div>
+
         <div class="space-y-3">
           <div
             v-for="(game, idx) in form.games"
@@ -302,7 +351,11 @@ const getPattern = (slug: string) =>
                   v-model="game.patternSlug"
                   class="w-full border-slate-300 rounded p-1.5 text-sm"
                 >
-                  <option v-for="p in patterns" :key="p.slug" :value="p.slug">
+                  <option
+                    v-for="p in filteredPatterns"
+                    :key="p.slug"
+                    :value="p.slug"
+                  >
                     {{ p.name }}
                   </option>
                 </select>

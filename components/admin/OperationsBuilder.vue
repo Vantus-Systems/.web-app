@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useOpsStore } from '~/stores/ops';
 import PricingEditor from './PricingEditor.vue';
 import PatternEditor from './PatternEditor.vue';
@@ -21,15 +21,61 @@ const steps = [
   { id: 'schedule', label: 'Calendar / Schedule' }
 ];
 
+const opsSchemaMeta = computed(() => opsStore.opsSchemaDraft?.meta);
+const opsSchemaStatus = computed(() => opsSchemaMeta.value?.status || "Draft");
+const opsSchemaName = computed(() => opsSchemaMeta.value?.name || "Operations Schema");
+
 const handleSave = async () => {
     if (opsStore.dirty.pricing) await opsStore.savePricing();
     if (opsStore.dirty.schedule) await opsStore.saveSchedule();
+    if (opsStore.dirty.opsSchema) await opsStore.saveOpsSchema();
+    if (opsStore.dirty.scheduleDayProfiles) await opsStore.saveScheduleDayProfiles();
 };
 
 const handlePatternSave = (p: any) => opsStore.savePattern(p);
 const handlePatternDelete = (slug: string) => opsStore.deletePattern(slug);
 const handleProgramSave = (p: any) => opsStore.saveProgram(p);
 const handleProgramDelete = (slug: string) => opsStore.deleteProgram(slug);
+
+const updateOpsSchemaMeta = (updates: Record<string, any>) => {
+  if (!opsStore.opsSchemaDraft) return;
+  opsStore.updateOpsSchemaDraft({
+    ...opsStore.opsSchemaDraft,
+    meta: {
+      ...opsStore.opsSchemaDraft.meta,
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    },
+  });
+};
+
+const createDraft = () => {
+  updateOpsSchemaMeta({ status: "Draft" });
+};
+
+const publishSchema = async () => {
+  if (!opsStore.opsSchemaDraft) return;
+  const errors = [];
+  if (!opsStore.opsSchemaDraft.definitions?.rateCards?.length) {
+    errors.push("At least one rate card is required.");
+  }
+  if (!opsStore.opsSchemaDraft.timelineConfiguration?.flowSegments?.length) {
+    errors.push("At least one flow segment is required.");
+  }
+  if (!opsStore.programs.length) {
+    errors.push("At least one program is required.");
+  }
+  if (errors.length > 0) {
+    alert(`Cannot publish:\n\n${errors.join("\n")}`);
+    return;
+  }
+  updateOpsSchemaMeta({ status: "Live", version: opsStore.opsSchemaDraft.meta.version + 1 });
+  await opsStore.saveOpsSchema();
+};
+
+const rollbackSchema = () => {
+  opsStore.resetOpsSchemaDraft();
+};
 </script>
 
 <template>
@@ -52,34 +98,79 @@ const handleProgramDelete = (slug: string) => opsStore.deleteProgram(slug);
 
         <div class="flex-1 flex flex-col min-w-0">
         <!-- Command Bar -->
-        <div class="h-16 border-b border-slate-200 flex items-center justify-between px-8 bg-white shadow-sm z-10 shrink-0">
-            <div class="flex gap-6">
-                <div class="flex items-center gap-2">
-                <div :class="['w-2 h-2 rounded-full', opsStore.pricingReady ? 'bg-emerald-500' : 'bg-slate-300']"></div>
-                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Pricing</span>
+        <div class="border-b border-slate-200 bg-white shadow-sm z-10 shrink-0">
+            <div class="px-8 py-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">Operations Schema</p>
+                <div class="flex items-center gap-3">
+                  <h2 class="text-2xl font-black text-primary-900">{{ opsSchemaName }}</h2>
+                  <span
+                    :class="[
+                      'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide',
+                      opsSchemaStatus === 'Live'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-amber-100 text-amber-700',
+                    ]"
+                  >
+                    {{ opsSchemaStatus }}
+                  </span>
                 </div>
-                <div class="flex items-center gap-2">
-                <div :class="['w-2 h-2 rounded-full', opsStore.patternsReady ? 'bg-emerald-500' : 'bg-slate-300']"></div>
-                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Patterns</span>
-                </div>
-                <div class="flex items-center gap-2">
-                <div :class="['w-2 h-2 rounded-full', opsStore.programsReady ? 'bg-emerald-500' : 'bg-slate-300']"></div>
-                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Programs</span>
-                </div>
+                <p class="text-xs text-slate-500">
+                  Version {{ opsSchemaMeta?.version ?? 1 }} • Updated {{ opsSchemaMeta?.updatedAt ?? "—" }}
+                </p>
+              </div>
+
+              <div class="flex flex-wrap gap-2 items-center">
+                <button
+                  class="px-3 py-2 text-xs font-bold uppercase tracking-[0.3em] rounded-lg border border-slate-200 text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                  @click="createDraft"
+                >
+                  Create Draft
+                </button>
+                <button
+                  class="px-3 py-2 text-xs font-bold uppercase tracking-[0.3em] rounded-lg border border-slate-200 text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                  @click="rollbackSchema"
+                >
+                  Rollback
+                </button>
+                <button
+                  class="px-4 py-2 text-xs font-bold uppercase tracking-[0.3em] rounded-lg bg-emerald-600 text-white hover:bg-emerald-500"
+                  @click="publishSchema"
+                >
+                  Publish
+                </button>
+              </div>
             </div>
 
-            <div class="flex gap-4 items-center">
-                <div v-if="opsStore.hasUnsavedChanges" class="text-amber-600 font-bold text-xs uppercase tracking-wide flex items-center animate-pulse">
-                    Unsaved Changes
+            <div class="h-16 border-t border-slate-100 flex items-center justify-between px-8">
+                <div class="flex gap-6">
+                    <div class="flex items-center gap-2">
+                    <div :class="['w-2 h-2 rounded-full', opsStore.pricingReady ? 'bg-emerald-500' : 'bg-slate-300']"></div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Pricing</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                    <div :class="['w-2 h-2 rounded-full', opsStore.patternsReady ? 'bg-emerald-500' : 'bg-slate-300']"></div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Patterns</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                    <div :class="['w-2 h-2 rounded-full', opsStore.programsReady ? 'bg-emerald-500' : 'bg-slate-300']"></div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Programs</span>
+                    </div>
                 </div>
-                <button
-                    v-if="opsStore.hasUnsavedChanges"
-                    @click="handleSave"
-                    class="flex items-center gap-2 bg-primary-900 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-primary-800 transition shadow-lg shadow-primary-900/20"
-                >
-                    <Save class="w-4 h-4" />
-                    Save Changes
-                </button>
+
+                <div class="flex gap-4 items-center">
+                    <div v-if="opsStore.hasUnsavedChanges" class="text-amber-600 font-bold text-xs uppercase tracking-wide flex items-center animate-pulse">
+                        Unsaved Changes
+                    </div>
+                    <button
+                        v-if="opsStore.hasUnsavedChanges"
+                        @click="handleSave"
+                        class="flex items-center gap-2 bg-primary-900 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-primary-800 transition shadow-lg shadow-primary-900/20"
+                    >
+                        <Save class="w-4 h-4" />
+                        Save Changes
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -122,7 +213,9 @@ const handleProgramDelete = (slug: string) => opsStore.deleteProgram(slug);
                         :isSaving="false"
                         :pricingData="opsStore.pricingDraft"
                         :programs="opsStore.programs"
+                        :dayProfiles="opsStore.scheduleDayProfilesDraft"
                         @update:modelValue="opsStore.updateScheduleDraft"
+                        @update:dayProfiles="opsStore.updateScheduleDayProfilesDraft"
                         @save="handleSave"
                     />
                 </div>
