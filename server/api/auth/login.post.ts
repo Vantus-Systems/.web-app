@@ -1,6 +1,7 @@
 import { randomBytes } from "crypto";
 import { defineEventHandler, readBody, createError, setCookie } from "h3";
 import { authService } from "@server/services/auth.service";
+import { normalizeRole } from "~/utils/roles";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -17,6 +18,9 @@ export default defineEventHandler(async (event) => {
   if (!user) {
     console.log("[login] User not found:", username);
     throw createError({ statusCode: 401, message: "Invalid credentials" });
+  }
+  if (user.is_active === false) {
+    throw createError({ statusCode: 403, message: "Account is inactive" });
   }
 
   const valid = await authService.verifyPassword(password, user.password_hash);
@@ -56,6 +60,12 @@ export default defineEventHandler(async (event) => {
 
   return {
     success: true,
-    user: { id: user.id, username: user.username, role: user.role },
+    user: {
+      id: user.id,
+      username: user.username,
+      role: normalizeRole(user.role),
+      rawRole: user.role,
+      is_active: user.is_active ?? true,
+    },
   };
 });

@@ -11,7 +11,8 @@ model user {
   id            String    @id @default(uuid())
   username      String    @unique
   password_hash String
-  role          String    @default("admin") // "admin" or "mic"
+  role          String    @default("OWNER") // OWNER | CHARITY | MIC (legacy: admin/caller)
+  is_active     Boolean   @default(true)
   first_name    String?
   last_name     String?
   email         String?
@@ -24,6 +25,75 @@ model user {
   audit_logs    auditLog[] @relation("AuditActor")
 
   @@map("users")
+}
+
+enum ShiftDesignation {
+  AM
+  PM
+}
+
+enum ShiftWorkflowType {
+  NORMAL
+  NEGATIVE_BINGO_BOX
+  RECUPERATION_BOX_RETURN
+}
+
+enum HolidayRuleType {
+  FIXED_DATE
+  NTH_WEEKDAY
+  EASTER
+}
+
+enum HolidayClosureType {
+  CLOSED
+  CLOSE_EARLY
+}
+
+model shiftRecord {
+  id                String             @id @default(uuid())
+  date              DateTime
+  shift             ShiftDesignation
+  pulltabs_total    Float
+  deposit_total     Float
+  bingo_total       Float
+  players           Int?
+  workflow_type     ShiftWorkflowType
+  beginning_box     Float?
+  ending_box        Float?
+  bingo_actual      Float?
+  deposit_actual    Float?
+  notes             String?
+  prev_shift_id     String?
+  created_by_user_id String
+  is_deleted        Boolean            @default(false)
+  created_at        DateTime           @default(now())
+  updated_at        DateTime           @updatedAt
+
+  created_by        user               @relation(fields: [created_by_user_id], references: [id])
+  prev_shift        shiftRecord?       @relation("ShiftPrev", fields: [prev_shift_id], references: [id])
+  next_shifts       shiftRecord[]      @relation("ShiftPrev")
+
+  @@index([date, shift])
+  @@index([created_by_user_id])
+  @@map("shift_records")
+}
+
+model holidayRule {
+  id           String             @id @default(uuid())
+  name         String             @unique
+  rule_type    HolidayRuleType
+  month        Int?
+  day          Int?
+  weekday      Int?
+  week         Int?
+  closure_type HolidayClosureType
+  close_time   String?
+  start_year   Int?
+  end_year     Int?
+  created_at   DateTime           @default(now())
+  updated_at   DateTime           @updatedAt
+
+  @@map("holiday_rules")
 }
 
 model session {

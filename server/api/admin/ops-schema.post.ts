@@ -3,11 +3,10 @@ import { settingsService } from "@server/services/settings.service";
 import { auditService } from "@server/services/audit.service";
 import { opsSchemaV2Schema } from "@server/schemas/ops-schema.zod";
 import { ZodError } from "zod";
+import { assertRole } from "~/server/utils/roles";
 
 export default defineEventHandler(async (event) => {
-  if (!event.context.user || event.context.user.role !== "admin") {
-    throw createError({ statusCode: 403, message: "Forbidden" });
-  }
+  assertRole(event.context.user?.role, ["OWNER"]);
 
   const body = await readBody(event);
   let parsed;

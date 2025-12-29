@@ -1,8 +1,9 @@
 // server/api/admin/business.post.ts
-import { defineEventHandler, createError, readBody } from "h3";
+import { defineEventHandler, readBody } from "h3";
 import { z } from "zod";
 import { settingsService } from "@server/services/settings.service";
 import { auditService } from "@server/services/audit.service";
+import { assertRole } from "~/server/utils/roles";
 
 const businessSchema = z
   .object({
@@ -16,9 +17,7 @@ const businessSchema = z
   .passthrough();
 
 export default defineEventHandler(async (event) => {
-  if (!event.context.user || event.context.user.role !== "admin") {
-    throw createError({ statusCode: 403, message: "Forbidden" });
-  }
+  assertRole(event.context.user?.role, ["OWNER"]);
 
   const body = await readBody(event);
   const parsed = businessSchema.parse(body);

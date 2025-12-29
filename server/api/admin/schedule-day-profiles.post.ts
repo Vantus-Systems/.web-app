@@ -1,7 +1,8 @@
-import { createError, defineEventHandler, readBody } from "h3";
+import { defineEventHandler, readBody } from "h3";
 import { z } from "zod";
 import { settingsService } from "@server/services/settings.service";
 import { auditService } from "@server/services/audit.service";
+import { assertRole } from "~/server/utils/roles";
 
 const scheduleDayProfilesSchema = z.object({
   profiles: z.array(z.any()),
@@ -10,9 +11,7 @@ const scheduleDayProfilesSchema = z.object({
 });
 
 export default defineEventHandler(async (event) => {
-  if (!event.context.user || event.context.user.role !== "admin") {
-    throw createError({ statusCode: 403, message: "Forbidden" });
-  }
+  assertRole(event.context.user?.role, ["OWNER"]);
 
   const body = await readBody(event);
   const parsed = scheduleDayProfilesSchema.parse(body);

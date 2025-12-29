@@ -1,10 +1,10 @@
-import { defineEventHandler, createError } from "h3";
+import { defineEventHandler } from "h3";
 import prisma from "@server/db/client";
+import { normalizeRole } from "~/utils/roles";
+import { assertRole } from "~/server/utils/roles";
 
 export default defineEventHandler(async (event) => {
-  if (!event.context.user || event.context.user.role !== "admin") {
-    throw createError({ statusCode: 403, message: "Forbidden" });
-  }
+  assertRole(event.context.user?.role, ["OWNER"]);
 
   const users = await prisma.user.findMany({
     select: {
@@ -16,8 +16,13 @@ export default defineEventHandler(async (event) => {
       phone: true,
       role: true,
       last_login_at: true,
+      is_active: true,
     },
   });
 
-  return users;
+  return users.map((user) => ({
+    ...user,
+    role: normalizeRole(user.role),
+    rawRole: user.role,
+  }));
 });

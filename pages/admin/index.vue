@@ -444,26 +444,27 @@
                                 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize',
                               ]"
                             >
-                              {{ user.role }}
-                            </span>
-                          </td>
-                          <td
-                            class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
-                          >
-                            {{
-                              user.last_login_at
-                                ? new Date(
-                                    user.last_login_at,
-                                  ).toLocaleDateString()
-                                : "Never"
-                            }}
-                          </td>
-                          <td
-                            class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6"
-                          >
-                            <button
-                              class="text-primary-700 hover:text-primary-900 font-bold mr-4"
-                              @click="editUser(user)"
+                                <span
+                                :class="[
+                                    normalizeRole(user.role) === 'OWNER'
+                                    ? 'bg-gold-100 text-gold-800'
+                                    : normalizeRole(user.role) === 'CHARITY'
+                                      ? 'bg-emerald-100 text-emerald-800'
+                                      : 'bg-blue-100 text-blue-800',
+                                    'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+                                ]"
+                                >
+                                {{ roleLabel(user.role) }}
+                                </span>
+                                <div
+                                  class="mt-1 text-[10px] uppercase tracking-widest"
+                                  :class="user.is_active ? 'text-emerald-600' : 'text-rose-500'"
+                                >
+                                  {{ user.is_active ? "Active" : "Inactive" }}
+                                </div>
+                            </td>
+                            <td
+                                class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
                             >
                               Edit
                             </button>
@@ -551,11 +552,73 @@
                             placeholder="Doe"
                           />
                         </div>
-                      </div>
-                      <div>
-                        <label
-                          class="block text-sm font-medium text-gray-300 mb-1"
-                          >Email</label
+                        <div>
+                            <label
+                            class="block text-sm font-medium text-gray-300 mb-1"
+                            >Password</label
+                            >
+                            <input
+                            v-model="newUser.password"
+                            type="password"
+                            :required="userFormMode === 'create'"
+                            class="block w-full bg-primary-800 border-primary-700 rounded-lg text-white placeholder-primary-400 focus:ring-gold focus:border-gold p-2.5"
+                            :placeholder="userFormMode === 'create' ? '••••••••' : 'Leave blank to keep current'"
+                            />
+                        </div>
+                        <div>
+                            <label
+                            class="block text-sm font-medium text-gray-300 mb-1"
+                            >Role</label
+                            >
+                            <select
+                            v-model="newUser.role"
+                            class="block w-full bg-primary-800 border-primary-700 rounded-lg text-white focus:ring-gold focus:border-gold p-2.5"
+                            >
+                            <option value="OWNER">Owner</option>
+                            <option value="MIC">MIC</option>
+                            <option value="CHARITY">Charity</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <input
+                            id="user-active"
+                            v-model="newUser.isActive"
+                            type="checkbox"
+                            class="rounded text-gold focus:ring-gold"
+                          />
+                          <label for="user-active" class="text-sm font-medium text-gray-300">
+                            Active Account
+                          </label>
+                        </div>
+                        <div class="flex gap-3">
+                          <button
+                              type="submit"
+                              class="flex-1 bg-gold hover:bg-gold-600 text-primary-900 font-black py-3 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+                          >
+                              {{ userFormMode === "create" ? "Create Account" : "Save Changes" }}
+                          </button>
+                          <button
+                              v-if="userFormMode === 'edit'"
+                              type="button"
+                              class="flex-1 border border-white/30 text-white font-bold py-3 rounded-lg"
+                              @click="resetUserForm"
+                          >
+                              Cancel
+                          </button>
+                        </div>
+                        </form>
+                    </div>
+
+                    <!-- Trust Signal -->
+                    <div
+                        class="mt-6 p-4 bg-gold-50 border border-gold-100 rounded-lg flex items-start"
+                    >
+                        <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-5 w-5 text-gold-600 mr-3 mt-0.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
                         >
                         <input
                           v-model="newUser.email"
@@ -668,9 +731,11 @@ import W2GGenerator from "~/components/admin/W2GGenerator.vue";
 import OperationsBuilder from "~/components/admin/OperationsBuilder.vue";
 import BaseCard from "~/components/ui/BaseCard.vue";
 import BaseButton from "~/components/ui/BaseButton.vue";
+import { normalizeRole, roleLabel } from "~/utils/roles";
 
 definePageMeta({
-  middleware: ["auth"],
+  middleware: ["auth", "role"],
+  roles: ["OWNER"],
 });
 
 const router = useRouter();
@@ -698,7 +763,8 @@ const newUser = ref({
   email: "",
   phone: "",
   password: "",
-  role: "mic",
+  role: "MIC",
+  isActive: true,
 });
 const userFormMode = ref<"create" | "edit">("create");
 const editingUserId = ref<string | null>(null);
@@ -714,8 +780,19 @@ const verifyAdminSession = async () => {
       "/api/auth/user",
       { credentials: "include" },
     );
-    const role = response?.user?.role;
-    if (!role || role !== "admin") {
+    const role = normalizeRole(response?.user?.role ?? null);
+    if (!role) {
+      throw new Error("Unauthorized");
+    }
+    if (role === "MIC") {
+      await router.push("/admin/mic");
+      return null;
+    }
+    if (role === "CHARITY") {
+      await router.push("/admin/charities");
+      return null;
+    }
+    if (role !== "OWNER") {
       throw new Error("Unauthorized");
     }
     return response.user;
@@ -859,7 +936,8 @@ const editUser = (user: any) => {
     email: user.email || "",
     phone: user.phone || "",
     password: "",
-    role: user.role || "mic",
+    role: normalizeRole(user.role) || "MIC",
+    isActive: user.is_active ?? true,
   };
 };
 
@@ -873,7 +951,8 @@ const resetUserForm = () => {
     email: "",
     phone: "",
     password: "",
-    role: "mic",
+    role: "MIC",
+    isActive: true,
   };
 };
 

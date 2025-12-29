@@ -5,14 +5,14 @@
     "passwordHash": "4ac1248bd0f97d810c1ed142151b7788220815c87e88a6d1e5d37345f79815aa5da9f6e2fc423facf1b4636b48d57f7b4ea1147b01783bd135686a714171e7e0",
     "salt": "9075fc1d178017d8be9f97b1fc1c64a6",
     "name": "Administrator",
-    "role": "admin"
+    "role": "OWNER"
   },
   {
     "id": "ce981b3a-1f14-4072-bea2-da79ba12773e",
-    "username": "mic_caller",
+    "username": "mic_user",
     "passwordHash": "c5d3aaeab5bafe512c38a9641b10512a98108033e328c59b7e64e179f6b2d8cd4111a0301e12c5d07bfdad8062a153e360be54cf01d6bbc8b9b22303c60f8956",
     "salt": "3701b4e1c99f5ad84f43a47a5b3739ae",
-    "name": "Test Caller",
-    "role": "mic"
+    "name": "Test MIC",
+    "role": "MIC"
   }
 ]

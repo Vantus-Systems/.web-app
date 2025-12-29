@@ -27,9 +27,9 @@ TEST_PASSWORD = "admin123"
 
 # Test user to create
 TEST_USER = {
-    "username": f"test_caller_{int(time.time())}",  # Unique per test run
+    "username": f"test_mic_{int(time.time())}",  # Unique per test run
     "password": "TestPassword123!",
-    "role": "mic"
+    "role": "MIC"
 }
 
 class AdminUsersTest:
