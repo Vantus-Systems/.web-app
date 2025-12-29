@@ -39,16 +39,18 @@
 
         <!-- CTA & Mobile Menu -->
         <div class="flex items-center gap-4">
-          <div class="hidden sm:block text-right">
-            <p
-              class="text-[10px] text-slate-500 uppercase tracking-wider font-bold"
-            >
-              {{ jackpotStore.activeLabel }}
-            </p>
-            <p class="text-primary-700 font-bold font-mono">
-              {{ formatCurrency(jackpotStore.currentJackpot) }}
-            </p>
-          </div>
+          <ClientOnly>
+            <div class="hidden sm:block text-right">
+              <p
+                class="text-[10px] text-slate-500 uppercase tracking-wider font-bold"
+              >
+                {{ jackpotStore.activeLabel }}
+              </p>
+              <p class="text-primary-700 font-bold font-mono">
+                {{ formatCurrency(jackpotStore.currentJackpot) }}
+              </p>
+            </div>
+          </ClientOnly>
           <button
             class="md:hidden p-2 text-slate-600 rounded-md hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
             :aria-expanded="isMenuOpen"

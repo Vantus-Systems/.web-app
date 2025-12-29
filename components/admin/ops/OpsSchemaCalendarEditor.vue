@@ -109,7 +109,8 @@
           >
             Color
             <input
-              v-model="selectedProfile.color"
+              :value="selectedProfile.color || '#000000'"
+              @input="selectedProfile.color = ($event.target as HTMLInputElement).value"
               type="color"
               class="mt-1 w-12 h-10 border-0 bg-transparent"
             />

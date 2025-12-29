@@ -37,7 +37,8 @@
           Color
         </label>
         <input
-          v-model="draft.color"
+          :value="draft.color || '#000000'"
+          @input="draft.color = ($event.target as HTMLInputElement).value"
           type="color"
           class="w-12 h-10 border-0 bg-transparent"
         />

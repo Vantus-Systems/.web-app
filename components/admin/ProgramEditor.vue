@@ -203,7 +203,8 @@
         >
           Paper Color
           <input
-            v-model="selectedGame.paperColor"
+            :value="selectedGame.paperColor || '#ffffff'"
+            @input="selectedGame.paperColor = ($event.target as HTMLInputElement).value"
             type="color"
             class="mt-1 w-12 h-10 border-0 bg-transparent"
           />
