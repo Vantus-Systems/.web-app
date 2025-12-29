@@ -19,7 +19,7 @@ Usage: python3 verify_w2g_signature.py
 import sys
 from playwright.sync_api import sync_playwright, expect, TimeoutError
 
-BASE_URL = "http://localhost:3001"
+BASE_URL = "http://localhost:3000"
 SCREENSHOT_DIR = "verification"
 
 # Test credentials
@@ -212,30 +212,30 @@ class W2GSignatureTest:
         """Test player information form fields."""
         print("\n📋 TEST: Player Information Form Fields")
         try:
+            # Wait for the player info section to be visible
+            player_info_header = "h3:has-text('Player Information & W-2G Generation')"
+            try:
+                self.page.wait_for_selector(player_info_header, state='visible', timeout=10000)
+                self.log_test("Player Information section appeared", True)
+            except TimeoutError:
+                self.log_test("Player Information section appeared", False, "Form did not load after high payout.")
+                self.save_screenshot("w2g_player_info_missing")
+                return False
+
             # Look for player name input
-            name_input = self.page.locator("input[placeholder*='John']")
-            if name_input.count() == 0:
-                name_input = self.page.locator("input").filter(has_text="Name")
-            
-            if name_input.count() > 0:
-                self.log_test("Player name input field exists", True)
-            else:
-                self.log_test("Player name input field exists", False)
+            name_input = self.page.get_by_placeholder("John Doe")
+            expect(name_input).to_be_visible()
+            self.log_test("Player name input field exists", True)
             
             # Look for SSN input
-            ssn_input = self.page.locator("input[placeholder*='XXX']")
-            if ssn_input.count() == 0:
-                ssn_input = self.page.locator("input").filter(has_text="SSN")
-            
-            if ssn_input.count() > 0:
-                self.log_test("Player SSN input field exists", True)
-                return True
-            else:
-                self.log_test("Player SSN input field exists", False)
-                return False
+            ssn_input = self.page.get_by_placeholder("XXX-XX-XXXX")
+            expect(ssn_input).to_be_visible()
+            self.log_test("Player SSN input field exists", True)
+            return True
                 
         except Exception as e:
             self.log_test("Player info form fields", False, str(e))
+            self.save_screenshot("w2g_player_info_error")
             return False
 
     def test_signature_canvas(self) -> bool:
