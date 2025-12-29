@@ -137,11 +137,7 @@ const removeFrame = (idx: number) => {
 
 const getPatternFrame = (p: any) => {
   if (!p.definition.frames || !p.definition.frames[0]) return Array(25).fill(0);
-  const f = p.definition.frames[0];
-  if (f.length === 5 && Array.isArray(f[0])) {
-    return f.flat();
-  }
-  return f;
+  return normalizeFrame(p.definition.frames[0]);
 };
 
 const categories = computed(() => {
