@@ -147,7 +147,7 @@
               ]"
               @click="toggleFilter('metrics')"
             >
-              Metrics
+              Projected Metrics
             </button>
           </div>
 
@@ -172,6 +172,53 @@
             <span v-if="isSaving">Syncing...</span>
             <span v-else>Publish Changes</span>
           </BaseButton>
+        </div>
+      </div>
+
+      <div class="grid gap-3 md:grid-cols-4">
+        <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
+          <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">
+            Sessions
+          </p>
+          <p class="text-2xl font-black text-primary-900">
+            {{ scheduleSummary.totalSessions }}
+          </p>
+          <p class="text-xs text-slate-500">
+            {{ currentMonthName }} coverage
+          </p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
+          <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">
+            Projected Revenue
+          </p>
+          <p class="text-2xl font-black text-primary-900">
+            ${{ formatMoney(scheduleSummary.projectedRevenue) }}
+          </p>
+          <p class="text-xs text-slate-500">
+            Based on assigned sessions
+          </p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
+          <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">
+            Avg. Occupancy
+          </p>
+          <p class="text-2xl font-black text-primary-900">
+            {{ scheduleSummary.occupancyAvg }}%
+          </p>
+          <p class="text-xs text-slate-500">
+            Auto-calculated
+          </p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
+          <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">
+            Conflict Days
+          </p>
+          <p class="text-2xl font-black text-primary-900">
+            {{ scheduleSummary.conflictDays }}
+          </p>
+          <p class="text-xs text-slate-500">
+            {{ filters.highlightConflicts ? "Visible" : "Hidden" }}
+          </p>
         </div>
       </div>
     </BaseCard>
@@ -942,6 +989,30 @@ const calendarCells = computed(() => {
   }
 
   return cells;
+});
+
+const scheduleSummary = computed(() => {
+  const monthCells = calendarCells.value.filter((cell) => cell.isCurrentMonth);
+  const sessions = monthCells.flatMap((cell) => cell.sessions);
+  const totalSessions = sessions.length;
+  const projectedRevenue = sessions.reduce(
+    (sum, session) => sum + (Number(session.projectedRevenue) || 0),
+    0,
+  );
+  const occupancySum = sessions.reduce(
+    (sum, session) => sum + (Number(session.occupancy) || 0),
+    0,
+  );
+  const occupancyAvg = totalSessions
+    ? Math.round(occupancySum / totalSessions)
+    : 0;
+  const conflictDays = monthCells.filter((cell) => cell.hasConflict).length;
+  return {
+    totalSessions,
+    projectedRevenue,
+    occupancyAvg,
+    conflictDays,
+  };
 });
 
 const dayProfilesData = computed(() => ({
