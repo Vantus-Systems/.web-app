@@ -105,6 +105,7 @@
             v-model="draft"
             :available-shifts="availableShifts"
             :prev-ending-box="prevEndingBox"
+            :shift-hint="shiftHint"
             submit-label="Save Shift"
             @submit="createShift"
           />
@@ -119,6 +120,7 @@ import { computed, ref, watch, onMounted } from "vue";
 import AdminShell from "~/components/admin/AdminShell.vue";
 import ShiftForm from "~/components/admin/mic/ShiftForm.vue";
 import HolidayBanner from "~/components/admin/mic/HolidayBanner.vue";
+import type { HolidayOccurrence, ShiftRecord } from "~/types/admin";
 
 definePageMeta({
   middleware: ["auth", "role"],
@@ -129,8 +131,8 @@ const router = useRouter();
 const session = ref<{ username: string; role: string } | null>(null);
 const selectedDate = ref(new Date().toISOString().slice(0, 10));
 const overrideClosed = ref(false);
-const holidays = ref<any[]>([]);
-const shifts = ref<any[]>([]);
+const holidays = ref<HolidayOccurrence[]>([]);
+const shifts = ref<ShiftRecord[]>([]);
 const prevEndingBox = ref<number | null>(null);
 
 const draft = ref({
@@ -157,6 +159,13 @@ const availableShifts = computed(() => {
   if (overrideClosed.value) return ["AM", "PM"];
   if (holidayForDate.value?.closureType === "CLOSED") return [];
   return ["AM", "PM"];
+});
+
+const shiftHint = computed(() => {
+  if (holidayForDate.value?.closureType === "CLOSE_EARLY") {
+    return `PM closes early at ${holidayForDate.value.closeTime ?? "early close"}.`;
+  }
+  return "";
 });
 
 const loadSession = async () => {
