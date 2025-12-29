@@ -4,11 +4,10 @@ import { auditService } from "@server/services/audit.service";
 import { compileOpsSchema } from "@server/services/opsSchemaCompiler";
 import { opsSchemaV2Schema } from "@server/schemas/ops-schema.zod";
 import { ZodError } from "zod";
+import { assertRole } from "~/server/utils/roles";
 
 export default defineEventHandler(async (event) => {
-  if (!event.context.user || event.context.user.role !== "admin") {
-    throw createError({ statusCode: 403, message: "Forbidden" });
-  }
+  assertRole(event.context.user?.role, ["OWNER"]);
 
   const draft = await settingsService.get("ops_schema_draft");
   if (!draft) {
@@ -33,7 +32,7 @@ export default defineEventHandler(async (event) => {
   }
   const publishedSchema = {
     ...parsed,
-    meta: { ...parsed.meta, status: "active" },
+    meta: { ...parsed.meta, status: "live" },
   };
 
   const [history, currentPricing, currentSchedule] = await Promise.all([

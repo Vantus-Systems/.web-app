@@ -1,9 +1,8 @@
 import prisma from "~/server/db/client";
+import { assertRole } from "~/server/utils/roles";
 
 export default defineEventHandler(async (event) => {
-  if (!event.context.user || event.context.user.role !== "admin") {
-    throw createError({ statusCode: 403, message: "Forbidden" });
-  }
+  assertRole(event.context.user?.role, ["OWNER"]);
 
   const programs = await prisma.bingoProgram.findMany({
     orderBy: { name: "asc" },

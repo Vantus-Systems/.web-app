@@ -427,14 +427,22 @@
                             >
                                 <span
                                 :class="[
-                                    user.role === 'admin'
+                                    normalizeRole(user.role) === 'OWNER'
                                     ? 'bg-gold-100 text-gold-800'
-                                    : 'bg-blue-100 text-blue-800',
-                                    'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize',
+                                    : normalizeRole(user.role) === 'CHARITY'
+                                      ? 'bg-emerald-100 text-emerald-800'
+                                      : 'bg-blue-100 text-blue-800',
+                                    'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
                                 ]"
                                 >
-                                {{ user.role }}
+                                {{ roleLabel(user.role) }}
                                 </span>
+                                <div
+                                  class="mt-1 text-[10px] uppercase tracking-widest"
+                                  :class="user.is_active ? 'text-emerald-600' : 'text-rose-500'"
+                                >
+                                  {{ user.is_active ? "Active" : "Inactive" }}
+                                </div>
                             </td>
                             <td
                                 class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
@@ -583,9 +591,21 @@
                             v-model="newUser.role"
                             class="block w-full bg-primary-800 border-primary-700 rounded-lg text-white focus:ring-gold focus:border-gold p-2.5"
                             >
-                            <option value="mic">MIC (Caller)</option>
-                            <option value="admin">Administrator</option>
+                            <option value="OWNER">Owner</option>
+                            <option value="MIC">MIC</option>
+                            <option value="CHARITY">Charity</option>
                             </select>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <input
+                            id="user-active"
+                            v-model="newUser.isActive"
+                            type="checkbox"
+                            class="rounded text-gold focus:ring-gold"
+                          />
+                          <label for="user-active" class="text-sm font-medium text-gray-300">
+                            Active Account
+                          </label>
                         </div>
                         <div class="flex gap-3">
                           <button
@@ -645,9 +665,11 @@ import W2GGenerator from "~/components/admin/W2GGenerator.vue";
 import OperationsBuilder from "~/components/admin/OperationsBuilder.vue";
 import BaseCard from "~/components/ui/BaseCard.vue";
 import BaseButton from "~/components/ui/BaseButton.vue";
+import { normalizeRole, roleLabel } from "~/utils/roles";
 
 definePageMeta({
-  middleware: ["auth"],
+  middleware: ["auth", "role"],
+  roles: ["OWNER"],
 });
 
 const router = useRouter();
@@ -675,7 +697,8 @@ const newUser = ref({
   email: "",
   phone: "",
   password: "",
-  role: "mic",
+  role: "MIC",
+  isActive: true,
 });
 const userFormMode = ref<"create" | "edit">("create");
 const editingUserId = ref<string | null>(null);
@@ -691,8 +714,19 @@ const verifyAdminSession = async () => {
       "/api/auth/user",
       { credentials: "include" },
     );
-    const role = response?.user?.role;
-    if (!role || role !== "admin") {
+    const role = normalizeRole(response?.user?.role ?? null);
+    if (!role) {
+      throw new Error("Unauthorized");
+    }
+    if (role === "MIC") {
+      await router.push("/admin/mic");
+      return null;
+    }
+    if (role === "CHARITY") {
+      await router.push("/admin/charities");
+      return null;
+    }
+    if (role !== "OWNER") {
       throw new Error("Unauthorized");
     }
     return response.user;
@@ -827,7 +861,8 @@ const editUser = (user: any) => {
     email: user.email || "",
     phone: user.phone || "",
     password: "",
-    role: user.role || "mic",
+    role: normalizeRole(user.role) || "MIC",
+    isActive: user.is_active ?? true,
   };
 };
 
@@ -841,7 +876,8 @@ const resetUserForm = () => {
     email: "",
     phone: "",
     password: "",
-    role: "mic",
+    role: "MIC",
+    isActive: true,
   };
 };
 

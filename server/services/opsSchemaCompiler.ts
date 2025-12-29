@@ -1,6 +1,8 @@
+import { createError } from "h3";
 import { opsSchemaV2Schema } from "@server/schemas/ops-schema.zod";
 import type { OpsSchemaV2 } from "~/types/ops-schema";
 import { formatHHMM, parseHHMM } from "~/utils/time.utils";
+import { detectOverlaps, normalizeTimeRange } from "~/utils/ops-schema.utils";
 
 type CompilerOptions = {
   previousPricing?: any;
@@ -18,13 +20,16 @@ const normalizeCategory = (label: string) => {
 };
 
 const buildLegacyPricing = (schema: OpsSchemaV2, previousPricing?: any) => {
-  const flowSegments = [...schema.timeline_configuration.flow_segments].sort(
+  const flowSegments = [...schema.timeline.flowSegments].sort(
     (a, b) => parseHHMM(a.time_start) - parseHHMM(b.time_start),
   );
-  const bundles = Object.values(schema.definitions.bundles ?? {});
+  const bundles = schema.definitions.bundles ?? [];
+  const rateCardLookup = new Map(
+    schema.definitions.rateCards.map((card) => [card.id, card]),
+  );
 
   const daytimeSessions = flowSegments.map((segment) => {
-    const rateCard = schema.definitions.rate_cards?.[segment.rate_card_id];
+    const rateCard = rateCardLookup.get(segment.rate_card_id);
     return {
       id: segment.id,
       name: segment.label,
@@ -52,7 +57,7 @@ const buildLegacyPricing = (schema: OpsSchemaV2, previousPricing?: any) => {
     };
   });
 
-  const overlayEvents = [...schema.timeline_configuration.overlay_events].sort(
+  const overlayEvents = [...schema.timeline.overlayEvents].sort(
     (a, b) => parseHHMM(a.time_start) - parseHHMM(b.time_start),
   );
   const eveningStart =
@@ -85,18 +90,19 @@ const buildLegacyPricing = (schema: OpsSchemaV2, previousPricing?: any) => {
 };
 
 const buildLegacySchedule = (schema: OpsSchemaV2, previousSchedule?: any) => {
-  const profiles = schema.day_profiles ?? [];
-  const segments = schema.timeline_configuration.flow_segments ?? [];
-  const overlays = schema.timeline_configuration.overlay_events ?? [];
-  const assignments = schema.calendar.assignments ?? {};
+  const profiles = schema.dayProfiles ?? [];
+  const segments = schema.timeline.flowSegments ?? [];
+  const overlays = schema.timeline.overlayEvents ?? [];
+  const assignments = schema.calendar.weekdayDefaults ?? {};
+  const dateAssignments = schema.calendar.assignments ?? {};
   const overrides = schema.calendar.overrides ?? {};
 
   const sessions: any[] = [];
 
   weekDays.forEach((day) => {
-    const profileId = assignments[day];
-    if (!profileId) return;
-    const profile = profiles.find((p) => p.id === profileId);
+    const assignment = assignments[day];
+    if (!assignment || assignment.status === "closed") return;
+    const profile = profiles.find((p) => p.id === assignment.profile_id);
     if (!profile) return;
 
     profile.segment_ids.forEach((segmentId) => {
@@ -148,15 +154,44 @@ const buildLegacySchedule = (schema: OpsSchemaV2, previousSchedule?: any) => {
     });
   });
 
-  Object.entries(overrides).forEach(([date, items]) => {
-    items.forEach((entry) => {
+  Object.entries(dateAssignments).forEach(([date, assignment]) => {
+    if (!assignment || assignment.status === "closed") return;
+    const profile = profiles.find((p) => p.id === assignment.profile_id);
+    if (!profile) return;
+    profile.segment_ids.forEach((segmentId) => {
+      const segment = segments.find((seg) => seg.id === segmentId);
+      if (!segment) return;
+      sessions.push({
+        id: `${date}-${segment.id}`,
+        name: `${segment.label} (Override)`,
+        category: normalizeCategory(segment.label),
+        startTime: segment.time_start,
+        endTime: segment.time_end,
+        gameType: "Regular",
+        status: "Upcoming",
+        overrideDate: date,
+        availableDays: [],
+        pricing: {},
+        specials: {},
+        isDraft: false,
+        projectedRevenue: 0,
+        ticketsSold: 0,
+        totalSeats: 100,
+        programSlug: "",
+        pricingSessionId: segment.rate_card_id,
+      });
+    });
+  });
+
+  Object.entries(overrides).forEach(([date, entries]) => {
+    entries.forEach((entry) => {
       const profile = profiles.find((p) => p.id === entry.profile_id);
       if (!profile) return;
       profile.segment_ids.forEach((segmentId) => {
         const segment = segments.find((seg) => seg.id === segmentId);
         if (!segment) return;
         sessions.push({
-          id: `${date}-${segment.id}`,
+          id: `${date}-${segment.id}-${entry.id}`,
           name: `${segment.label} (Override)`,
           category: normalizeCategory(segment.label),
           startTime: segment.time_start,
@@ -190,6 +225,26 @@ export const compileOpsSchema = (
   options: CompilerOptions = {},
 ) => {
   const parsed = opsSchemaV2Schema.parse(schema);
+  const overlaps = detectOverlaps(parsed.timeline.flowSegments);
+  if (overlaps.length > 0) {
+    throw createError({
+      statusCode: 400,
+      message: `Flow segments overlap: ${overlaps
+        .map((pair) => `${pair.a.label} ↔ ${pair.b.label}`)
+        .join(", ")}`,
+    });
+  }
+
+  const operational = normalizeTimeRange(
+    parsed.timeline.operationalHours.start,
+    parsed.timeline.operationalHours.end,
+  );
+  if (operational.start === operational.end) {
+    throw createError({
+      statusCode: 400,
+      message: "Operational hours must span a non-zero duration.",
+    });
+  }
 
   return {
     pricing: buildLegacyPricing(parsed, options.previousPricing),

@@ -1,11 +1,10 @@
 import { createError, defineEventHandler } from "h3";
 import { settingsService } from "@server/services/settings.service";
 import { auditService } from "@server/services/audit.service";
+import { assertRole } from "~/server/utils/roles";
 
 export default defineEventHandler(async (event) => {
-  if (!event.context.user || event.context.user.role !== "admin") {
-    throw createError({ statusCode: 403, message: "Forbidden" });
-  }
+  assertRole(event.context.user?.role, ["OWNER"]);
 
   const [live, history] = await Promise.all([
     settingsService.get("ops_schema_live"),

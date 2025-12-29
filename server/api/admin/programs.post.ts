@@ -1,6 +1,7 @@
 import { z } from "zod";
 import prisma from "~/server/db/client";
 import { auditService } from "~/server/services/audit.service";
+import { assertRole } from "~/server/utils/roles";
 
 const gameSchema = z.object({
   sortOrder: z.number().int().min(0).max(999),
@@ -18,9 +19,7 @@ const programSchema = z.object({
 });
 
 export default defineEventHandler(async (event) => {
-  if (!event.context.user || event.context.user.role !== "admin") {
-    throw createError({ statusCode: 403, message: "Forbidden" });
-  }
+  assertRole(event.context.user?.role, ["OWNER"]);
 
   const body = await readBody(event);
   const data = programSchema.parse(body);

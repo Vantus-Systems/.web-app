@@ -43,13 +43,55 @@ async function main() {
       data: {
         username: "admin",
         password_hash: passwordHash,
-        role: "admin",
+        role: "OWNER",
+        is_active: true,
       },
     });
     console.log("Created admin user (password: admin123)");
   } else {
     console.log("Admin user already exists");
   }
+
+  console.log("Seeding holiday rules...");
+  const holidayRules = [
+    {
+      name: "Easter",
+      rule_type: "EASTER",
+      closure_type: "CLOSED",
+    },
+    {
+      name: "Thanksgiving",
+      rule_type: "NTH_WEEKDAY",
+      month: 11,
+      weekday: 4,
+      week: 4,
+      closure_type: "CLOSED",
+    },
+    {
+      name: "Christmas Eve",
+      rule_type: "FIXED_DATE",
+      month: 12,
+      day: 24,
+      closure_type: "CLOSE_EARLY",
+      close_time: "17:00",
+    },
+    {
+      name: "Christmas",
+      rule_type: "FIXED_DATE",
+      month: 12,
+      day: 25,
+      closure_type: "CLOSED",
+    },
+  ];
+
+  for (const rule of holidayRules) {
+    await prisma.holidayRule.upsert({
+      where: { name: rule.name },
+      update: rule,
+      create: rule,
+    });
+  }
+  console.log("Seeded holiday rules");
 
   console.log("Seeding Bingo Patterns...");
 
