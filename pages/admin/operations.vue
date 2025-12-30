@@ -23,7 +23,7 @@ definePageMeta({
 });
 
 const router = useRouter();
-const session = ref<{ username: string; role: string } | null>(null);
+const session = ref<{ username?: string | null; role?: string | null } | null>(null);
 
 const loadSession = async () => {
   session.value = (

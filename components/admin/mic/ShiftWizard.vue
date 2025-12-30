@@ -645,12 +645,18 @@ const searchRestrictedOnInput = async (idx: number, playerName: string) => {
     return;
   }
   try {
-    const results = await $fetch(
+    const results = await $fetch<unknown[]>(
       `/api/admin/mic/restricted-players/search?query=${encodeURIComponent(playerName)}`,
       {
         credentials: "include",
       },
     );
+
+    if (!Array.isArray(results)) {
+      restrictedPlayers.value[idx] = false;
+      return;
+    }
+
     restrictedPlayers.value[idx] = results.length > 0;
   } catch (error) {
     console.error("Restricted search failed", error);

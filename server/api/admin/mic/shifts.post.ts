@@ -143,34 +143,33 @@ export default defineEventHandler(async (event) => {
 
   // Create CheckLog records
   for (const check of data.check_logs) {
+    // Coerce values to the expected types to satisfy Prisma/TS
+    const playerName = String(getField(check, K_PLAYER_NAME));
+    const checkNumber = String(getField(check, K_CHECK_NUMBER));
+    const stampedRaw = getField(check, K_STAMPED_ON_BACK);
+    const phoneRaw = getField(check, K_PHONE_DL_WRITTEN);
+    const toBoolean = (v: any) => (typeof v === "string" ? v === "true" : Boolean(v));
+
     await prisma.checkLog.create({
       data: {
         shift_id: shiftRecord.id,
-        [K_PLAYER_NAME]: getField(check, K_PLAYER_NAME),
-        [K_CHECK_NUMBER]: getField(check, K_CHECK_NUMBER),
-        amount: check.amount,
-        [K_STAMPED_ON_BACK]: getField(check, K_STAMPED_ON_BACK),
-        [K_PHONE_DL_WRITTEN]: getField(check, K_PHONE_DL_WRITTEN),
+        [K_PLAYER_NAME]: playerName,
+        [K_CHECK_NUMBER]: checkNumber,
+        amount: Number(check.amount),
+        [K_STAMPED_ON_BACK]: toBoolean(stampedRaw),
+        [K_PHONE_DL_WRITTEN]: toBoolean(phoneRaw),
         [K_IS_BLOCKED]: false,
       },
     });
   }
 
-  return {
-    id: shiftRecord.id,
-    date: shiftRecord.date.toISOString(),
-    shift: shiftRecord.shift,
-    headcount: shiftRecord.players,
-    [K_SALES_BINGO]: getField(shiftRecord as any, K_SALES_BINGO),
-    [K_SALES_PULLTABS]: getField(shiftRecord as any, K_SALES_PULLTABS),
-    [K_SALES_TOTAL]: getField(shiftRecord as any, K_SALES_TOTAL),
-    [K_CASH_TOTAL]: getField(shiftRecord as any, K_CASH_TOTAL),
-    [K_CHECKS_TOTAL]: getField(shiftRecord as any, K_CHECKS_TOTAL),
-    variance: shiftRecord.variance,
-    [K_VARIANCE_NOTE]: getField(shiftRecord as any, K_VARIANCE_NOTE),
-    [K_NEG_BINGO_CODE]: getField(shiftRecord as any, K_NEG_BINGO_CODE),
-    status: shiftRecord.status,
-    [K_CREATED_AT]: getField(shiftRecord as any, K_CREATED_AT).toISOString(),
-    [K_UPDATED_AT]: getField(shiftRecord as any, K_UPDATED_AT).toISOString(),
-  };
+  return await prisma.shiftRecord.findUnique({
+    where: { id: shiftRecord.id },
+    include: {
+      created_by: {
+        select: { id: true, username: true, first_name: true, last_name: true },
+      },
+      prev_shift: true,
+    },
+  });
 });

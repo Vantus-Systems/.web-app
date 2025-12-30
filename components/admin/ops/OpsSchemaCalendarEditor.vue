@@ -223,7 +223,7 @@ const flowSegments = computed(() => draft.value.timeline.flowSegments ?? []);
 const overlayEvents = computed(() => draft.value.timeline.overlayEvents ?? []);
 
 const selectedProfile = computed(() =>
-  dayProfiles.value.find((profile) => profile.id === selectedProfileId.value),
+  dayProfiles.value.find((profile: any) => profile.id === selectedProfileId.value),
 );
 
 const viewDate = ref(new Date());
@@ -251,7 +251,7 @@ const calendarDays = computed(() => {
     const fallbackAssignment = draft.value.calendar.weekdayDefaults[weekday];
     const assignment = directAssignment || fallbackAssignment;
     const profile = assignment?.profile_id
-      ? dayProfiles.value.find((p) => p.id === assignment.profile_id)
+      ? dayProfiles.value.find((p: any) => p.id === assignment.profile_id)
       : undefined;
     days.push({
       date: iso,
@@ -313,7 +313,7 @@ const addProfile = () => {
 const removeProfile = () => {
   if (!selectedProfile.value) return;
   draft.value.dayProfiles = dayProfiles.value.filter(
-    (profile) => profile.id !== selectedProfile.value?.id,
+    (profile: any) => profile.id !== selectedProfile.value?.id,
   );
   selectedProfileId.value = null;
 };
@@ -322,7 +322,7 @@ const toggleSegment = (segmentId: string) => {
   if (!selectedProfile.value) return;
   const list = selectedProfile.value.segment_ids;
   if (list.includes(segmentId)) {
-    selectedProfile.value.segment_ids = list.filter((id) => id !== segmentId);
+    selectedProfile.value.segment_ids = list.filter((id: string) => id !== segmentId);
   } else {
     selectedProfile.value.segment_ids.push(segmentId);
   }
@@ -333,7 +333,7 @@ const toggleOverlay = (eventId: string) => {
   const list = selectedProfile.value.overlay_event_ids;
   if (list.includes(eventId)) {
     selectedProfile.value.overlay_event_ids = list.filter(
-      (id) => id !== eventId,
+      (id: string) => id !== eventId,
     );
   } else {
     selectedProfile.value.overlay_event_ids.push(eventId);

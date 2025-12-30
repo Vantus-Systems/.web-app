@@ -71,7 +71,7 @@
                     ${{ formatCurrency(shift.deposit_total, 2) }}
                   </td>
                   <td class="px-3 py-2 text-right">
-                    {{ formatCurrency(shift.bingo_total, 2) }}
+                    ${{ formatCurrency(shift.bingo_total, 2) }}
                   </td>
                   <td class="px-3 py-2 text-right">
                     <NuxtLink
@@ -132,7 +132,8 @@ definePageMeta({
 });
 
 const router = useRouter();
-const session = ref<{ username: string; role: string } | null>(null);
+type SessionUser = { username: string; role: string | null } | null;
+const session = ref<SessionUser>(null);
 const selectedDate = ref(new Date().toISOString().slice(0, 10));
 const overrideClosed = ref(false);
 const holidays = ref<HolidayOccurrence[]>([]);
@@ -159,36 +160,35 @@ const shiftHint = computed(() => {
 });
 
 const loadSession = async () => {
-  session.value = (
-    await $fetch("/api/auth/user", { credentials: "include" })
-  ).user;
+  const res = await $fetch("/api/auth/user", { credentials: "include" });
+  session.value = res?.user ?? null;
 };
 
 const loadHolidays = async () => {
   const year = Number(selectedDate.value.slice(0, 4));
-  const response = await $fetch(`/api/admin/holiday-rules?year=${year}`, {
-    credentials: "include",
-  });
-  holidays.value = response.occurrences ?? [];
+  const response = await $fetch<{ occurrences?: HolidayOccurrence[] }>(
+    `/api/admin/holiday-rules?year=${year}`,
+    { credentials: "include" },
+  );
+  holidays.value = response?.occurrences ?? [];
 };
 
 const loadShifts = async () => {
-  shifts.value = await $fetch(
+  shifts.value = await $fetch<ShiftRecord[]>(
     `/api/admin/shift-records?start=${selectedDate.value}&end=${selectedDate.value}`,
     { credentials: "include" },
   );
-  prevEndingBox.value = shifts.value.length
-    ? shifts.value[shifts.value.length - 1].ending_box
-    : null;
+  const lastShift = shifts.value.length ? shifts.value[shifts.value.length - 1] : null;
+  prevEndingBox.value = lastShift ? (lastShift.ending_box ?? null) : null;
 };
 
 const submitMicShift = async (payload: Record<string, unknown>) => {
-  const record = await $fetch("/api/admin/mic/shifts", {
+  const record = await $fetch<ShiftRecord>("/api/admin/mic/shifts", {
     method: "POST",
     body: payload,
     credentials: "include",
   });
-  shifts.value.unshift(record as ShiftRecord);
+  shifts.value.unshift(record);
 };
 
 const logout = async () => {

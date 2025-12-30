@@ -459,13 +459,20 @@ const resizeCanvas = () => {
 const getPos = (e: MouseEvent | TouchEvent) => {
   if (!signatureCanvas.value) return { x: 0, y: 0 };
   const rect = signatureCanvas.value.getBoundingClientRect();
-  const clientX =
-    "touches" in e ? e.touches[0].clientX : (e as MouseEvent).clientX;
-  const clientY =
-    "touches" in e ? e.touches[0].clientY : (e as MouseEvent).clientY;
+
+  if ("touches" in e) {
+    const touch = e.touches && e.touches[0];
+    if (!touch) return { x: 0, y: 0 };
+    return {
+      x: touch.clientX - rect.left,
+      y: touch.clientY - rect.top,
+    };
+  }
+
+  const me = e as MouseEvent;
   return {
-    x: clientX - rect.left,
-    y: clientY - rect.top,
+    x: me.clientX - rect.left,
+    y: me.clientY - rect.top,
   };
 };
 

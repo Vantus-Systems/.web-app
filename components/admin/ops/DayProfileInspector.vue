@@ -207,14 +207,15 @@ watch(
   () => props.selectedDates,
   (dates) => {
     if (dates.length === 1) {
-      const weekday = new Date(`${dates[0]}T00:00:00`).toLocaleDateString(
+      const date = dates[0]!;
+      const weekday = new Date(`${date}T00:00:00`).toLocaleDateString(
         "en-US",
         {
           weekday: "short",
         },
       );
       const assignment =
-        props.assignments[dates[0]] || props.weekdayDefaults[weekday];
+        props.assignments[date] || props.weekdayDefaults[weekday];
       selectedProfileId.value = assignment?.profile_id ?? "";
       closed.value = assignment?.status === "closed";
       return;
@@ -244,7 +245,7 @@ const emitSmartFill = () => {
 
 const agenda = computed(() => {
   if (props.selectedDates.length !== 1) return [];
-  const date = props.selectedDates[0];
+  const date = props.selectedDates[0]!;
   const assignment =
     props.assignments[date] ||
     props.weekdayDefaults[
@@ -280,14 +281,17 @@ const agenda = computed(() => {
 
 const overrideProfileId = ref("");
 const overrideReason = ref("");
-const currentOverrides = computed(() => {
+const currentOverrides = computed<
+  Array<{ id: string; profile_id: string; reason?: string }>
+>(() => {
   if (props.selectedDates.length !== 1) return [];
-  return props.overrides[props.selectedDates[0]] ?? [];
+  const date = props.selectedDates[0]!;
+  return props.overrides[date] ?? [];
 });
 
 const addOverride = () => {
   if (props.selectedDates.length !== 1 || !overrideProfileId.value) return;
-  const date = props.selectedDates[0];
+  const date = props.selectedDates[0]!;
   const nextOverrides = [
     ...currentOverrides.value,
     {
@@ -303,7 +307,7 @@ const addOverride = () => {
 
 const removeOverride = (id: string) => {
   if (props.selectedDates.length !== 1) return;
-  const date = props.selectedDates[0];
+  const date = props.selectedDates[0]!;
   const nextOverrides = currentOverrides.value.filter((item) => item.id !== id);
   emit("update-overrides", { date, overrides: nextOverrides });
 };

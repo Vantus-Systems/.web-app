@@ -3,6 +3,12 @@ import { ref, computed, onMounted, onUnmounted } from "vue";
 export function useScheduleClock() {
   const timeZone = "America/Chicago";
 
+  type ChicagoTime = {
+    dateStr: string;
+    minutes: number;
+    dayOfWeek: string;
+  };
+
   // State
   const mode = ref<"now" | "custom">("now");
   const customDate = ref<string>(""); // YYYY-MM-DD
@@ -23,24 +29,24 @@ export function useScheduleClock() {
   });
 
   // Computed Current Time in Chicago
-  const chicagoTime = computed(() => {
+  const chicagoTime = computed<ChicagoTime>(() => {
     if (mode.value === "custom" && customDate.value && customTime.value) {
-      // Create date from custom input
-      // Input is usually local time context or specifically intended as Chicago time
-      // Let's assume the user inputs "Chicago Time"
-      const [y, m, d] = customDate.value.split("-").map(Number);
-      const [hr, min] = customTime.value.split(":").map(Number);
+      // Parse custom date/time with safe fallbacks
+      const dateParts = customDate.value.split("-").map(Number);
+      const y = dateParts[0] ?? new Date().getFullYear();
+      const m = dateParts[1] ?? 1;
+      const d = dateParts[2] ?? 1;
 
-      // We construct a date that represents that time in Chicago
-      // It's a bit tricky without a library, but let's try to interpret it as local for display purposes logic
-      // Actually, simplest is to treat the comparison logic based on HH:mm string matching or minutes from midnight
+      const timeParts = customTime.value.split(":").map(Number);
+      const hr = timeParts[0] ?? 0;
+      const min = timeParts[1] ?? 0;
 
       return {
         dateStr: customDate.value, // YYYY-MM-DD
         minutes: hr * 60 + min,
         dayOfWeek: new Date(y, m - 1, d).toLocaleDateString("en-US", {
           weekday: "short",
-        }) as any, // "Mon"
+        }),
       };
     }
 
@@ -60,12 +66,12 @@ export function useScheduleClock() {
     const parts = formatter.formatToParts(date);
     const getPart = (type: string) => parts.find((p) => p.type === type)?.value;
 
-    const y = getPart("year");
-    const m = getPart("month");
-    const d = getPart("day");
-    const h = Number(getPart("hour"));
-    const min = Number(getPart("minute"));
-    const weekday = getPart("weekday"); // "Mon", "Tue", etc.
+    const y = getPart("year") ?? "1970";
+    const m = getPart("month") ?? "01";
+    const d = getPart("day") ?? "01";
+    const h = Number(getPart("hour") ?? "0");
+    const min = Number(getPart("minute") ?? "0");
+    const weekday = getPart("weekday") ?? ""; // "Mon", "Tue", etc.
 
     return {
       dateStr: `${y}-${m}-${d}`,
@@ -75,8 +81,12 @@ export function useScheduleClock() {
   });
 
   const parseTime = (timeStr: string) => {
-    const [h, m] = timeStr.split(":").map(Number);
-    return h * 60 + m;
+    const [hStr = "0", mStr = "0"] = timeStr.split(":");
+    const h = parseInt(hStr, 10);
+    const m = parseInt(mStr, 10);
+    const hh = Number.isNaN(h) ? 0 : h;
+    const mm = Number.isNaN(m) ? 0 : m;
+    return hh * 60 + mm;
   };
 
   const getStatus = (block: any) => {

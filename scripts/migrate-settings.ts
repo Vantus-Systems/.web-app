@@ -10,12 +10,12 @@ async function main() {
   const schedule = (await settingsService.get("schedule")) || [];
   const scheduleJson = JSON.stringify(schedule);
 
-  const existingScheduleActive = await prisma.scheduleVersion.findFirst({
+  const existingScheduleActive = await (prisma as any).scheduleVersion.findFirst({
     where: { status: "ACTIVE" },
   });
   if (!existingScheduleActive) {
     console.log("Creating initial ACTIVE schedule version...");
-    await prisma.scheduleVersion.create({
+    await (prisma as any).scheduleVersion.create({
       data: {
         status: "ACTIVE",
         data: scheduleJson,
@@ -26,12 +26,12 @@ async function main() {
   }
 
   // Create initial Draft for schedule
-  const existingScheduleDraft = await prisma.scheduleVersion.findFirst({
+  const existingScheduleDraft = await (prisma as any).scheduleVersion.findFirst({
     where: { status: "DRAFT" },
   });
   if (!existingScheduleDraft) {
     console.log("Creating initial DRAFT schedule version...");
-    await prisma.scheduleVersion.create({
+    await (prisma as any).scheduleVersion.create({
       data: {
         status: "DRAFT",
         data: scheduleJson,
@@ -44,12 +44,12 @@ async function main() {
   const pricing = (await settingsService.get("pricing")) || {};
   const pricingJson = JSON.stringify(pricing);
 
-  const existingPricingActive = await prisma.pricingVersion.findFirst({
+  const existingPricingActive = await (prisma as any).pricingVersion.findFirst({
     where: { status: "ACTIVE" },
   });
   if (!existingPricingActive) {
     console.log("Creating initial ACTIVE pricing version...");
-    await prisma.pricingVersion.create({
+    await (prisma as any).pricingVersion.create({
       data: {
         status: "ACTIVE",
         data: pricingJson,
@@ -60,12 +60,12 @@ async function main() {
   }
 
   // Create initial Draft for pricing
-  const existingPricingDraft = await prisma.pricingVersion.findFirst({
+  const existingPricingDraft = await (prisma as any).pricingVersion.findFirst({
     where: { status: "DRAFT" },
   });
   if (!existingPricingDraft) {
     console.log("Creating initial DRAFT pricing version...");
-    await prisma.pricingVersion.create({
+    await (prisma as any).pricingVersion.create({
       data: {
         status: "DRAFT",
         data: pricingJson,

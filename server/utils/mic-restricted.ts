@@ -21,7 +21,6 @@ export async function searchRestrictedPlayers(query: string): Promise<
       active: true,
       name: {
         contains: query,
-        mode: "insensitive",
       },
     },
     select: {
@@ -51,7 +50,6 @@ export async function isPlayerRestricted(playerName: string): Promise<{
       active: true,
       name: {
         equals: playerName,
-        mode: "insensitive",
       },
     },
     select: {

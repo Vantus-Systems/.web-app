@@ -145,7 +145,7 @@ definePageMeta({
 });
 
 const router = useRouter();
-const session = ref<{ username: string; role: string } | null>(null);
+const session = ref<{ username?: string; role?: any } | null>(null);
 const kpis = ref({
   totalUsers: 0,
   activeUsers: 0,
@@ -177,18 +177,28 @@ const loadSession = async () => {
 
 const loadKPIs = async () => {
   try {
-    const users = await $fetch("/api/admin/users", { credentials: "include" });
-    kpis.value.totalUsers = users.length;
-    kpis.value.activeUsers = users.filter((u: any) => u.is_active).length;
+    const users: any = await $fetch("/api/admin/users", { credentials: "include" });
+    if (Array.isArray(users)) {
+      kpis.value.totalUsers = users.length;
+      kpis.value.activeUsers = users.filter((u: any) => u.is_active).length;
+    } else {
+      kpis.value.totalUsers = 0;
+      kpis.value.activeUsers = 0;
+    }
   } catch {
     // Error loading users
   }
 
   try {
-    const approvals = await $fetch("/api/admin/approval-requests", {
+    const approvalsRes: any = await $fetch("/api/admin/approval-requests", {
       credentials: "include",
     });
-    const pending = approvals.data.filter((a: any) => a.status === "pending");
+    const approvalsData = Array.isArray(approvalsRes?.data)
+      ? approvalsRes.data
+      : approvalsRes?.data
+      ? [approvalsRes.data]
+      : [];
+    const pending = approvalsData.filter((a: any) => a.status === "pending");
     kpis.value.pendingApprovals = pending.length;
   } catch {
     // Error loading approvals
@@ -197,11 +207,15 @@ const loadKPIs = async () => {
 
 const loadApprovalQueue = async () => {
   try {
-    const response = await $fetch("/api/admin/approval-requests", {
+    const response: any = await $fetch("/api/admin/approval-requests", {
       credentials: "include",
       query: { status: "pending" },
     });
-    approvalQueue.value = response.data;
+    approvalQueue.value = Array.isArray(response?.data)
+      ? response.data
+      : response?.data
+      ? [response.data]
+      : [];
   } catch {
     // Error loading approval queue
   }

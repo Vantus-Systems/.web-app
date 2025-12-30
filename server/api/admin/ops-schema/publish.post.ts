@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
     settingsService.get("schedule"),
   ]);
 
-  const compiled = compileOpsSchema(publishedSchema, {
+  const compiled = compileOpsSchema(publishedSchema as any, {
     previousPricing: currentPricing,
     previousSchedule: currentSchedule,
   });

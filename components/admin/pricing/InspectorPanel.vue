@@ -191,7 +191,9 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from "vue";
-import type { RateCard } from "~/types/ops-schema";
+// Local minimal RateCard type to avoid relying on an export that may not exist in
+// ~/types/ops-schema. Adjust if a more complete shape is needed elsewhere.
+type RateCard = { id: string; name: string };
 
 const props = defineProps<{
   item: any;

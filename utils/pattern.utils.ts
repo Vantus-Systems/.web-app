@@ -5,7 +5,7 @@ export const rotatePatternCells = (cells: number[]) => {
     for (let col = 0; col < 5; col += 1) {
       const sourceIndex = row * 5 + col;
       const targetIndex = col * 5 + (4 - row);
-      rotated[targetIndex] = cells[sourceIndex];
+      rotated[targetIndex] = cells[sourceIndex] ?? 0;
     }
   }
   rotated[12] = 1;
@@ -15,19 +15,19 @@ export const rotatePatternCells = (cells: number[]) => {
 export const hashPatternCells = (cells: number[]) => cells.join("");
 
 export const countLines = (cells: number[]) => {
-  const grid = Array.from({ length: 5 }, (_, row) =>
+  const grid: boolean[][] = Array.from({ length: 5 }, (_, row) =>
     Array.from({ length: 5 }, (_, col) => cells[row * 5 + col] === 1),
   );
-  grid[2][2] = true;
+  grid[2]![2] = true;
   let count = 0;
   for (let row = 0; row < 5; row += 1) {
-    if (grid[row].every(Boolean)) count += 1;
+    if (grid[row]!.every(Boolean)) count += 1;
   }
   for (let col = 0; col < 5; col += 1) {
-    if (grid.every((row) => row[col])) count += 1;
+    if (grid.every((r) => r[col] === true)) count += 1;
   }
-  if ([0, 1, 2, 3, 4].every((i) => grid[i][i])) count += 1;
-  if ([0, 1, 2, 3, 4].every((i) => grid[i][4 - i])) count += 1;
+  if ([0, 1, 2, 3, 4].every((i) => grid[i]![i] === true)) count += 1;
+  if ([0, 1, 2, 3, 4].every((i) => grid[i]![4 - i] === true)) count += 1;
   return count;
 };
 
@@ -51,11 +51,13 @@ export const generateLinePermutations = (
   const build = (start: number, combo: number[]) => {
     if (combo.length === lineCount) {
       const cells = Array(25).fill(0);
-      combo.forEach((idx) => {
-        lineSets[idx].forEach((cell) => {
+      for (const idx of combo) {
+        const set = lineSets[idx];
+        if (!set) continue;
+        for (const cell of set) {
           cells[cell] = 1;
-        });
-      });
+        }
+      }
       cells[12] = 1;
       if (countLines(cells) !== lineCount) return;
       const hash = hashPatternCells(cells);
@@ -67,7 +69,9 @@ export const generateLinePermutations = (
     }
     for (let i = start; i < indices.length; i += 1) {
       if (permutations.length >= 25) return;
-      build(i + 1, [...combo, indices[i]]);
+      const next = indices[i];
+      if (next === undefined) continue;
+      build(i + 1, [...combo, next]);
     }
   };
 

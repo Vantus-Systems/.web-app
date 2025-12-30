@@ -9,18 +9,21 @@ export const parseTime = (t: string): number => {
   const trimmed = t.trim();
   const match12 = trimmed.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
   if (match12) {
-    const [, h, m, ap] = match12;
-    let hour = parseInt(h);
-    const min = parseInt(m);
-    if (ap.toUpperCase() === "PM" && hour !== 12) hour += 12;
-    if (ap.toUpperCase() === "AM" && hour === 12) hour = 0;
+    const h = match12[1]!;
+    const m = match12[2]!;
+    const ap = match12[3]!;
+    let hour = parseInt(h, 10);
+    const min = parseInt(m, 10);
+    const period = ap.toUpperCase();
+    if (period === "PM" && hour !== 12) hour += 12;
+    if (period === "AM" && hour === 12) hour = 0;
     return hour * 60 + min;
   }
 
   const match24 = trimmed.match(/^(\d{1,2}):(\d{2})$/);
   if (match24) {
-    const hour = parseInt(match24[1]);
-    const min = parseInt(match24[2]);
+    const hour = parseInt(match24[1]!, 10);
+    const min = parseInt(match24[2]!, 10);
     return hour * 60 + min;
   }
   return 0;

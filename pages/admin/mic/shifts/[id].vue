@@ -90,7 +90,7 @@ definePageMeta({
 
 const router = useRouter();
 const route = useRoute();
-const session = ref<{ username: string; role: string } | null>(null);
+const session = ref<{ username?: string; role?: any } | null>(null);
 const record = ref<ShiftRecord | null>(null);
 const draft = ref<ShiftFormValue | null>(null);
 const isDeleteOpen = ref(false);

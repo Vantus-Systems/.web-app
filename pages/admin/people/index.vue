@@ -186,7 +186,7 @@ definePageMeta({
 });
 
 const router = useRouter();
-const session = ref<{ username: string; role: string } | null>(null);
+const session = ref<{ username?: string; role?: any } | null>(null);
 const users = ref<AdminUser[]>([]);
 const selectedUsers = ref<string[]>([]);
 const searchQuery = ref("");
@@ -290,7 +290,12 @@ const loadUsers = async () => {
   session.value = (
     await $fetch("/api/auth/user", { credentials: "include" })
   ).user;
-  users.value = await $fetch("/api/admin/users", { credentials: "include" });
+  const fetched = await $fetch("/api/admin/users", { credentials: "include" });
+  // Normalize role to a string to satisfy AdminUser type (role may be null from API)
+  users.value = (Array.isArray(fetched) ? fetched : []).map((u: any) => ({
+    ...u,
+    role: u.role ?? "",
+  }));
 };
 
 const createUser = async () => {
@@ -299,7 +304,8 @@ const createUser = async () => {
     body: newUser.value,
     credentials: "include",
   });
-  users.value.push(user);
+  // Ensure returned user's role is a string
+  users.value.push({ ...user, role: (user as any).role ?? "" });
   newUser.value = {
     username: "",
     password: "",
@@ -319,8 +325,10 @@ const saveUser = async (user: any) => {
     },
     credentials: "include",
   });
+  // Normalize updated user's role before replacing in local list
+  const normalized = { ...updated, role: (updated as any).role ?? "" };
   users.value = users.value.map((entry) =>
-    entry.id === updated.id ? updated : entry,
+    entry.id === normalized.id ? normalized : entry,
   );
 };
 

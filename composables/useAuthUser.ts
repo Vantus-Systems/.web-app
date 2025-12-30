@@ -1,7 +1,7 @@
 import { useState, useFetch } from "#imports";
 
 export const useAuthUser = () => {
-  const user = useState("user", () => null);
+  const user = useState<Record<string, any> | null>("user", () => null);
 
   const fetchUser = async () => {
     try {

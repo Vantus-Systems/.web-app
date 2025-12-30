@@ -185,7 +185,7 @@ definePageMeta({
 });
 
 const router = useRouter();
-const session = ref<{ username: string; role: string } | null>(null);
+const session = ref<{ username?: string; role?: any } | null>(null);
 const charities = ref<any[]>([]);
 const editingId = ref<string | null>(null);
 const form = ref({

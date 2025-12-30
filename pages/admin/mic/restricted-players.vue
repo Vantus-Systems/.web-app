@@ -85,8 +85,8 @@ import { useRouter } from "vue-router";
 import AdminShell from "~/components/admin/AdminShell.vue";
 
 const router = useRouter();
-const session = ref<{ username: string; role: string } | null>(null);
-const allPlayers = ref<Array<{ id: string; name: string; notes?: string }>>([]);
+const session = ref<{ username?: string; role?: any } | null>(null);
+const allPlayers = ref<Array<{ id: string; name: string; notes?: string | null }>>([]);
 const search = ref("");
 const form = ref({ name: "", notes: "" });
 

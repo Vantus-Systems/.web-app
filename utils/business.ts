@@ -16,7 +16,7 @@ export const BUSINESS_INFO = {
   },
   hours: "Open Daily from 10:00 AM",
   social: {
-    facebook: "https://facebook.com", // Placeholder
+    facebook: "https://facebook.com/maryestherbingo", // Placeholder
   },
   meta: {
     description:

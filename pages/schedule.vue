@@ -91,7 +91,10 @@ watch(
       activeDay.value = customDate.value;
     } else if (days.value.length > 0) {
       // If "today" is in the list, select it, otherwise first one
-      activeDay.value = days.value[0].id;
+      const first = days.value[0];
+      if (first) {
+        activeDay.value = first.id;
+      }
     }
   },
   { immediate: true },

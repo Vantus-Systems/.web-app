@@ -19,15 +19,21 @@ const props = withDefaults(
 const currentFrameIndex = ref(0);
 const intervalId = ref<any>(null);
 
-const frames = computed(() => {
-  if (!props.definition || !props.definition.frames) return [Array(25).fill(0)];
-  return props.definition.frames;
+const frames = computed<number[][]>(() => {
+  if (!props.definition || !props.definition.frames) return [Array(25).fill(0) as number[]];
+  return props.definition.frames as number[][];
 });
 
-const activeFrame = computed(() => {
+const activeFrame = computed<number[]>(() => {
   const frame = frames.value[currentFrameIndex.value] || frames.value[0];
-  return frame;
+  return frame as number[];
 });
+
+// helper array for rendering 25 cells without an unused "cell" variable
+const cells = computed(() => Array.from({ length: 25 }));
+
+// avoid using the reserved/deprecated "name" identifier in templates
+const displayName = computed(() => props.name);
 
 const startAnimation = () => {
   stopAnimation();

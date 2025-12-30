@@ -128,7 +128,7 @@ export const useOpsStore = defineStore("ops", {
           programs,
           opsSchemaResponse,
           scheduleDayProfiles,
-        ] = await Promise.all([
+        ] = (await Promise.all([
           $fetch("/api/pricing", { credentials: "include" }),
           $fetch("/api/schedule", { credentials: "include" }),
           $fetch("/api/admin/patterns", { credentials: "include" }),
@@ -137,7 +137,7 @@ export const useOpsStore = defineStore("ops", {
           $fetch("/api/admin/schedule-day-profiles", {
             credentials: "include",
           }),
-        ]);
+        ])) as any[];
 
         this.pricing = pricing;
         this.schedule = schedule;
