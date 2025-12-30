@@ -38,9 +38,9 @@
             <td class="px-3 py-2 font-semibold text-slate-700">
               {{ row.shift }}
             </td>
-            <td class="px-3 py-2 text-right">${{ row.pulltabs.toFixed(2) }}</td>
-            <td class="px-3 py-2 text-right">${{ row.deposit.toFixed(2) }}</td>
-            <td class="px-3 py-2 text-right">{{ row.bingo.toFixed(2) }}</td>
+            <td class="px-3 py-2 text-right">${{ formatCurrency(row.pulltabs, 2) }}</td>
+            <td class="px-3 py-2 text-right">${{ formatCurrency(row.deposit, 2) }}</td>
+            <td class="px-3 py-2 text-right">{{ formatCurrency(row.bingo, 2) }}</td>
             <td class="px-3 py-2 text-right">{{ row.players }}</td>
           </tr>
           <tr
@@ -48,12 +48,12 @@
           >
             <td class="px-3 py-2">Total</td>
             <td class="px-3 py-2 text-right">
-              ${{ totals.pulltabs.toFixed(2) }}
+              ${{ formatCurrency(totals.pulltabs, 2) }}
             </td>
             <td class="px-3 py-2 text-right">
-              ${{ totals.deposit.toFixed(2) }}
+              ${{ formatCurrency(totals.deposit, 2) }}
             </td>
-            <td class="px-3 py-2 text-right">{{ totals.bingo.toFixed(2) }}</td>
+            <td class="px-3 py-2 text-right">{{ formatCurrency(totals.bingo, 2) }}</td>
             <td class="px-3 py-2 text-right">{{ totals.players }}</td>
           </tr>
         </tbody>
@@ -64,6 +64,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { formatCurrency } from "~/utils/format";
 
 const props = defineProps<{
   dateLabel: string;

@@ -27,25 +27,30 @@ Official website for Mary Esther Bingo, a premier entertainment venue in Florida
 ## Setup
 
 1. **Install Dependencies:**
+
    ```bash
    npm install
    ```
 
 2. **Development Server:**
+
    ```bash
    npm run dev
    ```
+
    Visit `http://localhost:3000`.
 
    Tip: `npm run dev` runs a full dev server with API routes and is the recommended workflow while you iterate on server-side features.
 
 3. **Linting & Type Checking:**
+
    ```bash
    npm run lint
    npm run typecheck
    ```
 
 4. **Build & Preview:**
+
    ```bash
    npm run build
    npm run preview   # quick preview of the production build
@@ -60,6 +65,7 @@ Official website for Mary Esther Bingo, a premier entertainment venue in Florida
 ### Local database setup (SQLite)
 
 - After cloning, `npm install` automatically provisions the SQLite database before anything else runs:
+
   ```bash
   npm install        # postinstall runs setup-db.js + nuxt prepare
   npm run dev
@@ -100,6 +106,7 @@ The application includes an admin portal at `/admin/login`. Authentication now u
 - A default admin account exists for initial setup; credentials are `admin` / `admin123` (created by `server/utils/users.ts` when `server/data/users.json` is missing). Change this password immediately in production.
 
 ### Admin Features
+
 - User management (create/update users with roles: admin/mic)
 - Business information updates
 - Jackpot value management
@@ -108,6 +115,7 @@ The application includes an admin portal at `/admin/login`. Authentication now u
 ## API Endpoints
 
 ### Public Endpoints
+
 - `GET /api/business` - Business configuration
 - `GET /api/jackpot` - Current jackpot value
 - `GET /api/schedule` - Schedule data
@@ -116,6 +124,7 @@ The application includes an admin portal at `/admin/login`. Authentication now u
 - `POST /api/contact` - Contact form submission (with rate limiting)
 
 ### Admin Endpoints (Require authentication)
+
 - `GET /api/admin/users` - List users
 - `POST /api/admin/users` - Create/update user
 - `DELETE /api/admin/users` - Delete user
@@ -137,6 +146,7 @@ The application includes an admin portal at `/admin/login`. Authentication now u
 ## Data Persistence
 
 The application uses JSON files for data storage:
+
 - `server/data/users.json` - User accounts
 - `server/data/sessions.json` - Active sessions
 - `server/data/messages.json` - Contact form submissions
@@ -182,14 +192,16 @@ node .output/server/index.mjs
 Alternatively, you can run `npm run start:server` after cloning; the helper script automatically runs `nuxt build` whenever the `.output/server/index.mjs` entrypoint is missing, so you don't need to build manually before starting the production runtime.
 
 For production:
+
 1. Set `NODE_ENV=production`
 2. Replace the demo login in `server/api/auth/login.post.ts` with a secure username/password flow (use `getUserByUsername()` + `verifyPassword()`); rotate default credentials
 3. Ensure `server/data/` directory is writable and persistent across deploys
-4. Configure secrets and environment variables as needed (e.g., secure cookie flags depend on `NODE_ENV`) 
+4. Configure secrets and environment variables as needed (e.g., secure cookie flags depend on `NODE_ENV`)
 
 ## Development Workflow
 
 1. **Before committing:**
+
    ```bash
    npm run lint:fix
    npm run typecheck
@@ -222,11 +234,9 @@ Created 5 todos
 
 Using "Replace String in File"
 
-
 ```
 
 ```
-
 
 Read [](file:///home/meb/med/scripts/setup-db.js)
 
@@ -234,89 +244,83 @@ Proceeding to harden the provisioning loop and add robust readiness and port-map
 
 Using "Replace String in File"
 
-
 ```
 
 ```
 
-
-Ran Edit Block 
+Ran Edit Block
 Completed with input: {
-  "file_path": "/home/meb/med/scripts/check-db.js",
-  "content": "#!/usr/bin/env node\n/* scripts/check-db.js\n   Simple DB connectivity check using Prisma Client. Loads .env if present.\n*/\nimport fs from \"fs\";\nimport path from \"path\";\nimport { PrismaClient } from \"@prisma/client\";\n\nfunction loadDotEnv() {\n  const envPath = path.join(process.cwd(), \".env\");\n  if (!fs.existsSync(envPath)) return;\n  const raw = fs.readFileSync(envPath, \"utf8\");\n  for (const line of raw.split(/\\r?\\n/)) {\n    const trimmed = line.trim();\n    if (!trimmed || trimmed.startsWith(\"#\")) continue;\n    const eq = trimmed.indexOf(\"=\");\n    if (eq === -1) continue;\n    const k = trimmed.slice(0, eq).trim();\n    let v = trimmed.slice(eq + 1).trim();\n    if ((v.startsWith('\"') && v.endsWith('\"')) || (v.startsWith(\"'\") && v.endsWith(\"'\"))) {\n      v = v.slice(1, -1);\n    }\n    if (!process.env[k]) process.env[k] = v;\n  }\n}\n\n(async () => {\n  loadDotEnv();\n  const prisma = new PrismaClient();\n  try {\n    console.log('[check-db] Connecting to database (DATABASE_URL from env or .env)...');\n    await prisma.$connect();\n    const res = await prisma.$queryRaw`SELECT 1 as ok`;\n    console.log('[check-db] Database connected OK:', res);\n    process.exit(0);\n  } catch (err) {\n    console.error('[check-db] DB connectivity check failed:', err && err.message ? err.message : err);\n    process.exit(1);\n  } finally {\n    await prisma.$disconnect();\n  }\n})();"
+"file*path": "/home/meb/med/scripts/check-db.js",
+"content": "#!/usr/bin/env node\n/* scripts/check-db.js\n Simple DB connectivity check using Prisma Client. Loads .env if present.\n\_/\nimport fs from \"fs\";\nimport path from \"path\";\nimport { PrismaClient } from \"@prisma/client\";\n\nfunction loadDotEnv() {\n const envPath = path.join(process.cwd(), \".env\");\n if (!fs.existsSync(envPath)) return;\n const raw = fs.readFileSync(envPath, \"utf8\");\n for (const line of raw.split(/\\r?\\n/)) {\n const trimmed = line.trim();\n if (!trimmed || trimmed.startsWith(\"#\")) continue;\n const eq = trimmed.indexOf(\"=\");\n if (eq === -1) continue;\n const k = trimmed.slice(0, eq).trim();\n let v = trimmed.slice(eq + 1).trim();\n if ((v.startsWith('\"') && v.endsWith('\"')) || (v.startsWith(\"'\") && v.endsWith(\"'\"))) {\n v = v.slice(1, -1);\n }\n if (!process.env[k]) process.env[k] = v;\n }\n}\n\n(async () => {\n loadDotEnv();\n const prisma = new PrismaClient();\n try {\n console.log('[check-db] Connecting to database (DATABASE_URL from env or .env)...');\n await prisma.$connect();\n    const res = await prisma.$queryRaw`SELECT 1 as ok`;\n console.log('[check-db] Database connected OK:', res);\n process.exit(0);\n } catch (err) {\n console.error('[check-db] DB connectivity check failed:', err && err.message ? err.message : err);\n process.exit(1);\n } finally {\n await prisma.$disconnect();\n }\n})();"
 }
 
-Ran Edit Block 
+Ran Edit Block
 Completed with input: {
-  "file_path": "/home/meb/med/scripts/check-db.js",
-  "range": "1-9999",
-  "content": "#!/usr/bin/env node\n/* scripts/check-db.js\n   Simple DB connectivity check using Prisma Client. Loads .env if present.\n*/\nimport fs from \"fs\";\nimport path from \"path\";\nimport { PrismaClient } from \"@prisma/client\";\n\nfunction loadDotEnv() {\n  const envPath = path.join(process.cwd(), \".env\");\n  if (!fs.existsSync(envPath)) return;\n  const raw = fs.readFileSync(envPath, \"utf8\");\n  for (const line of raw.split(/\\r?\\n/)) {\n    const trimmed = line.trim();\n    if (!trimmed || trimmed.startsWith(\"#\")) continue;\n    const eq = trimmed.indexOf(\"=\");\n    if (eq === -1) continue;\n    const k = trimmed.slice(0, eq).trim();\n    let v = trimmed.slice(eq + 1).trim();\n    if ((v.startsWith('\"') && v.endsWith('\"')) || (v.startsWith(\"'\") && v.endsWith(\"'\"))) {\n      v = v.slice(1, -1);\n    }\n    if (!process.env[k]) process.env[k] = v;\n  }\n}\n\n(async () => {\n  loadDotEnv();\n  const prisma = new PrismaClient();\n  try {\n    console.log('[check-db] Connecting to database (DATABASE_URL from env or .env)...');\n    await prisma.$connect();\n    const res = await prisma.$queryRaw`SELECT 1 as ok`;\n    console.log('[check-db] Database connected OK:', res);\n    process.exit(0);\n  } catch (err) {\n    console.error('[check-db] DB connectivity check failed:', err && err.message ? err.message : err);\n    process.exit(1);\n  } finally {\n    await prisma.$disconnect();\n  }\n})();"
+"file*path": "/home/meb/med/scripts/check-db.js",
+"range": "1-9999",
+"content": "#!/usr/bin/env node\n/* scripts/check-db.js\n Simple DB connectivity check using Prisma Client. Loads .env if present.\n\_/\nimport fs from \"fs\";\nimport path from \"path\";\nimport { PrismaClient } from \"@prisma/client\";\n\nfunction loadDotEnv() {\n const envPath = path.join(process.cwd(), \".env\");\n if (!fs.existsSync(envPath)) return;\n const raw = fs.readFileSync(envPath, \"utf8\");\n for (const line of raw.split(/\\r?\\n/)) {\n const trimmed = line.trim();\n if (!trimmed || trimmed.startsWith(\"#\")) continue;\n const eq = trimmed.indexOf(\"=\");\n if (eq === -1) continue;\n const k = trimmed.slice(0, eq).trim();\n let v = trimmed.slice(eq + 1).trim();\n if ((v.startsWith('\"') && v.endsWith('\"')) || (v.startsWith(\"'\") && v.endsWith(\"'\"))) {\n v = v.slice(1, -1);\n }\n if (!process.env[k]) process.env[k] = v;\n }\n}\n\n(async () => {\n loadDotEnv();\n const prisma = new PrismaClient();\n try {\n console.log('[check-db] Connecting to database (DATABASE_URL from env or .env)...');\n await prisma.$connect();\n    const res = await prisma.$queryRaw`SELECT 1 as ok`;\n console.log('[check-db] Database connected OK:', res);\n process.exit(0);\n } catch (err) {\n console.error('[check-db] DB connectivity check failed:', err && err.message ? err.message : err);\n process.exit(1);\n } finally {\n await prisma.$disconnect();\n }\n})();"
 }
 
 Ran terminal command: cat > scripts/check-db.js <<'EOF'
 #!/usr/bin/env node
-/* scripts/check-db.js
-   Simple DB connectivity check using Prisma Client. Loads .env if present.
-*/
+/_ scripts/check-db.js
+Simple DB connectivity check using Prisma Client. Loads .env if present.
+_/
 import fs from "fs";
 import path from "path";
 import { PrismaClient } from "@prisma/client";
 
 function loadDotEnv() {
-  const envPath = path.join(process.cwd(), ".env");
-  if (!fs.existsSync(envPath)) return;
-  const raw = fs.readFileSync(envPath, "utf8");
-  for (const line of raw.split(/\r?\n/)) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-    const eq = trimmed.indexOf("=");
-    if (eq === -1) continue;
-    const k = trimmed.slice(0, eq).trim();
-    let v = trimmed.slice(eq + 1).trim();
-    if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
-      v = v.slice(1, -1);
-    }
-    if (!process.env[k]) process.env[k] = v;
-  }
+const envPath = path.join(process.cwd(), ".env");
+if (!fs.existsSync(envPath)) return;
+const raw = fs.readFileSync(envPath, "utf8");
+for (const line of raw.split(/\r?\n/)) {
+const trimmed = line.trim();
+if (!trimmed || trimmed.startsWith("#")) continue;
+const eq = trimmed.indexOf("=");
+if (eq === -1) continue;
+const k = trimmed.slice(0, eq).trim();
+let v = trimmed.slice(eq + 1).trim();
+if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
+v = v.slice(1, -1);
+}
+if (!process.env[k]) process.env[k] = v;
+}
 }
 
 (async () => {
-  loadDotEnv();
-  const prisma = new PrismaClient();
-  try {
-    console.log('[check-db] Connecting to database (DATABASE_URL from env or .env)...');
-    await prisma.$connect();
+loadDotEnv();
+const prisma = new PrismaClient();
+try {
+console.log('[check-db] Connecting to database (DATABASE_URL from env or .env)...');
+await prisma.$connect();
     const res = await prisma.$queryRaw`SELECT 1 as ok`;
-    console.log('[check-db] Database connected OK:', res);
-    process.exit(0);
-  } catch (err) {
-    console.error('[check-db] DB connectivity check failed:', err && err.message ? err.message : err);
-    process.exit(1);
-  } finally {
-    await prisma.$disconnect();
-  }
+console.log('[check-db] Database connected OK:', res);
+process.exit(0);
+} catch (err) {
+console.error('[check-db] DB connectivity check failed:', err && err.message ? err.message : err);
+process.exit(1);
+} finally {
+await prisma.$disconnect();
+}
 })();
 EOF
 
 # ensure it's executable
+
 chmod +x scripts/check-db.js
 
+Using "Replace String in File"
+
+```
+
+```
 
 Using "Replace String in File"
 
-
 ```
 
 ```
-
-
-Using "Replace String in File"
-
-
-```
-
-```
-
 
 Ran terminal command: npm run lint && npm run typecheck && npm run check:db
 
@@ -334,13 +338,13 @@ Ran terminal command: npx eslint scripts --ext .js
 
 Ran terminal command: git status --porcelain && git add -A && git commit -m "chore(db): harden setup-db, add DB check script, document env vars"
 
-Starting: *Add DB health-check script* (2/5)
+Starting: _Add DB health-check script_ (2/5)
 
-Starting: *Run lint/typecheck and verify locally* (4/5)
+Starting: _Run lint/typecheck and verify locally_ (4/5)
 
 Ran terminal command: npm run lint
 
-Completed: *Run lint/typecheck and verify locally* (4/5)
+Completed: _Run lint/typecheck and verify locally_ (4/5)
 
 Perfect! The DB provisioning is now hardened (Docker permission checks, container port detection, pg_isready readiness probe, configurable timeouts) and I added check-db.js + `npm run check:db` to verify the DB; next I can add a CI workflow to run the check automatically if you want.## Summary — What I changed ✅
 
@@ -389,6 +393,7 @@ Perfect! The DB provisioning is now hardened (Docker permission checks, containe
    npm run check:db     # verifies app can connect to DB via Prisma
    ```
 3. If you hit a Docker socket permission error:
+
    ```bash
    sudo usermod -aG docker $USER
    # Re-login or run:
@@ -398,6 +403,7 @@ Perfect! The DB provisioning is now hardened (Docker permission checks, containe
    ```
 
 4. If provisioning times out, inspect container logs:
+
    ```bash
    docker logs med-postgres --tail 50
    docker inspect med-postgres
@@ -419,6 +425,7 @@ Perfect! The DB provisioning is now hardened (Docker permission checks, containe
 ---
 
 If you want, I’ll:
+
 - open a PR with these changes (if you prefer non-main commits), and/or
 - add a simple CI workflow to exercise `check:db` and capture logs on failure.
 

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import { useOpsStore } from "~/stores/ops";
+import { Save } from "lucide-vue-next";
 import OpsSchemaPricingEditor from "./ops/OpsSchemaPricingEditor.vue";
 import OpsSchemaCalendarEditor from "./ops/OpsSchemaCalendarEditor.vue";
 import PatternEditor from "./PatternEditor.vue";
 import ProgramEditor from "./ProgramEditor.vue";
-import { Save } from "lucide-vue-next";
+import { useOpsStore } from "~/stores/ops";
 
 const opsStore = useOpsStore();
 const currentStep = ref("pricing"); // pricing | patterns | programs | schedule
@@ -234,8 +234,8 @@ const rollbackSchema = () => {
               </div>
               <button
                 v-if="opsStore.hasUnsavedChanges"
-                @click="handleSave"
                 class="flex items-center gap-2 bg-primary-900 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-primary-800 transition shadow-lg shadow-primary-900/20"
+                @click="handleSave"
               >
                 <Save class="w-4 h-4" />
                 Save Changes
@@ -260,9 +260,9 @@ const rollbackSchema = () => {
               class="fade-enter-active"
             >
               <OpsSchemaPricingEditor
-                :modelValue="opsStore.opsSchemaDraft"
+                :model-value="opsStore.opsSchemaDraft"
                 :density="density"
-                @update:modelValue="opsStore.updateOpsSchemaDraft"
+                @update:model-value="opsStore.updateOpsSchemaDraft"
                 @update:density="density = $event"
               />
             </div>
@@ -287,8 +287,8 @@ const rollbackSchema = () => {
 
             <div v-if="currentStep === 'schedule' && opsStore.opsSchemaDraft">
               <OpsSchemaCalendarEditor
-                :modelValue="opsStore.opsSchemaDraft"
-                @update:modelValue="opsStore.updateOpsSchemaDraft"
+                :model-value="opsStore.opsSchemaDraft"
+                @update:model-value="opsStore.updateOpsSchemaDraft"
               />
             </div>
           </div>

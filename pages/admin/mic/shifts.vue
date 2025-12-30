@@ -65,13 +65,13 @@
                     {{ shift.shift }}
                   </td>
                   <td class="px-3 py-2 text-right">
-                    ${{ shift.pulltabs_total.toFixed(2) }}
+                    ${{ formatCurrency(shift.pulltabs_total, 2) }}
                   </td>
                   <td class="px-3 py-2 text-right">
-                    ${{ shift.deposit_total.toFixed(2) }}
+                    ${{ formatCurrency(shift.deposit_total, 2) }}
                   </td>
                   <td class="px-3 py-2 text-right">
-                    {{ shift.bingo_total.toFixed(2) }}
+                    {{ formatCurrency(shift.bingo_total, 2) }}
                   </td>
                   <td class="px-3 py-2 text-right">
                     <NuxtLink
@@ -100,15 +100,18 @@
               New Shift
             </p>
             <h3 class="text-lg font-black text-primary-900">Record Totals</h3>
+            <p class="text-xs text-slate-500 mt-2">
+              Available shifts:
+              <span v-if="availableShifts.length > 0">{{
+                availableShifts.join(", ")
+              }}</span>
+              <span v-else class="text-rose-600">Closed</span>
+            </p>
+            <p v-if="shiftHint" class="text-xs text-slate-400">
+              {{ shiftHint }}
+            </p>
           </div>
-          <ShiftForm
-            v-model="draft"
-            :available-shifts="availableShifts"
-            :prev-ending-box="prevEndingBox"
-            :shift-hint="shiftHint"
-            submit-label="Save Shift"
-            @submit="createShift"
-          />
+          <ShiftWizard @submit="submitMicShift" />
         </div>
       </div>
     </div>
@@ -118,8 +121,9 @@
 <script setup lang="ts">
 import { computed, ref, watch, onMounted } from "vue";
 import AdminShell from "~/components/admin/AdminShell.vue";
-import ShiftForm from "~/components/admin/mic/ShiftForm.vue";
+import ShiftWizard from "~/components/admin/mic/ShiftWizard.vue";
 import HolidayBanner from "~/components/admin/mic/HolidayBanner.vue";
+import { formatCurrency } from "~/utils/format";
 import type { HolidayOccurrence, ShiftRecord } from "~/types/admin";
 
 definePageMeta({
@@ -134,20 +138,6 @@ const overrideClosed = ref(false);
 const holidays = ref<HolidayOccurrence[]>([]);
 const shifts = ref<ShiftRecord[]>([]);
 const prevEndingBox = ref<number | null>(null);
-
-const draft = ref({
-  date: selectedDate.value,
-  shift: "AM" as const,
-  pulltabs_total: 0,
-  deposit_total: 0,
-  players: 0,
-  workflow_type: "NORMAL" as const,
-  beginning_box: undefined,
-  ending_box: undefined,
-  bingo_actual: undefined,
-  deposit_actual: undefined,
-  notes: "",
-});
 
 const holidayForDate = computed(
   () =>
@@ -192,14 +182,13 @@ const loadShifts = async () => {
     : null;
 };
 
-const createShift = async (payload: any) => {
-  if (!availableShifts.value.length) return;
-  const record = await $fetch("/api/admin/shift-records", {
+const submitMicShift = async (payload: Record<string, unknown>) => {
+  const record = await $fetch("/api/admin/mic/shifts", {
     method: "POST",
     body: payload,
     credentials: "include",
   });
-  shifts.value.unshift(record);
+  shifts.value.unshift(record as ShiftRecord);
 };
 
 const logout = async () => {
@@ -209,8 +198,7 @@ const logout = async () => {
 
 watch(
   () => selectedDate.value,
-  async (value) => {
-    draft.value.date = value;
+  async () => {
     await loadHolidays();
     await loadShifts();
   },

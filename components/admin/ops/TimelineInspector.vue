@@ -38,9 +38,9 @@
         </label>
         <input
           :value="draft.color || '#000000'"
-          @input="draft.color = ($event.target as HTMLInputElement).value"
           type="color"
           class="w-12 h-10 border-0 bg-transparent"
+          @input="draft.color = ($event.target as HTMLInputElement).value"
         />
         <label
           class="block text-xs font-bold text-slate-500 uppercase tracking-wider mt-3 mb-1"

@@ -107,7 +107,7 @@ type CalendarCell = {
   isFallback?: boolean;
 };
 
-const props = defineProps<{
+const { monthLabel, days, weekDays, selectedDates } = defineProps<{
   monthLabel: string;
   days: CalendarCell[];
   weekDays: string[];

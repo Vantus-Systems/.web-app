@@ -6,7 +6,7 @@
     >
       <div class="w-20 border-r border-slate-200 shrink-0 bg-slate-50"></div>
       <!-- Sidebar spacer -->
-      <div class="flex-1 relative overflow-hidden" ref="timelineHeader">
+      <div ref="timelineHeader" class="flex-1 relative overflow-hidden">
         <div
           v-for="hour in hours"
           :key="hour"
@@ -51,7 +51,7 @@
         </div>
 
         <!-- Tracks Area -->
-        <div class="flex-1 relative pt-4" ref="tracksArea">
+        <div ref="tracksArea" class="flex-1 relative pt-4">
           <!-- Flow Track -->
           <div class="h-12 relative w-full mb-2">
             <div
@@ -67,7 +67,7 @@
                   : ''
               "
               :style="getSegmentStyle(segment)"
-              @click="$emit('select', { type: 'flowSegment', id: segment.id })"
+              @click="emit('select', { type: 'flowSegment', id: segment.id })"
             >
               <span class="text-[10px] font-bold text-blue-700 truncate">{{
                 segment.name
@@ -139,7 +139,7 @@
 import { computed } from "vue";
 import type { FlowSegment, OverlayEvent } from "~/types/ops-schema";
 
-const props = defineProps<{
+const { flowSegments, overlayEvents, selectedId } = defineProps<{
   flowSegments: FlowSegment[];
   overlayEvents: OverlayEvent[];
   selectedId?: string;

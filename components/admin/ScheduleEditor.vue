@@ -1096,7 +1096,6 @@ const createCell = (date: Date, isCurrentMonth: boolean) => {
     for (let i = 0; i < sessions.length - 1; i++) {
       const s1 = sessions[i];
       const s2 = sessions[i + 1];
-      const start1 = parseTime(s1.startTime || "");
       const end1 = parseTime(s1.endTime || "");
       const start2 = parseTime(s2.startTime || "");
 
@@ -1192,36 +1191,10 @@ const changeMonth = (delta: number) => {
   currentDate.value = d;
 };
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "Live":
-      return "bg-emerald-500";
-    case "Upcoming":
-      return "bg-sky-500";
-    case "Closing":
-      return "bg-amber-500";
-    case "Sold Out":
-      return "bg-rose-500";
-    default:
-      return "bg-slate-300";
-  }
-};
-
 const formatMoney = (val?: number) => (val ? val.toLocaleString() : "0");
 
-const getProgramName = (slug: string) => {
-  return props.programs?.find((p) => p.slug === slug)?.name || slug;
-};
-const getPricingName = (id: string) => {
-  if (id === "evening-main") return "Evening Main";
-  return (
-    props.pricingData?.daytime?.sessions?.find((s: any) => s.id === id)?.name ||
-    id
-  );
-};
-
 // --- Drag and Drop ---
-const onDragStart = (e: DragEvent, session: any) => {
+const _onDragStart = (e: DragEvent, session: any) => {
   if (e.dataTransfer) {
     e.dataTransfer.setData("application/json", JSON.stringify(session));
     e.dataTransfer.effectAllowed = "move";
@@ -1280,7 +1253,7 @@ const toggleFilter = (key: "drafts" | "conflicts" | "metrics") => {
 };
 
 // --- Context Menu ---
-const openContextMenu = (e: MouseEvent, session: any) => {
+const _openContextMenu = (e: MouseEvent, session: any) => {
   contextMenu.value = {
     visible: true,
     x: e.clientX,
@@ -1503,9 +1476,10 @@ const runBulkGenerate = () => {
 
   const { type, data } = bulkForm.value.template;
   const newSessions = [];
-  const loopDate = new Date(start);
+  for (let i = 0; i <= diffDays; i++) {
+    const loopDate = new Date(start);
+    loopDate.setDate(loopDate.getDate() + i);
 
-  while (loopDate <= end) {
     let dayIndex = loopDate.getDay() - 1;
     if (dayIndex === -1) dayIndex = 6;
 
@@ -1547,8 +1521,6 @@ const runBulkGenerate = () => {
 
       newSessions.push(newSession);
     }
-
-    loopDate.setDate(loopDate.getDate() + 1);
   }
 
   if (newSessions.length > 0) {

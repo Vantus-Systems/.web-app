@@ -1,9 +1,11 @@
 # Mary Esther Bingo - Project Architecture
 
 ## Overview
+
 A Nuxt 3 full-stack web application for managing a bingo hall in Mary Esther, FL.
 
 ## Tech Stack
+
 - **Frontend**: Nuxt 3, Vue 3, TypeScript, Tailwind CSS, Pinia
 - **Backend**: Nitro server, H3 event handlers
 - **Database**: SQLite (Prisma ORM)
@@ -11,6 +13,7 @@ A Nuxt 3 full-stack web application for managing a bingo hall in Mary Esther, FL
 - **Validation**: Zod schemas
 
 ## Architecture Patterns
+
 - **File-Based Routing**: `/pages` directory
 - **API Routes**: `/server/api` with H3 handlers
 - **Middleware**: Server (`/server/middleware`) and client (`/middleware`)
@@ -19,6 +22,7 @@ A Nuxt 3 full-stack web application for managing a bingo hall in Mary Esther, FL
 - **Stores**: Pinia state management in `/stores`
 
 ## Key Features
+
 1. Public-facing pages (schedule, pricing, programs, contact)
 2. Admin panel with role-based access (OWNER, MIC, CHARITY, CALLER)
 3. Operations schema management (pricing, schedules, day profiles)
@@ -28,6 +32,7 @@ A Nuxt 3 full-stack web application for managing a bingo hall in Mary Esther, FL
 7. Audit logging for sensitive operations
 
 ## Security Model
+
 - Session-based authentication with HTTP-only cookies
 - Role-based authorization via `assertRole()` utility
 - Password hashing with Argon2id
@@ -36,10 +41,12 @@ A Nuxt 3 full-stack web application for managing a bingo hall in Mary Esther, FL
 - All admin routes protected by middleware
 
 ## Data Storage
+
 - **Prisma/SQLite**: Users, sessions, audit logs, patterns, programs, games, shift records, holiday rules, contact messages, settings
 - **JSON Files** (legacy, being migrated): `/server/data/*.json`
 
 ## Critical Dependencies
+
 - `@prisma/client`: Database ORM
 - `argon2`: Password hashing
 - `zod`: Runtime type validation

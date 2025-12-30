@@ -53,7 +53,9 @@
         :operational-end="draft.timeline.operationalHours.end"
         :density="density"
         :selected-id="selected?.id"
-        :selected-type="selected?.type === 'rateCard' ? null : selected?.type ?? null"
+        :selected-type="
+          selected?.type === 'rateCard' ? null : (selected?.type ?? null)
+        "
         :gaps="gaps"
         @select="handleSelect"
         @add-segment="addSegmentFromDrop"
@@ -112,8 +114,14 @@ const isValidTimeFormat = (time: string): boolean => {
   if (!match) return false;
   const hours = Number(match[1]);
   const minutes = Number(match[2]);
-  return !Number.isNaN(hours) && !Number.isNaN(minutes) &&
-         hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59;
+  return (
+    !Number.isNaN(hours) &&
+    !Number.isNaN(minutes) &&
+    hours >= 0 &&
+    hours <= 23 &&
+    minutes >= 0 &&
+    minutes <= 59
+  );
 };
 
 const isValidTimeRange = (start: string, end: string): boolean => {
@@ -132,7 +140,9 @@ const isValidColorFormat = (color: string): boolean => {
 
 const isValidBundleIds = (bundleIds: string[]): boolean => {
   // Check if all bundle IDs are valid (non-empty strings)
-  return bundleIds.every(id => typeof id === 'string' && id.trim().length > 0);
+  return bundleIds.every(
+    (id) => typeof id === "string" && id.trim().length > 0,
+  );
 };
 
 const isValidOperationalHours = (start: string, end: string): boolean => {
@@ -141,23 +151,42 @@ const isValidOperationalHours = (start: string, end: string): boolean => {
   return isValidTimeRange(start, end);
 };
 
-const isValidSegmentDuration = (start: string, end: string, minMinutes: number = 15): boolean => {
+const isValidSegmentDuration = (
+  start: string,
+  end: string,
+  minMinutes: number = 15,
+): boolean => {
   if (!isValidTimeFormat(start) || !isValidTimeFormat(end)) return false;
   const startMinutes = toMinutes(start);
   const endMinutes = toMinutes(end);
-  return (endMinutes - startMinutes) >= minMinutes;
+  return endMinutes - startMinutes >= minMinutes;
 };
 
-const isValidTriggerTarget = (targetId: string | undefined, overlayEvents: OpsSchemaOverlayEvent[]): boolean => {
+const isValidTriggerTarget = (
+  targetId: string | undefined,
+  overlayEvents: OpsSchemaOverlayEvent[],
+): boolean => {
   if (!targetId) return true; // null/undefined is valid (no target)
-  return overlayEvents.some(event => event.id === targetId);
+  return overlayEvents.some((event) => event.id === targetId);
 };
 
-const hasOverlappingSegments = (newSegment: { time_start: string; time_end: string; allow_overlap?: boolean; id?: string }, existingSegments: OpsSchemaFlowSegment[]): boolean => {
+const hasOverlappingSegments = (
+  newSegment: {
+    time_start: string;
+    time_end: string;
+    allow_overlap?: boolean;
+    id?: string;
+  },
+  existingSegments: OpsSchemaFlowSegment[],
+): boolean => {
   // Check if the new segment overlaps with any existing segments
   for (const segment of existingSegments) {
     // Skip if the segment allows overlap or if it's the same segment being updated
-    if (segment.allow_overlap || (newSegment.id && segment.id === newSegment.id)) continue;
+    if (
+      segment.allow_overlap ||
+      (newSegment.id && segment.id === newSegment.id)
+    )
+      continue;
 
     const newStart = toMinutes(newSegment.time_start);
     const newEnd = toMinutes(newSegment.time_end);
@@ -202,16 +231,14 @@ const gaps = computed(() => {
   const end = draft.value.timeline.operationalHours.end;
 
   if (!isValidOperationalHours(start, end)) {
-    console.warn('DEBUG: Invalid operational hours:', { start, end });
-    setError('Invalid operational hours. Please check the start and end times.');
+    console.warn("DEBUG: Invalid operational hours:", { start, end });
+    setError(
+      "Invalid operational hours. Please check the start and end times.",
+    );
     return [];
   }
 
-  return detectGaps(
-    flowSegments.value,
-    start,
-    end,
-  );
+  return detectGaps(flowSegments.value, start, end);
 });
 
 const handleSelect = (payload: Selected) => {
@@ -259,29 +286,34 @@ const addSegmentFromDrop = (payload: {
   time_start: string;
   time_end: string;
 }) => {
-  console.log('DEBUG: addSegmentFromDrop called with:', payload);
+  console.log("DEBUG: addSegmentFromDrop called with:", payload);
 
   // Validate time format
-  if (!isValidTimeFormat(payload.time_start) || !isValidTimeFormat(payload.time_end)) {
-    setError('Invalid time format. Expected HH:MM format.');
+  if (
+    !isValidTimeFormat(payload.time_start) ||
+    !isValidTimeFormat(payload.time_end)
+  ) {
+    setError("Invalid time format. Expected HH:MM format.");
     return;
   }
 
   // Validate time range
   if (!isValidTimeRange(payload.time_start, payload.time_end)) {
-    setError('Invalid time range. End time must be after start time.');
+    setError("Invalid time range. End time must be after start time.");
     return;
   }
 
   // Validate segment duration minimum
   if (!isValidSegmentDuration(payload.time_start, payload.time_end)) {
-    setError('Segment duration too short. Minimum duration is 15 minutes.');
+    setError("Segment duration too short. Minimum duration is 15 minutes.");
     return;
   }
 
   // Validate no overlapping segments
   if (hasOverlappingSegments(payload, flowSegments.value)) {
-    setError('Segment overlaps with existing segments. Please adjust the time range.');
+    setError(
+      "Segment overlaps with existing segments. Please adjust the time range.",
+    );
     return;
   }
 
@@ -290,8 +322,8 @@ const addSegmentFromDrop = (payload: {
   );
 
   if (!rateCard) {
-    console.warn('DEBUG: Rate card not found for ID:', payload.rateCardId);
-    setError('Rate card not found. Please select a valid rate card.');
+    console.warn("DEBUG: Rate card not found for ID:", payload.rateCardId);
+    setError("Rate card not found. Please select a valid rate card.");
     return;
   }
 
@@ -313,30 +345,37 @@ const updateSegmentTime = (payload: {
   time_start: string;
   time_end: string;
 }) => {
-  console.log('DEBUG: updateSegmentTime called with:', payload);
+  console.log("DEBUG: updateSegmentTime called with:", payload);
 
   // Validate time format
-  if (!isValidTimeFormat(payload.time_start) || !isValidTimeFormat(payload.time_end)) {
-    setError('Invalid time format. Expected HH:MM format.');
+  if (
+    !isValidTimeFormat(payload.time_start) ||
+    !isValidTimeFormat(payload.time_end)
+  ) {
+    setError("Invalid time format. Expected HH:MM format.");
     return;
   }
 
   // Validate time range
   if (!isValidTimeRange(payload.time_start, payload.time_end)) {
-    setError('Invalid time range. End time must be after start time.');
+    setError("Invalid time range. End time must be after start time.");
     return;
   }
 
   // Validate segment duration minimum
   if (!isValidSegmentDuration(payload.time_start, payload.time_end)) {
-    setError('Segment duration too short. Minimum duration is 15 minutes.');
+    setError("Segment duration too short. Minimum duration is 15 minutes.");
     return;
   }
 
   // Validate no overlapping segments (excluding the current segment being updated)
-  const otherSegments = flowSegments.value.filter((segment: OpsSchemaFlowSegment) => segment.id !== payload.id);
+  const otherSegments = flowSegments.value.filter(
+    (segment: OpsSchemaFlowSegment) => segment.id !== payload.id,
+  );
   if (hasOverlappingSegments(payload, otherSegments)) {
-    setError('Segment overlaps with existing segments. Please adjust the time range.');
+    setError(
+      "Segment overlaps with existing segments. Please adjust the time range.",
+    );
     return;
   }
 
@@ -345,8 +384,8 @@ const updateSegmentTime = (payload: {
   );
 
   if (!target) {
-    console.warn('DEBUG: Segment not found for ID:', payload.id);
-    setError('Segment not found. Cannot update time.');
+    console.warn("DEBUG: Segment not found for ID:", payload.id);
+    setError("Segment not found. Cannot update time.");
     return;
   }
 
@@ -377,48 +416,55 @@ const addTrigger = () => {
 };
 
 const updateRateCard = (updated: OpsSchemaRateCard) => {
-  console.log('DEBUG: updateRateCard called with:', updated);
+  console.log("DEBUG: updateRateCard called with:", updated);
 
   // Validate required fields
   if (!updated.name || !updated.id) {
-    setError('Rate card must have a name and ID.');
+    setError("Rate card must have a name and ID.");
     return;
   }
 
   // Validate color format
   if (updated.color && !isValidColorFormat(updated.color)) {
-    setError('Invalid color format. Expected hex color code.');
+    setError("Invalid color format. Expected hex color code.");
     return;
   }
 
   // Validate bundle IDs
-  if (updated.yield_configuration?.active_bundles &&
-      !isValidBundleIds(updated.yield_configuration.active_bundles)) {
-    setError('Invalid bundle IDs. All bundle IDs must be non-empty strings.');
+  if (
+    updated.yield_configuration?.active_bundles &&
+    !isValidBundleIds(updated.yield_configuration.active_bundles)
+  ) {
+    setError("Invalid bundle IDs. All bundle IDs must be non-empty strings.");
     return;
   }
 
-  const idx = rateCards.value.findIndex((card: OpsSchemaRateCard) => card.id === updated.id);
+  const idx = rateCards.value.findIndex(
+    (card: OpsSchemaRateCard) => card.id === updated.id,
+  );
   if (idx >= 0) {
     draft.value.definitions.rateCards[idx] = updated;
   } else {
-    console.warn('DEBUG: Rate card not found for update:', updated.id);
-    setError('Rate card not found. Cannot update.');
+    console.warn("DEBUG: Rate card not found for update:", updated.id);
+    setError("Rate card not found. Cannot update.");
   }
 };
 
 const updateSegment = (updated: OpsSchemaFlowSegment) => {
-  console.log('DEBUG: updateSegment called with:', updated);
+  console.log("DEBUG: updateSegment called with:", updated);
 
   // Validate time format
-  if (!isValidTimeFormat(updated.time_start) || !isValidTimeFormat(updated.time_end)) {
-    setError('Invalid time format. Expected HH:MM format.');
+  if (
+    !isValidTimeFormat(updated.time_start) ||
+    !isValidTimeFormat(updated.time_end)
+  ) {
+    setError("Invalid time format. Expected HH:MM format.");
     return;
   }
 
   // Validate time range
   if (!isValidTimeRange(updated.time_start, updated.time_end)) {
-    setError('Invalid time range. End time must be after start time.');
+    setError("Invalid time range. End time must be after start time.");
     return;
   }
 
@@ -428,53 +474,63 @@ const updateSegment = (updated: OpsSchemaFlowSegment) => {
   if (idx >= 0) {
     draft.value.timeline.flowSegments[idx] = updated;
   } else {
-    console.warn('DEBUG: Segment not found for update:', updated.id);
-    setError('Segment not found. Cannot update.');
+    console.warn("DEBUG: Segment not found for update:", updated.id);
+    setError("Segment not found. Cannot update.");
   }
 };
 
 const updateOverlay = (updated: OpsSchemaOverlayEvent) => {
-  console.log('DEBUG: updateOverlay called with:', updated);
+  console.log("DEBUG: updateOverlay called with:", updated);
 
   // Validate time format
-  if (!isValidTimeFormat(updated.time_start) || !isValidTimeFormat(updated.time_end)) {
-    setError('Invalid time format. Expected HH:MM format.');
+  if (
+    !isValidTimeFormat(updated.time_start) ||
+    !isValidTimeFormat(updated.time_end)
+  ) {
+    setError("Invalid time format. Expected HH:MM format.");
     return;
   }
 
   // Validate time range
   if (!isValidTimeRange(updated.time_start, updated.time_end)) {
-    setError('Invalid time range. End time must be after start time.');
+    setError("Invalid time range. End time must be after start time.");
     return;
   }
 
-  const idx = overlayEvents.value.findIndex((event: OpsSchemaOverlayEvent) => event.id === updated.id);
+  const idx = overlayEvents.value.findIndex(
+    (event: OpsSchemaOverlayEvent) => event.id === updated.id,
+  );
   if (idx >= 0) {
     draft.value.timeline.overlayEvents[idx] = updated;
   } else {
-    console.warn('DEBUG: Overlay event not found for update:', updated.id);
-    setError('Overlay event not found. Cannot update.');
+    console.warn("DEBUG: Overlay event not found for update:", updated.id);
+    setError("Overlay event not found. Cannot update.");
   }
 };
 
 const updateTrigger = (updated: OpsSchemaLogicTrigger) => {
-  console.log('DEBUG: updateTrigger called with:', updated);
+  console.log("DEBUG: updateTrigger called with:", updated);
 
   // Validate time format
   if (!isValidTimeFormat(updated.trigger_time)) {
-    setError('Invalid trigger time format. Expected HH:MM format.');
+    setError("Invalid trigger time format. Expected HH:MM format.");
     return;
   }
 
   // Validate trigger type
   if (!["hard_reset", "sales_window_open"].includes(updated.type)) {
-    setError('Invalid trigger type. Must be "hard_reset" or "sales_window_open".');
+    setError(
+      'Invalid trigger type. Must be "hard_reset" or "sales_window_open".',
+    );
     return;
   }
 
   // Validate trigger target event
-  if (updated.target_event && !isValidTriggerTarget(updated.target_event, overlayEvents.value)) {
-    setError('Invalid target event. Target event must exist in the timeline.');
+  if (
+    updated.target_event &&
+    !isValidTriggerTarget(updated.target_event, overlayEvents.value)
+  ) {
+    setError("Invalid target event. Target event must exist in the timeline.");
     return;
   }
 
@@ -484,17 +540,17 @@ const updateTrigger = (updated: OpsSchemaLogicTrigger) => {
   if (idx >= 0) {
     draft.value.logicTriggers[idx] = updated;
   } else {
-    console.warn('DEBUG: Trigger not found for update:', updated.id);
-    setError('Trigger not found. Cannot update.');
+    console.warn("DEBUG: Trigger not found for update:", updated.id);
+    setError("Trigger not found. Cannot update.");
   }
 };
 
 const removeSelection = (payload: Selected) => {
-  console.log('DEBUG: removeSelection called with:', payload);
+  console.log("DEBUG: removeSelection called with:", payload);
 
   if (!payload) {
-    console.warn('DEBUG: removeSelection called with null payload');
-    setError('No item selected for deletion.');
+    console.warn("DEBUG: removeSelection called with null payload");
+    setError("No item selected for deletion.");
     return;
   }
 
@@ -504,8 +560,8 @@ const removeSelection = (payload: Selected) => {
       (card: OpsSchemaRateCard) => card.id !== payload.id,
     );
     if (rateCards.value.length === initialLength) {
-      console.warn('DEBUG: Rate card not found for deletion:', payload.id);
-      setError('Rate card not found. Cannot delete.');
+      console.warn("DEBUG: Rate card not found for deletion:", payload.id);
+      setError("Rate card not found. Cannot delete.");
     }
   } else if (payload.type === "segment") {
     const initialLength = flowSegments.value.length;
@@ -513,8 +569,8 @@ const removeSelection = (payload: Selected) => {
       (segment: OpsSchemaFlowSegment) => segment.id !== payload.id,
     );
     if (flowSegments.value.length === initialLength) {
-      console.warn('DEBUG: Segment not found for deletion:', payload.id);
-      setError('Segment not found. Cannot delete.');
+      console.warn("DEBUG: Segment not found for deletion:", payload.id);
+      setError("Segment not found. Cannot delete.");
     }
   } else if (payload.type === "overlay") {
     const initialLength = overlayEvents.value.length;
@@ -522,8 +578,8 @@ const removeSelection = (payload: Selected) => {
       (event: OpsSchemaOverlayEvent) => event.id !== payload.id,
     );
     if (overlayEvents.value.length === initialLength) {
-      console.warn('DEBUG: Overlay event not found for deletion:', payload.id);
-      setError('Overlay event not found. Cannot delete.');
+      console.warn("DEBUG: Overlay event not found for deletion:", payload.id);
+      setError("Overlay event not found. Cannot delete.");
     }
   } else if (payload.type === "trigger") {
     const initialLength = logicTriggers.value.length;
@@ -531,12 +587,12 @@ const removeSelection = (payload: Selected) => {
       (trigger: OpsSchemaLogicTrigger) => trigger.id !== payload.id,
     );
     if (logicTriggers.value.length === initialLength) {
-      console.warn('DEBUG: Trigger not found for deletion:', payload.id);
-      setError('Trigger not found. Cannot delete.');
+      console.warn("DEBUG: Trigger not found for deletion:", payload.id);
+      setError("Trigger not found. Cannot delete.");
     }
   } else {
-    console.warn('DEBUG: Unknown selection type for deletion:', payload.type);
-    setError('Unknown item type. Cannot delete.');
+    console.warn("DEBUG: Unknown selection type for deletion:", payload.type);
+    setError("Unknown item type. Cannot delete.");
   }
   selected.value = null;
 };

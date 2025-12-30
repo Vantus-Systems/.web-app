@@ -12,7 +12,7 @@
       </p>
     </div>
 
-    <div class="flex-1 overflow-y-auto p-4 space-y-4" v-if="item">
+    <div v-if="item" class="flex-1 overflow-y-auto p-4 space-y-4">
       <!-- Common: Name -->
       <div class="space-y-1">
         <label class="text-[10px] uppercase font-bold text-slate-500"
@@ -20,8 +20,8 @@
         >
         <input
           v-model="localItem.name"
-          @change="commit"
           class="w-full text-sm border-slate-200 rounded focus:border-gold focus:ring-gold"
+          @change="commit"
         />
       </div>
 
@@ -33,8 +33,8 @@
           >
           <select
             v-model="localItem.category"
-            @change="commit"
             class="w-full text-sm border-slate-200 rounded focus:border-gold focus:ring-gold"
+            @change="commit"
           >
             <option value="">None</option>
             <option value="Regular">Regular</option>
@@ -53,9 +53,9 @@
             >
             <input
               v-model.number="localItem.basePrice"
-              @change="commit"
               type="number"
               class="w-full pl-6 text-sm border-slate-200 rounded focus:border-gold focus:ring-gold"
+              @change="commit"
             />
           </div>
         </div>
@@ -65,9 +65,9 @@
           >
           <textarea
             v-model="localItem.description"
-            @change="commit"
             rows="3"
             class="w-full text-sm border-slate-200 rounded focus:border-gold focus:ring-gold"
+            @change="commit"
           ></textarea>
         </div>
       </template>
@@ -85,9 +85,9 @@
             >
             <input
               v-model.number="localItem.price"
-              @change="commit"
               type="number"
               class="w-full pl-6 text-sm border-slate-200 rounded focus:border-gold focus:ring-gold"
+              @change="commit"
             />
           </div>
         </div>
@@ -113,8 +113,8 @@
             </div>
             <div class="pt-2 border-t border-slate-200 mt-2">
               <select
-                @change="addRateCardToBundle($event)"
                 class="w-full text-xs border-slate-200 rounded"
+                @change="addRateCardToBundle($event)"
               >
                 <option value="">+ Add Card</option>
                 <option v-for="rc in allRateCards" :key="rc.id" :value="rc.id">
@@ -135,9 +135,9 @@
             >
             <input
               v-model="localItem.startTime"
-              @change="commit"
               type="time"
               class="w-full text-sm border-slate-200 rounded focus:border-gold focus:ring-gold"
+              @change="commit"
             />
           </div>
           <div class="space-y-1">
@@ -146,9 +146,9 @@
             >
             <input
               v-model="localItem.endTime"
-              @change="commit"
               type="time"
               class="w-full text-sm border-slate-200 rounded focus:border-gold focus:ring-gold"
+              @change="commit"
             />
           </div>
         </div>
@@ -158,8 +158,8 @@
           >
           <select
             v-model="localItem.rateCardId"
-            @change="commit"
             class="w-full text-sm border-slate-200 rounded focus:border-gold focus:ring-gold"
+            @change="commit"
           >
             <option value="">(No specific card)</option>
             <option v-for="rc in allRateCards" :key="rc.id" :value="rc.id">

@@ -13,6 +13,7 @@
     "postinstall": "node ./scripts/setup-db.js && nuxt prepare",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "verify:admin": "python3 verification/verify_admin_console.py",
     "typecheck": "vue-tsc --noEmit",
     "prisma:generate": "prisma generate",
     "prisma:migrate:dev": "prisma migrate dev",

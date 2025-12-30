@@ -14,7 +14,7 @@
           Week
         </div>
         <div class="text-lg font-bold text-slate-900">
-          ${{ weeklyTotal.toFixed(2) }}
+          ${{ formatCurrency(weeklyTotal, 2) }}
         </div>
       </div>
       <div class="border border-slate-200 rounded-lg p-3">
@@ -22,7 +22,7 @@
           Month
         </div>
         <div class="text-lg font-bold text-slate-900">
-          ${{ monthlyTotal.toFixed(2) }}
+          ${{ formatCurrency(monthlyTotal, 2) }}
         </div>
       </div>
     </div>
@@ -31,6 +31,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { formatCurrency } from "~/utils/format";
 
 const props = defineProps<{
   weekShifts: Array<{ deposit_total: number }>;
@@ -38,9 +39,15 @@ const props = defineProps<{
 }>();
 
 const weeklyTotal = computed(() =>
-  props.weekShifts.reduce((sum, shift) => sum + shift.deposit_total, 0),
+  props.weekShifts.reduce(
+    (sum, shift) => sum + Number(shift.deposit_total ?? 0),
+    0,
+  ),
 );
 const monthlyTotal = computed(() =>
-  props.monthShifts.reduce((sum, shift) => sum + shift.deposit_total, 0),
+  props.monthShifts.reduce(
+    (sum, shift) => sum + Number(shift.deposit_total ?? 0),
+    0,
+  ),
 );
 </script>

@@ -89,12 +89,16 @@
         <form class="space-y-3" @submit.prevent="createUser">
           <input
             v-model="newUser.username"
+            name="username"
+            autocomplete="username"
             class="w-full rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-sm"
             placeholder="Username"
           />
           <input
             v-model="newUser.password"
             type="password"
+            name="password"
+            autocomplete="new-password"
             class="w-full rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-sm"
             placeholder="Password"
           />

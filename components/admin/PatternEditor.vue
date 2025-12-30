@@ -72,15 +72,15 @@
         <div class="flex gap-2">
           <button
             class="text-xs font-bold uppercase tracking-[0.2em] border border-slate-200 rounded-lg px-3 py-2"
-            @click="duplicatePattern"
             :disabled="!editingPattern"
+            @click="duplicatePattern"
           >
             Duplicate
           </button>
           <button
             class="text-xs font-bold uppercase tracking-[0.2em] border border-rose-200 text-rose-600 rounded-lg px-3 py-2"
-            @click="deletePattern"
             :disabled="!editingPattern || editingPattern?.isNew"
+            @click="deletePattern"
           >
             Delete
           </button>
@@ -146,15 +146,15 @@
         <div class="flex items-center gap-3">
           <button
             class="text-xs font-bold text-slate-600"
-            @click="addFrame"
             :disabled="!form.isAnimated"
+            @click="addFrame"
           >
             + Frame
           </button>
           <button
             class="text-xs font-bold text-rose-500"
-            @click="removeFrame(currentFrameIndex)"
             :disabled="form.definition.frames.length <= 1"
+            @click="removeFrame(currentFrameIndex)"
           >
             Remove Frame
           </button>

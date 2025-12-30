@@ -24,38 +24,124 @@ model user {
   sessions      session[]
   audit_logs    auditLog[] @relation("AuditActor")
   created_shifts shiftRecord[] @relation("UserShiftRecords")
+  reported_incidents incident[] @relation("IncidentReporter")
 
   @@map("users")
 }
 
 
 model shiftRecord {
-  id                String             @id @default(uuid())
-  date              DateTime
-  shift             String
-  pulltabs_total    Float
-  deposit_total     Float
-  bingo_total       Float
-  players           Int?
-  workflow_type     String
-  beginning_box     Float?
-  ending_box        Float?
-  bingo_actual      Float?
-  deposit_actual    Float?
-  notes             String?
-  prev_shift_id     String?
-  created_by_user_id String
-  is_deleted        Boolean            @default(false)
-  created_at        DateTime           @default(now())
-  updated_at        DateTime           @updatedAt
+  id                        String             @id @default(uuid())
+  date                      DateTime
+  shift                     String
+  pulltabs_total            Float
+  sales_bingo               Float               @default(0)  // can be negative with reason
+  sales_pulltabs            Float               @default(0)  // must be >= 0
+  sales_total               Float               @default(0)  // computed: sales_bingo + sales_pulltabs
+  deposit_total             Float               // legacy; kept for backward compat
+  bingo_total               Float
+  cash_total                Float?              // computed from CashCount
+  checks_total              Float?              // computed from CheckLog
+  variance                  Float?              // computed: (cash_total + checks_total) - sales_total
+  variance_note             String?             // required if variance outside tolerance
+  negative_bingo_reason_code String?            // if sales_bingo < 0: High Payouts | Jackpot Hit | Promo Night | Other
+  status                    String              @default("DRAFT") // DRAFT | SUBMITTED | FLAGGED
+  players                   Int?
+  workflow_type             String
+  beginning_box             Float?
+  ending_box                Float?
+  bingo_actual              Float?
+  deposit_actual            Float?
+  notes                     String?
+  prev_shift_id             String?
+  created_by_user_id        String
+  is_deleted                Boolean             @default(false)
+  created_at                DateTime            @default(now())
+  updated_at                DateTime            @updatedAt
 
-  created_by        user               @relation("UserShiftRecords", fields: [created_by_user_id], references: [id])
-  prev_shift        shiftRecord?       @relation("ShiftPrev", fields: [prev_shift_id], references: [id])
-  next_shifts       shiftRecord[]      @relation("ShiftPrev")
+  created_by                user                @relation("UserShiftRecords", fields: [created_by_user_id], references: [id])
+  prev_shift                shiftRecord?        @relation("ShiftPrev", fields: [prev_shift_id], references: [id])
+  next_shifts               shiftRecord[]       @relation("ShiftPrev")
+  cash_count                cashCount?
+  check_logs                checkLog[]
+  incidents                 incident[]
 
   @@index([date, shift])
   @@index([created_by_user_id])
+  @@index([status])
   @@map("shift_records")
+}
+
+model cashCount {
+  id                String    @id @default(uuid())
+  shift_id          String    @unique
+  denom_100_count   Int       @default(0)
+  denom_50_count    Int       @default(0)
+  denom_20_count    Int       @default(0)
+  denom_10_count    Int       @default(0)
+  denom_5_count     Int       @default(0)
+  denom_1_count     Int       @default(0)
+  denom_quarters    Int       @default(0)
+  denom_dimes       Int       @default(0)
+  denom_nickels     Int       @default(0)
+  denom_pennies     Int       @default(0)
+  total_value       Float
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+
+  shift             shiftRecord @relation(fields: [shift_id], references: [id], onDelete: Cascade)
+
+  @@map("cash_counts")
+}
+
+model checkLog {
+  id                String    @id @default(uuid())
+  shift_id          String
+  player_name       String
+  check_number      String
+  amount            Float
+  stamped_on_back   Boolean   @default(false)  // REQUIRED true to submit
+  phone_dl_written  Boolean   @default(false)  // REQUIRED true to submit
+  is_blocked        Boolean   @default(false)  // restricted player match
+  blocked_reason    String?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+
+  shift             shiftRecord @relation(fields: [shift_id], references: [id], onDelete: Cascade)
+
+  @@index([shift_id])
+  @@index([player_name])
+  @@map("check_logs")
+}
+
+model restrictedPlayer {
+  id                String    @id @default(uuid())
+  name              String    @unique
+  active            Boolean   @default(true)
+  notes             String?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+
+  @@map("restricted_players")
+}
+
+model incident {
+  id                String    @id @default(uuid())
+  shift_id          String?
+  reported_by_user_id String?
+  type              String                            // Maintenance | PlayerIssue | Supply | Money | Other
+  description       String
+  status            String    @default("OPEN")        // OPEN | RESOLVED
+  created_at        DateTime  @default(now())
+  resolved_at       DateTime?
+
+  shift             shiftRecord? @relation(fields: [shift_id], references: [id], onDelete: SetNull)
+  reported_by       user?        @relation("IncidentReporter", fields: [reported_by_user_id], references: [id], onDelete: SetNull)
+
+  @@index([shift_id])
+  @@index([reported_by_user_id])
+  @@index([status])
+  @@map("incidents")
 }
 
 model holidayRule {

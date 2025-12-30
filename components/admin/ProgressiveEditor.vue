@@ -146,7 +146,7 @@ const draft = ref(cloneDraft(props.modelValue));
 // Filter out non-progressive keys like lastUpdated
 const filteredProgressives = computed(() => {
   if (!draft.value) return {};
-  const { lastUpdated, ...rest } = draft.value;
+  const { lastUpdated: _lastUpdated, ...rest } = draft.value;
   return rest;
 });
 

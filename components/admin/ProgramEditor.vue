@@ -13,8 +13,8 @@
           </div>
           <button
             class="text-xs font-bold text-primary-700 border border-slate-200 rounded-lg px-2 py-1 hover:bg-slate-50"
-            @click="startEdit()"
             :disabled="!patternsReady"
+            @click="startEdit()"
           >
             + New
           </button>
@@ -204,9 +204,13 @@
           Paper Color
           <input
             :value="selectedGame.paperColor || '#ffffff'"
-            @input="selectedGame.paperColor = ($event.target as HTMLInputElement).value"
             type="color"
             class="mt-1 w-12 h-10 border-0 bg-transparent"
+            @input="
+              selectedGame.paperColor = (
+                $event.target as HTMLInputElement
+              ).value
+            "
           />
         </label>
         <label

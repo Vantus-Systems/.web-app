@@ -357,11 +357,8 @@ const applyAssignment = (payload: { dates: string[]; assignment: any }) => {
 const applySmartFill = (payload: { day: string; profileId: string }) => {
   const start = new Date(`${draft.value.calendar.range.start}T00:00:00`);
   const end = new Date(`${draft.value.calendar.range.end}T00:00:00`);
-  for (
-    let cursor = new Date(start);
-    cursor <= end;
-    cursor.setDate(cursor.getDate() + 1)
-  ) {
+  let cursor = new Date(start);
+  while (cursor <= end) {
     const weekday = cursor.toLocaleDateString("en-US", { weekday: "short" });
     if (weekday === payload.day) {
       const date = cursor.toISOString().slice(0, 10);
@@ -370,6 +367,7 @@ const applySmartFill = (payload: { day: string; profileId: string }) => {
         profile_id: payload.profileId,
       };
     }
+    cursor.setDate(cursor.getDate() + 1);
   }
 };
 
