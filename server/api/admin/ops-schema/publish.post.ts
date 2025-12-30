@@ -4,10 +4,10 @@ import { auditService } from "@server/services/audit.service";
 import { compileOpsSchema } from "@server/services/opsSchemaCompiler";
 import { opsSchemaV2Schema } from "@server/schemas/ops-schema.zod";
 import { ZodError } from "zod";
-import { assertRole } from "~/server/utils/roles";
+import { assertPermission } from "~/server/utils/permissions";
 
 export default defineEventHandler(async (event) => {
-  assertRole(event.context.user?.role, ["OWNER"]);
+  assertPermission(event.context.user?.role, "ops:publish");
 
   const draft = await settingsService.get("ops_schema_draft");
   if (!draft) {

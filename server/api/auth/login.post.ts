@@ -1,22 +1,33 @@
-import { randomBytes } from "crypto";
 import { defineEventHandler, readBody, createError, setCookie } from "h3";
 import { z } from "zod";
 import { authService } from "@server/services/auth.service";
 import { normalizeRole } from "~/utils/roles";
+import { generateCsrfToken } from "@server/middleware/csrf";
+import { rateLimiter } from "@server/utils/rateLimiter";
 
 const loginSchema = z.object({
-  username: z.string(),
-  password: z.string(),
+  username: z.string().min(1),
+  password: z.string().min(12),
 });
 
 export default defineEventHandler(async (event) => {
+  // Rate limiting: 5 attempts per 15 minutes per IP
+  const ip = event.node.req.socket.remoteAddress || "unknown";
+  const rateLimitKey = `login:${ip}`;
+
+  if (!rateLimiter.checkLimit(rateLimitKey, { maxAttempts: 5, windowMs: 15 * 60 * 1000 })) {
+    const resetTime = rateLimiter.getResetTime(rateLimitKey);
+    throw createError({
+      statusCode: 429,
+      message: `Too many login attempts. Try again in ${resetTime} seconds.`,
+    });
+  }
+
   const body = await readBody(event);
-  console.log("[login] Attempting login for:", body.username);
   const { username, password } = loginSchema.parse(body);
 
   const user = await authService.getUserByUsername(username);
   if (!user) {
-    console.log("[login] User not found:", username);
     throw createError({ statusCode: 401, message: "Invalid credentials" });
   }
   if (user.is_active === false) {
@@ -25,13 +36,13 @@ export default defineEventHandler(async (event) => {
 
   const valid = await authService.verifyPassword(password, user.password_hash);
   if (!valid) {
-    console.log("[login] Invalid password for:", username);
     throw createError({ statusCode: 401, message: "Invalid credentials" });
   }
 
-  console.log("[login] Success for:", username);
+  // Successful login - clear rate limit
+  rateLimiter.clearLimit(rateLimitKey);
+
   // Create session
-  const ip = event.node.req.socket.remoteAddress;
   const userAgent = event.node.req.headers["user-agent"];
   const { token, expiresAt } = await authService.createSession(
     user.id,
@@ -42,15 +53,13 @@ export default defineEventHandler(async (event) => {
   // Set cookies
   setCookie(event, "auth_token", token, {
     httpOnly: true,
-    // Use bracket notation to avoid bundler inlining NODE_ENV at build time so
-    // this check remains runtime-configurable.
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     expires: expiresAt,
   });
 
-  // Set CSRF token cookie (readable by JS)
-  const csrfToken = randomBytes(16).toString("hex");
+  // Generate and set CSRF token (derived from session token)
+  const csrfToken = generateCsrfToken(token);
   setCookie(event, "csrf_token", csrfToken, {
     httpOnly: false, // JS needs to read this
     secure: process.env.NODE_ENV === "production",

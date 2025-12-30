@@ -3,10 +3,10 @@ import { settingsService } from "@server/services/settings.service";
 import { auditService } from "@server/services/audit.service";
 import { opsSchemaV2Schema } from "@server/schemas/ops-schema.zod";
 import { ZodError } from "zod";
-import { assertRole } from "~/server/utils/roles";
+import { assertPermission } from "~/server/utils/permissions";
 
 export default defineEventHandler(async (event) => {
-  assertRole(event.context.user?.role, ["OWNER"]);
+  assertPermission(event.context.user?.role, "ops:edit");
 
   const body = await readBody(event);
   let parsed;

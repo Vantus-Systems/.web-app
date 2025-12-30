@@ -42,7 +42,33 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "@vueuse/motion/nuxt",
     "@nuxtjs/sitemap",
+    "nuxt-security",
   ],
+
+  security: {
+    headers: {
+      contentSecurityPolicy: {
+        "default-src": ["'self'"],
+        "script-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        "font-src": ["'self'", "https://fonts.gstatic.com"],
+        "img-src": ["'self'", "data:", "https:"],
+        "connect-src": ["'self'"],
+      },
+      crossOriginEmbedderPolicy: process.env.NODE_ENV === "development" ? "unsafe-none" : "require-corp",
+      xFrameOptions: "DENY",
+      xContentTypeOptions: "nosniff",
+      strictTransportSecurity: {
+        maxAge: 31536000,
+        includeSubdomains: true,
+      },
+    },
+    rateLimiter: {
+      tokensPerInterval: 150,
+      interval: 300000, // 5 minutes
+      headers: false,
+    },
+  },
 
   site: {
     url: "https://maryestherbingo.com",

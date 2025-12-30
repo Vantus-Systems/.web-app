@@ -1,11 +1,11 @@
 import { defineEventHandler, readBody } from "h3";
 import prisma from "~/server/db/client";
-import { assertRole } from "~/server/utils/roles";
+import { assertAnyPermission } from "~/server/utils/permissions";
 import { shiftRecordInputSchema } from "~/server/schemas/shift-record.zod";
 import { computeShiftTotals } from "~/server/services/shiftRecords.service";
 
 export default defineEventHandler(async (event) => {
-  assertRole(event.context.user?.role, ["OWNER", "MIC"]);
+  assertAnyPermission(event.context.user?.role, ["mic:edit", "ops:edit"]);
 
   const body = await readBody(event);
   const data = shiftRecordInputSchema.parse(body);

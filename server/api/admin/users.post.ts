@@ -1,13 +1,23 @@
 import { defineEventHandler, createError, readBody } from "h3";
 import { authService } from "@server/services/auth.service";
+import { auditService } from "@server/services/audit.service";
 import { z } from "zod";
 import prisma from "@server/db/client";
 import { normalizeRole } from "~/utils/roles";
-import { assertRole } from "~/server/utils/roles";
+import { assertPermission } from "~/server/utils/permissions";
+
+// Strong password validation
+const passwordSchema = z
+  .string()
+  .min(12, "Password must be at least 12 characters")
+  .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+  .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+  .regex(/[0-9]/, "Password must contain at least one number")
+  .regex(/[^a-zA-Z0-9]/, "Password must contain at least one special character");
 
 const userSchema = z.object({
-  username: z.string().min(3),
-  password: z.string().min(6),
+  username: z.string().min(3).max(50),
+  password: passwordSchema,
   role: z.enum(["OWNER", "CHARITY", "MIC", "admin", "mic", "CALLER", "caller"]),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
@@ -17,7 +27,7 @@ const userSchema = z.object({
 });
 
 export default defineEventHandler(async (event) => {
-  assertRole(event.context.user?.role, ["OWNER"]);
+  assertPermission(event.context.user?.role, "people:edit");
 
   const body = await readBody(event);
   const {
@@ -52,6 +62,18 @@ export default defineEventHandler(async (event) => {
       email: email || null,
       phone: phone || null,
       is_active: isActive ?? true,
+    },
+  });
+
+  // Audit log
+  await auditService.log({
+    actorUserId: event.context.user.id,
+    action: "CREATE_USER",
+    entity: `user:${user.id}`,
+    after: {
+      username: user.username,
+      role: user.role,
+      is_active: user.is_active,
     },
   });
 

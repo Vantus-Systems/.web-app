@@ -279,6 +279,8 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from "vue";
+type Cell = 0 | 1;
+type Frame = Cell[];
 import {
   generateLinePermutations,
   rotatePatternCells,
@@ -322,15 +324,24 @@ const permutationLines = ref(3);
 const isPlaying = ref(false);
 let playInterval: number | null = null;
 
-const normalizeFrame = (frame: any): number[] => {
-  if (!frame) return Array(25).fill(0);
-  if (frame.length === 5 && Array.isArray(frame[0])) {
-    return frame.flat() as number[];
+const normalizeFrame = (frame: any): Frame => {
+  let arr: number[] = [];
+  if (!frame) {
+    arr = Array.from({ length: 25 }, (_, i) => (i === 12 ? 1 : 0));
+  } else if (frame.length === 5 && Array.isArray(frame[0])) {
+    arr = (frame.flat() as any[]).map((v: any) => (v ? 1 : 0));
+  } else if (Array.isArray(frame)) {
+    arr = (frame as any[]).map((v: any) => (v ? 1 : 0));
+  } else {
+    arr = Array(25).fill(0);
   }
-  if (Array.isArray(frame)) {
-    return frame as number[];
+  if (arr.length < 25) {
+    arr = [...arr, ...Array(25 - arr.length).fill(0)];
+  } else if (arr.length > 25) {
+    arr = arr.slice(0, 25);
   }
-  return Array(25).fill(0);
+  arr[12] = 1;
+  return arr as Frame;
 };
 
 const startEdit = (p?: any) => {
@@ -420,11 +431,8 @@ const filteredPatterns = computed(() => {
   });
 });
 
-const activeFrame = computed(() => {
-  if (!form.value.definition.frames[currentFrameIndex.value]) {
-    return Array(25).fill(0);
-  }
-  return form.value.definition.frames[currentFrameIndex.value];
+const activeFrame = computed<Frame>(() => {
+  return normalizeFrame(form.value.definition.frames?.[currentFrameIndex.value]);
 });
 
 const toggleCell = (idx: number) => {

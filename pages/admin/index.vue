@@ -1,28 +1,24 @@
 <template>
   <AdminShell
-    :title="currentTabName || 'Admin Home'"
-    subtitle="Management Console"
     :user-role="sessionUser?.role"
     :user-name="sessionUser?.username"
+    :breadcrumbs="[{ label: 'Admin', path: '/admin' }]"
     @logout="logout"
   >
-    <div class="space-y-6">
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <div class="flex flex-wrap gap-2">
-          <button
-            v-for="tab in tabs"
-            :key="`tab-${tab.id}`"
-            :class="[
-              currentTab === tab.id
-                ? 'bg-primary-900 text-gold shadow-inner'
-                : 'bg-white text-slate-600 hover:bg-slate-100',
-              'px-3 py-2 rounded-lg text-xs font-bold transition-all duration-200',
-            ]"
-            @click="currentTab = tab.id"
-          >
-            {{ tab.name }}
-          </button>
-        </div>
+    <AdminPageHeader
+      title="Admin Dashboard"
+      subtitle="Management Console"
+      description="Central hub for managing business operations, content, and system settings."
+      :instructions="`
+        <ul>
+          <li><strong>Business Info</strong> - Update contact details and hours</li>
+          <li><strong>Jackpot</strong> - Configure progressive jackpot display</li>
+          <li><strong>Specials</strong> - Manage daily promotions and announcements</li>
+          <li><strong>Operations</strong> - Full schedule and pricing management</li>
+        </ul>
+      `"
+    >
+      <template #actions>
         <div class="hidden sm:flex flex-col items-end">
           <div class="text-[10px] text-slate-400 uppercase tracking-[0.3em]">
             System Sync
@@ -36,6 +32,24 @@
             </template>
           </ClientOnly>
         </div>
+      </template>
+    </AdminPageHeader>
+
+    <div class="space-y-6">
+      <div class="flex flex-wrap gap-2">
+        <button
+          v-for="tab in tabs"
+          :key="`tab-${tab.id}`"
+          :class="[
+            currentTab === tab.id
+              ? 'bg-primary-900 text-gold shadow-inner'
+              : 'bg-white text-slate-600 hover:bg-slate-100',
+            'px-3 py-2 rounded-lg text-xs font-bold transition-all duration-200',
+          ]"
+          @click="currentTab = tab.id"
+        >
+          {{ tab.name }}
+        </button>
       </div>
 
       <div v-if="currentTab === 'operations'" class="h-full flex flex-col">
@@ -274,6 +288,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import AdminPageHeader from "~/components/admin/ui/AdminPageHeader.vue";
 import AdminShell from "~/components/admin/AdminShell.vue";
 import ProgressiveEditor from "~/components/admin/ProgressiveEditor.vue";
 import W2GGenerator from "~/components/admin/W2GGenerator.vue";
