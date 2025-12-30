@@ -38,8 +38,8 @@
 
     <BaseModal v-model="isDeleteOpen" title="Delete shift record">
       <p class="text-sm text-slate-600">
-        This will archive the shift record and remove it from daily totals.
-        This action cannot be undone.
+        This will archive the shift record and remove it from daily totals. This
+        action cannot be undone.
       </p>
       <template #footer>
         <div class="flex justify-end gap-2">

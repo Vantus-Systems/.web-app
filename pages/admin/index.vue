@@ -49,7 +49,9 @@
           class="flex flex-col items-center justify-center py-24"
         >
           <div class="relative">
-            <div class="h-16 w-16 border-4 border-primary-100 rounded-full"></div>
+            <div
+              class="h-16 w-16 border-4 border-primary-100 rounded-full"
+            ></div>
             <div
               class="absolute top-0 left-0 h-16 w-16 border-4 border-gold border-t-transparent rounded-full animate-spin"
             ></div>
@@ -312,10 +314,9 @@ let lastSyncInterval: ReturnType<typeof setInterval> | null = null;
 
 const verifyAdminSession = async () => {
   try {
-    const response = await $fetch<{ user: { role?: string; username?: string } }>(
-      "/api/auth/user",
-      { credentials: "include" },
-    );
+    const response = await $fetch<{
+      user: { role?: string; username?: string };
+    }>("/api/auth/user", { credentials: "include" });
     const role = normalizeRole(response?.user?.role ?? null);
     if (!role) {
       throw new Error("Unauthorized");
