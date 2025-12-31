@@ -228,10 +228,13 @@ const loadSession = async () => {
   ).user;
 };
 
-const loadCharities = () => {
+const loadCharities = async () => {
   try {
-    // Placeholder: In a real implementation, this would fetch from an API
-    charities.value = [];
+    const response = await $fetch<{ success: boolean; data: any[] }>(
+      "/api/admin/charities",
+      { credentials: "include" },
+    );
+    charities.value = response?.data ?? [];
   } catch (e) {
     console.error("Error loading charities", e);
   }
@@ -261,23 +264,31 @@ const saveCharity = async () => {
   try {
     if (editingId.value) {
       // Update existing charity
-      const updated = await $fetch(`/api/admin/charities/${editingId.value}`, {
-        method: "PUT",
-        body: form.value,
-        headers: getHeaders(),
-        credentials: "include",
-      });
+      const response = await $fetch<{ success: boolean; data: any }>(
+        `/api/admin/charities/${editingId.value}`,
+        {
+          method: "PUT",
+          body: form.value,
+          headers: getHeaders(),
+          credentials: "include",
+        },
+      );
+      const updated = response?.data ?? response;
       charities.value = charities.value.map((c) =>
         c.id === editingId.value ? updated : c,
       );
     } else {
       // Create new charity
-      const created = await $fetch("/api/admin/charities", {
-        method: "POST",
-        body: form.value,
-        headers: getHeaders(),
-        credentials: "include",
-      });
+      const response = await $fetch<{ success: boolean; data: any }>(
+        "/api/admin/charities",
+        {
+          method: "POST",
+          body: form.value,
+          headers: getHeaders(),
+          credentials: "include",
+        },
+      );
+      const created = response?.data ?? response;
       charities.value.push(created);
     }
     cancelEdit();

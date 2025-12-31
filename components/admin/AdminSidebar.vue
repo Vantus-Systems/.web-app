@@ -53,6 +53,7 @@ const navItems = computed(() => {
     return [
       { label: "MIC Dashboard", to: "/admin/mic" },
       { label: "Shift Records", to: "/admin/mic/shifts" },
+      { label: "Restricted Players", to: "/admin/mic/restricted-players" },
       { label: "Operations Builder", to: "/admin/operations" },
     ];
   }
