@@ -66,6 +66,7 @@ import { ref, onMounted } from "vue";
 import AdminShell from "~/components/admin/AdminShell.vue";
 import ShiftForm from "~/components/admin/mic/ShiftForm.vue";
 import BaseModal from "~/components/ui/BaseModal.vue";
+import { useCsrf } from "~/composables/useCsrf";
 import type { ShiftRecord } from "~/types/admin";
 
 type ShiftFormValue = {
@@ -90,9 +91,18 @@ definePageMeta({
 
 const router = useRouter();
 const route = useRoute();
+const { getHeaders } = useCsrf();
 const session = ref<{ username?: string; role?: any } | null>(null);
 const record = ref<ShiftRecord | null>(null);
-const draft = ref<ShiftFormValue | null>(null);
+const draft = ref<ShiftFormValue>({
+  date: "",
+  shift: "AM",
+  pulltabs_total: 0,
+  deposit_total: 0,
+  players: 0,
+  workflow_type: "NORMAL",
+  notes: "",
+});
 const isDeleteOpen = ref(false);
 
 const loadSession = async () => {
@@ -102,9 +112,13 @@ const loadSession = async () => {
 };
 
 const loadShift = async () => {
-  const data = await $fetch(`/api/admin/shift-records/${route.params.id}`, {
-    credentials: "include",
-  });
+  // fetch returns untyped JSON; use `any` so TypeScript doesn't complain about string unions
+  const data: any = await $fetch(
+    `/api/admin/shift-records/${route.params.id}`,
+    {
+      credentials: "include",
+    },
+  );
   record.value = data;
   draft.value = {
     date: data.date.slice(0, 10),
@@ -126,6 +140,7 @@ const updateShift = async (payload: any) => {
   record.value = await $fetch(`/api/admin/shift-records/${route.params.id}`, {
     method: "PUT",
     body: payload,
+    headers: getHeaders(),
     credentials: "include",
   });
 };
@@ -133,6 +148,7 @@ const updateShift = async (payload: any) => {
 const confirmDelete = async () => {
   await $fetch(`/api/admin/shift-records/${route.params.id}`, {
     method: "DELETE",
+    headers: getHeaders(),
     credentials: "include",
   });
   isDeleteOpen.value = false;
@@ -140,7 +156,11 @@ const confirmDelete = async () => {
 };
 
 const logout = async () => {
-  await $fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+  await $fetch("/api/auth/logout", {
+    method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+  });
   router.push("/admin/login");
 };
 

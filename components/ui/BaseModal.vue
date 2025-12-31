@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, nextTick } from "vue";
+import { onMounted, onUnmounted, ref, nextTick, watch } from "vue";
 
 const props = defineProps<{
   modelValue: boolean;
@@ -7,6 +7,9 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(["update:modelValue", "close"]);
+
+const modalRef = ref<HTMLElement | null>(null);
+const previousActiveElement = ref<HTMLElement | null>(null);
 
 const close = () => {
   emit("update:modelValue", false);
@@ -23,7 +26,55 @@ const handleKeydown = (e: KeyboardEvent) => {
   if (e.key === "Escape") {
     close();
   }
+
+  // Focus trap: Tab key handling
+  if (e.key === "Tab" && modalRef.value) {
+    const focusableElements = modalRef.value.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    );
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    if (e.shiftKey && document.activeElement === firstElement) {
+      e.preventDefault();
+      lastElement?.focus();
+    } else if (!e.shiftKey && document.activeElement === lastElement) {
+      e.preventDefault();
+      firstElement?.focus();
+    }
+  }
 };
+
+// Watch for modal open/close to manage focus
+watch(
+  () => props.modelValue,
+  async (isOpen) => {
+    if (isOpen) {
+      // Save currently focused element
+      previousActiveElement.value = document.activeElement as HTMLElement;
+      
+      // Wait for next tick to ensure modal is rendered
+      await nextTick();
+      
+      // Focus first focusable element in modal
+      if (modalRef.value) {
+        const firstFocusable = modalRef.value.querySelector<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        );
+        firstFocusable?.focus();
+      }
+      
+      // Prevent body scroll
+      document.body.style.overflow = "hidden";
+    } else {
+      // Restore body scroll
+      document.body.style.overflow = "";
+      
+      // Restore focus to previous element
+      previousActiveElement.value?.focus();
+    }
+  },
+);
 
 onMounted(() => {
   document.addEventListener("keydown", handleKeydown);
@@ -31,6 +82,8 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener("keydown", handleKeydown);
+  // Ensure body scroll is restored on unmount
+  document.body.style.overflow = "";
 });
 </script>
 
@@ -46,9 +99,11 @@ onUnmounted(() => {
     >
       <div
         v-if="modelValue"
+        ref="modalRef"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
         role="dialog"
         aria-modal="true"
+        :aria-labelledby="title ? 'modal-title' : undefined"
         @click="handleBackdropClick"
       >
         <div
@@ -60,7 +115,11 @@ onUnmounted(() => {
             v-if="title || $slots.header"
             class="flex items-center justify-between border-b border-neutral-100 px-6 py-4"
           >
-            <h3 v-if="title" class="text-lg font-semibold text-emerald-900">
+            <h3
+              v-if="title"
+              id="modal-title"
+              class="text-lg font-semibold text-emerald-900"
+            >
               {{ title }}
             </h3>
             <slot name="header" />

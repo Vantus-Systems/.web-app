@@ -83,8 +83,10 @@
 import { computed, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import AdminShell from "~/components/admin/AdminShell.vue";
+import { useCsrf } from "~/composables/useCsrf";
 
 const router = useRouter();
+const { getHeaders } = useCsrf();
 const session = ref<{ username?: string; role?: any } | null>(null);
 const allPlayers = ref<
   Array<{ id: string; name: string; notes?: string | null }>
@@ -115,7 +117,11 @@ const filtered = computed(() => {
 });
 
 const logout = async () => {
-  await $fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+  await $fetch("/api/auth/logout", {
+    method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+  });
   router.push("/admin/login");
 };
 
@@ -126,6 +132,7 @@ const create = async () => {
   await $fetch("/api/admin/mic/restricted-players", {
     method: "POST",
     body: form.value,
+    headers: getHeaders(),
     credentials: "include",
   });
   await loadPlayers();
@@ -135,6 +142,7 @@ const create = async () => {
 const deactivate = async (id: string) => {
   await $fetch(`/api/admin/mic/restricted-players/${id}`, {
     method: "DELETE",
+    headers: getHeaders(),
     credentials: "include",
   });
   await loadPlayers();

@@ -1,7 +1,9 @@
+import { useCsrf } from "./useCsrf";
 import { useState, useFetch } from "#imports";
 
 export const useAuthUser = () => {
   const user = useState<Record<string, any> | null>("user", () => null);
+  const { getHeaders } = useCsrf();
 
   const fetchUser = async () => {
     try {
@@ -17,7 +19,10 @@ export const useAuthUser = () => {
   };
 
   const logout = async () => {
-    await useFetch("/api/auth/logout", { method: "POST" });
+    await useFetch("/api/auth/logout", {
+      method: "POST",
+      headers: getHeaders(),
+    });
     user.value = null;
   };
 

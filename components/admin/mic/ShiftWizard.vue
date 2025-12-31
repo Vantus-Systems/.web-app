@@ -520,11 +520,13 @@
 import { ref, computed } from "vue";
 import { formatCurrency } from "~/utils/format";
 import { reconcile } from "~/server/utils/mic-money";
+import { useCsrf } from "~/composables/useCsrf";
 import type {
   DenominationCount,
   MicShiftSubmission,
 } from "~/server/schemas/micShift.zod";
 
+const { getHeaders } = useCsrf();
 const emit = defineEmits<{
   (e: "submit", shift: MicShiftSubmission): void;
 }>();
@@ -697,6 +699,7 @@ const submitIncident = async () => {
     await $fetch("/api/admin/mic/incidents", {
       method: "POST",
       body: incidentData.value,
+      headers: getHeaders(),
       credentials: "include",
     });
     incidentData.value = { type: "", description: "" };

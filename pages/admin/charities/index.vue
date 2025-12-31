@@ -202,6 +202,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import AdminShell from "~/components/admin/AdminShell.vue";
+import { useCsrf } from "~/composables/useCsrf";
 
 definePageMeta({
   middleware: ["auth", "role"],
@@ -209,6 +210,7 @@ definePageMeta({
 });
 
 const router = useRouter();
+const { getHeaders } = useCsrf();
 const session = ref<{ username?: string; role?: any } | null>(null);
 const charities = ref<any[]>([]);
 const editingId = ref<string | null>(null);
@@ -226,7 +228,7 @@ const loadSession = async () => {
   ).user;
 };
 
-const loadCharities = async () => {
+const loadCharities = () => {
   try {
     // Placeholder: In a real implementation, this would fetch from an API
     charities.value = [];
@@ -262,6 +264,7 @@ const saveCharity = async () => {
       const updated = await $fetch(`/api/admin/charities/${editingId.value}`, {
         method: "PUT",
         body: form.value,
+        headers: getHeaders(),
         credentials: "include",
       });
       charities.value = charities.value.map((c) =>
@@ -272,12 +275,13 @@ const saveCharity = async () => {
       const created = await $fetch("/api/admin/charities", {
         method: "POST",
         body: form.value,
+        headers: getHeaders(),
         credentials: "include",
       });
       charities.value.push(created);
     }
     cancelEdit();
-  } catch (e) {
+  } catch {
     alert("Error saving charity");
   }
 };
@@ -288,16 +292,21 @@ const deleteCharity = async (id: string) => {
   try {
     await $fetch(`/api/admin/charities/${id}`, {
       method: "DELETE",
+      headers: getHeaders(),
       credentials: "include",
     });
     charities.value = charities.value.filter((c) => c.id !== id);
-  } catch (e) {
+  } catch {
     alert("Error deleting charity");
   }
 };
 
 const logout = async () => {
-  await $fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+  await $fetch("/api/auth/logout", {
+    method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+  });
   router.push("/admin/login");
 };
 

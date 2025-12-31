@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { useCsrf } from "~/composables/useCsrf";
 import type { OpsSchemaV2 } from "~/types/ops-schema";
 
 const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -175,9 +176,11 @@ export const useOpsStore = defineStore("ops", {
     },
     async savePricing() {
       if (!this.pricingDraft) return;
+      const { getHeaders } = useCsrf();
       await $fetch("/api/admin/pricing", {
         method: "POST",
         body: this.pricingDraft,
+        headers: getHeaders(),
         credentials: "include",
       });
       this.pricing = JSON.parse(JSON.stringify(this.pricingDraft));
@@ -197,9 +200,11 @@ export const useOpsStore = defineStore("ops", {
     },
     async saveSchedule() {
       if (!this.scheduleDraft) return;
+      const { getHeaders } = useCsrf();
       await $fetch("/api/admin/schedule", {
         method: "POST",
         body: this.scheduleDraft,
+        headers: getHeaders(),
         credentials: "include",
       });
       this.schedule = JSON.parse(JSON.stringify(this.scheduleDraft));
@@ -266,24 +271,30 @@ export const useOpsStore = defineStore("ops", {
     },
     async saveOpsSchema() {
       if (!this.opsSchemaDraft) return;
+      const { getHeaders } = useCsrf();
       await $fetch("/api/admin/ops-schema", {
         method: "POST",
         body: this.opsSchemaDraft,
+        headers: getHeaders(),
         credentials: "include",
       });
       this.opsSchemaDraft = JSON.parse(JSON.stringify(this.opsSchemaDraft));
       this.dirty.opsSchema = false;
     },
     async publishOpsSchema() {
+      const { getHeaders } = useCsrf();
       await $fetch("/api/admin/ops-schema/publish", {
         method: "POST",
+        headers: getHeaders(),
         credentials: "include",
       });
       await this.refreshOpsSchema();
     },
     async rollbackOpsSchema() {
+      const { getHeaders } = useCsrf();
       await $fetch("/api/admin/ops-schema/rollback", {
         method: "POST",
+        headers: getHeaders(),
         credentials: "include",
       });
       await this.refreshOpsSchema();
@@ -320,9 +331,11 @@ export const useOpsStore = defineStore("ops", {
     },
     async saveScheduleDayProfiles() {
       if (!this.scheduleDayProfilesDraft) return;
+      const { getHeaders } = useCsrf();
       await $fetch("/api/admin/schedule-day-profiles", {
         method: "POST",
         body: this.scheduleDayProfilesDraft,
+        headers: getHeaders(),
         credentials: "include",
       });
       this.scheduleDayProfiles = JSON.parse(
@@ -333,44 +346,52 @@ export const useOpsStore = defineStore("ops", {
 
     // Patterns
     async savePattern(pattern: any) {
+      const { getHeaders } = useCsrf();
       await $fetch("/api/admin/patterns", {
         method: "POST",
         body: pattern,
+        headers: getHeaders(),
         credentials: "include",
       });
       await this.refreshPatterns();
     },
     async deletePattern(slug: string) {
+      const { getHeaders } = useCsrf();
       await $fetch(`/api/admin/patterns?slug=${slug}`, {
         method: "DELETE",
+        headers: getHeaders(),
         credentials: "include",
       });
       await this.refreshPatterns();
     },
     async refreshPatterns() {
-      this.patterns = await $fetch("/api/admin/patterns", {
+      this.patterns = await $fetch<any>("/api/admin/patterns", {
         credentials: "include",
       });
     },
 
     // Programs
     async saveProgram(program: any) {
+      const { getHeaders } = useCsrf();
       await $fetch("/api/admin/programs", {
         method: "POST",
         body: program,
+        headers: getHeaders(),
         credentials: "include",
       });
       await this.refreshPrograms();
     },
     async deleteProgram(slug: string) {
+      const { getHeaders } = useCsrf();
       await $fetch(`/api/admin/programs?slug=${slug}`, {
         method: "DELETE",
+        headers: getHeaders(),
         credentials: "include",
       });
       await this.refreshPrograms();
     },
     async refreshPrograms() {
-      this.programs = await $fetch("/api/admin/programs", {
+      this.programs = await $fetch<any>("/api/admin/programs", {
         credentials: "include",
       });
     },

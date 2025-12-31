@@ -28,7 +28,7 @@ function validateCsrfToken(sessionToken: string, csrfToken: string): boolean {
   return csrfToken === expected;
 }
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler((event) => {
   const method = event.method;
 
   // Only validate mutating requests

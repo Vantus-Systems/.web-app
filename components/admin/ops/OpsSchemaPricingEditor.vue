@@ -231,7 +231,6 @@ const gaps = computed(() => {
   const end = draft.value.timeline.operationalHours.end;
 
   if (!isValidOperationalHours(start, end)) {
-    console.warn("DEBUG: Invalid operational hours:", { start, end });
     setError(
       "Invalid operational hours. Please check the start and end times.",
     );
@@ -286,8 +285,6 @@ const addSegmentFromDrop = (payload: {
   time_start: string;
   time_end: string;
 }) => {
-  console.log("DEBUG: addSegmentFromDrop called with:", payload);
-
   // Validate time format
   if (
     !isValidTimeFormat(payload.time_start) ||
@@ -322,7 +319,6 @@ const addSegmentFromDrop = (payload: {
   );
 
   if (!rateCard) {
-    console.warn("DEBUG: Rate card not found for ID:", payload.rateCardId);
     setError("Rate card not found. Please select a valid rate card.");
     return;
   }
@@ -345,8 +341,6 @@ const updateSegmentTime = (payload: {
   time_start: string;
   time_end: string;
 }) => {
-  console.log("DEBUG: updateSegmentTime called with:", payload);
-
   // Validate time format
   if (
     !isValidTimeFormat(payload.time_start) ||
@@ -384,7 +378,6 @@ const updateSegmentTime = (payload: {
   );
 
   if (!target) {
-    console.warn("DEBUG: Segment not found for ID:", payload.id);
     setError("Segment not found. Cannot update time.");
     return;
   }
@@ -416,8 +409,6 @@ const addTrigger = () => {
 };
 
 const updateRateCard = (updated: OpsSchemaRateCard) => {
-  console.log("DEBUG: updateRateCard called with:", updated);
-
   // Validate required fields
   if (!updated.name || !updated.id) {
     setError("Rate card must have a name and ID.");
@@ -445,14 +436,11 @@ const updateRateCard = (updated: OpsSchemaRateCard) => {
   if (idx >= 0) {
     draft.value.definitions.rateCards[idx] = updated;
   } else {
-    console.warn("DEBUG: Rate card not found for update:", updated.id);
     setError("Rate card not found. Cannot update.");
   }
 };
 
 const updateSegment = (updated: OpsSchemaFlowSegment) => {
-  console.log("DEBUG: updateSegment called with:", updated);
-
   // Validate time format
   if (
     !isValidTimeFormat(updated.time_start) ||
@@ -474,14 +462,11 @@ const updateSegment = (updated: OpsSchemaFlowSegment) => {
   if (idx >= 0) {
     draft.value.timeline.flowSegments[idx] = updated;
   } else {
-    console.warn("DEBUG: Segment not found for update:", updated.id);
     setError("Segment not found. Cannot update.");
   }
 };
 
 const updateOverlay = (updated: OpsSchemaOverlayEvent) => {
-  console.log("DEBUG: updateOverlay called with:", updated);
-
   // Validate time format
   if (
     !isValidTimeFormat(updated.time_start) ||
@@ -503,14 +488,11 @@ const updateOverlay = (updated: OpsSchemaOverlayEvent) => {
   if (idx >= 0) {
     draft.value.timeline.overlayEvents[idx] = updated;
   } else {
-    console.warn("DEBUG: Overlay event not found for update:", updated.id);
     setError("Overlay event not found. Cannot update.");
   }
 };
 
 const updateTrigger = (updated: OpsSchemaLogicTrigger) => {
-  console.log("DEBUG: updateTrigger called with:", updated);
-
   // Validate time format
   if (!isValidTimeFormat(updated.trigger_time)) {
     setError("Invalid trigger time format. Expected HH:MM format.");
@@ -540,16 +522,12 @@ const updateTrigger = (updated: OpsSchemaLogicTrigger) => {
   if (idx >= 0) {
     draft.value.logicTriggers[idx] = updated;
   } else {
-    console.warn("DEBUG: Trigger not found for update:", updated.id);
     setError("Trigger not found. Cannot update.");
   }
 };
 
 const removeSelection = (payload: Selected) => {
-  console.log("DEBUG: removeSelection called with:", payload);
-
   if (!payload) {
-    console.warn("DEBUG: removeSelection called with null payload");
     setError("No item selected for deletion.");
     return;
   }
@@ -560,7 +538,6 @@ const removeSelection = (payload: Selected) => {
       (card: OpsSchemaRateCard) => card.id !== payload.id,
     );
     if (rateCards.value.length === initialLength) {
-      console.warn("DEBUG: Rate card not found for deletion:", payload.id);
       setError("Rate card not found. Cannot delete.");
     }
   } else if (payload.type === "segment") {
@@ -569,7 +546,6 @@ const removeSelection = (payload: Selected) => {
       (segment: OpsSchemaFlowSegment) => segment.id !== payload.id,
     );
     if (flowSegments.value.length === initialLength) {
-      console.warn("DEBUG: Segment not found for deletion:", payload.id);
       setError("Segment not found. Cannot delete.");
     }
   } else if (payload.type === "overlay") {
@@ -578,7 +554,6 @@ const removeSelection = (payload: Selected) => {
       (event: OpsSchemaOverlayEvent) => event.id !== payload.id,
     );
     if (overlayEvents.value.length === initialLength) {
-      console.warn("DEBUG: Overlay event not found for deletion:", payload.id);
       setError("Overlay event not found. Cannot delete.");
     }
   } else if (payload.type === "trigger") {
@@ -587,11 +562,9 @@ const removeSelection = (payload: Selected) => {
       (trigger: OpsSchemaLogicTrigger) => trigger.id !== payload.id,
     );
     if (logicTriggers.value.length === initialLength) {
-      console.warn("DEBUG: Trigger not found for deletion:", payload.id);
       setError("Trigger not found. Cannot delete.");
     }
   } else {
-    console.warn("DEBUG: Unknown selection type for deletion:", payload.type);
     setError("Unknown item type. Cannot delete.");
   }
   selected.value = null;

@@ -184,6 +184,7 @@ import { ref, onMounted, computed } from "vue";
 import AdminShell from "~/components/admin/AdminShell.vue";
 import UserSearchFilters from "~/components/admin/UserSearchFilters.vue";
 import BulkActions from "~/components/admin/BulkActions.vue";
+import { useCsrf } from "~/composables/useCsrf";
 import type { AdminUser } from "~/types/admin";
 
 definePageMeta({
@@ -192,6 +193,7 @@ definePageMeta({
 });
 
 const router = useRouter();
+const { getHeaders } = useCsrf();
 const session = ref<{ username?: string; role?: any } | null>(null);
 const users = ref<AdminUser[]>([]);
 const selectedUsers = ref<string[]>([]);
@@ -275,7 +277,7 @@ const updateFilters = (payload: { search: string; filters: any }) => {
   selectedUsers.value = []; // Reset selection on filter change
 };
 
-const handleBulkApprove = async () => {
+const handleBulkApprove = () => {
   // Implementation for bulk approve
   alert(`Approved ${selectedUsers.value.length} user(s)`);
   selectedUsers.value = [];
@@ -309,6 +311,7 @@ const createUser = async () => {
   const user = await $fetch("/api/admin/users", {
     method: "POST",
     body: newUser.value,
+    headers: getHeaders(),
     credentials: "include",
   });
   // Ensure returned user's role is a string
@@ -330,6 +333,7 @@ const saveUser = async (user: any) => {
       role: user.role,
       isActive: user.is_active,
     },
+    headers: getHeaders(),
     credentials: "include",
   });
   // Normalize updated user's role before replacing in local list
@@ -340,7 +344,11 @@ const saveUser = async (user: any) => {
 };
 
 const logout = async () => {
-  await $fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+  await $fetch("/api/auth/logout", {
+    method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+  });
   router.push("/admin/login");
 };
 

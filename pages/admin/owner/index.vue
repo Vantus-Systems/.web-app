@@ -158,6 +158,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import AdminShell from "~/components/admin/AdminShell.vue";
+import { useCsrf } from "~/composables/useCsrf";
 
 definePageMeta({
   middleware: ["auth", "role"],
@@ -165,6 +166,7 @@ definePageMeta({
 });
 
 const router = useRouter();
+const { getHeaders } = useCsrf();
 const session = ref<{ username?: string; role?: any } | null>(null);
 const kpis = ref({
   totalUsers: 0,
@@ -243,7 +245,7 @@ const loadApprovalQueue = async () => {
   }
 };
 
-const loadRecentChanges = async () => {
+const loadRecentChanges = () => {
   // Populate with sample data
   recentChanges.value = [
     {
@@ -275,11 +277,12 @@ const approveRequest = async (id: string) => {
         status: "approved",
         respondedBy: session.value?.username,
       },
+      headers: getHeaders(),
       credentials: "include",
     });
     await loadApprovalQueue();
     await loadKPIs();
-  } catch (e) {
+  } catch {
     alert("Error approving request");
   }
 };
@@ -296,17 +299,22 @@ const rejectRequest = async (id: string) => {
         respondedBy: session.value?.username,
         rejectionReason: reason,
       },
+      headers: getHeaders(),
       credentials: "include",
     });
     await loadApprovalQueue();
     await loadKPIs();
-  } catch (e) {
+  } catch {
     alert("Error rejecting request");
   }
 };
 
 const logout = async () => {
-  await $fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+  await $fetch("/api/auth/logout", {
+    method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+  });
   router.push("/admin/login");
 };
 

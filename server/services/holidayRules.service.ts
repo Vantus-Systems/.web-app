@@ -69,7 +69,7 @@ export const getHolidayOccurrencesForYear = async (year: number) => {
     occurrences.push({
       date: formatDate(date),
       name: rule.name,
-      closureType: rule.closure_type,
+      closureType: rule.closure_type as "CLOSED" | "CLOSE_EARLY",
       closeTime: rule.close_time,
       ruleId: rule.id,
     });

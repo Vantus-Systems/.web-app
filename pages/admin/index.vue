@@ -290,7 +290,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { onBeforeUnmount, onMounted, ref } from "vue";
 import AdminPageHeader from "~/components/admin/ui/AdminPageHeader.vue";
 import AdminShell from "~/components/admin/AdminShell.vue";
 import ProgressiveEditor from "~/components/admin/ProgressiveEditor.vue";
@@ -299,6 +299,7 @@ import OperationsBuilder from "~/components/admin/OperationsBuilder.vue";
 import BaseCard from "~/components/ui/BaseCard.vue";
 import BaseButton from "~/components/ui/BaseButton.vue";
 import { normalizeRole } from "~/utils/roles";
+import { useCsrf } from "~/composables/useCsrf";
 
 definePageMeta({
   middleware: ["auth", "role"],
@@ -306,6 +307,7 @@ definePageMeta({
 });
 
 const router = useRouter();
+const { getHeaders } = useCsrf();
 const tabs = [
   { id: "business", name: "Business Info" },
   { id: "progressives", name: "Progressives" },
@@ -314,9 +316,6 @@ const tabs = [
   { id: "users", name: "Users" },
 ];
 const currentTab = ref("business");
-const currentTabName = computed(
-  () => tabs.find((t) => t.id === currentTab.value)?.name,
-);
 
 const sessionUser = ref<{ username: string; role: string } | null>(null);
 
@@ -352,7 +351,10 @@ const verifyAdminSession = async () => {
     }
     return response.user;
   } catch {
-    await $fetch("/api/auth/logout", { method: "POST" }).catch(() => undefined);
+    await $fetch("/api/auth/logout", {
+      method: "POST",
+      headers: getHeaders(),
+    }).catch(() => undefined);
     await router.push("/admin/login");
     return null;
   }
@@ -404,6 +406,7 @@ const saveBusinessInfo = async () => {
   await $fetch("/api/admin/business", {
     method: "POST",
     body: businessData.value,
+    headers: getHeaders(),
     credentials: "include",
   });
   alert("Business Info Saved!");
@@ -416,6 +419,7 @@ const saveJackpot = async () => {
     await $fetch("/api/admin/jackpot", {
       method: "POST",
       body: jackpotData.value,
+      headers: getHeaders(),
       credentials: "include",
     });
     alert("Progressives Updated!");
@@ -427,7 +431,11 @@ const saveJackpot = async () => {
 };
 
 const logout = async () => {
-  await $fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+  await $fetch("/api/auth/logout", {
+    method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+  });
   router.push("/admin/login");
 };
 </script>

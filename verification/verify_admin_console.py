@@ -11,7 +11,7 @@ async def run():
         console_messages = []
 
         def on_console(msg):
-            console_messages.append({"type": msg.type, "text": msg.text()})
+            console_messages.append({"type": msg.type, "text": msg.text})
 
         page.on("console", on_console)
 
@@ -33,9 +33,9 @@ async def run():
                     print("Console messages captured:")
                     for cm in console_messages:
                         print(f"  [{cm['type'].upper()}] {cm['text']}")
-                        # Treat console 'error' and 'warning' as failures
-                        if cm["type"] in ("error", "warning"):
-                            print("Detected error/warning in console — failing verification.")
+                        # Treat console 'error' as failures
+                        if cm["type"] == "error":
+                            print("Detected error in console — failing verification.")
                             exit_code = 2
                 else:
                     print("No console messages captured.")

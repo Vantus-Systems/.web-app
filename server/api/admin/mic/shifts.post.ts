@@ -98,8 +98,6 @@ export default defineEventHandler(async (event) => {
   const K_IS_BLOCKED = "is_blocked";
   const K_VARIANCE_NOTE = "variance_note";
   const K_NEG_BINGO_CODE = "negative_bingo_reason_code";
-  const K_CREATED_AT = "created_at";
-  const K_UPDATED_AT = "updated_at";
 
   // Create shift record with computed totals
   const shiftRecord = await prisma.shiftRecord.create({

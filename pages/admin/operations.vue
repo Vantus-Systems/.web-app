@@ -16,6 +16,7 @@
 import { ref, onMounted } from "vue";
 import AdminShell from "~/components/admin/AdminShell.vue";
 import OperationsBuilder from "~/components/admin/OperationsBuilder.vue";
+import { useCsrf } from "~/composables/useCsrf";
 
 definePageMeta({
   middleware: ["auth", "role"],
@@ -23,6 +24,7 @@ definePageMeta({
 });
 
 const router = useRouter();
+const { getHeaders } = useCsrf();
 const session = ref<{ username?: string | null; role?: string | null } | null>(
   null,
 );
@@ -34,7 +36,11 @@ const loadSession = async () => {
 };
 
 const logout = async () => {
-  await $fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+  await $fetch("/api/auth/logout", {
+    method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+  });
   router.push("/admin/login");
 };
 

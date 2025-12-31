@@ -124,6 +124,7 @@ import AdminShell from "~/components/admin/AdminShell.vue";
 import ShiftWizard from "~/components/admin/mic/ShiftWizard.vue";
 import HolidayBanner from "~/components/admin/mic/HolidayBanner.vue";
 import { formatCurrency } from "~/utils/format";
+import { useCsrf } from "~/composables/useCsrf";
 import type { HolidayOccurrence, ShiftRecord } from "~/types/admin";
 
 definePageMeta({
@@ -132,6 +133,7 @@ definePageMeta({
 });
 
 const router = useRouter();
+const { getHeaders } = useCsrf();
 type SessionUser = { username?: string; role: string | null } | null;
 const session = ref<SessionUser>(null);
 const selectedDate = ref(new Date().toISOString().slice(0, 10));
@@ -188,13 +190,18 @@ const submitMicShift = async (payload: Record<string, unknown>) => {
   const record = await $fetch<ShiftRecord>("/api/admin/mic/shifts", {
     method: "POST",
     body: payload,
+    headers: getHeaders(),
     credentials: "include",
   });
   shifts.value.unshift(record);
 };
 
 const logout = async () => {
-  await $fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+  await $fetch("/api/auth/logout", {
+    method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+  });
   router.push("/admin/login");
 };
 

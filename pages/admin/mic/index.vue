@@ -44,6 +44,7 @@ import AdminShell from "~/components/admin/AdminShell.vue";
 import DailyTotals from "~/components/admin/mic/DailyTotals.vue";
 import ShiftSummary from "~/components/admin/mic/ShiftSummary.vue";
 import HolidayBanner from "~/components/admin/mic/HolidayBanner.vue";
+import { useCsrf } from "~/composables/useCsrf";
 import type { HolidayOccurrence, ShiftRecord } from "~/types/admin";
 
 definePageMeta({
@@ -52,6 +53,7 @@ definePageMeta({
 });
 
 const router = useRouter();
+const { getHeaders } = useCsrf();
 const session = ref<{ username?: string | null; role?: string | null } | null>(
   null,
 );
@@ -119,7 +121,11 @@ const loadMonthSummary = async () => {
 };
 
 const logout = async () => {
-  await $fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+  await $fetch("/api/auth/logout", {
+    method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+  });
   router.push("/admin/login");
 };
 
