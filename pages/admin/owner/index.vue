@@ -166,7 +166,7 @@ definePageMeta({
 });
 
 const router = useRouter();
-const { getHeaders } = useCsrf();
+const { getHeaders, refreshCsrfToken } = useCsrf();
 const session = ref<{ username?: string; role?: any } | null>(null);
 const kpis = ref({
   totalUsers: 0,
@@ -310,6 +310,7 @@ const rejectRequest = async (id: string) => {
 };
 
 const logout = async () => {
+  await refreshCsrfToken();
   await $fetch("/api/auth/logout", {
     method: "POST",
     headers: getHeaders(),

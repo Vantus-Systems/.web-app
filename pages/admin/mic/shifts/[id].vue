@@ -91,7 +91,7 @@ definePageMeta({
 
 const router = useRouter();
 const route = useRoute();
-const { getHeaders } = useCsrf();
+const { getHeaders, refreshCsrfToken } = useCsrf();
 const session = ref<{ username?: string; role?: any } | null>(null);
 const record = ref<ShiftRecord | null>(null);
 const draft = ref<ShiftFormValue>({
@@ -156,6 +156,7 @@ const confirmDelete = async () => {
 };
 
 const logout = async () => {
+  await refreshCsrfToken();
   await $fetch("/api/auth/logout", {
     method: "POST",
     headers: getHeaders(),

@@ -24,7 +24,7 @@ definePageMeta({
 });
 
 const router = useRouter();
-const { getHeaders } = useCsrf();
+const { getHeaders, refreshCsrfToken } = useCsrf();
 const session = ref<{ username?: string | null; role?: string | null } | null>(
   null,
 );
@@ -36,6 +36,7 @@ const loadSession = async () => {
 };
 
 const logout = async () => {
+  await refreshCsrfToken();
   await $fetch("/api/auth/logout", {
     method: "POST",
     headers: getHeaders(),

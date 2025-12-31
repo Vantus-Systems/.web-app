@@ -252,3 +252,15 @@ All changes are backward compatible:
 - [x] All code passes linting
 - [x] Build succeeds
 - [x] Admin flows still work
+
+## CSRF & Logout Hardening (Current)
+
+- `server/middleware/auth.ts` now refreshes the `csrf_token` cookie whenever a valid session is detected, preventing missing-token 403s when users clear or lose the CSRF cookie.
+- `composables/useCsrf.ts` exposes a `refreshCsrfToken` helper, and all admin logout flows now refresh the token and send credentials with the request.
+- Updated admin pages and `useAuthUser` to call `refreshCsrfToken()` before logging out, ensuring the `x-csrf-token` header always matches the active session.
+- Added `.env` placeholders for `APP_SECRET` and `MONITOR_URL` to avoid default-secret usage.
+
+### CSRF Changes Verification
+
+- [x] npm run lint
+- [x] npm run typecheck

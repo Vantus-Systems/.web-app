@@ -193,7 +193,7 @@ definePageMeta({
 });
 
 const router = useRouter();
-const { getHeaders } = useCsrf();
+const { getHeaders, refreshCsrfToken } = useCsrf();
 const session = ref<{ username?: string; role?: any } | null>(null);
 const users = ref<AdminUser[]>([]);
 const selectedUsers = ref<string[]>([]);
@@ -344,6 +344,7 @@ const saveUser = async (user: any) => {
 };
 
 const logout = async () => {
+  await refreshCsrfToken();
   await $fetch("/api/auth/logout", {
     method: "POST",
     headers: getHeaders(),

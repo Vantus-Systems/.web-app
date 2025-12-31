@@ -307,7 +307,7 @@ definePageMeta({
 });
 
 const router = useRouter();
-const { getHeaders } = useCsrf();
+const { getHeaders, refreshCsrfToken } = useCsrf();
 const tabs = [
   { id: "business", name: "Business Info" },
   { id: "progressives", name: "Progressives" },
@@ -351,10 +351,16 @@ const verifyAdminSession = async () => {
     }
     return response.user;
   } catch {
-    await $fetch("/api/auth/logout", {
-      method: "POST",
-      headers: getHeaders(),
-    }).catch(() => undefined);
+    try {
+      await refreshCsrfToken();
+      await $fetch("/api/auth/logout", {
+        method: "POST",
+        headers: getHeaders(),
+        credentials: "include",
+      });
+    } catch {
+      // ignore cleanup errors
+    }
     await router.push("/admin/login");
     return null;
   }
@@ -431,6 +437,7 @@ const saveJackpot = async () => {
 };
 
 const logout = async () => {
+  await refreshCsrfToken();
   await $fetch("/api/auth/logout", {
     method: "POST",
     headers: getHeaders(),

@@ -3,7 +3,7 @@ import { useState, useFetch } from "#imports";
 
 export const useAuthUser = () => {
   const user = useState<Record<string, any> | null>("user", () => null);
-  const { getHeaders } = useCsrf();
+  const { getHeaders, refreshCsrfToken } = useCsrf();
 
   const fetchUser = async () => {
     try {
@@ -19,9 +19,11 @@ export const useAuthUser = () => {
   };
 
   const logout = async () => {
+    await refreshCsrfToken();
     await useFetch("/api/auth/logout", {
       method: "POST",
       headers: getHeaders(),
+      credentials: "include",
     });
     user.value = null;
   };

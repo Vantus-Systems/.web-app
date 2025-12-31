@@ -86,7 +86,7 @@ import AdminShell from "~/components/admin/AdminShell.vue";
 import { useCsrf } from "~/composables/useCsrf";
 
 const router = useRouter();
-const { getHeaders } = useCsrf();
+const { getHeaders, refreshCsrfToken } = useCsrf();
 const session = ref<{ username?: string; role?: any } | null>(null);
 const allPlayers = ref<
   Array<{ id: string; name: string; notes?: string | null }>
@@ -117,6 +117,7 @@ const filtered = computed(() => {
 });
 
 const logout = async () => {
+  await refreshCsrfToken();
   await $fetch("/api/auth/logout", {
     method: "POST",
     headers: getHeaders(),

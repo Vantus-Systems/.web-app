@@ -133,7 +133,7 @@ definePageMeta({
 });
 
 const router = useRouter();
-const { getHeaders } = useCsrf();
+const { getHeaders, refreshCsrfToken } = useCsrf();
 type SessionUser = { username?: string; role: string | null } | null;
 const session = ref<SessionUser>(null);
 const selectedDate = ref(new Date().toISOString().slice(0, 10));
@@ -197,6 +197,7 @@ const submitMicShift = async (payload: Record<string, unknown>) => {
 };
 
 const logout = async () => {
+  await refreshCsrfToken();
   await $fetch("/api/auth/logout", {
     method: "POST",
     headers: getHeaders(),
