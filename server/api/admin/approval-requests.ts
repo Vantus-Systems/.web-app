@@ -1,6 +1,7 @@
 import { readFile, writeFile } from "fs/promises";
 import { join } from "path";
-import { defineEventHandler, readBody, getQuery } from "h3";
+import { defineEventHandler, readBody, getQuery, createError } from "h3";
+import { assertRole } from "~/server/utils/roles";
 
 const dataDir = join(process.cwd(), "server/data");
 
@@ -33,6 +34,7 @@ async function saveApprovals(approvals: ApprovalRequest[]): Promise<void> {
 }
 
 export default defineEventHandler(async (event) => {
+  assertRole(event.context.user?.role, ["OWNER"]);
   const method = event.node.req.method;
 
   if (method === "GET") {
@@ -60,6 +62,12 @@ export default defineEventHandler(async (event) => {
   if (method === "POST") {
     // Create new approval request
     const body = await readBody(event);
+    if (!body?.userId || !body?.type) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Missing required fields",
+      });
+    }
     const approvals = await loadApprovals();
 
     const newRequest: ApprovalRequest = {

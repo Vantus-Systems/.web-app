@@ -1,3 +1,4 @@
+import { defineEventHandler, getQuery, createError } from "h3";
 import prisma from "~/server/db/client";
 import { auditService } from "~/server/services/audit.service";
 import { assertRole } from "~/server/utils/roles";

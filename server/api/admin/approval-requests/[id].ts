@@ -1,6 +1,7 @@
 import { readFile, writeFile } from "fs/promises";
 import { join } from "path";
-import { defineEventHandler, readBody } from "h3";
+import { defineEventHandler, readBody, createError } from "h3";
+import { assertRole } from "~/server/utils/roles";
 
 const dataDir = join(process.cwd(), "server/data");
 
@@ -33,8 +34,15 @@ async function saveApprovals(approvals: ApprovalRequest[]): Promise<void> {
 }
 
 export default defineEventHandler(async (event) => {
+  assertRole(event.context.user?.role, ["OWNER"]);
   const method = event.node.req.method;
-  const id = getRouterParam(event, "id");
+  const id = event.context.params?.id;
+  if (!id) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Missing approval id",
+    });
+  }
 
   if (method === "PUT") {
     // Update approval request status

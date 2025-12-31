@@ -1,6 +1,7 @@
 import { readFile, writeFile } from "fs/promises";
 import { join } from "path";
-import { defineEventHandler, readBody } from "h3";
+import { defineEventHandler, readBody, createError } from "h3";
+import { assertAnyPermission } from "~/server/utils/permissions";
 
 const dataDir = join(process.cwd(), "server/data");
 
@@ -32,9 +33,13 @@ async function saveCharities(charities: Charity[]): Promise<void> {
 
 export default defineEventHandler(async (event) => {
   const method = event.node.req.method;
-  const id = getRouterParam(event, "id");
+  const id = event.context.params?.id;
+  if (!id) {
+    throw createError({ statusCode: 400, statusMessage: "Missing charity id" });
+  }
 
   if (method === "GET") {
+    assertAnyPermission(event.context.user?.role, ["charities:read"]);
     const charities = await loadCharities();
     const charity = charities.find((c) => c.id === id);
 
@@ -52,6 +57,7 @@ export default defineEventHandler(async (event) => {
   }
 
   if (method === "PUT") {
+    assertAnyPermission(event.context.user?.role, ["charities:edit"]);
     const body = await readBody(event);
     const charities = await loadCharities();
     const idx = charities.findIndex((c) => c.id === id);
@@ -65,11 +71,11 @@ export default defineEventHandler(async (event) => {
 
     charities[idx] = {
       ...charities[idx],
-      name: body.name,
-      description: body.description || "",
-      contact_person: body.contact_person,
-      tax_id: body.tax_id,
-      is_active: body.is_active ?? true,
+      name: body.name || charities[idx].name,
+      description: body.description ?? charities[idx].description,
+      contact_person: body.contact_person || charities[idx].contact_person,
+      tax_id: body.tax_id || charities[idx].tax_id,
+      is_active: body.is_active ?? charities[idx].is_active,
     };
 
     await saveCharities(charities);
@@ -81,6 +87,7 @@ export default defineEventHandler(async (event) => {
   }
 
   if (method === "DELETE") {
+    assertAnyPermission(event.context.user?.role, ["charities:edit"]);
     const charities = await loadCharities();
     const filtered = charities.filter((c) => c.id !== id);
 

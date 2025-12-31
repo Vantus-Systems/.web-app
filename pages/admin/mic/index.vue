@@ -77,17 +77,23 @@ const loadSession = async () => {
 
 const loadHolidays = async () => {
   const year = Number(selectedDate.value.slice(0, 4));
-  const response = await $fetch<{ occurrences?: HolidayOccurrence[] }>("/api/admin/holiday-rules", {
-    credentials: "include",
-    params: { year },
-  });
+  const response = await $fetch<{ occurrences?: HolidayOccurrence[] }>(
+    "/api/admin/holiday-rules",
+    {
+      credentials: "include",
+      params: { year },
+    },
+  );
   holidays.value = response.occurrences ?? [];
 };
 
 const loadDailyShifts = async () => {
-  dailyShifts.value = await $fetch(`/api/admin/shift-records?start=${selectedDate.value}&end=${selectedDate.value}`, { 
-    credentials: "include",
-  });
+  dailyShifts.value = await $fetch(
+    `/api/admin/shift-records?start=${selectedDate.value}&end=${selectedDate.value}`,
+    {
+      credentials: "include",
+    },
+  );
 };
 
 const loadWeekSummary = async () => {

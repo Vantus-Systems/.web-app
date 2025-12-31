@@ -1,4 +1,4 @@
-import { defineEventHandler, readBody } from "h3";
+import { defineEventHandler, readBody, createError } from "h3";
 import prisma from "~/server/db/client";
 import { assertRole } from "~/server/utils/roles";
 import { incidentUpdateSchema } from "~/server/schemas/micIncident.zod";

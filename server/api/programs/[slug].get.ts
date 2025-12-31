@@ -1,3 +1,4 @@
+import { defineEventHandler, getRouterParam, createError } from "h3";
 import prisma from "~/server/db/client";
 
 export default defineEventHandler(async (event) => {

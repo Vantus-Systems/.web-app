@@ -1,4 +1,4 @@
-import { defineEventHandler } from "h3";
+import { defineEventHandler, createError } from "h3";
 import prisma from "~/server/db/client";
 import { assertRole } from "~/server/utils/roles";
 

@@ -1,6 +1,7 @@
 import { readFile, writeFile } from "fs/promises";
 import { join } from "path";
-import { defineEventHandler, readBody } from "h3";
+import { defineEventHandler, readBody, createError } from "h3";
+import { assertAnyPermission } from "~/server/utils/permissions";
 
 const dataDir = join(process.cwd(), "server/data");
 
@@ -34,6 +35,7 @@ export default defineEventHandler(async (event) => {
   const method = event.node.req.method;
 
   if (method === "GET") {
+    assertAnyPermission(event.context.user?.role, ["charities:read"]);
     const charities = await loadCharities();
     return {
       success: true,
@@ -42,7 +44,14 @@ export default defineEventHandler(async (event) => {
   }
 
   if (method === "POST") {
+    assertAnyPermission(event.context.user?.role, ["charities:edit"]);
     const body = await readBody(event);
+    if (!body?.name || !body?.contact_person || !body?.tax_id) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Missing required fields",
+      });
+    }
     const charities = await loadCharities();
 
     const newCharity: Charity = {
