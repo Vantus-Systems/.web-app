@@ -1,4 +1,5 @@
 import { ref, computed, onMounted, onUnmounted } from "vue";
+import { parseTime as parseTimeToMinutes } from "~/utils/time.utils";
 
 export function useScheduleClock() {
   const timeZone = "America/Chicago";
@@ -80,13 +81,18 @@ export function useScheduleClock() {
     };
   });
 
-  const parseTime = (timeStr: string) => {
-    const [hStr = "0", mStr = "0"] = timeStr.split(":");
-    const h = parseInt(hStr, 10);
-    const m = parseInt(mStr, 10);
-    const hh = Number.isNaN(h) ? 0 : h;
-    const mm = Number.isNaN(m) ? 0 : m;
-    return hh * 60 + mm;
+  const normalizeRangeForNow = (
+    start: number,
+    end: number,
+    nowMins: number,
+  ) => {
+    // If end <= start, interpret as a spans-midnight range.
+    if (end <= start) {
+      const endNorm = end + 24 * 60;
+      const nowNorm = nowMins < start ? nowMins + 24 * 60 : nowMins;
+      return { start, end: endNorm, now: nowNorm };
+    }
+    return { start, end, now: nowMins };
   };
 
   const getStatus = (block: any) => {
@@ -97,12 +103,15 @@ export function useScheduleClock() {
       return "inactive"; // Not today
     }
 
-    const start = parseTime(block.startTime);
-    const end = parseTime(block.endTime);
+    const start = parseTimeToMinutes(block.startTime);
+    const end = parseTimeToMinutes(block.endTime);
     const current = chicagoTime.value.minutes;
 
-    if (current >= start && current < end) return "live";
-    if (current < start) return "upcoming";
+    const normalized = normalizeRangeForNow(start, end, current);
+
+    if (normalized.now >= normalized.start && normalized.now < normalized.end)
+      return "live";
+    if (normalized.now < normalized.start) return "upcoming";
     return "past";
   };
 

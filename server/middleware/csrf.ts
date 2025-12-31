@@ -9,14 +9,30 @@ import { defineEventHandler, getCookie, getHeader, createError } from "h3";
 const CSRF_HEADER = "x-csrf-token";
 const CSRF_COOKIE = "csrf_token";
 
+let warnedMissingSecret = false;
+
 /**
  * Generate a CSRF token hash from session token
  */
 function generateCsrfToken(sessionToken: string): string {
+  const secret = process.env.APP_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      throw createError({
+        statusCode: 500,
+        message: "Server misconfigured: APP_SECRET is required in production",
+      });
+    }
+    if (!warnedMissingSecret) {
+      warnedMissingSecret = true;
+      console.warn(
+        "[csrf] APP_SECRET is not set; using an insecure development fallback secret.",
+      );
+    }
+  }
+
   return createHash("sha256")
-    .update(
-      `csrf:${sessionToken}:${process.env.APP_SECRET || "default-secret"}`,
-    )
+    .update(`csrf:${sessionToken}:${secret || "dev-secret"}`)
     .digest("hex");
 }
 

@@ -1,6 +1,17 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import { Save } from "lucide-vue-next";
+import { 
+  Save, 
+  LayoutDashboard, 
+  DollarSign, 
+  Calendar, 
+  Grid, 
+  Layers, 
+  CheckCircle, 
+  AlertCircle,
+  RotateCcw,
+  UploadCloud
+} from "lucide-vue-next";
 import OpsSchemaPricingEditor from "./ops/OpsSchemaPricingEditor.vue";
 import OpsSchemaCalendarEditor from "./ops/OpsSchemaCalendarEditor.vue";
 import PatternEditor from "./PatternEditor.vue";
@@ -8,7 +19,7 @@ import ProgramEditor from "./ProgramEditor.vue";
 import { useOpsStore } from "~/stores/ops";
 
 const opsStore = useOpsStore();
-const currentStep = ref("pricing"); // pricing | patterns | programs | schedule
+const currentStep = ref("overview"); // overview | pricing | patterns | programs | schedule
 type Density = "compact" | "standard" | "detail";
 const density = ref<Density>("standard");
 
@@ -17,10 +28,11 @@ onMounted(() => {
 });
 
 const steps = [
-  { id: "pricing", label: "Rate Cards + Timeline" },
-  { id: "schedule", label: "Day Profiles + Calendar" },
-  { id: "patterns", label: "Pattern Studio" },
-  { id: "programs", label: "Program Orchestrator" },
+  { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "pricing", label: "Pricing & Timeline", icon: DollarSign },
+  { id: "schedule", label: "Schedule", icon: Calendar },
+  { id: "patterns", label: "Patterns", icon: Grid },
+  { id: "programs", label: "Programs", icon: Layers },
 ];
 
 const opsSchemaMeta = computed(() => opsStore.opsSchemaDraft?.meta);
@@ -79,233 +91,233 @@ const publishSchema = async () => {
 const rollbackSchema = () => {
   opsStore.rollbackOpsSchema();
 };
+
+const statusColors = {
+  draft: "bg-amber-100 text-amber-700 border-amber-200",
+  live: "bg-accent-success/10 text-accent-success border-accent-success/20",
+  archived: "bg-slate-100 text-slate-600 border-slate-200",
+};
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-slate-50 border-t border-slate-200">
-    <div class="flex flex-1 min-h-0">
-      <!-- Sidebar -->
-      <div
-        class="w-64 bg-white border-r border-slate-200 flex flex-col py-6 overflow-y-auto"
-      >
-        <nav class="space-y-1 px-4">
+  <div class="flex h-full bg-base overflow-hidden">
+    <!-- Sidebar -->
+    <div class="w-64 bg-surface border-r border-divider flex flex-col shrink-0">
+      <div class="p-6 border-b border-divider">
+        <h2 class="text-sm font-bold text-secondary uppercase tracking-wider">Builder</h2>
+      </div>
+      <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+        <button
+          v-for="step in steps"
+          :key="step.id"
+          class="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200"
+          :class="
+            currentStep === step.id
+              ? 'bg-accent-primary/10 text-accent-primary'
+              : 'text-secondary hover:bg-base hover:text-primary'
+          "
+          @click="currentStep = step.id"
+        >
+          <component :is="step.icon" class="w-4 h-4" />
+          {{ step.label }}
+        </button>
+      </nav>
+      
+      <!-- Sidebar Footer Status -->
+      <div class="p-4 border-t border-divider bg-base/50">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-secondary">Pricing</span>
+            <CheckCircle v-if="opsStore.pricingReady" class="w-4 h-4 text-accent-success" />
+            <div v-else class="w-4 h-4 rounded-full border-2 border-divider"></div>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-secondary">Patterns</span>
+            <CheckCircle v-if="opsStore.patternsReady" class="w-4 h-4 text-accent-success" />
+            <div v-else class="w-4 h-4 rounded-full border-2 border-divider"></div>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-secondary">Programs</span>
+            <CheckCircle v-if="opsStore.programsReady" class="w-4 h-4 text-accent-success" />
+            <div v-else class="w-4 h-4 rounded-full border-2 border-divider"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0">
+      <!-- Top Bar -->
+      <header class="h-16 bg-surface border-b border-divider flex items-center justify-between px-6 shrink-0 z-10">
+        <div class="flex items-center gap-4">
+          <div>
+            <h1 class="text-lg font-bold text-primary">{{ opsSchemaName }}</h1>
+            <div class="flex items-center gap-2 text-xs text-secondary">
+              <span class="uppercase tracking-wide font-medium">{{ opsSchemaStatus }}</span>
+              <span>•</span>
+              <span>{{ opsSchemaMeta?.timezone ?? "UTC" }}</span>
+              <span>•</span>
+              <span>{{ opsSchemaMeta?.currency ?? "USD" }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div v-if="opsStore.hasUnsavedChanges" class="flex items-center gap-2 text-amber-600 text-xs font-bold uppercase tracking-wide mr-4 animate-pulse">
+            <AlertCircle class="w-4 h-4" />
+            Unsaved Changes
+          </div>
+
+          <div class="h-6 w-px bg-divider mx-2"></div>
+
           <button
-            v-for="step in steps"
-            :key="step.id"
-            class="w-full flex items-center px-4 py-3 text-sm font-bold rounded-lg transition-colors text-left"
-            :class="
-              currentStep === step.id
-                ? 'bg-primary-50 text-primary-900'
-                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
-            "
-            @click="currentStep = step.id"
+            class="p-2 text-secondary hover:text-primary hover:bg-base rounded-lg transition-colors"
+            title="Rollback"
+            @click="rollbackSchema"
           >
-            {{ step.label }}
+            <RotateCcw class="w-4 h-4" />
           </button>
-        </nav>
-      </div>
 
-      <div class="flex-1 flex flex-col min-w-0">
-        <!-- Command Bar -->
-        <div class="border-b border-slate-200 bg-white shadow-sm z-10 shrink-0">
-          <div
-            class="px-8 py-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
+          <button
+            class="flex items-center gap-2 px-4 py-2 bg-surface border border-divider hover:bg-base text-primary text-sm font-medium rounded-lg transition-colors"
+            @click="handleSave"
           >
-            <div>
-              <p
-                class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
-              >
-                Operations Schema
-              </p>
-              <div class="flex items-center gap-3">
-                <h2 class="text-2xl font-black text-primary-900">
-                  {{ opsSchemaName }}
-                </h2>
-                <span
-                  :class="[
-                    'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide',
-                    opsSchemaStatus === 'live'
-                      ? 'bg-emerald-100 text-emerald-700'
-                      : 'bg-amber-100 text-amber-700',
-                  ]"
-                >
-                  {{ opsSchemaStatus }}
-                </span>
+            <Save class="w-4 h-4" />
+            Save Draft
+          </button>
+
+          <button
+            class="flex items-center gap-2 px-4 py-2 bg-accent-primary hover:bg-accent-primary/90 text-white text-sm font-medium rounded-lg shadow-sm transition-colors"
+            @click="publishSchema"
+          >
+            <UploadCloud class="w-4 h-4" />
+            Publish
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <main class="flex-1 overflow-y-auto bg-base p-6">
+        <div v-if="opsStore.loading && !opsStore.pricing" class="flex items-center justify-center h-full">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-primary"></div>
+        </div>
+        
+        <div v-else class="h-full">
+          <!-- Overview Dashboard -->
+          <div v-if="currentStep === 'overview'" class="max-w-5xl mx-auto space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <!-- Status Cards -->
+              <div class="bg-surface p-6 rounded-xl border border-divider shadow-sm hover:shadow-md transition-shadow cursor-pointer" @click="currentStep = 'pricing'">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                    <DollarSign class="w-6 h-6" />
+                  </div>
+                  <CheckCircle v-if="opsStore.pricingReady" class="w-5 h-5 text-accent-success" />
+                </div>
+                <h3 class="text-lg font-bold text-primary mb-1">Pricing & Timeline</h3>
+                <p class="text-sm text-secondary">Manage rate cards, sessions, and operational hours.</p>
               </div>
-              <p class="text-xs text-slate-500">
-                {{ opsSchemaMeta?.timezone ?? "—" }} •
-                {{ opsSchemaMeta?.currency ?? "—" }}
-              </p>
+
+              <div class="bg-surface p-6 rounded-xl border border-divider shadow-sm hover:shadow-md transition-shadow cursor-pointer" @click="currentStep = 'patterns'">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="p-2 bg-purple-50 text-purple-600 rounded-lg">
+                    <Grid class="w-6 h-6" />
+                  </div>
+                  <CheckCircle v-if="opsStore.patternsReady" class="w-5 h-5 text-accent-success" />
+                </div>
+                <h3 class="text-lg font-bold text-primary mb-1">Patterns</h3>
+                <p class="text-sm text-secondary">Design bingo patterns and game sequences.</p>
+              </div>
+
+              <div class="bg-surface p-6 rounded-xl border border-divider shadow-sm hover:shadow-md transition-shadow cursor-pointer" @click="currentStep = 'programs'">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="p-2 bg-orange-50 text-orange-600 rounded-lg">
+                    <Layers class="w-6 h-6" />
+                  </div>
+                  <CheckCircle v-if="opsStore.programsReady" class="w-5 h-5 text-accent-success" />
+                </div>
+                <h3 class="text-lg font-bold text-primary mb-1">Programs</h3>
+                <p class="text-sm text-secondary">Assemble games into full session programs.</p>
+              </div>
             </div>
 
-            <div class="flex flex-wrap gap-2 items-center">
-              <div
-                class="flex items-center rounded-lg border border-slate-200 overflow-hidden"
-              >
-                <button
-                  v-for="mode in ['compact', 'standard', 'detail']"
-                  :key="mode"
-                  class="px-3 py-2 text-xs font-bold uppercase tracking-[0.2em]"
-                  :class="
-                    density === mode
-                      ? 'bg-primary-900 text-white'
-                      : 'text-slate-500 hover:bg-slate-50'
-                  "
-                  @click="setDensity(mode as Density)"
-                >
-                  {{ mode }}
-                </button>
+            <!-- Validation / Next Steps -->
+            <div class="bg-surface rounded-xl border border-divider overflow-hidden">
+              <div class="px-6 py-4 border-b border-divider bg-base/50">
+                <h3 class="font-bold text-primary">Validation Status</h3>
               </div>
-              <button
-                class="px-3 py-2 text-xs font-bold uppercase tracking-[0.3em] rounded-lg border border-slate-200 text-slate-500 hover:text-slate-700 hover:border-slate-300"
-                @click="createDraft"
-              >
-                Create Draft
-              </button>
-              <button
-                class="px-3 py-2 text-xs font-bold uppercase tracking-[0.3em] rounded-lg border border-slate-200 text-slate-500 hover:text-slate-700 hover:border-slate-300"
-                @click="handleSave"
-              >
-                Save Draft
-              </button>
-              <button
-                class="px-3 py-2 text-xs font-bold uppercase tracking-[0.3em] rounded-lg border border-slate-200 text-slate-500 hover:text-slate-700 hover:border-slate-300"
-                @click="rollbackSchema"
-              >
-                Rollback
-              </button>
-              <button
-                class="px-4 py-2 text-xs font-bold uppercase tracking-[0.3em] rounded-lg bg-emerald-600 text-white hover:bg-emerald-500"
-                @click="publishSchema"
-              >
-                Publish
-              </button>
+              <div class="p-6">
+                <div v-if="!opsStore.opsSchemaDraft?.definitions?.rateCards?.length" class="flex items-start gap-3 mb-4 text-sm text-secondary">
+                  <AlertCircle class="w-5 h-5 text-accent-warning shrink-0" />
+                  <div>
+                    <p class="font-medium text-primary">Missing Rate Cards</p>
+                    <p>Define at least one rate card in the Pricing section.</p>
+                  </div>
+                </div>
+                <div v-if="!opsStore.programs.length" class="flex items-start gap-3 mb-4 text-sm text-secondary">
+                  <AlertCircle class="w-5 h-5 text-accent-warning shrink-0" />
+                  <div>
+                    <p class="font-medium text-primary">No Programs Defined</p>
+                    <p>Create at least one program to schedule sessions.</p>
+                  </div>
+                </div>
+                <div v-if="opsStore.pricingReady && opsStore.programsReady" class="flex items-center gap-2 text-accent-success font-medium">
+                  <CheckCircle class="w-5 h-5" />
+                  <span>Schema is ready for publishing.</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div
-            class="h-16 border-t border-slate-100 flex items-center justify-between px-8"
-          >
-            <div class="flex gap-6">
-              <div class="flex items-center gap-2">
-                <div
-                  :class="[
-                    'w-2 h-2 rounded-full',
-                    opsStore.pricingReady ? 'bg-emerald-500' : 'bg-slate-300',
-                  ]"
-                ></div>
-                <span
-                  class="text-xs font-bold uppercase tracking-wider text-slate-500"
-                  >Pricing</span
-                >
-              </div>
-              <div class="flex items-center gap-2">
-                <div
-                  :class="[
-                    'w-2 h-2 rounded-full',
-                    opsStore.patternsReady ? 'bg-emerald-500' : 'bg-slate-300',
-                  ]"
-                ></div>
-                <span
-                  class="text-xs font-bold uppercase tracking-wider text-slate-500"
-                  >Patterns</span
-                >
-              </div>
-              <div class="flex items-center gap-2">
-                <div
-                  :class="[
-                    'w-2 h-2 rounded-full',
-                    opsStore.programsReady ? 'bg-emerald-500' : 'bg-slate-300',
-                  ]"
-                ></div>
-                <span
-                  class="text-xs font-bold uppercase tracking-wider text-slate-500"
-                  >Programs</span
-                >
-              </div>
-            </div>
+          <!-- Editors -->
+          <div v-if="currentStep === 'pricing' && opsStore.opsSchemaDraft" class="h-full fade-in">
+            <OpsSchemaPricingEditor
+              :model-value="opsStore.opsSchemaDraft"
+              :density="density"
+              @update:model-value="opsStore.updateOpsSchemaDraft"
+              @update:density="density = $event"
+            />
+          </div>
 
-            <div class="flex gap-4 items-center">
-              <div
-                v-if="opsStore.hasUnsavedChanges"
-                class="text-amber-600 font-bold text-xs uppercase tracking-wide flex items-center animate-pulse"
-              >
-                Unsaved Changes
-              </div>
-              <button
-                v-if="opsStore.hasUnsavedChanges"
-                class="flex items-center gap-2 bg-primary-900 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-primary-800 transition shadow-lg shadow-primary-900/20"
-                @click="handleSave"
-              >
-                <Save class="w-4 h-4" />
-                Save Changes
-              </button>
-            </div>
+          <div v-if="currentStep === 'patterns'" class="h-full fade-in">
+            <PatternEditor
+              :patterns="opsStore.patterns"
+              @save="handlePatternSave"
+              @delete="handlePatternDelete"
+            />
+          </div>
+
+          <div v-if="currentStep === 'programs'" class="h-full fade-in">
+            <ProgramEditor
+              :programs="opsStore.programs"
+              :patterns="opsStore.patterns"
+              @save="handleProgramSave"
+              @delete="handleProgramDelete"
+              @navigate="(step) => (currentStep = step)"
+            />
+          </div>
+
+          <div v-if="currentStep === 'schedule' && opsStore.opsSchemaDraft" class="h-full fade-in">
+            <OpsSchemaCalendarEditor
+              :model-value="opsStore.opsSchemaDraft"
+              @update:model-value="opsStore.updateOpsSchemaDraft"
+            />
           </div>
         </div>
-
-        <!-- Content -->
-        <div class="flex-1 overflow-y-auto p-8">
-          <div
-            v-if="opsStore.loading && !opsStore.pricing"
-            class="flex justify-center py-20"
-          >
-            <div
-              class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-900"
-            ></div>
-          </div>
-          <div v-else>
-            <div
-              v-if="currentStep === 'pricing' && opsStore.opsSchemaDraft"
-              class="fade-enter-active"
-            >
-              <OpsSchemaPricingEditor
-                :model-value="opsStore.opsSchemaDraft"
-                :density="density"
-                @update:model-value="opsStore.updateOpsSchemaDraft"
-                @update:density="density = $event"
-              />
-            </div>
-
-            <div v-if="currentStep === 'patterns'">
-              <PatternEditor
-                :patterns="opsStore.patterns"
-                @save="handlePatternSave"
-                @delete="handlePatternDelete"
-              />
-            </div>
-
-            <div v-if="currentStep === 'programs'">
-              <ProgramEditor
-                :programs="opsStore.programs"
-                :patterns="opsStore.patterns"
-                @save="handleProgramSave"
-                @delete="handleProgramDelete"
-                @navigate="(step) => (currentStep = step)"
-              />
-            </div>
-
-            <div v-if="currentStep === 'schedule' && opsStore.opsSchemaDraft">
-              <OpsSchemaCalendarEditor
-                :model-value="opsStore.opsSchemaDraft"
-                @update:model-value="opsStore.updateOpsSchemaDraft"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+      </main>
     </div>
   </div>
 </template>
 
 <style scoped>
-.fade-enter-active {
-  animation: fadeIn 0.3s ease-out;
+.fade-in {
+  animation: fadeIn 0.2s ease-out;
 }
+
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(5px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;

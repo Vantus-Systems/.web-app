@@ -36,27 +36,28 @@ async function sendAlert(missing: string[]) {
 export default async () => {
   try {
     await prisma.$connect();
-    const rows = (await prisma.$queryRaw`
-      SELECT name FROM sqlite_master
-      WHERE type='table' AND name IN ('settings','sessions')
-    `) as any[];
-    const found = rows.map((r) => r.name as string);
-    const required = ["settings", "sessions"];
-    const missing = required.filter((n) => !found.includes(n));
 
-    if (missing.length) {
-      // fire an alert (non-blocking for client behavior but awaited to log failures)
-      await sendAlert(missing);
-      throw createError({
-        statusCode: 503,
-        statusMessage: "DB_MISSING_TABLES",
-        message: `Missing tables: ${missing.join(", ")}`,
-      });
-    }
+    // Provider-agnostic schema readiness checks (fail if tables/models are missing).
+    await prisma.setting.findFirst({ select: { key: true } });
+    // `session` uses `token_hash` as its primary key in this schema.
+    await prisma.session.findFirst({ select: { token_hash: true } });
 
     return { ok: true };
   } catch (err: any) {
     if (err?.statusCode) throw err;
+
+    const code = err?.code as string | undefined;
+
+    // Prisma typically uses P2021 when a table does not exist.
+    if (code === "P2021" || code === "P2022") {
+      await sendAlert(["schema_not_ready"]);
+      throw createError({
+        statusCode: 503,
+        statusMessage: "DB_SCHEMA_NOT_READY",
+        message: "Database schema not ready",
+      });
+    }
+
     throw createError({ statusCode: 500, message: "DB check failed" });
   }
 };

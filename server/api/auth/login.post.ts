@@ -71,6 +71,7 @@ export default defineEventHandler(async (event) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
+      path: "/",
       expires: expiresAt,
     });
 
@@ -80,6 +81,7 @@ export default defineEventHandler(async (event) => {
       httpOnly: false, // JS needs to read this
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
+      path: "/",
       expires: expiresAt,
     });
 

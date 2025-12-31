@@ -3,6 +3,7 @@ import { ref, computed, watch } from "vue";
 import { Calendar, Filter, Clock } from "lucide-vue-next";
 import { useBusiness } from "~/composables/useBusiness";
 import { useScheduleClock } from "~/composables/useScheduleClock";
+import { parseTime as parseTimeToMinutes } from "~/utils/time.utils";
 
 const {
   business: BUSINESS_INFO,
@@ -125,9 +126,7 @@ const filteredSessions = computed(() => {
 
   // Sort by start time
   filtered.sort((a, b) => {
-    const ta = parseInt(a.startTime.replace(":", ""));
-    const tb = parseInt(b.startTime.replace(":", ""));
-    return ta - tb;
+    return parseTimeToMinutes(a.startTime) - parseTimeToMinutes(b.startTime);
   });
 
   return filtered;

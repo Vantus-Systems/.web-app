@@ -1,24 +1,24 @@
 <template>
   <div
-    class="min-h-screen bg-slate-50 font-sans text-slate-900 h-screen flex flex-col overflow-hidden"
+    class="min-h-screen bg-base font-sans text-primary h-screen flex flex-col overflow-hidden"
   >
     <nav
-      class="bg-primary-950 shadow-2xl border-b border-primary-800 sticky top-0 z-50 shrink-0"
+      class="bg-surface/80 backdrop-blur-md border-b border-divider sticky top-0 z-50 shrink-0"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-20">
+        <div class="flex justify-between h-16">
           <div class="flex items-center gap-6">
             <div class="flex-shrink-0 flex items-center">
               <span
-                class="text-gold font-black text-2xl tracking-tighter uppercase italic"
+                class="text-primary font-bold text-xl tracking-tight"
                 >Mary Esther</span
               >
               <span
-                class="ml-2 text-white font-light text-2xl tracking-widest uppercase"
+                class="ml-2 text-secondary font-normal text-xl tracking-tight"
                 >Bingo</span
               >
               <div
-                class="ml-4 px-2 py-0.5 bg-gold/10 border border-gold/20 rounded text-[10px] text-gold font-bold tracking-widest uppercase"
+                class="ml-3 px-2 py-0.5 bg-accent-primary/10 text-accent-primary rounded text-[10px] font-bold tracking-widest uppercase"
               >
                 Admin
               </div>
@@ -36,12 +36,12 @@
 
             <!-- Command Palette Button -->
             <button
-              class="hidden sm:flex items-center gap-2 px-3 py-2 bg-primary-800/50 hover:bg-primary-800 text-slate-300 rounded-lg text-xs transition-colors border border-primary-700"
+              class="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-base hover:bg-base/80 text-secondary rounded-md text-xs transition-colors border border-divider"
               @click="commandPaletteOpen = true"
               aria-label="Open command palette"
             >
               <svg
-                class="w-4 h-4"
+                class="w-3.5 h-3.5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -54,12 +54,12 @@
                 />
               </svg>
               <span>Search</span>
-              <kbd class="px-1.5 py-0.5 bg-primary-900/50 rounded text-[10px] font-mono">⌘K</kbd>
+              <kbd class="px-1.5 py-0.5 bg-divider/50 rounded text-[10px] font-mono">⌘K</kbd>
             </button>
 
             <!-- Help Button -->
             <button
-              class="p-2 bg-primary-800/50 hover:bg-primary-800 text-slate-300 rounded-lg transition-colors border border-primary-700"
+              class="p-2 text-secondary hover:text-primary transition-colors"
               @click="helpPanelOpen = true"
               aria-label="Open help panel"
             >
@@ -80,16 +80,16 @@
 
             <!-- User Info -->
             <div class="hidden md:flex flex-col items-end mr-4">
-              <span class="text-white text-xs font-bold">{{ userLabel }}</span>
+              <span class="text-primary text-xs font-semibold">{{ userLabel }}</span>
               <span
-                class="text-[10px] text-slate-400 uppercase tracking-widest"
+                class="text-[10px] text-secondary uppercase tracking-widest"
                 >{{ roleLabelText }}</span
               >
             </div>
 
             <!-- Logout Button -->
             <button
-              class="bg-primary-800 hover:bg-red-900/40 text-slate-300 hover:text-white px-4 py-2 rounded-lg text-xs font-bold border border-primary-700 transition-colors"
+              class="text-accent-error hover:bg-accent-error/10 px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
               @click="$emit('logout')"
             >
               Logout

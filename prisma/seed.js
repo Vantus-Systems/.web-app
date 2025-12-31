@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
+import { randomBytes } from "crypto";
 import { PrismaClient } from "@prisma/client";
 import argon2 from "argon2";
 
@@ -33,21 +34,47 @@ async function main() {
   }
 
   console.log("Seeding users...");
+  const isProd = process.env.NODE_ENV === "production";
+  const username = process.env.SEED_ADMIN_USERNAME || "admin";
+
   const existingAdmin = await prisma.user.findUnique({
-    where: { username: "admin" },
+    where: { username },
   });
 
   if (!existingAdmin) {
-    const passwordHash = await argon2.hash("admin123");
-    await prisma.user.create({
-      data: {
-        username: "admin",
-        password_hash: passwordHash,
-        role: "OWNER",
-        is_active: true,
-      },
-    });
-    console.log("Created admin user (password: admin123)");
+    const providedPassword = process.env.SEED_ADMIN_PASSWORD;
+
+    let password = providedPassword;
+    if (!password) {
+      if (isProd) {
+        console.warn(
+          "[seed] Skipping default admin user creation in production. Set SEED_ADMIN_USERNAME and SEED_ADMIN_PASSWORD to create an initial admin.",
+        );
+        password = null;
+      } else {
+        // Dev convenience: generate a strong random password and print it once.
+        const generated = randomBytes(12).toString("base64url");
+        password = generated;
+        console.log(
+          `[seed] Created dev admin credentials: username=${username} password=${generated}`,
+        );
+      }
+    }
+
+    if (password) {
+      const passwordHash = await argon2.hash(password);
+      await prisma.user.create({
+        data: {
+          username,
+          password_hash: passwordHash,
+          role: "OWNER",
+          is_active: true,
+        },
+      });
+      if (isProd) {
+        console.log(`[seed] Created admin user: username=${username}`);
+      }
+    }
   } else {
     console.log("Admin user already exists");
   }

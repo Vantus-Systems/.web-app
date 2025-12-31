@@ -1,0 +1,23 @@
+{
+    "name": "med",
+    "description": "Mary Esther Bingo - Nuxt 4 + Nitro/H3 application",
+    "type": "web",
+    "url": "http://localhost:3000",
+    "webRoot": "${workspaceFolder}",
+    "sourceMapRoot": "${workspaceFolder}/.output",
+    "sourceMapPathOverrides": {
+        "webpack:///./*": "${webRoot}/*",
+        "webpack:///*": "${webRoot}/*"
+    },
+    "breakOnLoad": true,
+    "smartStep": true,
+    "skipFiles": [
+        "node_modules/**",
+        ".output/**",
+        "dist/**",
+        "build/**",
+        ".nuxt/**",
+        ".next/**",
+        ".svelte-kit/**"
+    ]
+}

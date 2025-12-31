@@ -7,8 +7,14 @@ export default defineEventHandler(async (event) => {
     await authService.revokeSession(token);
   }
 
-  deleteCookie(event, "auth_token");
-  deleteCookie(event, "csrf_token");
+  const cookieOptions = {
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+  };
+
+  deleteCookie(event, "auth_token", cookieOptions);
+  deleteCookie(event, "csrf_token", cookieOptions);
 
   return { success: true };
 });

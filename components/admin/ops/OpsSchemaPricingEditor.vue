@@ -96,16 +96,11 @@ import type {
 import RateCardPalette from "~/components/admin/ops/RateCardPalette.vue";
 import TimelineCanvas from "~/components/admin/ops/TimelineCanvas.vue";
 import TimelineInspector from "~/components/admin/ops/TimelineInspector.vue";
-import { detectGaps } from "~/utils/ops-schema.utils";
-
-// Helper function to convert time string to minutes
-const toMinutes = (time: string): number => {
-  const match = time.trim().match(/^(\d{2}):(\d{2})$/);
-  if (!match) return 0;
-  const hours = Number(match[1]);
-  const minutes = Number(match[2]);
-  return hours * 60 + minutes;
-};
+import {
+  detectGaps,
+  detectOverlaps,
+  normalizeTimeRange,
+} from "~/utils/ops-schema.utils";
 
 // Validation functions
 const isValidTimeFormat = (time: string): boolean => {
@@ -126,9 +121,11 @@ const isValidTimeFormat = (time: string): boolean => {
 
 const isValidTimeRange = (start: string, end: string): boolean => {
   if (!start || !end) return false;
-  const startMinutes = toMinutes(start);
-  const endMinutes = toMinutes(end);
-  return endMinutes > startMinutes;
+  if (!isValidTimeFormat(start) || !isValidTimeFormat(end)) return false;
+  if (start === end) return false;
+  // Allow spans-midnight (end <= start) to match server behavior.
+  const range = normalizeTimeRange(start, end);
+  return range.start !== range.end;
 };
 
 const isValidColorFormat = (color: string): boolean => {
@@ -147,7 +144,6 @@ const isValidBundleIds = (bundleIds: string[]): boolean => {
 
 const isValidOperationalHours = (start: string, end: string): boolean => {
   if (!start || !end) return false;
-  if (!isValidTimeFormat(start) || !isValidTimeFormat(end)) return false;
   return isValidTimeRange(start, end);
 };
 
@@ -157,9 +153,9 @@ const isValidSegmentDuration = (
   minMinutes: number = 15,
 ): boolean => {
   if (!isValidTimeFormat(start) || !isValidTimeFormat(end)) return false;
-  const startMinutes = toMinutes(start);
-  const endMinutes = toMinutes(end);
-  return endMinutes - startMinutes >= minMinutes;
+  if (start === end) return false;
+  const range = normalizeTimeRange(start, end);
+  return range.end - range.start >= minMinutes;
 };
 
 const isValidTriggerTarget = (
@@ -179,26 +175,33 @@ const hasOverlappingSegments = (
   },
   existingSegments: OpsSchemaFlowSegment[],
 ): boolean => {
-  // Check if the new segment overlaps with any existing segments
-  for (const segment of existingSegments) {
-    // Skip if the segment allows overlap or if it's the same segment being updated
-    if (
-      segment.allow_overlap ||
-      (newSegment.id && segment.id === newSegment.id)
-    )
-      continue;
+  type OverlapCheckSegment = {
+    time_start: string;
+    time_end: string;
+    allow_overlap?: boolean;
+    id?: string;
+  };
 
-    const newStart = toMinutes(newSegment.time_start);
-    const newEnd = toMinutes(newSegment.time_end);
-    const existingStart = toMinutes(segment.time_start);
-    const existingEnd = toMinutes(segment.time_end);
+  const candidate = {
+    ...newSegment,
+    allow_overlap: newSegment.allow_overlap ?? false,
+  };
 
-    // Check for overlap: new segment starts before existing ends AND new segment ends after existing starts
-    if (newStart < existingEnd && newEnd > existingStart) {
-      return true;
-    }
-  }
-  return false;
+  const candidateId = candidate.id ?? `__candidate__${Date.now()}`;
+  const candidateWithId: OverlapCheckSegment = { ...candidate, id: candidateId };
+
+  const others = existingSegments.filter(
+    (segment) => !(candidate.id && segment.id === candidate.id),
+  );
+
+  const overlaps = detectOverlaps<OverlapCheckSegment>([
+    ...(others as OverlapCheckSegment[]),
+    candidateWithId,
+  ]);
+
+  return overlaps.some(
+    (pair) => pair.a.id === candidateId || pair.b.id === candidateId,
+  );
 };
 
 const props = defineProps<{
@@ -296,7 +299,7 @@ const addSegmentFromDrop = (payload: {
 
   // Validate time range
   if (!isValidTimeRange(payload.time_start, payload.time_end)) {
-    setError("Invalid time range. End time must be after start time.");
+    setError("Invalid time range. Start and end times must be different.");
     return;
   }
 
@@ -352,7 +355,7 @@ const updateSegmentTime = (payload: {
 
   // Validate time range
   if (!isValidTimeRange(payload.time_start, payload.time_end)) {
-    setError("Invalid time range. End time must be after start time.");
+    setError("Invalid time range. Start and end times must be different.");
     return;
   }
 
@@ -452,7 +455,7 @@ const updateSegment = (updated: OpsSchemaFlowSegment) => {
 
   // Validate time range
   if (!isValidTimeRange(updated.time_start, updated.time_end)) {
-    setError("Invalid time range. End time must be after start time.");
+    setError("Invalid time range. Start and end times must be different.");
     return;
   }
 
@@ -478,7 +481,7 @@ const updateOverlay = (updated: OpsSchemaOverlayEvent) => {
 
   // Validate time range
   if (!isValidTimeRange(updated.time_start, updated.time_end)) {
-    setError("Invalid time range. End time must be after start time.");
+    setError("Invalid time range. Start and end times must be different.");
     return;
   }
 

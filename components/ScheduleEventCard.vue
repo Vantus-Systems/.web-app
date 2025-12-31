@@ -10,6 +10,7 @@ import {
   ChevronRight,
 } from "lucide-vue-next";
 import ProgramTable from "~/components/bingo/ProgramTable.vue";
+import { formatHHMM } from "~/utils/time.utils";
 
 interface Session {
   id: string;
@@ -106,6 +107,12 @@ const addToCalendar = () => {
   const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${text}&details=${details}`;
   window.open(url, "_blank");
 };
+
+const startTimeParts = computed(() => {
+  const formatted = formatHHMM(props.session.startTime);
+  const [time, period] = formatted.split(" ");
+  return { time, period: period ?? "" };
+});
 </script>
 
 <template>
@@ -135,10 +142,10 @@ const addToCalendar = () => {
 
         <div class="text-center">
           <div class="text-4xl font-black tracking-tighter mb-1">
-            {{ session.startTime.split(" ")[0] }}
+            {{ startTimeParts.time }}
           </div>
           <div class="text-sm font-black opacity-80 uppercase tracking-[0.2em]">
-            {{ session.startTime.split(" ")[1] }}
+            {{ startTimeParts.period }}
           </div>
           <div class="mt-4 h-px w-8 bg-white/30 mx-auto"></div>
           <div class="mt-4 text-[10px] font-black uppercase tracking-[0.3em]">

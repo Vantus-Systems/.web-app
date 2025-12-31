@@ -1,32 +1,31 @@
 <template>
-  <div class="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)_320px] h-[720px]">
-    <div class="h-full flex flex-col bg-white border-r border-slate-200">
-      <div class="p-4 space-y-3">
+  <div class="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)_320px] h-full">
+    <!-- Library Sidebar -->
+    <div class="h-full flex flex-col bg-surface border border-divider rounded-xl overflow-hidden shadow-sm">
+      <div class="p-4 space-y-3 border-b border-divider bg-base/30">
         <div class="flex items-center justify-between">
           <div>
-            <p
-              class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
-            >
-              Library
-            </p>
-            <h3 class="text-lg font-black text-primary-900">Patterns</h3>
+            <p class="text-[10px] uppercase tracking-widest text-secondary font-bold">Library</p>
+            <h3 class="text-lg font-bold text-primary">Patterns</h3>
           </div>
           <button
-            class="text-xs font-bold text-primary-700 border border-slate-200 rounded-lg px-2 py-1 hover:bg-slate-50"
+            class="text-xs font-bold text-accent-primary border border-divider bg-surface hover:bg-base rounded-lg px-3 py-1.5 transition-colors"
             @click="startEdit()"
           >
             + New
           </button>
         </div>
-        <input
-          v-model="searchTerm"
-          type="text"
-          placeholder="Search patterns..."
-          class="w-full rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-xs"
-        />
+        <div class="relative">
+          <input
+            v-model="searchTerm"
+            type="text"
+            placeholder="Search patterns..."
+            class="w-full rounded-lg border-divider bg-base px-3 py-2 text-xs focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary outline-none transition-all"
+          />
+        </div>
         <select
           v-model="activeCategory"
-          class="w-full rounded-lg border-slate-200 bg-slate-50 px-2 py-1 text-xs"
+          class="w-full rounded-lg border-divider bg-base px-2 py-1.5 text-xs focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary outline-none"
         >
           <option
             v-for="category in categories"
@@ -37,48 +36,48 @@
           </option>
         </select>
       </div>
-      <div class="px-4 pb-4 space-y-2 overflow-y-auto">
+      <div class="flex-1 p-2 space-y-1 overflow-y-auto">
         <button
           v-for="p in filteredPatterns"
           :key="p.id"
-          class="w-full text-left rounded-xl border px-3 py-2"
+          class="w-full text-left rounded-lg border px-3 py-2.5 transition-all duration-200 group"
           :class="
             editingPattern?.slug === p.slug
-              ? 'border-primary-500 bg-primary-50'
-              : 'border-slate-200 bg-white hover:border-slate-300'
+              ? 'border-accent-primary bg-accent-primary/5 shadow-sm'
+              : 'border-transparent hover:bg-base hover:border-divider'
           "
           @click="startEdit(p)"
         >
-          <div class="text-sm font-bold text-slate-900">{{ p.name }}</div>
-          <div class="text-[10px] uppercase tracking-widest text-slate-400">
+          <div class="flex justify-between items-start">
+            <div class="text-sm font-bold text-primary group-hover:text-accent-primary transition-colors">{{ p.name }}</div>
+            <div v-if="p.isAnimated" class="text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-bold">ANIM</div>
+          </div>
+          <div class="text-[10px] uppercase tracking-widest text-secondary mt-1">
             {{ p.category || "Uncategorized" }}
           </div>
         </button>
       </div>
     </div>
 
-    <div class="flex flex-col gap-4">
-      <div class="flex items-center justify-between">
+    <!-- Canvas Area -->
+    <div class="flex flex-col gap-4 h-full overflow-y-auto">
+      <div class="flex items-center justify-between shrink-0">
         <div>
-          <p
-            class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
-          >
-            Pattern Studio
-          </p>
-          <h3 class="text-xl font-black text-primary-900">
+          <p class="text-[10px] uppercase tracking-widest text-secondary font-bold">Pattern Studio</p>
+          <h3 class="text-xl font-bold text-primary">
             {{ form.name || "Select a Pattern" }}
           </h3>
         </div>
         <div class="flex gap-2">
           <button
-            class="text-xs font-bold uppercase tracking-[0.2em] border border-slate-200 rounded-lg px-3 py-2"
+            class="text-xs font-bold uppercase tracking-wider border border-divider bg-surface hover:bg-base text-secondary hover:text-primary rounded-lg px-3 py-2 transition-colors"
             :disabled="!editingPattern"
             @click="duplicatePattern"
           >
             Duplicate
           </button>
           <button
-            class="text-xs font-bold uppercase tracking-[0.2em] border border-rose-200 text-rose-600 rounded-lg px-3 py-2"
+            class="text-xs font-bold uppercase tracking-wider border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg px-3 py-2 transition-colors"
             :disabled="!editingPattern || editingPattern?.isNew"
             @click="deletePattern"
           >
@@ -87,190 +86,162 @@
         </div>
       </div>
 
-      <div
-        class="bg-white border border-slate-200 rounded-xl p-6 flex flex-col items-center gap-4"
-      >
-        <div class="flex items-center justify-between w-full">
-          <div
-            class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400"
-          >
-            Canvas
-          </div>
-          <div class="flex items-center gap-2">
-            <button class="text-xs font-bold text-slate-500" @click="prevFrame">
-              Prev
+      <div class="bg-surface border border-divider rounded-xl p-8 flex flex-col items-center gap-6 shadow-sm flex-1 min-h-[400px] justify-center relative">
+        <div class="absolute top-4 left-4 right-4 flex items-center justify-between">
+          <div class="text-xs font-bold uppercase tracking-widest text-secondary">Canvas</div>
+          <div class="flex items-center gap-2 bg-base rounded-lg p-1">
+            <button class="p-1 hover:bg-white rounded text-secondary hover:text-primary transition-colors" @click="prevFrame">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
             </button>
-            <span class="text-xs font-bold text-slate-600"
-              >Frame {{ currentFrameIndex + 1 }}</span
-            >
-            <button class="text-xs font-bold text-slate-500" @click="nextFrame">
-              Next
+            <span class="text-xs font-mono font-bold text-primary w-16 text-center">
+              {{ currentFrameIndex + 1 }} / {{ form.definition.frames.length }}
+            </span>
+            <button class="p-1 hover:bg-white rounded text-secondary hover:text-primary transition-colors" @click="nextFrame">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
             </button>
           </div>
         </div>
-        <div
-          class="grid grid-cols-5 gap-1 bg-slate-200 p-1 rounded-lg w-64 h-64"
-        >
+
+        <!-- Grid -->
+        <div class="grid grid-cols-5 gap-2 bg-base p-3 rounded-xl shadow-inner">
           <div
             v-for="(val, idx) in activeFrame"
             :key="idx"
-            class="bg-white flex items-center justify-center rounded cursor-pointer hover:bg-slate-50 transition-colors"
-            :style="
-              val === 1 && idx !== 12 ? { backgroundColor: '#eab308' } : {}
-            "
+            class="w-12 h-12 flex items-center justify-center rounded-lg cursor-pointer transition-all duration-150 shadow-sm border border-divider/50"
+            :class="[
+              val === 1 && idx !== 12 ? 'bg-accent-primary scale-105 border-accent-primary' : 'bg-surface hover:bg-gray-50',
+              idx === 12 ? 'bg-base cursor-not-allowed opacity-50' : ''
+            ]"
             @click="toggleCell(idx)"
           >
-            <span v-if="idx === 12" class="text-[10px] font-bold text-slate-400"
-              >FREE</span
-            >
+            <span v-if="idx === 12" class="text-[10px] font-bold text-secondary">FREE</span>
           </div>
         </div>
-        <div
-          v-if="form.definition.frames.length > 1"
-          class="flex gap-2 overflow-x-auto pb-2"
-        >
-          <button
-            v-for="(_, idx) in form.definition.frames"
-            :key="idx"
-            class="px-3 py-1 rounded text-xs font-bold"
-            :class="
-              currentFrameIndex === idx
-                ? 'bg-primary-600 text-white'
-                : 'bg-slate-100 text-slate-600'
-            "
-            @click="currentFrameIndex = idx"
-          >
-            {{ idx + 1 }}
-          </button>
+
+        <!-- Timeline -->
+        <div v-if="form.definition.frames.length > 1" class="w-full overflow-x-auto pb-2 flex justify-center">
+          <div class="flex gap-2 p-2 bg-base rounded-xl">
+            <button
+              v-for="(_, idx) in form.definition.frames"
+              :key="idx"
+              class="w-8 h-8 rounded-lg text-xs font-bold flex items-center justify-center transition-all"
+              :class="
+                currentFrameIndex === idx
+                  ? 'bg-accent-primary text-white shadow-md scale-110'
+                  : 'bg-surface text-secondary hover:bg-white'
+              "
+              @click="currentFrameIndex = idx"
+            >
+              {{ idx + 1 }}
+            </button>
+          </div>
         </div>
+
         <div class="flex items-center gap-3">
           <button
-            class="text-xs font-bold text-slate-600"
+            class="text-xs font-bold text-accent-primary hover:text-accent-primary/80 flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-accent-primary/5 transition-colors"
             :disabled="!form.isAnimated"
             @click="addFrame"
           >
-            + Frame
+            <span>+ Add Frame</span>
           </button>
           <button
-            class="text-xs font-bold text-rose-500"
+            class="text-xs font-bold text-rose-500 hover:text-rose-600 flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-rose-50 transition-colors"
             :disabled="form.definition.frames.length <= 1"
             @click="removeFrame(currentFrameIndex)"
           >
-            Remove Frame
+            <span>Remove Frame</span>
           </button>
         </div>
       </div>
     </div>
 
-    <div class="h-full bg-white border-l border-slate-200 p-4 space-y-4">
-      <div>
-        <p
-          class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
-        >
-          Inspector
-        </p>
-        <h3 class="text-lg font-black text-primary-900">Pattern Details</h3>
+    <!-- Inspector Panel -->
+    <div class="h-full bg-surface border border-divider rounded-xl overflow-hidden shadow-sm flex flex-col">
+      <div class="p-4 border-b border-divider bg-base/30">
+        <p class="text-[10px] uppercase tracking-widest text-secondary font-bold">Inspector</p>
+        <h3 class="text-lg font-bold text-primary">Details</h3>
       </div>
 
-      <div class="space-y-3">
-        <label
-          class="block text-xs font-bold text-slate-500 uppercase tracking-wider"
-        >
-          Name
-          <input
-            v-model="form.name"
-            class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50"
-          />
-        </label>
-        <label
-          class="block text-xs font-bold text-slate-500 uppercase tracking-wider"
-        >
-          Slug
-          <input
-            v-model="form.slug"
-            class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50"
-            :disabled="!editingPattern?.isNew"
-          />
-        </label>
-        <label
-          class="block text-xs font-bold text-slate-500 uppercase tracking-wider"
-        >
-          Category
-          <input
-            v-model="form.category"
-            class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50"
-          />
-        </label>
-        <label
-          class="block text-xs font-bold text-slate-500 uppercase tracking-wider"
-        >
-          Tags
-          <input
-            v-model="tagsInput"
-            class="mt-1 w-full rounded-lg border-slate-200 bg-slate-50"
-          />
-        </label>
-        <label
-          class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider"
-        >
-          <input v-model="form.isAnimated" type="checkbox" class="rounded" />
-          Animated
-        </label>
-      </div>
+      <div class="p-4 space-y-6 overflow-y-auto flex-1">
+        <div class="space-y-4">
+          <label class="block">
+            <span class="text-xs font-bold text-secondary uppercase tracking-wider">Name</span>
+            <input
+              v-model="form.name"
+              class="mt-1.5 w-full rounded-lg border-divider bg-base px-3 py-2 text-sm focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary outline-none transition-all"
+            />
+          </label>
+          <label class="block">
+            <span class="text-xs font-bold text-secondary uppercase tracking-wider">Slug</span>
+            <input
+              v-model="form.slug"
+              class="mt-1.5 w-full rounded-lg border-divider bg-base px-3 py-2 text-sm focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary outline-none transition-all disabled:opacity-50"
+              :disabled="!editingPattern?.isNew"
+            />
+          </label>
+          <label class="block">
+            <span class="text-xs font-bold text-secondary uppercase tracking-wider">Category</span>
+            <input
+              v-model="form.category"
+              class="mt-1.5 w-full rounded-lg border-divider bg-base px-3 py-2 text-sm focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary outline-none transition-all"
+            />
+          </label>
+          <label class="block">
+            <span class="text-xs font-bold text-secondary uppercase tracking-wider">Tags</span>
+            <input
+              v-model="tagsInput"
+              class="mt-1.5 w-full rounded-lg border-divider bg-base px-3 py-2 text-sm focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary outline-none transition-all"
+              placeholder="Comma separated"
+            />
+          </label>
+          <label class="flex items-center gap-3 p-3 rounded-lg border border-divider bg-base/50 cursor-pointer hover:bg-base transition-colors">
+            <input v-model="form.isAnimated" type="checkbox" class="rounded text-accent-primary focus:ring-accent-primary" />
+            <span class="text-xs font-bold text-primary uppercase tracking-wider">Animated Pattern</span>
+          </label>
+        </div>
 
-      <div class="border-t border-slate-100 pt-4 space-y-3">
-        <div
-          class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400"
-        >
-          Rotation & Permutations
-        </div>
-        <label
-          class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider"
-        >
-          <input v-model="rotationEnabled" type="checkbox" class="rounded" />
-          Rotational Symmetry
-        </label>
-        <div class="flex items-center gap-2">
-          <input
-            v-model.number="permutationLines"
-            type="number"
-            min="1"
-            max="12"
-            class="w-16 rounded-lg border-slate-200 bg-slate-50 text-xs px-2 py-1"
-          />
-          <span class="text-xs text-slate-500">Lines Required</span>
-        </div>
-        <button
-          class="w-full text-xs font-bold uppercase tracking-[0.3em] border border-slate-200 py-2 rounded-lg"
-          @click="generatePermutations"
-        >
-          Calculate Permutations
-        </button>
-        <p v-if="error" class="text-xs text-rose-600">{{ error }}</p>
-      </div>
-
-      <div class="border-t border-slate-100 pt-4 space-y-2">
-        <div
-          class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400"
-        >
-          Preview Player
-        </div>
-        <div class="flex items-center gap-2">
-          <button class="text-xs font-bold text-slate-600" @click="togglePlay">
-            {{ isPlaying ? "Pause" : "Play" }}
+        <div class="border-t border-divider pt-6 space-y-4">
+          <div class="text-xs font-bold uppercase tracking-widest text-secondary">Generators</div>
+          <label class="flex items-center gap-3">
+            <input v-model="rotationEnabled" type="checkbox" class="rounded text-accent-primary focus:ring-accent-primary" />
+            <span class="text-xs font-bold text-secondary uppercase tracking-wider">Rotational Symmetry</span>
+          </label>
+          <div class="flex items-center gap-3">
+            <input
+              v-model.number="permutationLines"
+              type="number"
+              min="1"
+              max="12"
+              class="w-20 rounded-lg border-divider bg-base text-sm px-3 py-2 focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary outline-none"
+            />
+            <span class="text-xs text-secondary">Lines Required</span>
+          </div>
+          <button
+            class="w-full text-xs font-bold uppercase tracking-widest border border-divider hover:border-accent-primary hover:text-accent-primary py-2.5 rounded-lg transition-all bg-surface hover:bg-base"
+            @click="generatePermutations"
+          >
+            Generate
           </button>
-          <button class="text-xs font-bold text-slate-600" @click="nextFrame">
-            Next
-          </button>
+          <p v-if="error" class="text-xs text-rose-600 bg-rose-50 p-2 rounded border border-rose-100">{{ error }}</p>
+        </div>
+
+        <div class="border-t border-divider pt-6 space-y-4">
+          <div class="text-xs font-bold uppercase tracking-widest text-secondary">Preview</div>
+          <div class="flex items-center gap-2 bg-base p-1 rounded-lg">
+            <button class="flex-1 py-1.5 text-xs font-bold text-secondary hover:text-primary hover:bg-white rounded transition-colors" @click="togglePlay">
+              {{ isPlaying ? "Pause" : "Play Animation" }}
+            </button>
+          </div>
         </div>
       </div>
 
-      <div class="pt-4">
+      <div class="p-4 border-t border-divider bg-base/30">
         <button
-          class="w-full bg-gold text-primary-900 text-xs font-bold uppercase tracking-[0.3em] py-2 rounded-lg"
+          class="w-full bg-accent-primary hover:bg-accent-primary/90 text-white text-xs font-bold uppercase tracking-widest py-3 rounded-lg shadow-sm transition-all transform active:scale-[0.98]"
           @click="savePattern"
         >
-          Save Pattern
+          Save Changes
         </button>
       </div>
     </div>
