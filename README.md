@@ -23,6 +23,7 @@ Official website for Mary Esther Bingo, a premier entertainment venue in Florida
 - **Validation:** [Zod](https://zod.dev/) for server-side validation
 - **State Management:** [Pinia](https://pinia.vuejs.org/)
 - **Server Runtime:** [H3](https://h3.unjs.io/)
+- **Database:** SQLite with Prisma ORM
 
 ## Setup
 
@@ -72,7 +73,7 @@ Official website for Mary Esther Bingo, a premier entertainment venue in Florida
   ```
 
 - The `postinstall` workflow (and the standalone `npm run setup:db`) does the following:
-  - Uses `scripts/setup-db.js` to ensure a `DATABASE_URL` value exists, defaulting to the absolute `file://.../med.db` path via Node's `pathToFileURL`. The script logs the resolved URL so you can confirm which file is being targeted.
+  - Uses `scripts/setup-db.js` to ensure a `DATABASE_URL` value exists, defaulting to the absolute `file://.../med.db` path.
   - Runs `npx prisma generate` to refresh the Prisma client.
   - Runs `npx prisma db push --accept-data-loss` so the SQLite schema matches `prisma/schema.prisma`.
   - Runs `npx prisma db seed` to load the out-of-the-box admin user + configuration JSON.
@@ -80,7 +81,7 @@ Official website for Mary Esther Bingo, a premier entertainment venue in Florida
 
 - Manual helpers:
   - `npm run setup:db` or `npm run db:setup` re-runs the provisioning script if you ever delete `med.db` or want to reset the schema.
-  - `npm run check:db` runs `scripts/check-db.js`, which attempts a simple Prisma query against `DATABASE_URL` to prove connectivity.
+  - `npm run check:db` runs a simple Prisma query against `DATABASE_URL` to verify connectivity.
   - `npm run prisma:studio` opens the Prisma Studio database browser for inspection after setup completes.
 
 ## Project Structure
@@ -95,6 +96,7 @@ Official website for Mary Esther Bingo, a premier entertainment venue in Florida
   - `server/api/`: H3 API endpoints (public and admin).
   - `server/data/`: JSON file-based data storage (users, sessions, messages, etc.).
   - `server/utils/`: Auth, sessions, storage, and user management utilities.
+  - `server/db/`: Prisma client and database configuration.
 - `verification/`: Playwright-based E2E verification scripts.
 
 ## Admin Portal
@@ -122,6 +124,7 @@ The application includes an admin portal at `/admin/login`. Authentication now u
 - `GET /api/pricing` - Pricing information
 - `GET /api/specials` - Daily specials (Fort Walton time zone, hero note, and weekly offers)
 - `POST /api/contact` - Contact form submission (with rate limiting)
+- `GET /api/health` - Application health check (database connectivity)
 
 ### Admin Endpoints (Require authentication)
 
@@ -142,19 +145,14 @@ The application includes an admin portal at `/admin/login`. Authentication now u
 - **Password Hashing:** PBKDF2 (100,000 iterations, SHA-512) used by `server/utils/users.ts`.
 - **Rate Limiting:** Login attempts and contact form submissions are rate-limited (in-memory maps).
 - **Spam Protection:** Contact form contains a honeypot field `website` to reduce bot spam.
+- **CSRF Protection:** Admin mutations require CSRF token verification.
 
 ## Data Persistence
 
-The application uses JSON files for data storage:
+The application uses SQLite with Prisma for data storage:
 
-- `server/data/users.json` - User accounts
-- `server/data/sessions.json` - Active sessions
-- `server/data/messages.json` - Contact form submissions
-- `server/data/business.json` - Business configuration
-- `server/data/jackpot.json` - Jackpot value
-- `server/data/schedule.json` - Schedule data
-- `server/data/pricing.json` - Pricing data
-- `server/data/specials.json` - Daily specials hero + weekly offerings and timezone metadata
+- `med.db` - SQLite database file
+- Tables: `users`, `sessions`, `settings`, `messages` (managed by Prisma schema)
 
 ## Verification & Testing
 
@@ -173,10 +171,7 @@ Run the scripts (after starting the dev server):
 npm run dev
 python3 verify_homepage.py
 python3 verification/verify_admin.py
-python3 verification/verify_new_features.py
 ```
-
-`verification/verify_new_features.py` now confirms the Daily Specials hero loads on the homepage.
 
 Note: these scripts require Python 3.8+ and Playwright; if you change the admin auth flow, update the verification scripts accordingly.
 
@@ -195,7 +190,7 @@ For production:
 
 1. Set `NODE_ENV=production`
 2. Replace the demo login in `server/api/auth/login.post.ts` with a secure username/password flow (use `getUserByUsername()` + `verifyPassword()`); rotate default credentials
-3. Ensure `server/data/` directory is writable and persistent across deploys
+3. Ensure `med.db` database is backed up and persistent across deploys
 4. Configure secrets and environment variables as needed (e.g., secure cookie flags depend on `NODE_ENV`)
 
 ## Development Workflow
@@ -215,220 +210,102 @@ For production:
 3. **Adding new features:**
    - Use Zod for validation in API endpoints
    - Use `requireAuth()` for protected routes
-   - Use `readJson`/`writeJson` from `server/utils/storage.ts` for data operations
+   - Follow existing patterns in similar endpoints
    - Update verification scripts if needed
 
 ## Notes & Troubleshooting
 
 - Demo login: `server/api/auth/login.post.ts` uses a hardcoded password for demo use; replace before production and ensure sessions are created with the user's id.
 - Playwright scripts assume the admin login flow and page structure; update them if you change auth or UI.
-- Storage: `server/data/` is file-backed and lacks concurrency protections; avoid concurrent writes in production unless migrated to a proper DB.
+- Database: SQLite is file-backed; ensure `med.db` is writable and persistent in production.
+
+## Health Checks & Monitoring
+
+The application includes production-ready health checks and monitoring features:
+
+### Health Endpoint
+
+The `/api/health` endpoint provides a lightweight status check:
+
+```bash
+curl http://localhost:3000/api/health
+# Returns: { "ok": true }
+# Status codes:
+#   200 - All systems operational, required tables present
+#   503 - Database is missing required tables (settings, sessions)
+#   500 - Database connectivity error
+```
+
+### CI Pipeline Health Check
+
+GitHub Actions workflow (`.github/workflows/ci-health-check.yml`) automatically:
+- Runs on every push to `main` and pull requests
+- Executes: lint → typecheck → build → healthcheck → integration tests
+- Fails the build if the health endpoint doesn't return 200 or if tables are missing
+
+Run locally:
+
+```bash
+npm run build
+npm run healthcheck       # Quick DB connectivity check
+npm run test:integration  # Verify graceful degradation with missing tables
+```
+
+### Production Monitoring (Optional)
+
+Enable health monitoring by setting the `MONITOR_URL` secret in GitHub repo settings:
+
+1. Go to **Settings → Secrets and variables → Actions**
+2. Create a new secret: `MONITOR_URL` = `https://your-production-app.com`
+3. The `.github/workflows/scheduled-monitor.yml` workflow will:
+   - Check `/api/health` every 15 minutes
+   - Create a GitHub issue if health check fails
+   - Include response details and timestamp for debugging
+
+### Webhook Alerting (Optional)
+
+To receive real-time alerts when the database is missing tables, set these environment variables:
+
+```bash
+# Alert webhook URL (e.g., Slack incoming webhook, custom service, etc.)
+HEALTH_ALERT_WEBHOOK=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+
+# How often to send alerts (default: 1 hour = 3600000 ms)
+HEALTH_ALERT_TTL_MS=3600000
+
+# Service name included in alert payload for identification
+SERVICE_NAME=med-app
+```
+
+When tables are missing, the health endpoint will POST to the webhook with this JSON payload:
+
+```json
+{
+  "timestamp": "2025-01-15T14:30:00Z",
+  "service": "med-app",
+  "env": "production",
+  "missing": ["settings", "sessions"]
+}
+```
+
+Alerts are throttled to prevent spam (default once per hour).
+
+### Integration Tests
+
+The test suite includes a scenario that verifies the application gracefully degrades when the database schema is missing:
+
+```bash
+npm run test:integration
+```
+
+This test:
+1. Creates a temporary empty SQLite database
+2. Starts the application server with the empty database
+3. Calls `/api/health` and verifies it returns HTTP 503
+4. Cleans up temporary files
+
+This ensures that missing database tables don't cause unhandled crashes but instead return predictable error responses.
 
 ## License
 
 Copyright © 2025 Mary Esther Bingo. All rights reserved.
-
-Nice — the provisioning completed but there's room to harden the provisioning script and add a verification script. My next step is to add Docker permission checks, a robust readiness probe (pg_isready + checking container port mapping), a small `scripts/check-db.js` health-check script, and README updates; I'll start by creating a todo list and begin the first task.
-
-Created 5 todos
-
-Using "Replace String in File"
-
-```
-
-```
-
-Read [](file:///home/meb/med/scripts/setup-db.js)
-
-Proceeding to harden the provisioning loop and add robust readiness and port-mapping checks in setup-db.js. I'll replace the existing provisioning block with improved logic (timeout env vars, pg_isready probe, docker logs diagnostics, container port introspection).
-
-Using "Replace String in File"
-
-```
-
-```
-
-Ran Edit Block
-Completed with input: {
-"file*path": "/home/meb/med/scripts/check-db.js",
-"content": "#!/usr/bin/env node\n/* scripts/check-db.js\n Simple DB connectivity check using Prisma Client. Loads .env if present.\n\_/\nimport fs from \"fs\";\nimport path from \"path\";\nimport { PrismaClient } from \"@prisma/client\";\n\nfunction loadDotEnv() {\n const envPath = path.join(process.cwd(), \".env\");\n if (!fs.existsSync(envPath)) return;\n const raw = fs.readFileSync(envPath, \"utf8\");\n for (const line of raw.split(/\\r?\\n/)) {\n const trimmed = line.trim();\n if (!trimmed || trimmed.startsWith(\"#\")) continue;\n const eq = trimmed.indexOf(\"=\");\n if (eq === -1) continue;\n const k = trimmed.slice(0, eq).trim();\n let v = trimmed.slice(eq + 1).trim();\n if ((v.startsWith('\"') && v.endsWith('\"')) || (v.startsWith(\"'\") && v.endsWith(\"'\"))) {\n v = v.slice(1, -1);\n }\n if (!process.env[k]) process.env[k] = v;\n }\n}\n\n(async () => {\n loadDotEnv();\n const prisma = new PrismaClient();\n try {\n console.log('[check-db] Connecting to database (DATABASE_URL from env or .env)...');\n await prisma.$connect();\n    const res = await prisma.$queryRaw`SELECT 1 as ok`;\n console.log('[check-db] Database connected OK:', res);\n process.exit(0);\n } catch (err) {\n console.error('[check-db] DB connectivity check failed:', err && err.message ? err.message : err);\n process.exit(1);\n } finally {\n await prisma.$disconnect();\n }\n})();"
-}
-
-Ran Edit Block
-Completed with input: {
-"file*path": "/home/meb/med/scripts/check-db.js",
-"range": "1-9999",
-"content": "#!/usr/bin/env node\n/* scripts/check-db.js\n Simple DB connectivity check using Prisma Client. Loads .env if present.\n\_/\nimport fs from \"fs\";\nimport path from \"path\";\nimport { PrismaClient } from \"@prisma/client\";\n\nfunction loadDotEnv() {\n const envPath = path.join(process.cwd(), \".env\");\n if (!fs.existsSync(envPath)) return;\n const raw = fs.readFileSync(envPath, \"utf8\");\n for (const line of raw.split(/\\r?\\n/)) {\n const trimmed = line.trim();\n if (!trimmed || trimmed.startsWith(\"#\")) continue;\n const eq = trimmed.indexOf(\"=\");\n if (eq === -1) continue;\n const k = trimmed.slice(0, eq).trim();\n let v = trimmed.slice(eq + 1).trim();\n if ((v.startsWith('\"') && v.endsWith('\"')) || (v.startsWith(\"'\") && v.endsWith(\"'\"))) {\n v = v.slice(1, -1);\n }\n if (!process.env[k]) process.env[k] = v;\n }\n}\n\n(async () => {\n loadDotEnv();\n const prisma = new PrismaClient();\n try {\n console.log('[check-db] Connecting to database (DATABASE_URL from env or .env)...');\n await prisma.$connect();\n    const res = await prisma.$queryRaw`SELECT 1 as ok`;\n console.log('[check-db] Database connected OK:', res);\n process.exit(0);\n } catch (err) {\n console.error('[check-db] DB connectivity check failed:', err && err.message ? err.message : err);\n process.exit(1);\n } finally {\n await prisma.$disconnect();\n }\n})();"
-}
-
-Ran terminal command: cat > scripts/check-db.js <<'EOF'
-#!/usr/bin/env node
-/_ scripts/check-db.js
-Simple DB connectivity check using Prisma Client. Loads .env if present.
-_/
-import fs from "fs";
-import path from "path";
-import { PrismaClient } from "@prisma/client";
-
-function loadDotEnv() {
-const envPath = path.join(process.cwd(), ".env");
-if (!fs.existsSync(envPath)) return;
-const raw = fs.readFileSync(envPath, "utf8");
-for (const line of raw.split(/\r?\n/)) {
-const trimmed = line.trim();
-if (!trimmed || trimmed.startsWith("#")) continue;
-const eq = trimmed.indexOf("=");
-if (eq === -1) continue;
-const k = trimmed.slice(0, eq).trim();
-let v = trimmed.slice(eq + 1).trim();
-if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
-v = v.slice(1, -1);
-}
-if (!process.env[k]) process.env[k] = v;
-}
-}
-
-(async () => {
-loadDotEnv();
-const prisma = new PrismaClient();
-try {
-console.log('[check-db] Connecting to database (DATABASE_URL from env or .env)...');
-await prisma.$connect();
-    const res = await prisma.$queryRaw`SELECT 1 as ok`;
-console.log('[check-db] Database connected OK:', res);
-process.exit(0);
-} catch (err) {
-console.error('[check-db] DB connectivity check failed:', err && err.message ? err.message : err);
-process.exit(1);
-} finally {
-await prisma.$disconnect();
-}
-})();
-EOF
-
-# ensure it's executable
-
-chmod +x scripts/check-db.js
-
-Using "Replace String in File"
-
-```
-
-```
-
-Using "Replace String in File"
-
-```
-
-```
-
-Ran terminal command: npm run lint && npm run typecheck && npm run check:db
-
-Ran terminal command: npm run lint && npm run typecheck && npm run check:db
-
-Ran terminal command: npm run lint
-
-Ran terminal command: npm run check:db
-
-Ran terminal command: npm run setup:db
-
-Ran terminal command: npm run typecheck
-
-Ran terminal command: npx eslint scripts --ext .js
-
-Ran terminal command: git status --porcelain && git add -A && git commit -m "chore(db): harden setup-db, add DB check script, document env vars"
-
-Starting: _Add DB health-check script_ (2/5)
-
-Starting: _Run lint/typecheck and verify locally_ (4/5)
-
-Ran terminal command: npm run lint
-
-Completed: _Run lint/typecheck and verify locally_ (4/5)
-
-Perfect! The DB provisioning is now hardened (Docker permission checks, container port detection, pg_isready readiness probe, configurable timeouts) and I added check-db.js + `npm run check:db` to verify the DB; next I can add a CI workflow to run the check automatically if you want.## Summary — What I changed ✅
-
-- Fixed and hardened the automatic DB provisioning:
-  - setup-db.js
-    - Now verifies Docker is actually usable by the current user (runs `docker ps`) and provides a clear, actionable message if permissions are missing.
-    - Detects host port mapping when an existing container is running (uses `docker port ...`) rather than assuming a new port mapping.
-    - Uses a robust readiness probe (tries `docker exec <container> pg_isready` and inspects container logs for the "ready to accept connections" message).
-    - Adds configurable timeouts/poll interval via env vars:
-      - `DB_PROVISION_TIMEOUT_MS` (default 120000 ms)
-      - `DB_PROVISION_INTERVAL_MS` (default 2000 ms)
-    - Adds `POSTGRES_IMAGE` and `POSTGRES_CONTAINER` overrides.
-    - Better diagnostic logs and helpful tips (how to inspect logs and fix permission errors).
-- Added a small verification script:
-  - check-db.js — loads .env if present and runs a quick Prisma query to confirm connectivity.
-  - New npm script: `npm run check:db`
-- Documentation:
-  - README.md: updated Local DB setup section to document new env vars, troubleshooting steps, and `npm run check:db`.
-- Testing & verification I ran locally:
-  - `npm run setup:db` (idempotent; detected/used existing container, pushed schema, respected seeding)
-  - `npm run check:db` — succeeded (connected to DB)
-  - `vue-tsc --noEmit` (typecheck) — OK
-  - `npx eslint scripts` (lint for changed scripts) — OK
-- Committed the changes (on main): "chore(db): harden setup-db, add DB check script, document env vars"
-
----
-
-## Why this fixes the issue 💡
-
-- We observed earlier that sometimes Docker is installed but the current user can't access the Docker socket (permission denied). The script now detects that and prints an explicit fix (add user to `docker` group and re-login), rather than failing with a cryptic error.
-- Some installs start a container that takes a little time to accept connections; instead of blindly retrying prisma push, the script now probes container readiness (pg_isready) and inspects logs to know when to run `prisma db push` + `prisma db seed`.
-- If an existing named container is present, the script now discovers the container's host port mapping (so it uses the right port, not an assumed one).
-
----
-
-## How to reproduce / verify (quick checklist) 🔧
-
-1. Fresh clone → install:
-   ```bash
-   npm install
-   # postinstall runs automatically (attempts DB provisioning)
-   ```
-2. Manual provisioning (if you want to run the script yourself):
-   ```bash
-   npm run setup:db     # or npm run db:setup
-   npm run check:db     # verifies app can connect to DB via Prisma
-   ```
-3. If you hit a Docker socket permission error:
-
-   ```bash
-   sudo usermod -aG docker $USER
-   # Re-login or run:
-   newgrp docker
-   # Then re-run the setup
-   npm run setup:db
-   ```
-
-4. If provisioning times out, inspect container logs:
-
-   ```bash
-   docker logs med-postgres --tail 50
-   docker inspect med-postgres
-   ```
-
-5. Override behavior:
-   - `POSTGRES_IMAGE` — e.g. `POSTGRES_IMAGE=postgres:15-alpine npm run setup:db`
-   - `POSTGRES_CONTAINER` — change name used for the container
-   - `DB_PROVISION_TIMEOUT_MS` and `DB_PROVISION_INTERVAL_MS` for custom timeouts
-
----
-
-## Next steps / options (pick one) ▶️
-
-- I can add a GitHub Action to run `node scripts/check-db.js` (or run `npm run setup:db` inside a runner with Docker) so new changes are validated automatically (follow-up PR).
-- I can run a full repo lint job and fix any remaining lint warnings (I ran lint on changed scripts and typecheck; full repo lint may take longer).
-- Anything else you want automated in the provisioning (e.g., automatic `docker-compose.yml` or explicit health-check retries / log dumps on failure)?
-
----
-
-If you want, I’ll:
-
-- open a PR with these changes (if you prefer non-main commits), and/or
-- add a simple CI workflow to exercise `check:db` and capture logs on failure.
-
-Which would you like me to do next?
-
-Made changes.

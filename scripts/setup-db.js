@@ -29,7 +29,18 @@ async function ensureEnv() {
     // Extract existing DATABASE_URL for the current process
     const match = content.match(/DATABASE_URL=["']?([^"'\n]+)["']?/);
     if (match) {
-      process.env.DATABASE_URL = match[1];
+      const current = match[1];
+      // Normalize relative file: URLs to absolute paths to avoid ambiguous resolution in build/runtime
+      if (current.startsWith("file:") && !current.startsWith("file:/")) {
+        const rel = current.replace("file:", "");
+        const abs = pathToFileURL(path.resolve(ROOT, rel)).href;
+        content = content.replace(match[0], `DATABASE_URL="${abs}"`);
+        await fs.writeFile(ENV_PATH, content, "utf8");
+        log("Normalized DATABASE_URL in .env to absolute path:", abs);
+        process.env.DATABASE_URL = abs;
+      } else {
+        process.env.DATABASE_URL = current;
+      }
     }
   }
 }

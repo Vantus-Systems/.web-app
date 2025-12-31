@@ -3,20 +3,32 @@ import prisma from "@server/db/client";
 
 export const settingsService = {
   async get<T = unknown>(key: string): Promise<T | null> {
-    const row = await prisma.setting.findUnique({ where: { key } });
-    if (row) {
-      // The value is stored as a JSON string in SQLite
-      if (typeof row.value === "string") {
-        try {
-          return JSON.parse(row.value) as T;
-        } catch {
-          // If parsing fails, return as-is (might be a legacy object)
-          return row.value as unknown as T;
+    try {
+      const row = await prisma.setting.findUnique({ where: { key } });
+      if (row) {
+        // The value is stored as a JSON string in SQLite
+        if (typeof row.value === "string") {
+          try {
+            return JSON.parse(row.value) as T;
+          } catch {
+            // If parsing fails, return as-is (might be a legacy object)
+            return row.value as unknown as T;
+          }
         }
+        return row.value as T;
       }
-      return row.value as T;
+      return null;
+    } catch (error: any) {
+      const code = error?.code;
+      if (code === "P2021") {
+        console.error(
+          "[settings] get - settings table missing (P2021). Treating as no setting.",
+          error,
+        );
+        return null;
+      }
+      throw error;
     }
-    return null;
   },
 
   async set<T = unknown>(key: string, value: T): Promise<T> {

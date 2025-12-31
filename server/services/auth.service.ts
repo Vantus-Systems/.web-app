@@ -35,16 +35,29 @@ export const authService = {
   async verifySession(token: string) {
     const tokenHash = createHash("sha256").update(token).digest("hex");
 
-    const session = await prisma.session.findUnique({
-      where: { token_hash: tokenHash },
-      include: { user: true },
-    });
+    try {
+      const session = await prisma.session.findUnique({
+        where: { token_hash: tokenHash },
+        include: { user: true },
+      });
 
-    if (!session || session.expires_at < new Date()) {
-      return null;
+      if (!session || session.expires_at < new Date()) {
+        return null;
+      }
+
+      return session;
+    } catch (error: any) {
+      const code = error?.code;
+      if (code === "P2021") {
+        // Sessions table is missing; log and treat as unauthenticated instead of throwing
+        console.error(
+          "[auth] verifySession - sessions table missing (P2021). Treating as no session.",
+          error,
+        );
+        return null;
+      }
+      throw error;
     }
-
-    return session;
   },
 
   async revokeSession(token: string) {
@@ -53,8 +66,19 @@ export const authService = {
       await prisma.session.delete({
         where: { token_hash: tokenHash },
       });
-    } catch {
-      // Ignore if not found
+    } catch (error: any) {
+      const code = error?.code;
+      if (code === "P2021") {
+        console.error(
+          "[auth] revokeSession - sessions table missing (P2021). Ignoring.",
+          error,
+        );
+        return;
+      }
+      // Ignore if not found or rethrow unexpected errors
+      if (code !== "P2025") {
+        throw error;
+      }
     }
   },
 

@@ -22,7 +22,10 @@
     "prisma:seed": "prisma db seed",
     "setup:db": "node ./scripts/setup-db.js",
     "db:setup": "node ./scripts/setup-db.js",
-    "check:db": "node ./scripts/check-db.js"
+    "check:db": "node ./scripts/check-db.js",
+    "healthcheck": "node -r dotenv/config scripts/test-db-check.js",
+    "postbuild": "node ./scripts/clean-prisma-db.js",
+    "test:integration": "node -r ts-node/register ./scripts/integration/missing-tables.unit.ts"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

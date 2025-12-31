@@ -1,0 +1,110 @@
+name: Scheduled Health Monitor
+
+# Run every 15 minutes
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: # Allow manual trigger for testing
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check production health endpoint
+        id: health-check
+        continue-on-error: true
+        run: |
+          # Get the monitoring URL from repo secrets
+          # Usage: Set MONITOR_URL secret in repo settings to your production URL
+          # e.g., https://your-app.com
+          MONITOR_URL="${{ secrets.MONITOR_URL }}"
+          
+          if [ -z "$MONITOR_URL" ]; then
+            echo "SKIPPED: MONITOR_URL secret not configured"
+            echo "To enable monitoring, set MONITOR_URL secret in repo settings"
+            echo "Example: https://your-production-app.com"
+            exit 0
+          fi
+          
+          HEALTH_URL="$MONITOR_URL/api/health"
+          echo "Checking health endpoint: $HEALTH_URL"
+          
+          RESPONSE=$(curl -s -w '\n%{http_code}' "$HEALTH_URL" --connect-timeout 5 --max-time 10)
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+          TIMESTAMP=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          
+          echo "Health check result:"
+          echo "  Timestamp: $TIMESTAMP"
+          echo "  HTTP Code: $HTTP_CODE"
+          echo "  Response: $BODY"
+          
+          # Store results for potential issue creation
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+          echo "http_code=$HTTP_CODE" >> $GITHUB_OUTPUT
+          echo "response=$BODY" >> $GITHUB_OUTPUT
+          echo "monitor_url=$MONITOR_URL" >> $GITHUB_OUTPUT
+          
+          # Success conditions
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✓ Health check PASSED"
+            exit 0
+          else
+            echo "✗ Health check FAILED: HTTP $HTTP_CODE"
+            exit 1
+          fi
+
+      - name: Create issue on health check failure
+        if: failure() && steps.health-check.outputs.monitor_url != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const timestamp = "${{ steps.health-check.outputs.timestamp }}";
+            const httpCode = "${{ steps.health-check.outputs.http_code }}";
+            const response = "${{ steps.health-check.outputs.response }}";
+            const monitorUrl = "${{ steps.health-check.outputs.monitor_url }}";
+            
+            const title = `🚨 Health Check Failed (${httpCode}) - ${timestamp}`;
+            const body = `**Health Endpoint Monitor Alert**
+
+**Timestamp:** ${timestamp}
+**Endpoint:** ${monitorUrl}/api/health
+**Status Code:** ${httpCode}
+**Response:** \`\`\`
+${response}
+\`\`\`
+
+**What to do:**
+1. Check if the application is running
+2. Verify database is accessible
+3. Check server logs for errors
+4. Verify MONITOR_URL is correct in repo secrets
+
+This issue was automatically created by the scheduled health monitor workflow.`;
+            
+            // Check if there's already an open issue from today
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: ['health-check-failure']
+            });
+            
+            // Only create new issue if no open health-check-failure issues exist
+            if (issues.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['health-check-failure', 'automated']
+              });
+              console.log('Created new health check failure issue');
+            } else {
+              console.log('Health check failure issue already exists, skipping duplicate');
+            }
+
+      - name: Health check passed
+        if: success()
+        run: echo "✓ Production health check passed at $(date -u +'%Y-%m-%dT%H:%M:%SZ')"

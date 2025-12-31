@@ -1,0 +1,74 @@
+name: CI Health Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint code
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Run healthcheck script
+        run: npm run healthcheck
+        env:
+          DATABASE_URL: file:./med.db
+
+      - name: Start server in background
+        run: |
+          nohup node -r dotenv/config .output/server/index.mjs > server.log 2>&1 &
+          sleep 3
+        env:
+          DATABASE_URL: file:./med.db
+
+      - name: Test health endpoint
+        run: |
+          RESPONSE=$(curl -s -w '\n%{http_code}' http://localhost:3000/api/health)
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+          
+          echo "Health endpoint response:"
+          echo "HTTP Code: $HTTP_CODE"
+          echo "Body: $BODY"
+          
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "ERROR: Expected HTTP 200, got $HTTP_CODE"
+            exit 1
+          fi
+          
+          if ! echo "$BODY" | grep -q '"ok":true'; then
+            echo "ERROR: Expected ok:true in response"
+            exit 1
+          fi
+          
+          echo "SUCCESS: Health check passed"
+
+      - name: Run integration tests
+        run: npm run test:integration
+        timeout-minutes: 2
+
+      - name: Collect server logs on failure
+        if: failure()
+        run: cat server.log || true
