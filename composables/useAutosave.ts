@@ -1,5 +1,5 @@
-import { ref, watch, onUnmounted, onMounted } from 'vue';
-import type { Ref } from 'vue';
+import { ref, watch, onUnmounted, onMounted } from "vue";
+import type { Ref } from "vue";
 
 interface AutosaveOptions<T> {
   data: Ref<T>;
@@ -49,7 +49,7 @@ export function useAutosave<T>(options: AutosaveOptions<T>): AutosaveReturn {
         return parsed;
       }
     } catch (error) {
-      console.error('Failed to load draft from localStorage:', error);
+      console.error("Failed to load draft from localStorage:", error);
     }
   });
 
@@ -61,15 +61,15 @@ export function useAutosave<T>(options: AutosaveOptions<T>): AutosaveReturn {
         initialData = JSON.parse(JSON.stringify(newVal));
         return;
       }
-      
+
       isDirty.value = JSON.stringify(newVal) !== JSON.stringify(initialData);
-      
+
       // Reset autosave timer on change
       if (isDirty.value) {
         resetAutosaveTimer();
       }
     },
-    { deep: true }
+    { deep: true },
   );
 
   const saveDraft = async (): Promise<void> => {
@@ -93,7 +93,7 @@ export function useAutosave<T>(options: AutosaveOptions<T>): AutosaveReturn {
         onSave(data.value);
       }
     } catch (error) {
-      console.error('Autosave failed:', error);
+      console.error("Autosave failed:", error);
       if (onError && error instanceof Error) {
         onError(error);
       }
@@ -108,7 +108,7 @@ export function useAutosave<T>(options: AutosaveOptions<T>): AutosaveReturn {
       isDirty.value = false;
       initialData = null;
     } catch (error) {
-      console.error('Failed to discard draft:', error);
+      console.error("Failed to discard draft:", error);
     }
   };
 

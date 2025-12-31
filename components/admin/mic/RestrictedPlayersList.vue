@@ -36,20 +36,28 @@ const query = ref("");
 const results = ref<RestrictedPlayerResponse[]>([]);
 
 watch(
-  query,
-  async (value) => {
-    if (!value) {
-      results.value = [];
-      return;
-    }
-    const response = await $fetch(
-      `/api/admin/mic/restricted-players/search?query=${encodeURIComponent(value)}`,
-      {
-        credentials: "include",
-      },
-    );
-    results.value = response;
+  () => query.value,
+  (value, _oldValue, onInvalidate) => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    timer = setTimeout(async () => {
+      if (!value) {
+        results.value = [];
+        return;
+      }
+
+      const response = await $fetch<RestrictedPlayerResponse[]>(
+        `/api/admin/mic/restricted-players/search?query=${encodeURIComponent(value)}`,
+        {
+          credentials: "include",
+        },
+      );
+      results.value = response;
+    }, 500);
+
+    onInvalidate(() => {
+      if (timer) clearTimeout(timer);
+    });
   },
-  { debounce: 500 },
 );
 </script>

@@ -15,7 +15,7 @@
         :key="item"
         type="button"
         class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 text-left"
-        @click="$emit('create-supply', item)"
+        @click="emit('create-supply', item)"
       >
         {{ item }}
       </button>
@@ -24,6 +24,8 @@
 </template>
 
 <script setup lang="ts">
-const emit = defineEmits<["create-supply"]>();
+const emit = defineEmits<{
+  (e: 'create-supply', item?: string): void
+}>();
 const items = ["Tape", "Forms", "Pens", "Tubes", "Markers"];
 </script>

@@ -7,7 +7,7 @@ export interface OpsTemplate {
   id: string;
   name: string;
   description: string;
-  category: 'weekday' | 'weekend' | 'special' | 'custom';
+  category: "weekday" | "weekend" | "special" | "custom";
   config: {
     rateCards?: any[];
     timeline?: any;
@@ -18,103 +18,103 @@ export interface OpsTemplate {
 
 export const opsTemplates: OpsTemplate[] = [
   {
-    id: 'weekday-standard',
-    name: 'Weekday Standard',
-    description: 'Standard weekday configuration with evening sessions',
-    category: 'weekday',
+    id: "weekday-standard",
+    name: "Weekday Standard",
+    description: "Standard weekday configuration with evening sessions",
+    category: "weekday",
     config: {
       rateCards: [
         {
-          name: 'Regular',
-          pricePerSheet: 0.50,
+          name: "Regular",
+          pricePerSheet: 0.5,
           sheetsPerPack: 6,
-          packPrice: 3.00,
+          packPrice: 3.0,
         },
       ],
       timeline: {
         flowSegments: [
-          { type: 'warmup', durationMinutes: 15 },
-          { type: 'session', durationMinutes: 120 },
-          { type: 'break', durationMinutes: 10 },
+          { type: "warmup", durationMinutes: 15 },
+          { type: "session", durationMinutes: 120 },
+          { type: "break", durationMinutes: 10 },
         ],
       },
       dayProfiles: [
         {
-          name: 'Weekday Evening',
-          startTime: '18:00',
-          endTime: '22:00',
+          name: "Weekday Evening",
+          startTime: "18:00",
+          endTime: "22:00",
           sessionCount: 2,
         },
       ],
     },
   },
   {
-    id: 'weekend-marathon',
-    name: 'Weekend Marathon',
-    description: 'Extended weekend sessions with multiple breaks',
-    category: 'weekend',
+    id: "weekend-marathon",
+    name: "Weekend Marathon",
+    description: "Extended weekend sessions with multiple breaks",
+    category: "weekend",
     config: {
       rateCards: [
         {
-          name: 'Weekend Special',
+          name: "Weekend Special",
           pricePerSheet: 0.75,
           sheetsPerPack: 6,
-          packPrice: 4.50,
+          packPrice: 4.5,
         },
       ],
       timeline: {
         flowSegments: [
-          { type: 'warmup', durationMinutes: 20 },
-          { type: 'session', durationMinutes: 90 },
-          { type: 'break', durationMinutes: 15 },
-          { type: 'session', durationMinutes: 90 },
-          { type: 'break', durationMinutes: 15 },
-          { type: 'session', durationMinutes: 90 },
+          { type: "warmup", durationMinutes: 20 },
+          { type: "session", durationMinutes: 90 },
+          { type: "break", durationMinutes: 15 },
+          { type: "session", durationMinutes: 90 },
+          { type: "break", durationMinutes: 15 },
+          { type: "session", durationMinutes: 90 },
         ],
       },
       dayProfiles: [
         {
-          name: 'Saturday Afternoon',
-          startTime: '13:00',
-          endTime: '18:00',
+          name: "Saturday Afternoon",
+          startTime: "13:00",
+          endTime: "18:00",
           sessionCount: 3,
         },
       ],
     },
   },
   {
-    id: 'special-event',
-    name: 'Special Event',
-    description: 'Holiday or special event configuration with premium pricing',
-    category: 'special',
+    id: "special-event",
+    name: "Special Event",
+    description: "Holiday or special event configuration with premium pricing",
+    category: "special",
     config: {
       rateCards: [
         {
-          name: 'Premium',
-          pricePerSheet: 1.00,
+          name: "Premium",
+          pricePerSheet: 1.0,
           sheetsPerPack: 6,
-          packPrice: 6.00,
+          packPrice: 6.0,
         },
         {
-          name: 'VIP',
-          pricePerSheet: 1.50,
+          name: "VIP",
+          pricePerSheet: 1.5,
           sheetsPerPack: 6,
-          packPrice: 9.00,
+          packPrice: 9.0,
         },
       ],
       timeline: {
         flowSegments: [
-          { type: 'warmup', durationMinutes: 30 },
-          { type: 'session', durationMinutes: 120 },
-          { type: 'break', durationMinutes: 20 },
-          { type: 'session', durationMinutes: 120 },
+          { type: "warmup", durationMinutes: 30 },
+          { type: "session", durationMinutes: 120 },
+          { type: "break", durationMinutes: 20 },
+          { type: "session", durationMinutes: 120 },
         ],
       },
       dayProfiles: [
         {
-          name: 'Special Event',
-          startTime: '19:00',
-          endTime: '23:30',
+          name: "Special Event",
+          startTime: "19:00",
+          endTime: "23:30",
           sessionCount: 2,
         },
       ],

@@ -132,7 +132,7 @@ definePageMeta({
 });
 
 const router = useRouter();
-type SessionUser = { username: string; role: string | null } | null;
+type SessionUser = { username?: string; role: string | null } | null;
 const session = ref<SessionUser>(null);
 const selectedDate = ref(new Date().toISOString().slice(0, 10));
 const overrideClosed = ref(false);
@@ -178,7 +178,9 @@ const loadShifts = async () => {
     `/api/admin/shift-records?start=${selectedDate.value}&end=${selectedDate.value}`,
     { credentials: "include" },
   );
-  const lastShift = shifts.value.length ? shifts.value[shifts.value.length - 1] : null;
+  const lastShift = shifts.value.length
+    ? shifts.value[shifts.value.length - 1]
+    : null;
   prevEndingBox.value = lastShift ? (lastShift.ending_box ?? null) : null;
 };
 

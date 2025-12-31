@@ -29,11 +29,7 @@ export const versionService = {
   /**
    * Save a draft version (does not publish)
    */
-  async saveDraft(
-    key: string,
-    value: any,
-    actorUserId: string,
-  ): Promise<void> {
+  async saveDraft(key: string, value: any, actorUserId: string): Promise<void> {
     const stringValue = JSON.stringify(value);
     await prisma.setting.upsert({
       where: { key: `${key}:draft` },

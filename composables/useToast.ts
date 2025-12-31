@@ -59,19 +59,31 @@ export const useToast = () => {
     }
   };
 
-  const success = (message: string, options: { title?: string; duration?: number } = {}) => {
+  const success = (
+    message: string,
+    options: { title?: string; duration?: number } = {},
+  ) => {
     return show(message, { ...options, variant: "success" });
   };
 
-  const error = (message: string, options: { title?: string; duration?: number } = {}) => {
+  const error = (
+    message: string,
+    options: { title?: string; duration?: number } = {},
+  ) => {
     return show(message, { ...options, variant: "error" });
   };
 
-  const warning = (message: string, options: { title?: string; duration?: number } = {}) => {
+  const warning = (
+    message: string,
+    options: { title?: string; duration?: number } = {},
+  ) => {
     return show(message, { ...options, variant: "warning" });
   };
 
-  const info = (message: string, options: { title?: string; duration?: number } = {}) => {
+  const info = (
+    message: string,
+    options: { title?: string; duration?: number } = {},
+  ) => {
     return show(message, { ...options, variant: "info" });
   };
 

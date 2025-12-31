@@ -10,7 +10,9 @@ async function main() {
   const schedule = (await settingsService.get("schedule")) || [];
   const scheduleJson = JSON.stringify(schedule);
 
-  const existingScheduleActive = await (prisma as any).scheduleVersion.findFirst({
+  const existingScheduleActive = await (
+    prisma as any
+  ).scheduleVersion.findFirst({
     where: { status: "ACTIVE" },
   });
   if (!existingScheduleActive) {
@@ -26,9 +28,11 @@ async function main() {
   }
 
   // Create initial Draft for schedule
-  const existingScheduleDraft = await (prisma as any).scheduleVersion.findFirst({
-    where: { status: "DRAFT" },
-  });
+  const existingScheduleDraft = await (prisma as any).scheduleVersion.findFirst(
+    {
+      where: { status: "DRAFT" },
+    },
+  );
   if (!existingScheduleDraft) {
     console.log("Creating initial DRAFT schedule version...");
     await (prisma as any).scheduleVersion.create({

@@ -7,12 +7,16 @@
     @logout="logout"
   >
     <div class="space-y-6">
-      <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-6">
+      <div
+        class="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-6"
+      >
         <!-- Charities Table -->
         <div class="bg-white border border-slate-200 rounded-xl p-6 space-y-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+              <p
+                class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
+              >
                 Partners
               </p>
               <h3 class="text-xl font-black text-primary-900">
@@ -27,7 +31,9 @@
 
           <div v-else class="overflow-x-auto">
             <table class="min-w-full text-xs">
-              <thead class="text-slate-500 uppercase tracking-widest bg-slate-50">
+              <thead
+                class="text-slate-500 uppercase tracking-widest bg-slate-50"
+              >
                 <tr>
                   <th class="px-3 py-2 text-left">Name</th>
                   <th class="px-3 py-2 text-left">Contact</th>
@@ -37,12 +43,22 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="charity in charities" :key="charity.id" class="border-t border-slate-200">
+                <tr
+                  v-for="charity in charities"
+                  :key="charity.id"
+                  class="border-t border-slate-200"
+                >
                   <td class="px-3 py-2">
-                    <div class="font-semibold text-slate-900">{{ charity.name }}</div>
-                    <div class="text-[10px] text-slate-500">{{ charity.description }}</div>
+                    <div class="font-semibold text-slate-900">
+                      {{ charity.name }}
+                    </div>
+                    <div class="text-[10px] text-slate-500">
+                      {{ charity.description }}
+                    </div>
                   </td>
-                  <td class="px-3 py-2 text-slate-600">{{ charity.contact_person }}</td>
+                  <td class="px-3 py-2 text-slate-600">
+                    {{ charity.contact_person }}
+                  </td>
                   <td class="px-3 py-2 text-slate-600">{{ charity.tax_id }}</td>
                   <td class="px-3 py-2">
                     <span
@@ -79,7 +95,9 @@
         <!-- Charity Form -->
         <div class="bg-white border border-slate-200 rounded-xl p-6 space-y-4">
           <div>
-            <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+            <p
+              class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
+            >
               {{ editingId ? "Edit" : "Add" }}
             </p>
             <h3 class="text-lg font-black text-primary-900">
@@ -147,8 +165,14 @@
             </div>
 
             <div>
-              <label class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <input v-model="form.is_active" type="checkbox" class="rounded" />
+              <label
+                class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider"
+              >
+                <input
+                  v-model="form.is_active"
+                  type="checkbox"
+                  class="rounded"
+                />
                 Active
               </label>
             </div>
@@ -162,8 +186,8 @@
               <button
                 v-if="editingId"
                 type="button"
-                @click="cancelEdit"
                 class="flex-1 bg-slate-200 text-slate-700 text-xs font-bold uppercase tracking-[0.3em] py-2 rounded-lg hover:bg-slate-300 transition-colors"
+                @click="cancelEdit"
               >
                 Cancel
               </button>

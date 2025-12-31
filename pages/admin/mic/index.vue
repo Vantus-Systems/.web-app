@@ -52,7 +52,9 @@ definePageMeta({
 });
 
 const router = useRouter();
-const session = ref<{ username?: string | null; role?: string | null } | null>(null);
+const session = ref<{ username?: string | null; role?: string | null } | null>(
+  null,
+);
 const selectedDate = ref(new Date().toISOString().slice(0, 10));
 const holidays = ref<HolidayOccurrence[]>([]);
 const dailyShifts = ref<ShiftRecord[]>([]);

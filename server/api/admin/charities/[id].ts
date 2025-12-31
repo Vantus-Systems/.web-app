@@ -1,6 +1,6 @@
-import { defineEventHandler, readBody } from "h3";
 import { readFile, writeFile } from "fs/promises";
 import { join } from "path";
+import { defineEventHandler, readBody } from "h3";
 
 const dataDir = join(process.cwd(), "server/data");
 

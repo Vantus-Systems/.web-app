@@ -339,7 +339,7 @@ watch(
   () => props.availableShifts,
   (value) => {
     if (value.length && !value.includes(draft.value.shift)) {
-      draft.value.shift = value[0];
+      draft.value.shift = value[0]!;
     }
   },
   { immediate: true },

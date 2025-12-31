@@ -137,7 +137,23 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { FlowSegment, OverlayEvent } from "~/types/ops-schema";
+
+// Local lightweight types (ops-schema doesn't export these in some builds)
+type FlowSegment = {
+  id: string;
+  name: string;
+  startTime: string;
+  endTime: string;
+  [key: string]: any;
+};
+
+type OverlayEvent = {
+  id: string;
+  name: string;
+  startTime: string;
+  endTime: string;
+  [key: string]: any;
+};
 
 const { flowSegments, overlayEvents, selectedId } = defineProps<{
   flowSegments: FlowSegment[];
@@ -170,11 +186,12 @@ const formatHour = (h: number) => {
 
 const parseTime = (timeStr: string): number => {
   if (!timeStr) return 0;
-  const [h, m] = timeStr.split(":").map(Number);
+  const parts = timeStr.split(":");
+  const h = Number(parts[0] ?? 0);
+  const m = Number(parts[1] ?? 0);
   let total = h * 60 + m;
-  if (total < START_MIN) total += 24 * 60; // Handle post-midnight wrapping if it's considered 'next day' early morning but coded as 01:00
-  // Actually simpler: if logic implies 08:00 start, then 01:00 is next day.
-  if (total < 8 * 60) total += 24 * 60;
+  // If time is earlier than the start (e.g. 01:00), treat it as next day
+  if (total < START_MIN) total += 24 * 60;
   return total;
 };
 

@@ -10,15 +10,23 @@
       <!-- KPIs -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div class="bg-white border border-slate-200 rounded-xl p-6">
-          <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+          <p
+            class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
+          >
             Total Users
           </p>
-          <p class="text-4xl font-black text-primary-900 mt-2">{{ kpis.totalUsers }}</p>
-          <p class="text-xs text-slate-500 mt-2">Active: {{ kpis.activeUsers }}</p>
+          <p class="text-4xl font-black text-primary-900 mt-2">
+            {{ kpis.totalUsers }}
+          </p>
+          <p class="text-xs text-slate-500 mt-2">
+            Active: {{ kpis.activeUsers }}
+          </p>
         </div>
 
         <div class="bg-white border border-slate-200 rounded-xl p-6">
-          <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+          <p
+            class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
+          >
             Pending Approvals
           </p>
           <p class="text-4xl font-black text-amber-600 mt-2">
@@ -28,7 +36,9 @@
         </div>
 
         <div class="bg-white border border-slate-200 rounded-xl p-6">
-          <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+          <p
+            class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
+          >
             Live Schemas
           </p>
           <p class="text-4xl font-black text-emerald-600 mt-2">
@@ -38,7 +48,9 @@
         </div>
 
         <div class="bg-white border border-slate-200 rounded-xl p-6">
-          <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+          <p
+            class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
+          >
             Drafts
           </p>
           <p class="text-4xl font-black text-slate-600 mt-2">
@@ -52,10 +64,14 @@
       <div class="bg-white border border-slate-200 rounded-xl p-6 space-y-4">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+            <p
+              class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
+            >
               Approvals
             </p>
-            <h3 class="text-xl font-black text-primary-900">Pending Requests</h3>
+            <h3 class="text-xl font-black text-primary-900">
+              Pending Requests
+            </h3>
           </div>
         </div>
 
@@ -81,7 +97,9 @@
               >
                 <td class="px-3 py-2 font-semibold">{{ approval.type }}</td>
                 <td class="px-3 py-2">{{ approval.userId }}</td>
-                <td class="px-3 py-2">{{ formatDate(approval.requestedAt) }}</td>
+                <td class="px-3 py-2">
+                  {{ formatDate(approval.requestedAt) }}
+                </td>
                 <td class="px-3 py-2 flex gap-2">
                   <button
                     class="text-xs font-bold text-emerald-700 hover:text-emerald-900"
@@ -105,7 +123,9 @@
       <!-- Recent Changes Feed -->
       <div class="bg-white border border-slate-200 rounded-xl p-6 space-y-4">
         <div>
-          <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+          <p
+            class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
+          >
             Activity
           </p>
           <h3 class="text-xl font-black text-primary-900">Recent Changes</h3>
@@ -177,7 +197,9 @@ const loadSession = async () => {
 
 const loadKPIs = async () => {
   try {
-    const users: any = await $fetch("/api/admin/users", { credentials: "include" });
+    const users: any = await $fetch("/api/admin/users", {
+      credentials: "include",
+    });
     if (Array.isArray(users)) {
       kpis.value.totalUsers = users.length;
       kpis.value.activeUsers = users.filter((u: any) => u.is_active).length;
@@ -196,8 +218,8 @@ const loadKPIs = async () => {
     const approvalsData = Array.isArray(approvalsRes?.data)
       ? approvalsRes.data
       : approvalsRes?.data
-      ? [approvalsRes.data]
-      : [];
+        ? [approvalsRes.data]
+        : [];
     const pending = approvalsData.filter((a: any) => a.status === "pending");
     kpis.value.pendingApprovals = pending.length;
   } catch {
@@ -214,8 +236,8 @@ const loadApprovalQueue = async () => {
     approvalQueue.value = Array.isArray(response?.data)
       ? response.data
       : response?.data
-      ? [response.data]
-      : [];
+        ? [response.data]
+        : [];
   } catch {
     // Error loading approval queue
   }

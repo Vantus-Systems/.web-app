@@ -40,14 +40,16 @@
 
           <div class="overflow-x-auto">
             <table class="min-w-full text-xs">
-              <thead class="text-slate-500 uppercase tracking-widest bg-slate-50">
+              <thead
+                class="text-slate-500 uppercase tracking-widest bg-slate-50"
+              >
                 <tr>
                   <th class="px-3 py-2 text-left">
                     <input
                       type="checkbox"
                       :checked="allSelected"
-                      @change="toggleSelectAll"
                       class="rounded"
+                      @change="toggleSelectAll"
                     />
                   </th>
                   <th class="px-3 py-2 text-left">User</th>
@@ -66,8 +68,8 @@
                     <input
                       type="checkbox"
                       :checked="selectedUsers.includes(user.id)"
-                      @change="toggleUserSelection(user.id)"
                       class="rounded"
+                      @change="toggleUserSelection(user.id)"
                     />
                   </td>
                   <td class="px-3 py-2">
@@ -158,7 +160,11 @@
             <label
               class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider"
             >
-              <input v-model="newUser.isActive" type="checkbox" class="rounded" />
+              <input
+                v-model="newUser.isActive"
+                type="checkbox"
+                class="rounded"
+              />
               Active
             </label>
             <button
@@ -210,7 +216,8 @@ const filteredUsers = computed(() => {
     const searchLower = searchQuery.value.toLowerCase();
     const matchesSearch =
       user.username.toLowerCase().includes(searchLower) ||
-      (user.first_name && user.first_name.toLowerCase().includes(searchLower)) ||
+      (user.first_name &&
+        user.first_name.toLowerCase().includes(searchLower)) ||
       (user.last_name && user.last_name.toLowerCase().includes(searchLower));
 
     if (!matchesSearch) return false;

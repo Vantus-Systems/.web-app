@@ -3,6 +3,10 @@
  * Provides granular permission control beyond simple role checks
  */
 
+import { createError } from "h3";
+import type { NormalizedRole } from "~/utils/roles";
+import { normalizeRole } from "~/utils/roles";
+
 export type Permission =
   // Admin read/write
   | "admin:read"
@@ -39,10 +43,6 @@ export type Permission =
   | "patterns:edit"
   | "programs:read"
   | "programs:edit";
-
-import type { NormalizedRole } from "~/utils/roles";
-import { createError } from "h3";
-import { normalizeRole } from "~/utils/roles";
 
 /**
  * Role-to-permission mapping

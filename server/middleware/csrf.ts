@@ -3,8 +3,8 @@
  * Validates CSRF tokens on all mutating requests (POST, PUT, PATCH, DELETE)
  */
 
-import { defineEventHandler, getCookie, getHeader, createError } from "h3";
 import { createHash } from "crypto";
+import { defineEventHandler, getCookie, getHeader, createError } from "h3";
 
 const CSRF_HEADER = "x-csrf-token";
 const CSRF_COOKIE = "csrf_token";
@@ -14,17 +14,16 @@ const CSRF_COOKIE = "csrf_token";
  */
 function generateCsrfToken(sessionToken: string): string {
   return createHash("sha256")
-    .update(`csrf:${sessionToken}:${process.env.APP_SECRET || "default-secret"}`)
+    .update(
+      `csrf:${sessionToken}:${process.env.APP_SECRET || "default-secret"}`,
+    )
     .digest("hex");
 }
 
 /**
  * Validate CSRF token matches session
  */
-function validateCsrfToken(
-  sessionToken: string,
-  csrfToken: string,
-): boolean {
+function validateCsrfToken(sessionToken: string, csrfToken: string): boolean {
   const expected = generateCsrfToken(sessionToken);
   return csrfToken === expected;
 }
@@ -43,7 +42,10 @@ export default defineEventHandler(async (event) => {
   }
 
   // Skip CSRF for public endpoints
-  if (!event.path.startsWith("/api/admin") && !event.path.startsWith("/api/auth/logout")) {
+  if (
+    !event.path.startsWith("/api/admin") &&
+    !event.path.startsWith("/api/auth/logout")
+  ) {
     return;
   }
 
@@ -55,7 +57,8 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const csrfToken = getHeader(event, CSRF_HEADER) || getCookie(event, CSRF_COOKIE);
+  const csrfToken =
+    getHeader(event, CSRF_HEADER) || getCookie(event, CSRF_COOKIE);
   if (!csrfToken) {
     throw createError({
       statusCode: 403,

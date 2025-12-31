@@ -177,7 +177,10 @@
 
           <!-- Progressives Tab -->
           <div v-if="currentTab === 'progressives'" class="space-y-6">
-            <ProgressiveEditor v-model="jackpotData" :is-saving="isSavingJackpot" />
+            <ProgressiveEditor
+              v-model="jackpotData"
+              :is-saving="isSavingJackpot"
+            />
             <div class="flex justify-end">
               <button
                 class="px-5 py-2 bg-primary-900 text-white text-xs font-bold uppercase tracking-[0.3em] rounded-lg disabled:opacity-50"

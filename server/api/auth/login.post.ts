@@ -1,9 +1,9 @@
 import { defineEventHandler, readBody, createError, setCookie } from "h3";
 import { z } from "zod";
 import { authService } from "@server/services/auth.service";
-import { normalizeRole } from "~/utils/roles";
 import { generateCsrfToken } from "@server/middleware/csrf";
 import { rateLimiter } from "@server/utils/rateLimiter";
+import { normalizeRole } from "~/utils/roles";
 
 const loginSchema = z.object({
   username: z.string().min(1),
@@ -15,7 +15,12 @@ export default defineEventHandler(async (event) => {
   const ip = event.node.req.socket.remoteAddress || "unknown";
   const rateLimitKey = `login:${ip}`;
 
-  if (!rateLimiter.checkLimit(rateLimitKey, { maxAttempts: 5, windowMs: 15 * 60 * 1000 })) {
+  if (
+    !rateLimiter.checkLimit(rateLimitKey, {
+      maxAttempts: 5,
+      windowMs: 15 * 60 * 1000,
+    })
+  ) {
     const resetTime = rateLimiter.getResetTime(rateLimitKey);
     throw createError({
       statusCode: 429,

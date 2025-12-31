@@ -148,7 +148,8 @@ export default defineEventHandler(async (event) => {
     const checkNumber = String(getField(check, K_CHECK_NUMBER));
     const stampedRaw = getField(check, K_STAMPED_ON_BACK);
     const phoneRaw = getField(check, K_PHONE_DL_WRITTEN);
-    const toBoolean = (v: any) => (typeof v === "string" ? v === "true" : Boolean(v));
+    const toBoolean = (v: any) =>
+      typeof v === "string" ? v === "true" : Boolean(v);
 
     await prisma.checkLog.create({
       data: {

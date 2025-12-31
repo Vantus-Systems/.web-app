@@ -118,7 +118,21 @@
 </template>
 
 <script setup lang="ts">
-import type { RateCard, Bundle } from "~/types/ops-schema";
+// Local type definitions: the external module does not export RateCard/Bundle
+// so define minimal local types used by this component.
+type RateCard = {
+  id: string;
+  name?: string;
+  category?: string;
+  basePrice?: number | null;
+};
+
+type Bundle = {
+  id: string;
+  name?: string;
+  rateCardIds?: string[] | null;
+  price?: number | null;
+};
 
 defineProps<{
   rateCards: RateCard[];
