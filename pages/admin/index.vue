@@ -300,6 +300,7 @@ import BaseCard from "~/components/ui/BaseCard.vue";
 import BaseButton from "~/components/ui/BaseButton.vue";
 import { normalizeRole } from "~/utils/roles";
 import { useCsrf } from "~/composables/useCsrf";
+import { useToast } from "~/composables/useToast";
 
 definePageMeta({
   middleware: ["auth", "role"],
@@ -308,6 +309,7 @@ definePageMeta({
 
 const router = useRouter();
 const { getHeaders, refreshCsrfToken } = useCsrf();
+const toast = useToast();
 const tabs = [
   { id: "business", name: "Business Info" },
   { id: "progressives", name: "Progressives" },
@@ -325,6 +327,7 @@ const jackpotData = ref<any>({});
 const messagesData = ref<any[]>([]);
 
 const pending = ref(true);
+const isSavingBusiness = ref(false);
 const isSavingJackpot = ref(false);
 const lastSystemSync = ref("");
 let lastSyncInterval: ReturnType<typeof setInterval> | null = null;
@@ -409,13 +412,24 @@ onBeforeUnmount(() => {
 
 // Save Handlers
 const saveBusinessInfo = async () => {
-  await $fetch("/api/admin/business", {
-    method: "POST",
-    body: businessData.value,
-    headers: getHeaders(),
-    credentials: "include",
-  });
-  alert("Business Info Saved!");
+  isSavingBusiness.value = true;
+  try {
+    await $fetch("/api/admin/business", {
+      method: "POST",
+      body: businessData.value,
+      headers: getHeaders(),
+      credentials: "include",
+    });
+    toast.success("Business information updated successfully.", {
+      title: "Saved",
+    });
+  } catch (e: any) {
+    toast.error(e?.message || "Failed to save business info.", {
+      title: "Error",
+    });
+  } finally {
+    isSavingBusiness.value = false;
+  }
 };
 
 const saveJackpot = async () => {
@@ -428,9 +442,11 @@ const saveJackpot = async () => {
       headers: getHeaders(),
       credentials: "include",
     });
-    alert("Progressives Updated!");
-  } catch {
-    alert("Failed to update progressives.");
+    toast.success("Progressives updated successfully.", { title: "Saved" });
+  } catch (e: any) {
+    toast.error(e?.message || "Failed to update progressives.", {
+      title: "Error",
+    });
   } finally {
     isSavingJackpot.value = false;
   }
