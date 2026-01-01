@@ -9,8 +9,7 @@
         <div class="flex justify-between h-16">
           <div class="flex items-center gap-6">
             <div class="flex-shrink-0 flex items-center">
-              <span
-                class="text-primary font-bold text-xl tracking-tight"
+              <span class="text-primary font-bold text-xl tracking-tight"
                 >Mary Esther</span
               >
               <span
@@ -37,8 +36,8 @@
             <!-- Command Palette Button -->
             <button
               class="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-base hover:bg-base/80 text-secondary rounded-md text-xs transition-colors border border-divider"
-              @click="commandPaletteOpen = true"
               aria-label="Open command palette"
+              @click="commandPaletteOpen = true"
             >
               <svg
                 class="w-3.5 h-3.5"
@@ -54,14 +53,17 @@
                 />
               </svg>
               <span>Search</span>
-              <kbd class="px-1.5 py-0.5 bg-divider/50 rounded text-[10px] font-mono">⌘K</kbd>
+              <kbd
+                class="px-1.5 py-0.5 bg-divider/50 rounded text-[10px] font-mono"
+                >⌘K</kbd
+              >
             </button>
 
             <!-- Help Button -->
             <button
               class="p-2 text-secondary hover:text-primary transition-colors"
-              @click="helpPanelOpen = true"
               aria-label="Open help panel"
+              @click="helpPanelOpen = true"
             >
               <svg
                 class="w-5 h-5"
@@ -80,7 +82,9 @@
 
             <!-- User Info -->
             <div class="hidden md:flex flex-col items-end mr-4">
-              <span class="text-primary text-xs font-semibold">{{ userLabel }}</span>
+              <span class="text-primary text-xs font-semibold">{{
+                userLabel
+              }}</span>
               <span
                 class="text-[10px] text-secondary uppercase tracking-widest"
                 >{{ roleLabelText }}</span
@@ -119,20 +123,57 @@
             <h3 class="font-semibold text-primary-950 mb-2">Quick Tips</h3>
             <ul class="space-y-2 text-sm text-slate-700">
               <li class="flex items-start gap-2">
-                <svg class="w-4 h-4 text-primary-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                <svg
+                  class="w-4 h-4 text-primary-600 mt-0.5 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
-                <span>Press <kbd class="px-1 py-0.5 bg-slate-100 rounded text-xs font-mono">⌘K</kbd> to quickly search and navigate</span>
+                <span
+                  >Press
+                  <kbd
+                    class="px-1 py-0.5 bg-slate-100 rounded text-xs font-mono"
+                    >⌘K</kbd
+                  >
+                  to quickly search and navigate</span
+                >
               </li>
               <li class="flex items-start gap-2">
-                <svg class="w-4 h-4 text-primary-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                <svg
+                  class="w-4 h-4 text-primary-600 mt-0.5 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
                 <span>All changes are logged for audit trail</span>
               </li>
               <li class="flex items-start gap-2">
-                <svg class="w-4 h-4 text-primary-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                <svg
+                  class="w-4 h-4 text-primary-600 mt-0.5 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
                 <span>Use drafts to preview changes before publishing</span>
               </li>
@@ -140,7 +181,9 @@
           </div>
 
           <div>
-            <h3 class="font-semibold text-primary-950 mb-2">Your Permissions</h3>
+            <h3 class="font-semibold text-primary-950 mb-2">
+              Your Permissions
+            </h3>
             <div class="flex flex-wrap gap-2">
               <span
                 v-for="permission in userPermissions"
@@ -154,6 +197,9 @@
         </div>
       </slot>
     </AdminHelpPanel>
+
+    <!-- Toast Container for Global Notifications -->
+    <AdminToastContainer />
   </div>
 </template>
 
@@ -164,6 +210,7 @@ import AdminBreadcrumbs from "~/components/admin/ui/AdminBreadcrumbs.vue";
 import AdminEnvironmentBadge from "~/components/admin/ui/AdminEnvironmentBadge.vue";
 import AdminCommandPalette from "~/components/admin/ui/AdminCommandPalette.vue";
 import AdminHelpPanel from "~/components/admin/ui/AdminHelpPanel.vue";
+import AdminToastContainer from "~/components/admin/ui/AdminToastContainer.vue";
 import { roleLabel } from "~/utils/roles";
 import { usePermissions } from "~/composables/usePermissions";
 
@@ -185,9 +232,7 @@ const props = withDefaults(
   {
     title: "",
     subtitle: "",
-    breadcrumbs: () => [
-      { label: "Admin", path: "/admin" },
-    ],
+    breadcrumbs: () => [{ label: "Admin", path: "/admin" }],
     helpTitle: "Help & Quick Tips",
     environment: "development",
   },

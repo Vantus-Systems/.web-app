@@ -85,6 +85,11 @@ import { useRouter } from "vue-router";
 import AdminShell from "~/components/admin/AdminShell.vue";
 import { useCsrf } from "~/composables/useCsrf";
 
+definePageMeta({
+  middleware: ["auth", "role"],
+  roles: ["MIC", "OWNER"],
+});
+
 const router = useRouter();
 const { getHeaders, refreshCsrfToken } = useCsrf();
 const session = ref<{ username?: string; role?: any } | null>(null);
@@ -153,15 +158,8 @@ const reset = () => {
   form.value = { name: "", notes: "" };
 };
 
-const enforceOwner = () => {
-  if (session.value?.role !== "OWNER") {
-    router.push("/admin");
-  }
-};
-
 onMounted(async () => {
   await loadSession();
   await loadPlayers();
-  enforceOwner();
 });
 </script>
