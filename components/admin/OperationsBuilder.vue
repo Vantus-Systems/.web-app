@@ -12,7 +12,7 @@ import {
   RotateCcw,
   UploadCloud,
 } from "lucide-vue-next";
-import OpsSchemaPricingEditor from "./ops/OpsSchemaPricingEditor.vue";
+import OpsSchemaPricingEditorEnhanced from "./ops/OpsSchemaPricingEditorEnhanced.vue";
 import OpsSchemaCalendarEditor from "./ops/OpsSchemaCalendarEditor.vue";
 import PatternEditor from "./PatternEditor.vue";
 import ProgramEditor from "./ProgramEditor.vue";
@@ -433,7 +433,7 @@ const statusColors = {
             v-if="currentStep === 'pricing' && opsStore.opsSchemaDraft"
             class="h-full fade-in"
           >
-            <OpsSchemaPricingEditor
+            <OpsSchemaPricingEditorEnhanced
               :model-value="opsStore.opsSchemaDraft"
               :density="density"
               @update:model-value="opsStore.updateOpsSchemaDraft"

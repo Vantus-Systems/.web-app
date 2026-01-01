@@ -94,10 +94,12 @@ async function main() {
       );
       try {
         // Mark the migration as applied so Prisma won't try to rerun the failing DDL.
-        runCmd("npx prisma migrate resolve --applied 20251230120000_roles_shifts");
+        runCmd(
+          "npx prisma migrate resolve --applied 20251230120000_roles_shifts",
+        );
         // Retry deploy to ensure the rest of the migrations are recorded.
         runCmd("npx prisma migrate deploy");
-      } catch (inner) {
+      } catch {
         log("Automatic migration recovery failed; see error above.");
         throw err;
       }

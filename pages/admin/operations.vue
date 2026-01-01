@@ -6,7 +6,9 @@
     :user-name="session?.username"
     @logout="logout"
   >
-    <div class="bg-white border border-slate-200 rounded-xl p-4">
+    <div
+      class="bg-white border border-slate-200 rounded-xl overflow-hidden h-[calc(100vh-8rem)]"
+    >
       <OperationsBuilder />
     </div>
   </AdminShell>

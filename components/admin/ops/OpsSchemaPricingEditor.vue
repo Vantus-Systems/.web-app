@@ -15,25 +15,45 @@
           >
             Timeline Controls
           </p>
-          <h3 class="text-xl font-black text-primary-900">
-            Rate Cards + Timeline
-          </h3>
+          <div class="flex items-center gap-2">
+            <h3 class="text-xl font-black text-primary-900">
+              Rate Cards + Timeline
+            </h3>
+            <div class="group relative flex items-center">
+              <span class="cursor-help text-slate-400 hover:text-primary-600">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+              </span>
+              <div class="absolute left-full ml-2 w-64 p-2 bg-slate-800 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none z-50 transition-opacity">
+                Manage your rate cards and drag them onto the timeline to build your daily schedule flow.
+              </div>
+            </div>
+          </div>
         </div>
         <div class="flex gap-2">
-          <BaseButton
-            variant="outline"
-            class-name="text-xs px-3 py-2"
-            @click="addOverlayEvent"
-          >
-            + Overlay
-          </BaseButton>
-          <BaseButton
-            variant="outline"
-            class-name="text-xs px-3 py-2"
-            @click="addTrigger"
-          >
-            + Trigger
-          </BaseButton>
+          <div class="group relative">
+            <BaseButton
+              variant="outline"
+              class-name="text-xs px-3 py-2"
+              @click="addOverlayEvent"
+            >
+              + Overlay
+            </BaseButton>
+             <div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-48 p-2 bg-slate-800 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none z-50 transition-opacity text-center">
+                Add non-gaming events like "Doors Open" or "Intermission"
+              </div>
+          </div>
+          <div class="group relative">
+            <BaseButton
+              variant="outline"
+              class-name="text-xs px-3 py-2"
+              @click="addTrigger"
+            >
+              + Trigger
+            </BaseButton>
+            <div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-48 p-2 bg-slate-800 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none z-50 transition-opacity text-center">
+                Add logic triggers like "Hard Reset" or "Sales Open"
+            </div>
+          </div>
         </div>
       </div>
 

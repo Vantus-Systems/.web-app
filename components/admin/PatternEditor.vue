@@ -202,28 +202,99 @@
         </div>
 
         <div class="border-t border-divider pt-6 space-y-4">
-          <div class="text-xs font-bold uppercase tracking-widest text-secondary">Generators</div>
-          <label class="flex items-center gap-3">
-            <input v-model="rotationEnabled" type="checkbox" class="rounded text-accent-primary focus:ring-accent-primary" />
-            <span class="text-xs font-bold text-secondary uppercase tracking-wider">Rotational Symmetry</span>
-          </label>
-          <div class="flex items-center gap-3">
-            <input
-              v-model.number="permutationLines"
-              type="number"
-              min="1"
-              max="12"
-              class="w-20 rounded-lg border-divider bg-base text-sm px-3 py-2 focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary outline-none"
-            />
-            <span class="text-xs text-secondary">Lines Required</span>
+          <div class="text-xs font-bold uppercase tracking-widest text-secondary">
+            Generators
           </div>
+
+          <div class="space-y-2">
+            <label
+              class="text-xs font-bold text-secondary uppercase tracking-wider"
+              >Type</label
+            >
+            <select
+              v-model="generatorType"
+              class="w-full rounded-lg border-divider bg-base text-sm px-3 py-2 focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary outline-none"
+            >
+              <option value="lines">Line Permutations</option>
+              <option value="triple">
+                Triple Bingo (Lines+Stamps+Corners)
+              </option>
+              <option value="snake">Animated Snake</option>
+            </select>
+          </div>
+
+          <div v-if="generatorType === 'lines'" class="space-y-3">
+            <div class="flex items-center gap-3">
+              <input
+                v-model.number="permutationLines"
+                type="number"
+                min="1"
+                max="12"
+                class="w-20 rounded-lg border-divider bg-base text-sm px-3 py-2 focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary outline-none"
+              />
+              <span class="text-xs text-secondary">Lines Required</span>
+            </div>
+            <label class="flex items-center gap-3">
+              <input
+                v-model="rotationEnabled"
+                type="checkbox"
+                class="rounded text-accent-primary focus:ring-accent-primary"
+              />
+              <span
+                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                >Rotational Symmetry</span
+              >
+            </label>
+          </div>
+
+          <div v-if="generatorType === 'triple'" class="space-y-3">
+            <label class="flex items-center gap-3">
+              <input
+                v-model="includeStamps"
+                type="checkbox"
+                class="rounded text-accent-primary focus:ring-accent-primary"
+              />
+              <span
+                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                >Include Corner Stamps</span
+              >
+            </label>
+            <label class="flex items-center gap-3">
+              <input
+                v-model="includeCorners"
+                type="checkbox"
+                class="rounded text-accent-primary focus:ring-accent-primary"
+              />
+              <span
+                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                >Include 4 Corners</span
+              >
+            </label>
+            <label class="flex items-center gap-3">
+              <input
+                v-model="rotationEnabled"
+                type="checkbox"
+                class="rounded text-accent-primary focus:ring-accent-primary"
+              />
+              <span
+                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                >Rotational Symmetry</span
+              >
+            </label>
+          </div>
+
           <button
             class="w-full text-xs font-bold uppercase tracking-widest border border-divider hover:border-accent-primary hover:text-accent-primary py-2.5 rounded-lg transition-all bg-surface hover:bg-base"
             @click="generatePermutations"
           >
             Generate
           </button>
-          <p v-if="error" class="text-xs text-rose-600 bg-rose-50 p-2 rounded border border-rose-100">{{ error }}</p>
+          <p
+            v-if="error"
+            class="text-xs text-rose-600 bg-rose-50 p-2 rounded border border-rose-100"
+          >
+            {{ error }}
+          </p>
         </div>
 
         <div class="border-t border-divider pt-6 space-y-4">
@@ -254,6 +325,8 @@ type Cell = 0 | 1;
 type Frame = Cell[];
 import {
   generateLinePermutations,
+  generateTripleBingoPermutations,
+  generateSnakePattern,
   rotatePatternCells,
 } from "~/utils/pattern.utils";
 
@@ -291,7 +364,11 @@ const form = ref({
 
 const currentFrameIndex = ref(0);
 const rotationEnabled = ref(false);
+const cyclePositions = ref(false);
 const permutationLines = ref(3);
+const generatorType = ref<"lines" | "triple" | "snake">("lines");
+const includeStamps = ref(true);
+const includeCorners = ref(true);
 const isPlaying = ref(false);
 let playInterval: number | null = null;
 
@@ -449,18 +526,32 @@ const tagsInput = computed({
 });
 
 const generatePermutations = () => {
-  if (permutationLines.value <= 0 || permutationLines.value > 12) {
-    error.value = "Lines required must be between 1 and 12.";
-    return;
-  }
-  const base = activeFrame.value;
-  const permutations = generateLinePermutations(base, permutationLines.value);
-  form.value.definition.frames = rotationEnabled.value
-    ? permutations.map((frame) => rotatePatternCells(frame))
-    : permutations;
-  form.value.isAnimated = form.value.definition.frames.length > 1;
-  currentFrameIndex.value = 0;
   error.value = "";
+  let permutations: number[][] = [];
+
+  if (generatorType.value === "lines") {
+    if (permutationLines.value <= 0 || permutationLines.value > 12) {
+      error.value = "Lines required must be between 1 and 12.";
+      return;
+    }
+    const base = activeFrame.value;
+    permutations = generateLinePermutations(base, permutationLines.value);
+  } else if (generatorType.value === "triple") {
+    permutations = generateTripleBingoPermutations(
+      includeStamps.value,
+      includeCorners.value,
+    );
+  } else if (generatorType.value === "snake") {
+    permutations = generateSnakePattern();
+  }
+
+  if (rotationEnabled.value && generatorType.value !== "snake") {
+    permutations = permutations.map((frame) => rotatePatternCells(frame));
+  }
+
+  form.value.definition.frames = permutations;
+  form.value.isAnimated = permutations.length > 1;
+  currentFrameIndex.value = 0;
 };
 
 const togglePlay = () => {

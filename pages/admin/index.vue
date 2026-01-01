@@ -175,22 +175,7 @@
             </BaseCard>
           </div>
 
-          <!-- Progressives Tab -->
-          <div v-if="currentTab === 'progressives'" class="space-y-6">
-            <ProgressiveEditor
-              v-model="jackpotData"
-              :is-saving="isSavingJackpot"
-            />
-            <div class="flex justify-end">
-              <button
-                class="px-5 py-2 bg-primary-900 text-white text-xs font-bold uppercase tracking-[0.3em] rounded-lg disabled:opacity-50"
-                :disabled="isSavingJackpot"
-                @click="saveJackpot"
-              >
-                {{ isSavingJackpot ? "Saving..." : "Save Progressives" }}
-              </button>
-            </div>
-          </div>
+
 
           <!-- W2G Tab -->
           <div v-if="currentTab === 'messages'" class="space-y-8">
@@ -279,10 +264,7 @@
             </div>
           </div>
 
-          <!-- W2G Generator -->
-          <div v-if="currentTab === 'w2g'" class="space-y-6">
-            <W2GGenerator />
-          </div>
+          
         </div>
       </div>
     </div>
@@ -293,8 +275,6 @@
 import { onBeforeUnmount, onMounted, ref } from "vue";
 import AdminPageHeader from "~/components/admin/ui/AdminPageHeader.vue";
 import AdminShell from "~/components/admin/AdminShell.vue";
-import ProgressiveEditor from "~/components/admin/ProgressiveEditor.vue";
-import W2GGenerator from "~/components/admin/W2GGenerator.vue";
 import OperationsBuilder from "~/components/admin/OperationsBuilder.vue";
 import BaseCard from "~/components/ui/BaseCard.vue";
 import BaseButton from "~/components/ui/BaseButton.vue";
@@ -312,7 +292,6 @@ const { getHeaders, refreshCsrfToken } = useCsrf();
 const toast = useToast();
 const tabs = [
   { id: "business", name: "Business Info" },
-  { id: "progressives", name: "Progressives" },
   { id: "operations", name: "Operations Builder" },
   { id: "messages", name: "Messages" },
   { id: "users", name: "Users" },
@@ -323,12 +302,10 @@ const sessionUser = ref<{ username: string; role: string } | null>(null);
 
 // Data refs
 const businessData = ref<any>({});
-const jackpotData = ref<any>({});
 const messagesData = ref<any[]>([]);
 
 const pending = ref(true);
 const isSavingBusiness = ref(false);
-const isSavingJackpot = ref(false);
 const lastSystemSync = ref("");
 let lastSyncInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -376,14 +353,12 @@ const loadData = async () => {
     const user = await verifyAdminSession();
     if (!user) return;
     sessionUser.value = user as { username: string; role: string };
-    const [biz, jack, msgs] = await Promise.all([
+    const [biz, msgs] = await Promise.all([
       $fetch("/api/business", { credentials: "include" }),
-      $fetch("/api/jackpot", { credentials: "include" }),
       $fetch("/api/admin/messages", { credentials: "include" }),
     ]);
 
     businessData.value = biz;
-    jackpotData.value = jack;
     messagesData.value = msgs;
   } catch (e: any) {
     console.error("Failed to load data", e);
@@ -432,25 +407,7 @@ const saveBusinessInfo = async () => {
   }
 };
 
-const saveJackpot = async () => {
-  isSavingJackpot.value = true;
-  try {
-    jackpotData.value.lastUpdated = new Date().toLocaleString();
-    await $fetch("/api/admin/jackpot", {
-      method: "POST",
-      body: jackpotData.value,
-      headers: getHeaders(),
-      credentials: "include",
-    });
-    toast.success("Progressives updated successfully.", { title: "Saved" });
-  } catch (e: any) {
-    toast.error(e?.message || "Failed to update progressives.", {
-      title: "Error",
-    });
-  } finally {
-    isSavingJackpot.value = false;
-  }
-};
+
 
 const logout = async () => {
   await refreshCsrfToken();

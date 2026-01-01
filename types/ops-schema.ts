@@ -52,9 +52,27 @@ export type OpsSchemaOverlayEvent = {
 export type OpsSchemaLogicTrigger = {
   id: string;
   trigger_time: string;
-  type: "hard_reset" | "sales_window_open";
+  type:
+    | "hard_reset"
+    | "sales_window_open"
+    | "sales_window_close"
+    | "doors_open"
+    | "doors_close"
+    | "session_start"
+    | "session_end"
+    | "jackpot_reset"
+    | "custom";
   target_event?: string;
   description?: string;
+  custom_label?: string;
+  payload?: Record<string, unknown>;
+  isRelative?: boolean;
+  relativeAnchor?: {
+    targetId: string;
+    anchorPoint: "start" | "end";
+    offsetMinutes: number;
+  };
+  derivedTime?: string;
 };
 
 export type OpsSchemaDayProfile = {

@@ -64,13 +64,45 @@ const overlayEventSchema = z.object({
   pricing_override: z.record(z.unknown()).optional(),
 });
 
-const logicTriggerSchema = z.object({
-  id: z.string().min(1),
-  trigger_time: timeHHMM,
-  type: z.enum(["hard_reset", "sales_window_open"]),
-  target_event: z.string().optional(),
-  description: z.string().optional(),
-});
+const logicTriggerSchema = z
+  .object({
+    id: z.string().min(1),
+    trigger_time: timeHHMM,
+    type: z.enum([
+      "hard_reset",
+      "sales_window_open",
+      "sales_window_close",
+      "doors_open",
+      "doors_close",
+      "session_start",
+      "session_end",
+      "jackpot_reset",
+      "custom",
+    ]),
+    target_event: z.string().optional(),
+    description: z.string().optional(),
+    custom_label: z.string().optional(),
+    payload: z.record(z.unknown()).optional(),
+    isRelative: z.boolean().optional(),
+    relativeAnchor: z
+      .object({
+        targetId: z.string(),
+        anchorPoint: z.enum(["start", "end"]),
+        offsetMinutes: z.number(),
+      })
+      .optional(),
+    derivedTime: timeHHMM.optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.type === "custom" && !data.custom_label) return false;
+      return true;
+    },
+    {
+      message: "custom_label is required when type is 'custom'",
+      path: ["custom_label"],
+    },
+  );
 
 const dayProfileSchema = z.object({
   id: z.string().min(1),
