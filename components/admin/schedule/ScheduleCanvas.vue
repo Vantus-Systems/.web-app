@@ -1,36 +1,39 @@
 <template>
   <div 
-    class="h-full flex flex-col relative outline-none" 
+    class="h-full flex flex-col relative outline-none bg-base"
     tabindex="0"
     @mouseup="endPaint" 
     @mouseleave="onMouseLeaveCanvas"
     @keydown="handleKeyDown"
   >
     <!-- Sticky Header -->
-    <div class="grid grid-cols-7 border-b border-slate-200 bg-white z-20 sticky top-0 shadow-sm">
+    <div class="grid grid-cols-7 border-b border-divider bg-surface z-20 sticky top-0 shadow-sm">
       <div
         v-for="day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']"
         :key="day"
-        class="py-2 text-center text-xs font-bold text-slate-400 uppercase tracking-widest"
+        class="py-2 text-center text-xs font-bold text-tertiary uppercase tracking-widest"
       >
         {{ day }}
       </div>
     </div>
 
     <!-- Virtual List Container -->
-    <div ref="container" class="flex-1 overflow-y-auto overflow-x-hidden bg-slate-100">
-      <div v-bind="containerProps" :style="{ height: totalHeight + 'px', position: 'relative' }">
-        <div v-bind="wrapperProps">
+    <div
+        v-bind="containerProps"
+        class="flex-1 overflow-y-auto overflow-x-hidden bg-base"
+        @scroll="onScroll"
+    >
+      <div v-bind="wrapperProps">
           <div
             v-for="week in list"
             :key="week.index"
-            class="grid grid-cols-7 border-b border-slate-200 bg-white min-h-[120px]"
+            class="grid grid-cols-7 border-b border-divider bg-surface min-h-[120px]"
             :style="{ height: itemHeight + 'px' }"
           >
             <div
               v-for="day in week.data.days"
               :key="day.dateStr"
-              class="relative border-r border-slate-100 last:border-r-0 select-none cursor-pointer"
+              class="relative border-r border-divider last:border-r-0 select-none cursor-pointer"
               @mousedown="startPaint(day.dateStr, $event)"
               @mouseenter="onMouseEnter(day.dateStr)"
               @contextmenu.prevent="onContextMenu(day.dateStr, $event)"
@@ -42,8 +45,12 @@
                 :profile="getProfile(day.dateStr)"
                 :ghost-profile="getGhostProfile(day.dateStr)"
                 :is-selected="isSelected(day.dateStr) || isInDataRange(day.dateStr)"
-                :is-holiday="isHoliday(day.dateStr)"
+                :is-holiday="!!holidays?.[day.dateStr]"
+                :is-closed="holidays?.[day.dateStr]?.type === 'closed'"
                 :view-mode="viewMode"
+                :projected-revenue="revenue?.[day.dateStr]"
+                :staffing-status="staffing?.[day.dateStr]?.status"
+                :staffing-ready="staffing?.[day.dateStr]?.status === 'ok'"
               />
               
               <!-- Month Label Overlay (First day of month) -->
@@ -51,13 +58,12 @@
                 v-if="day.dateStr.endsWith('-01')"
                 class="absolute top-1 right-2 pointer-events-none z-10"
               >
-                <span class="text-[40px] font-black text-slate-900/5 leading-none select-none">
+                <span class="text-[40px] font-black text-primary/5 leading-none select-none">
                   {{ getMonthLabel(day.dateStr) }}
                 </span>
               </div>
             </div>
           </div>
-        </div>
       </div>
     </div>
   </div>
@@ -65,7 +71,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { useVirtualList } from "@vueuse/core";
+import { useVirtualList, useThrottleFn } from "@vueuse/core";
 import ScheduleDayCard from "./ScheduleDayCard.vue";
 
 const props = defineProps<{
@@ -75,9 +81,13 @@ const props = defineProps<{
   selectedDates: string[];
   activeToolProfileId: string | null;
   viewMode?: 'standard' | 'heatmap' | 'staffing';
+  // Real Data
+  revenue?: Record<string, number>;
+  staffing?: Record<string, { required: number; scheduled: number; missing: number; status: 'ok'|'short'|'unknown' }>;
+  holidays?: Record<string, { name: string; type: 'closed'|'special' }>;
 }>();
 
-const emit = defineEmits(["select-date", "paint-range", "open-inspector", "clear-selection", "copy-day", "paste-day", "context-menu", "preview-day"]);
+const emit = defineEmits(["select-date", "paint-range", "open-inspector", "clear-selection", "copy-day", "paste-day", "context-menu", "preview-day", "extend-range"]);
 
 // 1. Generate Weeks
 const weeks = computed(() => {
@@ -88,15 +98,10 @@ const weeks = computed(() => {
   // Align start to previous Monday if needed
   const current = new Date(start);
   const day = current.getDay();
-  // JS getDay(): Sun=0, Mon=1...Sat=6
-  // We want Monday start.
-  // If Sun(0) -> -6 days to get prev Mon
-  // If Mon(1) -> 0 days
-  // If Tue(2) -> -1 days
+  // JS getDay(): Sun=0, Mon=1...Sat=6 -> Mon=1
   const diff = day === 0 ? -6 : 1 - day;
   current.setDate(current.getDate() + diff);
 
-  // We loop until we pass the end date
   // Safety break
   let safety = 0;
   while (current <= end || (current > end && current.getDay() !== 1) && safety < 5000) {
@@ -120,13 +125,21 @@ const weeks = computed(() => {
 });
 
 // 2. Virtualization
-const itemHeight = 140; // Fixed height for consistency
+const itemHeight = 140;
 const { list, containerProps, wrapperProps } = useVirtualList(weeks, {
   itemHeight,
   overscan: 5,
 });
 
-const totalHeight = computed(() => weeks.value.length * itemHeight);
+// Scroll Handling for Infinite Grid
+const onScroll = useThrottleFn((e: Event) => {
+    const target = e.target as HTMLElement;
+
+    // Check bottom
+    if (target.scrollTop + target.clientHeight >= target.scrollHeight - 600) {
+        emit('extend-range', 'future');
+    }
+}, 200);
 
 // 3. Helpers
 const getProfile = (dateStr: string) => {
@@ -140,19 +153,12 @@ const hoverDate = ref<string | null>(null);
 
 const getGhostProfile = (dateStr: string) => {
   if (dateStr === hoverDate.value && props.activeToolProfileId && !isPainting.value) {
-    // Only show ghost if slot is empty or we want to show override
-    // Assuming overwrite behavior, so always show ghost
     return props.profiles.find(p => p.id === props.activeToolProfileId);
   }
   return undefined;
 };
 
 const isSelected = (dateStr: string) => props.selectedDates.includes(dateStr);
-const isHoliday = (dateStr: string) => {
-  // Simple check for now, can be expanded
-  const [y, m, d] = dateStr.split("-");
-  return (m === "12" && d === "25") || (m === "01" && d === "01") || (m === "07" && d === "04");
-};
 
 const getMonthLabel = (dateStr: string) => {
   const [y, m] = dateStr.split("-");
@@ -211,7 +217,6 @@ const isInDataRange = (dateStr: string) => {
 
 // 5. Interaction Handlers
 const onContextMenu = (dateStr: string, event: MouseEvent) => {
-  // If date not in selection, select it first
   if (!props.selectedDates.includes(dateStr)) {
     emit("select-date", { date: dateStr, multi: false });
   }
@@ -223,13 +228,11 @@ const onDoubleClick = (dateStr: string) => {
 };
 
 const handleKeyDown = (e: KeyboardEvent) => {
-  // We need a reference date. If selection exists, use the last one. If not, ignore or use today.
   if (props.selectedDates.length === 0) return;
   
   const current = props.selectedDates[props.selectedDates.length - 1];
   const dateObj = new Date(current);
   
-  // Helper to offset date
   const moveDate = (days: number) => {
     e.preventDefault();
     const newDate = new Date(dateObj);
@@ -239,18 +242,10 @@ const handleKeyDown = (e: KeyboardEvent) => {
   };
 
   switch (e.key) {
-    case "ArrowRight":
-      moveDate(1);
-      break;
-    case "ArrowLeft":
-      moveDate(-1);
-      break;
-    case "ArrowDown":
-      moveDate(7);
-      break;
-    case "ArrowUp":
-      moveDate(-7);
-      break;
+    case "ArrowRight": moveDate(1); break;
+    case "ArrowLeft": moveDate(-1); break;
+    case "ArrowDown": moveDate(7); break;
+    case "ArrowUp": moveDate(-7); break;
     case "Enter":
       e.preventDefault();
       emit("open-inspector");

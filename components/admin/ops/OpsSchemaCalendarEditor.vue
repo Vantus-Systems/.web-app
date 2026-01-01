@@ -1,105 +1,110 @@
 <template>
-  <div class="flex h-full flex-col bg-slate-50 overflow-hidden">
-    <!-- Top Toolbar / Header -->
-    <div class="flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200 shrink-0">
-      <div>
-        <div class="flex items-center gap-2">
-          <h3 class="text-lg font-black text-slate-900">Mission Control</h3>
-          <span class="px-2 py-0.5 rounded-full bg-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-            Schedule Editor
-          </span>
-        </div>
-        <p class="text-xs text-slate-400">
-          {{ dateRangeLabel }}
-        </p>
-      </div>
-      
-      <div class="flex items-center gap-4">
-        <!-- View Toggle -->
-        <div class="flex items-center bg-slate-100 p-1 rounded-lg">
-          <button 
-            v-for="mode in ['standard', 'heatmap', 'staffing']" 
-            :key="mode"
-            class="px-3 py-1 text-xs font-bold rounded-md transition-all capitalize"
-            :class="viewMode === mode ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
-            @click="viewMode = mode"
-          >
-            {{ mode }}
-          </button>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <div class="text-xs text-slate-400 mr-2">
-            <span v-if="hasChanges" class="text-amber-600 font-bold">Unsaved Changes</span>
-            <span v-else>All changes saved</span>
-          </div>
-          
-          <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
-             <button 
-               class="p-1.5 text-slate-500 hover:text-primary-600 hover:bg-white rounded-md transition-all"
-               title="Print Schedule"
-               @click="printSchedule"
-             >
-               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
-             </button>
-             <button 
-               class="p-1.5 text-slate-500 hover:text-primary-600 hover:bg-white rounded-md transition-all"
-               :class="{'text-primary-600 bg-white shadow-sm': isTvMode}"
-               title="TV Mode"
-               @click="isTvMode = !isTvMode"
-             >
-               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tv"><rect width="20" height="15" x="2" y="7" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
-             </button>
-          </div>
-        </div>
-      </div>
+  <div class="flex h-full bg-base overflow-hidden">
+    <!-- Sidebar: Library -->
+    <div class="w-64 flex-none border-r border-divider bg-surface z-20 shadow-sm">
+      <ScheduleProfileLibrary
+        :profiles="effectiveProfiles"
+        :active-tool-profile-id="activeToolProfileId"
+        @select-tool="selectTool"
+        @create-profile="$emit('create-profile')"
+      />
     </div>
 
-    <!-- Main Workspace -->
-    <div class="flex flex-1 overflow-hidden">
-      <!-- Left: Profile Palette -->
-      <div v-show="!isTvMode" class="w-64 flex-shrink-0 border-r border-slate-200 bg-white z-20 print:hidden">
-        <ScheduleProfileLibrary
-          :profiles="dayProfiles"
-          :selected-profile-id="selectedProfileId"
-          @select="selectProfile"
-          @clear="selectedProfileId = null"
-        />
+    <!-- Main Canvas -->
+    <div class="flex-1 flex flex-col min-w-0 bg-base">
+      <!-- Toolbar -->
+      <div class="h-12 border-b border-divider bg-surface flex items-center justify-between px-4 z-10">
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2">
+            <button
+                class="p-1.5 rounded hover:bg-base text-secondary hover:text-primary transition-colors"
+                title="Undo (Cmd+Z)"
+                @click="undo"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+            </button>
+            <button
+                class="p-1.5 rounded hover:bg-base text-secondary hover:text-primary transition-colors"
+                title="Redo (Cmd+Shift+Z)"
+                @click="redo"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"/></svg>
+            </button>
+          </div>
+
+          <div class="h-4 w-px bg-divider"></div>
+
+          <div class="flex items-center gap-1 bg-base p-0.5 rounded-lg border border-divider">
+             <button 
+               v-for="m in ['standard', 'heatmap', 'staffing']"
+               :key="m"
+               class="px-2 py-1 text-[10px] font-bold uppercase rounded transition-colors"
+               :class="viewMode === m ? 'bg-surface text-primary shadow-sm' : 'text-secondary hover:text-primary'"
+               @click="viewMode = m as any"
+             >
+               {{ m }}
+             </button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+           <button
+             class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase text-secondary hover:text-primary hover:bg-base rounded transition-colors"
+             @click="printSchedule"
+           >
+             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+             Print
+           </button>
+           <button
+             class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase text-secondary hover:text-accent-primary hover:bg-base rounded transition-colors"
+             @click="openTvMode"
+           >
+             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="15" x="2" y="7" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
+             TV Mode
+           </button>
+        </div>
       </div>
 
-      <!-- Center: Infinite Canvas -->
-      <div class="flex-1 relative bg-slate-100 overflow-hidden">
-        <ScheduleCanvas
-          :date-range="activeDateRange"
-          :assignments="draft.calendar.assignments"
-          :profiles="dayProfiles"
-          :selected-dates="selectedDates"
-          :active-tool-profile-id="selectedProfileId"
-          :view-mode="viewMode"
-          @select-date="handleDateSelection"
-          @paint-range="handlePaintRange"
-          @open-inspector="handleOpenInspector"
-          @clear-selection="handleBulkClear"
-          @copy-day="handleCopyDay"
-          @paste-day="handlePasteDay"
-          @context-menu="handleContextMenu"
-          @preview-day="handlePreviewDay"
-        />
-      </div>
+      <!-- Canvas -->
+      <ScheduleCanvas
+        :date-range="calendar.range"
+        :assignments="simpleAssignments"
+        :profiles="effectiveProfiles"
+        :selected-dates="selectedDates"
+        :active-tool-profile-id="activeToolProfileId"
+        :view-mode="viewMode"
+        :revenue="projectedRevenueMap"
+        :staffing="staffingMap"
+        :holidays="holidayMap"
+        @select-date="handleSelectDate"
+        @paint-range="handlePaintRange"
+        @open-inspector="isInspectorOpen = true"
+        @clear-selection="handleClearSelection"
+        @copy-day="handleCopyDay"
+        @paste-day="handlePasteDay"
+        @context-menu="handleContextMenu"
+        @preview-day="handlePreviewDay"
+        @extend-range="handleExtendRange"
+      />
+    </div>
 
-      <!-- Right: Inspector -->
-      <div v-show="!isTvMode" class="w-80 flex-shrink-0 border-l border-slate-200 bg-white z-20 print:hidden">
-        <ScheduleInspector
-          :selected-dates="selectedDates"
-          :assignments="draft.calendar.assignments"
-          :profiles="dayProfiles"
-          :stats="inspectorStats"
-          @clear-selection="selectedDates = []"
-          @apply-bulk="handleBulkApply"
-          @clear-bulk="handleBulkClear"
-          @smart-fill="handleSmartFill"
-        />
-      </div>
+    <!-- Inspector -->
+    <div
+        v-if="isInspectorOpen"
+        class="w-80 flex-none border-l border-divider bg-surface z-20 shadow-lg"
+    >
+      <ScheduleInspector
+        :selected-dates="selectedDates"
+        :assignments="simpleAssignments"
+        :profiles="effectiveProfiles"
+        :stats="rangeStats"
+        :staffing="staffingMap"
+        @clear-selection="handleClearSelection"
+        @apply-bulk="handleApplyBulk"
+        @clear-bulk="handleClearBulk"
+        @smart-fill="handleSmartFill"
+        @close="isInspectorOpen = false"
+      />
     </div>
 
     <!-- Context Menu -->
@@ -112,256 +117,307 @@
       @paste="handlePasteDay(contextMenu.date); contextMenu = null"
       @clear="handleClearDay(contextMenu.date); contextMenu = null"
       @lock="handleLockDay(contextMenu.date); contextMenu = null"
-      @holiday="handleHolidayDay(contextMenu.date); contextMenu = null"
+      @holiday="handleApplyHoliday(contextMenu.date); contextMenu = null"
     />
-
-    <!-- Mini-Timeline Popover -->
-    <div v-if="previewDate" class="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm" @click.self="previewDate = null">
-      <ScheduleMiniTimeline 
-        :date="previewDate"
-        :profile="getProfileForDate(previewDate)"
-        @close="previewDate = null"
-      />
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, toRaw, watch } from "vue";
+import { ref, computed, onMounted } from "vue";
 import type { OpsSchemaV2 } from "~/types/ops-schema";
-import ScheduleCanvas from "~/components/admin/schedule/ScheduleCanvas.vue";
-import ScheduleProfileLibrary from "~/components/admin/schedule/ScheduleProfileLibrary.vue";
-import ScheduleInspector from "~/components/admin/schedule/ScheduleInspector.vue";
-import ScheduleContextMenu from "~/components/admin/schedule/ScheduleContextMenu.vue";
-import ScheduleMiniTimeline from "~/components/admin/schedule/ScheduleMiniTimeline.vue";
+import ScheduleProfileLibrary from "../schedule/ScheduleProfileLibrary.vue";
+import ScheduleCanvas from "../schedule/ScheduleCanvas.vue";
+import ScheduleInspector from "../schedule/ScheduleInspector.vue";
+import ScheduleContextMenu from "../schedule/ScheduleContextMenu.vue";
+import { useRouter } from "vue-router";
 
 const props = defineProps<{
   modelValue: OpsSchemaV2;
+  profiles?: any[];
 }>();
 
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(["update:modelValue", "create-profile"]);
+const router = useRouter();
 
-// --- State Management ---
-const isSyncing = ref(false);
-const isTvMode = ref(false);
-const viewMode = ref<'standard' | 'heatmap' | 'staffing'>('standard');
-const cloneDraft = (value: OpsSchemaV2) => JSON.parse(JSON.stringify(toRaw(value)));
-const draft = ref(cloneDraft(props.modelValue));
-
-const selectedProfileId = ref<string | null>(null);
+// State
+const calendar = computed(() => props.modelValue.calendar);
+const activeToolProfileId = ref<string | null>(null);
 const selectedDates = ref<string[]>([]);
-const clipboard = ref<string | null>(null); // profileId stored
-
+const isInspectorOpen = ref(true);
+const viewMode = ref<'standard' | 'heatmap' | 'staffing'>('standard');
+const clipboardProfileId = ref<string | null>(null);
 const contextMenu = ref<{ x: number; y: number; date: string } | null>(null);
-const previewDate = ref<string | null>(null);
 
-// --- Computed Data ---
-const dayProfiles = computed(() => draft.value.dayProfiles ?? []);
-
-const activeDateRange = computed(() => {
-  return draft.value.calendar.range || {
-    start: new Date().getFullYear() + "-01-01",
-    end: new Date().getFullYear() + "-12-31"
-  };
+// Profiles Fallback
+const effectiveProfiles = computed(() => {
+    return props.profiles || props.modelValue.dayProfiles || [];
 });
 
-const dateRangeLabel = computed(() => {
-  const s = new Date(activeDateRange.value.start);
-  const e = new Date(activeDateRange.value.end);
-  return `${s.toLocaleDateString(undefined, { month: 'short', year: 'numeric'})} - ${e.toLocaleDateString(undefined, { month: 'short', year: 'numeric'})}`;
+// Assignments Mapper (Schema Object -> Simple ID Map)
+const simpleAssignments = computed(() => {
+    const map: Record<string, string> = {};
+    if (!calendar.value?.assignments) return map;
+
+    for (const [date, val] of Object.entries(calendar.value.assignments)) {
+        if (val && val.profile_id) {
+             map[date] = val.profile_id;
+        }
+    }
+    return map;
 });
 
-const hasChanges = computed(() => {
-  return JSON.stringify(draft.value) !== JSON.stringify(props.modelValue);
+// History (Mock for now)
+const undo = () => console.log("Undo not implemented fully");
+const redo = () => console.log("Redo not implemented fully");
+
+// --- Holidays ---
+const holidays = ref<any[]>([]);
+const holidayMap = computed(() => {
+    const map: Record<string, { name: string; type: 'closed' | 'special' }> = {};
+    for (const h of holidays.value) {
+        map[h.date] = {
+            name: h.name,
+            type: h.closureType === 'CLOSED' ? 'closed' : 'special'
+        };
+    }
+    return map;
 });
 
-const inspectorStats = computed(() => {
-  const assignments = draft.value.calendar.assignments;
-  let openDays = 0;
-  let conflicts = 0;
-  let projectedRevenue = 0; // Mock calculation or derive from profile metadata if available
+const fetchHolidays = async () => {
+    const currentYear = new Date().getFullYear();
+    try {
+        const [y1, y2] = await Promise.all([
+             $fetch('/api/admin/holiday-rules', { query: { year: currentYear } }),
+             $fetch('/api/admin/holiday-rules', { query: { year: currentYear + 1 } })
+        ]);
+        holidays.value = [...(y1.occurrences || []), ...(y2.occurrences || [])];
+    } catch (e) {
+        console.error("Failed to fetch holidays", e);
+    }
+};
 
-  Object.values(assignments).forEach((a: any) => {
-    if (a.status === 'open') openDays++;
-    // Add logic for conflicts/revenue if data exists in profiles
-  });
-
-  return { openDays, projectedRevenue, conflicts };
+onMounted(() => {
+    fetchHolidays();
 });
 
+// --- Computed Data Maps ---
+
+// Mock/Derived Revenue
+const projectedRevenueMap = computed(() => {
+    // Return empty until real integration is available to avoid fake data
+    return {};
+});
+
+// Staffing (Mock/Empty)
+const staffingMap = computed(() => {
+    // Return empty until real integration is available
+    return {};
+});
+
+// Range Stats
+const rangeStats = computed(() => {
+    const dates = selectedDates.value.length > 0 ? selectedDates.value : Object.keys(simpleAssignments.value);
+
+    let openDays = 0;
+    let projectedRevenue = 0;
+    let conflicts = 0;
+
+    for (const date of dates) {
+        if (simpleAssignments.value[date]) {
+            openDays++;
+            projectedRevenue += projectedRevenueMap.value[date] || 0;
+
+            const isHol = holidayMap.value[date]?.type === 'closed';
+            if (isHol) conflicts++;
+        }
+    }
+
+    return { openDays, projectedRevenue, conflicts };
+});
 
 // --- Actions ---
 
-const selectProfile = (id: string) => {
-  selectedProfileId.value = id;
-  // If we have selected dates, apply immediately? 
-  // User workflow: Select dates -> Select profile to apply? 
-  // OR: Select profile (palette) -> Paint dates.
-  // Let's support both. If dates are selected, apply profile to them.
-  if (selectedDates.value.length > 0) {
-    handleBulkApply(id);
-  }
+const selectTool = (id: string) => {
+  activeToolProfileId.value = activeToolProfileId.value === id ? null : id;
 };
 
-const handleDateSelection = (payload: { date: string; multi: boolean }) => {
-  // If painting tool is active (selectedProfileId is set) AND it's a drag, Canvas handles it via paint-range.
-  // This event is for explicit clicks.
+const updateAssignment = (date: string, profileId: string | undefined) => {
+  const newAssignments = { ...calendar.value.assignments };
   
-  if (payload.multi) {
-    if (selectedDates.value.includes(payload.date)) {
-      selectedDates.value = selectedDates.value.filter(d => d !== payload.date);
+  if (profileId === undefined) {
+    delete newAssignments[date];
+  } else {
+    // Validation
+    if (holidayMap.value[date]?.type === 'closed') {
+         console.warn("Assigning to holiday");
+    }
+    newAssignments[date] = { status: 'open', profile_id: profileId };
+  }
+  
+  emit("update:modelValue", {
+    ...props.modelValue,
+    calendar: {
+      ...calendar.value,
+      assignments: newAssignments
+    }
+  });
+};
+
+const handleSelectDate = ({ date, multi }: { date: string; multi: boolean }) => {
+  if (multi) {
+    if (selectedDates.value.includes(date)) {
+      selectedDates.value = selectedDates.value.filter(d => d !== date);
     } else {
-      selectedDates.value = [...selectedDates.value, payload.date];
+      selectedDates.value.push(date);
     }
   } else {
-    // If we have a tool selected, maybe we want to apply it?
-    // User said "Palette & Paint tool interaction".
-    // Usually single click with paint tool applies it.
-    if (selectedProfileId.value) {
-      assignProfileToDate(payload.date, selectedProfileId.value);
-    } else {
-      selectedDates.value = [payload.date];
+    selectedDates.value = [date];
+  }
+};
+
+const handlePaintRange = ({ start, end }: { start: string; end: string }) => {
+  if (!activeToolProfileId.value) return;
+  
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const newAssignments = { ...calendar.value.assignments };
+  
+  for (let d = startDate; d <= endDate; d.setDate(d.getDate() + 1)) {
+    const iso = d.toISOString().slice(0, 10);
+    newAssignments[iso] = { status: 'open', profile_id: activeToolProfileId.value };
+  }
+
+  emit("update:modelValue", {
+    ...props.modelValue,
+    calendar: {
+      ...calendar.value,
+      assignments: newAssignments
     }
-  }
-};
-
-const handlePaintRange = (payload: { start: string; end: string }) => {
-  if (!selectedProfileId.value) return;
-  
-  const start = new Date(payload.start);
-  const end = new Date(payload.end);
-  const current = new Date(start);
-  
-  while (current <= end) {
-    const dateStr = current.toISOString().slice(0, 10);
-    assignProfileToDate(dateStr, selectedProfileId.value);
-    current.setDate(current.getDate() + 1);
-  }
-};
-
-const handleBulkApply = (profileId: string) => {
-  if (!profileId) return;
-  selectedDates.value.forEach(date => {
-    assignProfileToDate(date, profileId);
   });
 };
 
-const handleBulkClear = () => {
-  selectedDates.value.forEach(date => {
-    delete draft.value.calendar.assignments[date];
-  });
+const handleClearSelection = () => {
+    if (selectedDates.value.length > 0) {
+        const newAssignments = { ...calendar.value.assignments };
+        selectedDates.value.forEach(d => delete newAssignments[d]);
+        emit("update:modelValue", {
+            ...props.modelValue,
+            calendar: {
+                ...calendar.value,
+                assignments: newAssignments
+            }
+        });
+    }
+    selectedDates.value = [];
 };
 
-const handleSmartFill = (payload: { profileId: string; days: string[] }) => {
-  const start = new Date(activeDateRange.value.start);
-  const end = new Date(activeDateRange.value.end);
-  let current = new Date(start);
-  
-  // Align to first day
-  current.setDate(current.getDate() + 1); // Fix timezone offset issues or start strictly?
-  // Actually, standard date iteration:
-  current = new Date(`${activeDateRange.value.start}T00:00:00`);
-  const endDate = new Date(`${activeDateRange.value.end}T00:00:00`);
-  
-  while (current <= endDate) {
-    const dayName = current.toLocaleDateString("en-US", { weekday: "short" }); // Mon, Tue...
-    if (payload.days.includes(dayName)) {
-      const dateStr = current.toISOString().slice(0, 10);
-      assignProfileToDate(dateStr, payload.profileId);
+const handleClearDay = (date: string) => updateAssignment(date, undefined);
+
+const handleApplyBulk = (profileId: string) => {
+    if (!profileId || selectedDates.value.length === 0) return;
+
+    const newAssignments = { ...calendar.value.assignments };
+    selectedDates.value.forEach(d => {
+        newAssignments[d] = { status: 'open', profile_id: profileId };
+    });
+    emit("update:modelValue", {
+        ...props.modelValue,
+        calendar: {
+            ...calendar.value,
+            assignments: newAssignments
+        }
+    });
+};
+
+const handleClearBulk = () => {
+    handleClearSelection();
+};
+
+const handleSmartFill = ({ profileId, days }: { profileId: string; days: string[] }) => {
+    const start = new Date(calendar.value.range.start);
+    const end = new Date(calendar.value.range.end);
+    const newAssignments = { ...calendar.value.assignments };
+    const dayMap: Record<string, number> = { 'Sun': 0, 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6 };
+    const targetDays = days.map(d => dayMap[d]);
+
+    for (let d = start; d <= end; d.setDate(d.getDate() + 1)) {
+        if (targetDays.includes(d.getDay())) {
+            const iso = d.toISOString().slice(0, 10);
+            newAssignments[iso] = { status: 'open', profile_id: profileId };
+        }
     }
-    current.setDate(current.getDate() + 1);
-  }
+
+    emit("update:modelValue", {
+        ...props.modelValue,
+        calendar: {
+            ...calendar.value,
+            assignments: newAssignments
+        }
+    });
+};
+
+const handleCopyDay = (date: string) => {
+    const pid = simpleAssignments.value[date];
+    if (pid) clipboardProfileId.value = pid;
+};
+
+const handlePasteDay = (date: string) => {
+    if (clipboardProfileId.value) {
+        updateAssignment(date, clipboardProfileId.value);
+    }
+};
+
+const handleContextMenu = ({ event, date }: { event: MouseEvent; date: string }) => {
+    contextMenu.value = { x: event.clientX, y: event.clientY, date };
+};
+
+const handlePreviewDay = (date: string) => {
+    selectedDates.value = [date];
+    isInspectorOpen.value = true;
+};
+
+const handleLockDay = (date: string) => {
+    console.log("Lock not fully implemented in schema yet");
+};
+
+const handleApplyHoliday = (date: string) => {
+    console.log("Manual holiday override not fully implemented");
+};
+
+const handleExtendRange = (direction: 'future' | 'past') => {
+    if (direction === 'future') {
+        const currentEnd = new Date(calendar.value.range.end);
+        currentEnd.setDate(currentEnd.getDate() + 28);
+        const newEnd = currentEnd.toISOString().slice(0, 10);
+
+        emit("update:modelValue", {
+            ...props.modelValue,
+            calendar: {
+                ...calendar.value,
+                range: {
+                    ...calendar.value.range,
+                    end: newEnd
+                }
+            }
+        });
+    }
 };
 
 const printSchedule = () => {
-  window.print();
+    window.print();
 };
 
-const assignProfileToDate = (date: string, profileId: string) => {
-  draft.value.calendar.assignments[date] = {
-    status: "open",
-    profile_id: profileId,
-  };
+const openTvMode = () => {
+    // Open in new tab
+    const url = router.resolve({ path: '/admin/operations/schedule/tv' }).href;
+    window.open(url, '_blank');
 };
-
-const getProfileForDate = (dateStr: string) => {
-  const assignment = draft.value.calendar.assignments[dateStr];
-  if (!assignment) return undefined;
-  return dayProfiles.value.find((p: any) => p.id === assignment.profile_id);
-};
-
-// --- New Features Handlers ---
-
-const handleOpenInspector = () => {
-  // Focus inspector if needed, or just standard "open" behavior (already always visible)
-};
-
-const handleCopyDay = (dateStr: string) => {
-  const assignment = draft.value.calendar.assignments[dateStr];
-  if (assignment) {
-    clipboard.value = assignment.profile_id;
-  } else {
-    clipboard.value = null;
-  }
-};
-
-const handlePasteDay = (dateStr: string) => {
-  if (clipboard.value) {
-    assignProfileToDate(dateStr, clipboard.value);
-  }
-};
-
-const handleClearDay = (dateStr: string) => {
-  delete draft.value.calendar.assignments[dateStr];
-};
-
-const handleLockDay = (dateStr: string) => {
-  // Mock lock implementation
-  alert("Day locked: " + dateStr);
-};
-
-const handleHolidayDay = (dateStr: string) => {
-  // Mock holiday implementation
-  alert("Holiday applied: " + dateStr);
-};
-
-const handleContextMenu = (payload: { event: MouseEvent; date: string }) => {
-  contextMenu.value = {
-    x: payload.event.clientX,
-    y: payload.event.clientY,
-    date: payload.date
-  };
-};
-
-const handlePreviewDay = (dateStr: string) => {
-  previewDate.value = dateStr;
-};
-
-// --- Watchers ---
-
-watch(
-  () => props.modelValue,
-  (value) => {
-    isSyncing.value = true;
-    draft.value = cloneDraft(value);
-    nextTick(() => {
-      isSyncing.value = false;
-    });
-  },
-  { deep: true, immediate: true }
-);
-
-watch(
-  draft,
-  (value) => {
-    if (!isSyncing.value) {
-      emit("update:modelValue", cloneDraft(value));
-    }
-  },
-  { deep: true }
-);
 </script>
 
 <style scoped>
-/* No specific styles needed with Tailwind */
+@media print {
+  .flex-none, .h-12 {
+    display: none;
+  }
+}
 </style>
