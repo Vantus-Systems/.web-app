@@ -3,18 +3,19 @@
     class="relative h-full flex flex-col rounded-lg border transition-all duration-200 select-none group"
     :class="[
       isSelected
-        ? 'ring-2 ring-primary-500 border-primary-500 z-10'
-        : 'border-slate-200 hover:border-slate-300 hover:shadow-sm',
-      isEmpty && !ghostProfile ? 'bg-slate-50' : 'bg-white',
-      ghostProfile ? 'opacity-60 border-dashed border-primary-300' : '',
-      viewModeClass
+        ? 'ring-2 ring-accent-primary border-accent-primary z-10'
+        : 'border-divider hover:border-secondary hover:shadow-sm',
+      isEmpty && !ghostProfile ? 'bg-base' : 'bg-surface',
+      ghostProfile ? 'opacity-60 border-dashed border-accent-primary' : '',
+      viewModeClass,
+      isClosed ? 'bg-base opacity-75' : ''
     ]"
   >
     <!-- Header -->
-    <div class="flex items-center justify-between px-2 py-1 border-b border-transparent group-hover:border-slate-100">
+    <div class="flex items-center justify-between px-2 py-1 border-b border-transparent group-hover:border-divider">
       <span
         class="text-[10px] font-bold uppercase tracking-wider"
-        :class="isSelected ? 'text-primary-700' : 'text-slate-400'"
+        :class="isSelected ? 'text-accent-primary' : 'text-tertiary'"
       >
         {{ dateLabel }}
       </span>
@@ -22,15 +23,21 @@
       <div class="flex items-center gap-1">
         <div
           v-if="hasConflict"
-          class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"
+          class="w-2 h-2 rounded-full bg-accent-error animate-pulse"
           title="Validation Issue"
         />
         <div
           v-if="isHoliday"
-          class="text-[10px] text-amber-600 font-bold"
+          class="text-[10px] text-accent-warning font-bold"
           title="Holiday"
         >
           HOL
+        </div>
+        <div
+            v-if="isClosed"
+            class="text-[10px] text-tertiary font-bold uppercase"
+        >
+            Closed
         </div>
       </div>
     </div>
@@ -39,7 +46,7 @@
     <div class="flex-1 p-2 flex flex-col justify-center min-h-[60px]">
       <template v-if="displayProfile">
         <div
-          class="text-xs font-bold text-slate-900 line-clamp-2 leading-tight mb-1"
+          class="text-xs font-bold text-primary line-clamp-2 leading-tight mb-1"
           :style="{ color: displayProfile.color }"
         >
           {{ displayProfile.name }} <span v-if="ghostProfile">(Preview)</span>
@@ -47,30 +54,45 @@
         
         <!-- Standard View -->
         <div v-if="viewMode === 'standard'" class="flex flex-wrap gap-1">
-          <span class="text-[10px] text-slate-500 bg-slate-100 px-1 rounded">
+          <span class="text-[10px] text-secondary bg-base px-1 rounded">
             {{ timeRange }}
           </span>
-          <span v-if="revenueDisplay" class="text-[10px] text-emerald-600 bg-emerald-50 px-1 rounded font-medium">
-            ${{ revenueDisplay }}
+          <span v-if="projectedRevenue" class="text-[10px] text-accent-success bg-emerald-50 px-1 rounded font-medium">
+            ${{ formatMoney(projectedRevenue) }}
+          </span>
+          <span v-if="staffingStatus === 'short'" class="text-[10px] text-accent-error bg-rose-50 px-1 rounded font-bold" title="Understaffed">
+            ! Staff
           </span>
         </div>
         
         <!-- Heatmap View Overlay Info -->
-        <div v-if="viewMode === 'heatmap'" class="text-[10px] font-mono text-slate-600 mt-1">
-           Rev: ${{ revenueDisplay }}
+        <div v-if="viewMode === 'heatmap'" class="text-[10px] font-mono text-secondary mt-1">
+           <template v-if="projectedRevenue">
+             ${{ formatMoney(projectedRevenue) }}
+           </template>
+           <template v-else>
+             -
+           </template>
         </div>
         
         <!-- Staffing View Overlay Info -->
-        <div v-if="viewMode === 'staffing'" class="text-[10px] font-mono text-slate-600 mt-1">
-           Cov: {{ coverageDisplay }}%
+        <div v-if="viewMode === 'staffing'" class="text-[10px] font-mono text-secondary mt-1">
+           <template v-if="staffingReady">
+             Ready
+           </template>
+           <template v-else-if="staffingStatus === 'short'">
+             Short
+           </template>
+           <template v-else>
+             -
+           </template>
         </div>
         
       </template>
       <template v-else>
         <!-- Empty State -->
         <div class="h-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-           <!-- Subtle hatch pattern or icon could go here -->
-           <span class="text-[10px] text-slate-300 uppercase tracking-widest font-bold">
+           <span class="text-[10px] text-tertiary uppercase tracking-widest font-bold">
              Open
            </span>
         </div>
@@ -97,8 +119,13 @@ const props = defineProps<{
   };
   isSelected?: boolean;
   isHoliday?: boolean;
+  isClosed?: boolean;
   hasConflict?: boolean;
   viewMode?: 'standard' | 'heatmap' | 'staffing';
+  // Real data props
+  projectedRevenue?: number;
+  staffingStatus?: 'ok' | 'short' | 'unknown';
+  staffingReady?: boolean;
 }>();
 
 const dateLabel = computed(() => {
@@ -114,35 +141,26 @@ const timeRange = computed(() => {
   return `${displayProfile.value.operationalHours.start}-${displayProfile.value.operationalHours.end}`;
 });
 
-// Mock Data Generators for Visualization
-const revenueDisplay = computed(() => {
-  if (!displayProfile.value) return 0;
-  // Deterministic mock based on date
-  const seed = props.date.charCodeAt(props.date.length - 1) + props.date.charCodeAt(props.date.length - 2);
-  return (seed * 100) + 5000;
-});
-
-const coverageDisplay = computed(() => {
-  if (!displayProfile.value) return 0;
-  const seed = props.date.charCodeAt(props.date.length - 1);
-  return Math.min(100, Math.max(60, seed));
-});
+const formatMoney = (val: number) => {
+    return new Intl.NumberFormat('en-US', { notation: "compact", compactDisplay: "short" }).format(val);
+};
 
 const viewModeClass = computed(() => {
   if (!displayProfile.value) return '';
   
   if (props.viewMode === 'heatmap') {
-    const val = revenueDisplay.value;
-    if (val > 12000) return '!bg-emerald-100';
-    if (val > 10000) return '!bg-emerald-50';
+    if (!props.projectedRevenue) return '';
+    const val = props.projectedRevenue;
+    // Simple thresholding for now - ideally this would be relative to a max
+    if (val > 10000) return '!bg-emerald-100';
+    if (val > 5000) return '!bg-emerald-50';
     return '';
   }
   
   if (props.viewMode === 'staffing') {
-    const val = coverageDisplay.value;
-    if (val < 70) return '!bg-rose-50';
-    if (val < 85) return '!bg-amber-50';
-    return '!bg-blue-50';
+    if (props.staffingStatus === 'short') return '!bg-rose-50';
+    if (props.staffingReady) return '!bg-blue-50';
+    return '';
   }
   
   return '';
