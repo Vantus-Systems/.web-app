@@ -1,4 +1,5 @@
 // server/api/admin/jackpot.post.ts
+import { randomUUID } from "node:crypto";
 import { defineEventHandler, readBody } from "h3";
 import { z } from "zod";
 import { settingsService } from "@server/services/settings.service";
@@ -30,7 +31,7 @@ export default defineEventHandler(async (event) => {
   // Ensure IDs exist
   parsed.items = parsed.items.map((item) => ({
     ...item,
-    id: item.id || crypto.randomUUID(),
+    id: item.id || randomUUID(),
   }));
 
   const before = await settingsService.get("jackpot");
