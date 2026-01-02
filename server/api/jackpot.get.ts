@@ -49,33 +49,9 @@ export default defineEventHandler(async () => {
   if (Array.isArray(d.items)) {
     currentState = d;
   }
-
   // Migration from Object Structure { babes: ..., hornet: ... }
   else if ("babes" in d && "hornet" in d) {
     currentState = {
-  // Already in the new structure
-  if (Array.isArray(d.items)) {
-    const normalized = {
-      ...d,
-      items: (d.items as any[]).map((item) => ({
-        ...item,
-        id: item?.id || randomUUID(),
-      })),
-      lastUpdated: d.lastUpdated || new Date().toISOString(),
-    };
-
-    // Persist if we had to fill in missing IDs
-    const missingId = (d.items as any[]).some((i) => !i?.id);
-    if (missingId) {
-      await settingsService.set("jackpot", normalized);
-    }
-
-    return normalized;
-  }
-
-  // Migration from Object Structure { babes: ..., hornet: ... }
-  if ("babes" in d && "hornet" in d) {
-    const migrated = {
       items: [
         {
           id: randomUUID(),
@@ -101,18 +77,9 @@ export default defineEventHandler(async () => {
     };
     needsPersistence = true;
   }
-
   // Migration for legacy single-value format
   else if ("value" in d) {
     currentState = {
-
-    await settingsService.set("jackpot", migrated);
-    return migrated;
-  }
-
-  // Migration for legacy single-value format
-  if ("value" in d) {
-    const migrated = {
       items: [
         {
           id: randomUUID(),
@@ -145,9 +112,6 @@ export default defineEventHandler(async () => {
   // --- Auto-Increment Logic ---
   const now = new Date();
   // Central Time Check (Approximate or use server local if configured, assuming server is local or UTC)
-  // User said "4:15 PM Daily... update at 5:00 PM".
-  // Assuming server time matches or we use offsets.
-  // Ideally use timezone aware logic.
   // For simplicity, checking hour >= 17.
 
   const todayStr = now.toISOString().slice(0, 10);
@@ -185,11 +149,4 @@ export default defineEventHandler(async () => {
   }
 
   return currentState;
-
-    await settingsService.set("jackpot", migrated);
-    return migrated;
-  }
-
-  // Unknown / corrupt structure — fall back safely
-  return defaultStructure;
 });
