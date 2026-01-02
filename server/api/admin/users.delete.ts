@@ -27,8 +27,19 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    await prisma.user.delete({
+    const deletedUser = await prisma.user.delete({
       where: { id },
+    });
+
+    // Audit log
+    await auditService.log({
+      actorUserId: event.context.user.id,
+      action: "DELETE_USER",
+      entity: `user:${deletedUser.id}`,
+      before: {
+        username: deletedUser.username,
+        role: deletedUser.role,
+      },
     });
   } catch (error) {
     if (

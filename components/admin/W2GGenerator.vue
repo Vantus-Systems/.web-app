@@ -2,10 +2,37 @@
   <div class="space-y-8">
     <BaseCard class-name="bg-white border border-slate-200">
       <template #header>
-        <h3 class="text-lg font-bold text-primary-900">
-          W-2G Payout Calculator
-        </h3>
+        <div class="flex flex-col gap-2">
+          <h3 class="text-lg font-bold text-primary-900">
+            W-2G Payout Calculator
+          </h3>
+          <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+            <p class="text-xs font-bold text-red-700 uppercase tracking-wide flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+              Important: Winner Processing & W-2G MUST be used ANYTIME a progressive is won to ensure proper logging and amount updates.
+            </p>
+          </div>
+        </div>
       </template>
+
+      <div class="mb-6 flex gap-2" v-if="props.progressiveAmounts">
+        <button
+          v-if="props.progressiveAmounts.babes"
+          @click="totalPayout = props.progressiveAmounts.babes"
+          class="px-3 py-1.5 bg-pink-100 text-pink-700 text-xs font-bold uppercase rounded-lg hover:bg-pink-200 transition-colors"
+        >
+          Bingo Babes: {{ formatCurrency(props.progressiveAmounts.babes) }}
+        </button>
+        <button
+          v-if="props.progressiveAmounts.hornet"
+          @click="totalPayout = props.progressiveAmounts.hornet"
+          class="px-3 py-1.5 bg-amber-100 text-amber-700 text-xs font-bold uppercase rounded-lg hover:bg-amber-200 transition-colors"
+        >
+          Hornet: {{ formatCurrency(props.progressiveAmounts.hornet) }}
+        </button>
+      </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div>

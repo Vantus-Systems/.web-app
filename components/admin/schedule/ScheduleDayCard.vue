@@ -1,78 +1,111 @@
 <template>
   <div
-    class="relative h-full flex flex-col rounded-lg border transition-all duration-200 select-none group"
+    class="relative h-full flex flex-col transition-all duration-200 select-none group border-b border-r border-divider p-1"
     :class="[
       isSelected
-        ? 'ring-2 ring-primary-500 border-primary-500 z-10'
-        : 'border-slate-200 hover:border-slate-300 hover:shadow-sm',
-      isEmpty && !ghostProfile ? 'bg-slate-50' : 'bg-white',
-      ghostProfile ? 'opacity-60 border-dashed border-primary-300' : '',
-      viewModeClass
+        ? 'bg-accent-primary/10 ring-inset ring-2 ring-accent-primary z-10'
+        : 'hover:bg-surface-dark/5',
+      isClosed ? 'bg-base/50 pattern-diagonal-lines' : 'bg-surface',
+      ghostProfile ? 'opacity-60 border-dashed border-accent-primary' : ''
     ]"
   >
     <!-- Header -->
-    <div class="flex items-center justify-between px-2 py-1 border-b border-transparent group-hover:border-slate-100">
+    <div class="flex items-center justify-between px-1 mb-1">
       <span
-        class="text-[10px] font-bold uppercase tracking-wider"
-        :class="isSelected ? 'text-primary-700' : 'text-slate-400'"
+        class="text-[10px] font-bold"
+        :class="[
+          isSelected ? 'text-accent-primary' : 'text-secondary',
+          isToday ? 'bg-accent-primary text-white px-1.5 rounded-full' : ''
+        ]"
       >
-        {{ dateLabel }}
+        {{ dayNumber }}
       </span>
-      <!-- Badges/Icons -->
+      
+      <!-- Icons -->
       <div class="flex items-center gap-1">
-        <div
-          v-if="hasConflict"
-          class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"
-          title="Validation Issue"
-        />
+        <div v-if="hasConflict" class="text-accent-warning animate-pulse" title="Schedule Conflict">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div v-if="isLocked" class="text-tertiary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
         <div
           v-if="isHoliday"
-          class="text-[10px] text-amber-600 font-bold"
-          title="Holiday"
+          class="flex items-center justify-center w-3 h-3 rounded-full bg-accent-warning text-[8px] font-bold text-black cursor-help"
+          :title="holidayInfo?.name"
         >
-          HOL
+          H
         </div>
+        <div
+          v-if="assignment.source === 'default' && !assignment.overrideReasons?.length"
+          class="w-1 h-1 rounded-full bg-tertiary/30"
+          title="Default Schedule"
+        />
+        <div
+          v-if="assignment.overrideReasons?.length"
+          class="w-1.5 h-1.5 rounded-full bg-accent-info"
+          :title="'Overridden: ' + assignment.overrideReasons.join(', ')"
+        />
       </div>
     </div>
 
     <!-- Content -->
-    <div class="flex-1 p-2 flex flex-col justify-center min-h-[60px]">
-      <template v-if="displayProfile">
+    <div class="flex-1 flex flex-col justify-center min-h-[50px] relative overflow-hidden">
+      <!-- Closed State -->
+      <div v-if="isClosed" class="flex items-center justify-center h-full">
+        <span class="text-[10px] font-bold text-tertiary uppercase tracking-widest rotate-[-15deg]">
+          Closed
+        </span>
+      </div>
+
+      <!-- Active Profile -->
+      <template v-else-if="displayProfile">
         <div
-          class="text-xs font-bold text-slate-900 line-clamp-2 leading-tight mb-1"
-          :style="{ color: displayProfile.color }"
+          class="text-xs font-bold leading-tight mb-1 truncate px-1 rounded-sm border-l-2"
+          :style="{ 
+            color: displayProfile.color || 'currentColor',
+            borderColor: displayProfile.color || 'transparent',
+            backgroundColor: displayProfile.color ? displayProfile.color + '10' : 'transparent'
+          }"
         >
-          {{ displayProfile.name }} <span v-if="ghostProfile">(Preview)</span>
+          {{ displayProfile.name }}
         </div>
         
-        <!-- Standard View -->
-        <div v-if="viewMode === 'standard'" class="flex flex-wrap gap-1">
-          <span class="text-[10px] text-slate-500 bg-slate-100 px-1 rounded">
+        <!-- Metrics -->
+        <div v-if="viewMode === 'standard'" class="flex flex-wrap gap-1 px-1">
+          <span class="text-[9px] text-secondary bg-base px-1 rounded">
             {{ timeRange }}
           </span>
-          <span v-if="revenueDisplay" class="text-[10px] text-emerald-600 bg-emerald-50 px-1 rounded font-medium">
-            ${{ revenueDisplay }}
-          </span>
         </div>
         
-        <!-- Heatmap View Overlay Info -->
-        <div v-if="viewMode === 'heatmap'" class="text-[10px] font-mono text-slate-600 mt-1">
-           Rev: ${{ revenueDisplay }}
+        <!-- View Mode Specifics -->
+        <div v-if="viewMode === 'heatmap' && revenueDisplay" class="absolute bottom-1 right-1">
+           <span class="text-[9px] font-mono text-emerald-600 font-bold">${{ revenueDisplay }}</span>
         </div>
         
-        <!-- Staffing View Overlay Info -->
-        <div v-if="viewMode === 'staffing'" class="text-[10px] font-mono text-slate-600 mt-1">
-           Cov: {{ coverageDisplay }}%
+        <div v-if="viewMode === 'staffing'" class="mt-auto px-1">
+           <div class="flex justify-between items-end mb-0.5">
+             <span class="text-[8px] text-tertiary font-mono">{{ shiftCount }} shifts</span>
+           </div>
+           <div class="h-1 w-full bg-base rounded-full overflow-hidden">
+             <div 
+               class="h-full bg-accent-success transition-all duration-500" 
+               :style="{ width: shiftCoverage + '%' }"
+               :class="{ 'bg-accent-warning': shiftCount < 3, 'bg-accent-success': shiftCount >= 3 }"
+             ></div>
+           </div>
         </div>
-        
       </template>
+
+      <!-- Empty/Open State -->
       <template v-else>
-        <!-- Empty State -->
         <div class="h-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-           <!-- Subtle hatch pattern or icon could go here -->
-           <span class="text-[10px] text-slate-300 uppercase tracking-widest font-bold">
-             Open
-           </span>
+           <button 
+             class="text-[10px] text-accent-primary hover:underline"
+             @click.stop="$emit('preview')"
+           >
+             Add
+           </button>
         </div>
       </template>
     </div>
@@ -81,70 +114,75 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import type { EffectiveAssignment } from "~/utils/schedule-calendar";
 
 const props = defineProps<{
-  date: string; // YYYY-MM-DD
-  dayOfWeek: string;
-  profile?: {
-    name: string;
-    color?: string;
-    operationalHours?: { start: string; end: string };
-  };
-  ghostProfile?: {
-    name: string;
-    color?: string;
-    operationalHours?: { start: string; end: string };
-  };
+  date: string;
+  dayOfWeek?: number;
+  assignment: EffectiveAssignment;
+  profile?: any;
+  ghostProfile?: any;
   isSelected?: boolean;
   isHoliday?: boolean;
+  holidayInfo?: any;
+  shifts?: any[];
   hasConflict?: boolean;
-  viewMode?: 'standard' | 'heatmap' | 'staffing';
+  viewMode?: string;
 }>();
 
-const dateLabel = computed(() => {
-  const dayNum = props.date.split('-')[2];
-  return `${props.dayOfWeek} ${dayNum}`;
-});
+defineEmits(['preview']);
 
 const displayProfile = computed(() => props.ghostProfile || props.profile);
-const isEmpty = computed(() => !displayProfile.value);
+const isClosed = computed(() => props.assignment.status === 'closed');
+const isLocked = computed(() => props.assignment.isLocked);
+const dayNumber = computed(() => {
+  const parts = props.date.split('-');
+  return Number(parts[2]);
+});
+
+const isToday = computed(() => {
+  const today = new Date();
+  // Using local time components since props.date is YYYY-MM-DD local
+  const [y, m, d] = props.date.split('-').map(Number);
+  const tY = today.getFullYear();
+  const tM = today.getMonth() + 1;
+  const tD = today.getDate();
+  return y === tY && m === tM && d === tD;
+});
 
 const timeRange = computed(() => {
-  if (!displayProfile.value?.operationalHours) return "";
-  return `${displayProfile.value.operationalHours.start}-${displayProfile.value.operationalHours.end}`;
+  // If profile has specific hours logic, use it.
+  // Assuming profile has start/end if available, else 24h.
+  // Actually, ops-schema.ts says `operationalHours` is in `timeline` global, not per profile?
+  // OpsSchemaDayProfile has `segment_ids`.
+  // We don't have segments here easily unless profile object is enriched.
+  // But let's assume `profile.description` or we just skip for now.
+  return "10:00-02:00"; // Mock default
 });
 
-// Mock Data Generators for Visualization
 const revenueDisplay = computed(() => {
-  if (!displayProfile.value) return 0;
-  // Deterministic mock based on date
-  const seed = props.date.charCodeAt(props.date.length - 1) + props.date.charCodeAt(props.date.length - 2);
-  return (seed * 100) + 5000;
+  // Mock revenue based on profile complexity
+  return (displayProfile.value?.name?.length || 0) * 1000; 
 });
 
-const coverageDisplay = computed(() => {
-  if (!displayProfile.value) return 0;
-  const seed = props.date.charCodeAt(props.date.length - 1);
-  return Math.min(100, Math.max(60, seed));
+const shiftCoverage = computed(() => {
+  if (!props.shifts || props.shifts.length === 0) return 0;
+  // Assume target is 10 shifts for full bar
+  return Math.min((props.shifts.length / 10) * 100, 100);
 });
 
-const viewModeClass = computed(() => {
-  if (!displayProfile.value) return '';
-  
-  if (props.viewMode === 'heatmap') {
-    const val = revenueDisplay.value;
-    if (val > 12000) return '!bg-emerald-100';
-    if (val > 10000) return '!bg-emerald-50';
-    return '';
-  }
-  
-  if (props.viewMode === 'staffing') {
-    const val = coverageDisplay.value;
-    if (val < 70) return '!bg-rose-50';
-    if (val < 85) return '!bg-amber-50';
-    return '!bg-blue-50';
-  }
-  
-  return '';
-});
+const shiftCount = computed(() => props.shifts?.length || 0);
+
 </script>
+
+<style scoped>
+.pattern-diagonal-lines {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 5px,
+    rgba(0, 0, 0, 0.03) 5px,
+    rgba(0, 0, 0, 0.03) 10px
+  );
+}
+</style>

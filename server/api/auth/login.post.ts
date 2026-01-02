@@ -10,6 +10,7 @@ import { z } from "zod";
 import { authService } from "@server/services/auth.service";
 import { generateCsrfToken } from "@server/middleware/csrf";
 import { rateLimiter } from "@server/utils/rateLimiter";
+import prisma from "@server/db/client";
 import { normalizeRole } from "~/utils/roles";
 
 const loginSchema = z.object({
@@ -57,6 +58,12 @@ export default defineEventHandler(async (event) => {
 
     // Successful login - clear rate limit
     rateLimiter.clearLimit(rateLimitKey);
+
+    // Update last_login_at
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { last_login_at: new Date() },
+    });
 
     // Create session
     const userAgent = getHeader(event, "user-agent");

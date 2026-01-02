@@ -527,6 +527,11 @@ import type {
 } from "~/server/schemas/micShift.zod";
 
 const { getHeaders } = useCsrf();
+
+const props = defineProps<{
+  initialDate?: string;
+}>();
+
 const emit = defineEmits<{
   (e: "submit", shift: MicShiftSubmission): void;
 }>();
@@ -556,7 +561,7 @@ const denominationLabels = {
 } as const;
 
 const data = ref<MicShiftSubmission>({
-  date: new Date().toISOString().slice(0, 10),
+  date: props.initialDate || new Date().toISOString().slice(0, 10),
   shift: "AM",
   headcount: 0,
   sales_bingo: 0,

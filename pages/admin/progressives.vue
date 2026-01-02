@@ -23,7 +23,9 @@
       <template #actions>
         <div class="flex items-center space-x-4">
           <ClientOnly>
-            <div class="text-xs text-slate-500 font-bold uppercase tracking-wider">
+            <div
+              class="text-xs text-slate-500 font-bold uppercase tracking-wider"
+            >
               Last Synced: {{ lastSystemSync }}
             </div>
           </ClientOnly>
@@ -54,7 +56,9 @@
       <!-- Progressive Editor Section -->
       <section>
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-black text-primary-900 uppercase tracking-tight">
+          <h2
+            class="text-xl font-black text-primary-900 uppercase tracking-tight"
+          >
             Jackpot Configuration
           </h2>
         </div>
@@ -68,14 +72,21 @@
       <!-- W-2G Generator Section -->
       <section class="border-t border-slate-200 pt-8">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-black text-primary-900 uppercase tracking-tight">
+          <h2
+            class="text-xl font-black text-primary-900 uppercase tracking-tight"
+          >
             Winner Processing & W-2G
           </h2>
           <span class="text-sm text-slate-500 font-medium">
             Auto-fill enabled for scanned IDs
           </span>
         </div>
-        <W2GGenerator />
+        <W2GGenerator
+          :progressive-amounts="{
+            babes: jackpotData?.babes?.current,
+            hornet: jackpotData?.hornet?.current,
+          }"
+        />
       </section>
     </div>
   </AdminShell>

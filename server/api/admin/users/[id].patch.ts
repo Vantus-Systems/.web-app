@@ -66,6 +66,19 @@ export default defineEventHandler(async (event) => {
     data: updateData,
   });
 
+  // Audit log
+  await auditService.log({
+    actorUserId: event.context.user.id,
+    action: "UPDATE_USER",
+    entity: `user:${user.id}`,
+    after: {
+      username: user.username,
+      role: user.role,
+      is_active: user.is_active,
+      updated_fields: Object.keys(updateData),
+    },
+  });
+
   return {
     id: user.id,
     username: user.username,

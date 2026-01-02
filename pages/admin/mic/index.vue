@@ -34,6 +34,8 @@
         <DailyTotals :date-label="selectedDate" :shifts="dailyShifts" />
         <ShiftSummary :week-shifts="weekShifts" :month-shifts="monthShifts" />
       </div>
+
+      <ShiftDepositCard :date="selectedDate" @saved="loadDailyShifts" />
     </div>
   </AdminShell>
 </template>

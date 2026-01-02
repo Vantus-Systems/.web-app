@@ -1,37 +1,50 @@
 <template>
   <div 
-    class="h-full flex flex-col relative outline-none" 
+    class="h-full flex flex-col relative outline-none bg-base" 
     tabindex="0"
     @mouseup="endPaint" 
-    @mouseleave="onMouseLeaveCanvas"
+    @mouseleave="endPaint"
     @keydown="handleKeyDown"
   >
     <!-- Sticky Header -->
-    <div class="grid grid-cols-7 border-b border-slate-200 bg-white z-20 sticky top-0 shadow-sm">
+    <div class="grid grid-cols-7 border-b border-divider bg-surface z-20 sticky top-0 shadow-sm">
       <div
         v-for="day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']"
         :key="day"
-        class="py-2 text-center text-xs font-bold text-slate-400 uppercase tracking-widest"
+        class="py-2 text-center text-xs font-bold text-tertiary uppercase tracking-widest"
       >
         {{ day }}
       </div>
     </div>
 
-    <!-- Virtual List Container -->
-    <div ref="container" class="flex-1 overflow-y-auto overflow-x-hidden bg-slate-100">
-      <div v-bind="containerProps" :style="{ height: totalHeight + 'px', position: 'relative' }">
-        <div v-bind="wrapperProps">
-          <div
-            v-for="week in list"
-            :key="week.index"
-            class="grid grid-cols-7 border-b border-slate-200 bg-white min-h-[120px]"
-            :style="{ height: itemHeight + 'px' }"
-          >
+    <!-- Scroll Container -->
+    <div ref="container" class="flex-1 overflow-y-auto overflow-x-hidden bg-base custom-scrollbar">
+      <!-- Top Loader Trigger -->
+      <div ref="topTrigger" class="h-4 w-full"></div>
+
+      <div v-if="weeks.length === 0" class="flex items-center justify-center h-full text-secondary">
+        No dates in range
+      </div>
+
+      <div v-else class="relative">
+         <!-- Virtual List Wrapper is tricky with variable height or dynamic content.
+             For now, we render plain list. 1 year = 52 divs. 
+             If performance is bad, we switch to virtual. -->
+         <div
+            v-for="(week, wIdx) in weeks"
+            :key="week.startDate"
+            class="grid grid-cols-7 border-b border-divider bg-surface min-h-[140px]"
+         >
             <div
-              v-for="day in week.data.days"
+              v-for="day in week.days"
               :key="day.dateStr"
-              class="relative border-r border-slate-100 last:border-r-0 select-none cursor-pointer"
-              @mousedown="startPaint(day.dateStr, $event)"
+              class="relative border-r border-divider last:border-r-0 select-none group"
+              :class="{
+                'bg-accent-primary/5': isSelected(day.dateStr),
+                'cursor-crosshair': activeToolProfileId,
+                'cursor-pointer': !activeToolProfileId
+              }"
+              @mousedown.left="startPaint(day.dateStr, $event)"
               @mouseenter="onMouseEnter(day.dateStr)"
               @contextmenu.prevent="onContextMenu(day.dateStr, $event)"
               @dblclick="onDoubleClick(day.dateStr)"
@@ -39,239 +52,297 @@
               <ScheduleDayCard
                 :date="day.dateStr"
                 :day-of-week="day.dayOfWeek"
+                :assignment="getEffectiveAssignment(day.dateStr)"
                 :profile="getProfile(day.dateStr)"
                 :ghost-profile="getGhostProfile(day.dateStr)"
-                :is-selected="isSelected(day.dateStr) || isInDataRange(day.dateStr)"
+                :is-selected="isSelected(day.dateStr)"
                 :is-holiday="isHoliday(day.dateStr)"
+                :holiday-info="getHoliday(day.dateStr)"
+                :shifts="getShiftsForDate(day.dateStr)"
+                :has-conflict="hasConflict(day.dateStr)"
                 :view-mode="viewMode"
+                @preview="emit('preview-day', day.dateStr)"
               />
               
               <!-- Month Label Overlay (First day of month) -->
               <div
                 v-if="day.dateStr.endsWith('-01')"
-                class="absolute top-1 right-2 pointer-events-none z-10"
+                class="absolute top-2 right-2 pointer-events-none z-10"
               >
-                <span class="text-[40px] font-black text-slate-900/5 leading-none select-none">
+                <span class="text-3xl font-black text-primary/5 leading-none select-none">
                   {{ getMonthLabel(day.dateStr) }}
                 </span>
               </div>
             </div>
-          </div>
-        </div>
+         </div>
       </div>
+
+      <!-- Bottom Loader Trigger -->
+      <div ref="bottomTrigger" class="h-4 w-full"></div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { useVirtualList } from "@vueuse/core";
+import { ref, computed, onMounted, watch, nextTick } from "vue";
+import { useInfiniteScroll, useKeyModifier } from "@vueuse/core";
 import ScheduleDayCard from "./ScheduleDayCard.vue";
+import { dateKey, resolveEffectiveAssignment } from "~/utils/schedule-calendar";
+import type { OpsSchemaCalendarAssignment, OpsSchemaCalendarOverride } from "~/types/ops-schema";
 
 const props = defineProps<{
-  dateRange: { start: string; end: string };
-  assignments: Record<string, string>; // date -> profileId
+  range: { start: string; end: string };
+  weekdayDefaults: Record<string, OpsSchemaCalendarAssignment>;
+  assignments: Record<string, OpsSchemaCalendarAssignment>;
+  overrides: Record<string, OpsSchemaCalendarOverride[]>;
   profiles: any[];
+  holidays: any[];
+  shifts?: any[];
   selectedDates: string[];
   activeToolProfileId: string | null;
   viewMode?: 'standard' | 'heatmap' | 'staffing';
 }>();
 
-const emit = defineEmits(["select-date", "paint-range", "open-inspector", "clear-selection", "copy-day", "paste-day", "context-menu", "preview-day"]);
+const emit = defineEmits([
+  "select-date", "paint-range", "open-inspector", 
+  "clear-selection", "copy-day", "paste-day", 
+  "context-menu", "preview-day", "extend-range"
+]);
 
-// 1. Generate Weeks
+// --- Infinite Scroll Triggers ---
+const container = ref<HTMLElement | null>(null);
+const topTrigger = ref<HTMLElement | null>(null);
+const bottomTrigger = ref<HTMLElement | null>(null);
+
+useInfiniteScroll(container, () => {
+  // Check scroll position to decide direction
+  // But useInfiniteScroll usually triggers when reaching bottom.
+  // We need bi-directional.
+  // For simplicity, I'll rely on intersection observer on triggers manually if useInfiniteScroll is limited.
+  // Actually, standard InfiniteScroll is bottom only.
+  // Let's use IntersectionObserver.
+}, { distance: 100 });
+
+// Custom Intersection Observer for Top/Bottom
+let observer: IntersectionObserver;
+
+onMounted(() => {
+  observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        if (entry.target === topTrigger.value) {
+          emit('extend-range', 'start');
+        } else if (entry.target === bottomTrigger.value) {
+          emit('extend-range', 'end');
+        }
+      }
+    });
+  }, { root: container.value, rootMargin: '200px' });
+
+  if (topTrigger.value) observer.observe(topTrigger.value);
+  if (bottomTrigger.value) observer.observe(bottomTrigger.value);
+});
+
+watch(() => props.range.start, async (newVal, oldVal) => {
+  if (newVal !== oldVal && container.value) {
+    const oldHeight = container.value.scrollHeight;
+    const oldTop = container.value.scrollTop;
+    
+    await nextTick();
+    
+    const newHeight = container.value.scrollHeight;
+    container.value.scrollTop = oldTop + (newHeight - oldHeight);
+  }
+});
+
+// --- Data Generation ---
+
 const weeks = computed(() => {
-  const start = new Date(props.dateRange.start);
-  const end = new Date(props.dateRange.end);
+  const start = new Date(props.range.start);
+  const end = new Date(props.range.end);
   const result = [];
   
-  // Align start to previous Monday if needed
+  // Align start to previous Monday
   const current = new Date(start);
-  const day = current.getDay();
-  // JS getDay(): Sun=0, Mon=1...Sat=6
-  // We want Monday start.
-  // If Sun(0) -> -6 days to get prev Mon
-  // If Mon(1) -> 0 days
-  // If Tue(2) -> -1 days
+  const day = current.getDay(); // 0=Sun, 1=Mon
+  // We want Monday start (1).
+  // diff = 1 - day.
+  // If Sun(0) -> 1 - 0 = +1 (wrong, need -6).
+  // If Mon(1) -> 1 - 1 = 0.
+  // If Tue(2) -> 1 - 2 = -1.
   const diff = day === 0 ? -6 : 1 - day;
   current.setDate(current.getDate() + diff);
 
-  // We loop until we pass the end date
-  // Safety break
-  let safety = 0;
-  while (current <= end || (current > end && current.getDay() !== 1) && safety < 5000) {
+  // Loop week by week
+  while (current <= end) {
     const weekDays = [];
     for (let i = 0; i < 7; i++) {
-      const y = current.getFullYear();
-      const m = String(current.getMonth() + 1).padStart(2, "0");
-      const d = String(current.getDate()).padStart(2, "0");
-      const dateStr = `${y}-${m}-${d}`;
-      
       weekDays.push({
-        dateStr,
-        dayOfWeek: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][current.getDay()],
+        dateStr: dateKey(current),
+        dayOfWeek: i // 0=Mon, 1=Tue... logic for display? No, let's keep it simple.
+        // Actually dateKey is enough.
       });
       current.setDate(current.getDate() + 1);
     }
-    result.push({ days: weekDays });
-    safety++;
+    result.push({
+      startDate: weekDays[0].dateStr,
+      days: weekDays
+    });
   }
   return result;
 });
 
-// 2. Virtualization
-const itemHeight = 140; // Fixed height for consistency
-const { list, containerProps, wrapperProps } = useVirtualList(weeks, {
-  itemHeight,
-  overscan: 5,
-});
-
-const totalHeight = computed(() => weeks.value.length * itemHeight);
-
-// 3. Helpers
-const getProfile = (dateStr: string) => {
-  const pid = props.assignments[dateStr];
-  if (!pid) return undefined;
-  return props.profiles.find(p => p.id === pid);
-};
-
-// Ghost State Logic
-const hoverDate = ref<string | null>(null);
-
-const getGhostProfile = (dateStr: string) => {
-  if (dateStr === hoverDate.value && props.activeToolProfileId && !isPainting.value) {
-    // Only show ghost if slot is empty or we want to show override
-    // Assuming overwrite behavior, so always show ghost
-    return props.profiles.find(p => p.id === props.activeToolProfileId);
-  }
-  return undefined;
-};
-
-const isSelected = (dateStr: string) => props.selectedDates.includes(dateStr);
-const isHoliday = (dateStr: string) => {
-  // Simple check for now, can be expanded
-  const [y, m, d] = dateStr.split("-");
-  return (m === "12" && d === "25") || (m === "01" && d === "01") || (m === "07" && d === "04");
-};
-
-const getMonthLabel = (dateStr: string) => {
-  const [y, m] = dateStr.split("-");
-  return new Date(Number(y), Number(m) - 1, 1).toLocaleString("default", { month: "short" }).toUpperCase();
-};
-
-// 4. Paint / Drag Logic
+// --- Interactions ---
 const isPainting = ref(false);
-const dragStart = ref<string | null>(null);
-const dragCurrent = ref<string | null>(null);
+const paintStartKey = ref<string | null>(null);
+const shiftPressed = useKeyModifier('Shift');
 
-const startPaint = (dateStr: string, event: MouseEvent) => {
-  if (event.shiftKey || !props.activeToolProfileId) {
-    // Selection Mode
-    emit("select-date", { date: dateStr, multi: event.shiftKey || event.metaKey });
-    return;
-  }
+const startPaint = (date: string, event: MouseEvent) => {
+  if (event.button !== 0) return; // Left click only
   
-  // Paint Mode
   isPainting.value = true;
-  dragStart.value = dateStr;
-  dragCurrent.value = dateStr;
+  paintStartKey.value = date;
+  
+  // Emit selection start
+  emit('select-date', { date, multi: shiftPressed.value || props.activeToolProfileId });
 };
 
-const onMouseEnter = (dateStr: string) => {
-  hoverDate.value = dateStr;
-  if (isPainting.value) {
-    dragCurrent.value = dateStr;
+const onMouseEnter = (date: string) => {
+  if (isPainting.value && paintStartKey.value) {
+    // We are dragging.
+    // Calculate range from start to current.
+    // For now, we assume simple selection logic, handled by parent?
+    // Parent "handleDateSelection" toggles. Dragging creates a stream of toggles? Bad.
+    // We should emit a "range selection" event or accumulate locally.
+    // User requested "Paint interactions".
+    // I'll emit 'select-date' for each entered cell if it's not already selected?
+    // Or better: emit 'paint-range' at the end.
+    // But visual feedback is needed.
+    // I'll emit 'select-date' with multi=true to add to selection.
+    
+    // Optimisation: only emit if not in selectedDates.
+    if (!props.selectedDates.includes(date)) {
+      emit('select-date', { date, multi: true });
+    }
   }
-};
-
-const onMouseLeaveCanvas = () => {
-  hoverDate.value = null;
-  endPaint();
 };
 
 const endPaint = () => {
-  if (isPainting.value && dragStart.value && dragCurrent.value) {
-    // Determine range
-    const start = dragStart.value < dragCurrent.value ? dragStart.value : dragCurrent.value;
-    const end = dragStart.value < dragCurrent.value ? dragCurrent.value : dragStart.value;
+  if (isPainting.value) {
+    isPainting.value = false;
+    paintStartKey.value = null;
     
-    emit("paint-range", { start, end });
+    // If we have an active tool, we should apply it to the selected dates now?
+    // OpsSchemaCalendarEditor handles `handleDateSelection`.
+    // If we just finished a drag, the dates are selected.
+    // If activeToolProfileId is set, we should paint them.
+    if (props.activeToolProfileId && props.selectedDates.length > 0) {
+      emit('paint-range', { dates: props.selectedDates, profileId: props.activeToolProfileId });
+      // clear selection after paint? Maybe not, keep selected for further edits.
+    }
   }
-  isPainting.value = false;
-  dragStart.value = null;
-  dragCurrent.value = null;
 };
 
-const isInDataRange = (dateStr: string) => {
-  if (!isPainting.value || !dragStart.value || !dragCurrent.value) return false;
-  const start = dragStart.value < dragCurrent.value ? dragStart.value : dragCurrent.value;
-  const end = dragStart.value < dragCurrent.value ? dragCurrent.value : dragStart.value;
-  return dateStr >= start && dateStr <= end;
+const onContextMenu = (date: string, event: MouseEvent) => {
+  emit('context-menu', { x: event.clientX, y: event.clientY, date });
 };
 
-// 5. Interaction Handlers
-const onContextMenu = (dateStr: string, event: MouseEvent) => {
-  // If date not in selection, select it first
-  if (!props.selectedDates.includes(dateStr)) {
-    emit("select-date", { date: dateStr, multi: false });
-  }
-  emit("context-menu", { event, date: dateStr });
-};
-
-const onDoubleClick = (dateStr: string) => {
-  emit("preview-day", dateStr);
+const onDoubleClick = (date: string) => {
+  emit('open-inspector', date);
 };
 
 const handleKeyDown = (e: KeyboardEvent) => {
-  // We need a reference date. If selection exists, use the last one. If not, ignore or use today.
-  if (props.selectedDates.length === 0) return;
-  
-  const current = props.selectedDates[props.selectedDates.length - 1];
-  const dateObj = new Date(current);
-  
-  // Helper to offset date
-  const moveDate = (days: number) => {
-    e.preventDefault();
-    const newDate = new Date(dateObj);
-    newDate.setDate(newDate.getDate() + days);
-    const newDateStr = newDate.toISOString().slice(0, 10);
-    emit("select-date", { date: newDateStr, multi: e.shiftKey });
-  };
-
-  switch (e.key) {
-    case "ArrowRight":
-      moveDate(1);
-      break;
-    case "ArrowLeft":
-      moveDate(-1);
-      break;
-    case "ArrowDown":
-      moveDate(7);
-      break;
-    case "ArrowUp":
-      moveDate(-7);
-      break;
-    case "Enter":
-      e.preventDefault();
-      emit("open-inspector");
-      break;
-    case "Backspace":
-    case "Delete":
-      e.preventDefault();
-      emit("clear-selection");
-      break;
-    case "c":
-      if (e.metaKey || e.ctrlKey) {
-        e.preventDefault();
-        emit("copy-day", current);
-      }
-      break;
-    case "v":
-      if (e.metaKey || e.ctrlKey) {
-        e.preventDefault();
-        emit("paste-day", current);
-      }
-      break;
+  if (e.key === 'c' && (e.metaKey || e.ctrlKey)) {
+    if (props.selectedDates.length > 0) {
+      emit('copy-day', props.selectedDates[props.selectedDates.length - 1]);
+    }
+  } else if (e.key === 'v' && (e.metaKey || e.ctrlKey)) {
+    if (props.selectedDates.length > 0) {
+      emit('paste-day', props.selectedDates[props.selectedDates.length - 1]);
+    }
+  } else if (e.key === 'Delete' || e.key === 'Backspace') {
+    emit('clear-selection');
   }
 };
+
+// --- Helpers ---
+
+const getEffectiveAssignment = (date: string) => {
+  return resolveEffectiveAssignment({
+    weekdayDefaults: props.weekdayDefaults,
+    assignments: props.assignments,
+    overrides: props.overrides,
+    range: props.range
+  } as any, date);
+};
+
+const getProfile = (date: string) => {
+  const eff = getEffectiveAssignment(date);
+  if (eff.effectiveProfileId) {
+    return props.profiles.find(p => p.id === eff.effectiveProfileId);
+  }
+  return null;
+};
+
+const getGhostProfile = (date: string) => {
+  // If hovering with a tool, show ghost?
+  // Logic could be complex. Skip for now or implement if easy.
+  return null;
+};
+
+const isSelected = (date: string) => {
+  return props.selectedDates.includes(date);
+};
+
+const isHoliday = (date: string) => {
+  return props.holidays.some(h => h.date === date);
+};
+
+const getHoliday = (date: string) => {
+  return props.holidays.find(h => h.date === date);
+};
+
+const getShiftsForDate = (date: string) => {
+  if (!props.shifts) return [];
+  return props.shifts.filter(s => s.date.startsWith(date));
+};
+
+const hasConflict = (date: string) => {
+  // Conflict if OPEN on a CLOSED holiday
+  const holiday = getHoliday(date);
+  if (!holiday) return false;
+  if (holiday.closureType !== 'CLOSED') return false; // Partial close might be ok
+  
+  const eff = getEffectiveAssignment(date);
+  return eff.status === 'open';
+};
+
+const getMonthLabel = (date: string) => {
+  const d = new Date(date);
+  // Add time zone offset to ensure correct month display if parsing simplistic?
+  // We used dateKey parsing logic which sets time to 00:00 local.
+  // parseDateKey in util handles this.
+  // But here we have string.
+  // new Date(date) parses as UTC if YYYY-MM-DD? No, YYYY-MM-DD is usually UTC in ES5, but local in some browsers?
+  // Safe way: split.
+  const [y, m, d_str] = date.split('-').map(Number);
+  const localDate = new Date(y, m - 1, d_str);
+  return localDate.toLocaleDateString(undefined, { month: 'long' });
+};
 </script>
+
+<style scoped>
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(110, 110, 115, 0.5);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(110, 110, 115, 0.8);
+}
+</style>

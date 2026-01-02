@@ -1,8 +1,8 @@
 <template>
-  <div class="h-full flex flex-col bg-white border-l border-slate-200 overflow-y-auto">
+  <div class="h-full flex flex-col bg-surface border-l border-divider overflow-y-auto">
     <!-- Context Header -->
-    <div class="p-4 border-b border-slate-200 bg-slate-50/50">
-      <h3 class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">
+    <div class="p-4 border-b border-divider bg-base/50">
+      <h3 class="text-xs font-bold text-tertiary uppercase tracking-[0.2em]">
         {{ modeLabel }}
       </h3>
     </div>
@@ -10,33 +10,33 @@
     <!-- MODE: NO SELECTION (Month Summary) -->
     <div v-if="mode === 'summary'" class="p-4 space-y-6">
       <div class="space-y-1">
-        <div class="text-3xl font-black text-slate-900">{{ stats.openDays }}</div>
-        <div class="text-xs font-medium text-slate-500 uppercase tracking-wide">
+        <div class="text-3xl font-black text-primary">{{ stats.openDays }}</div>
+        <div class="text-xs font-medium text-secondary uppercase tracking-wide">
           Scheduled Days
         </div>
       </div>
       
       <div class="space-y-1">
-        <div class="text-3xl font-black text-emerald-600">
+        <div class="text-3xl font-black text-accent-success">
           ${{ formatMoney(stats.projectedRevenue) }}
         </div>
-        <div class="text-xs font-medium text-slate-500 uppercase tracking-wide">
+        <div class="text-xs font-medium text-secondary uppercase tracking-wide">
           Proj. Revenue
         </div>
       </div>
 
       <!-- Smart Fill Tool -->
-      <div class="pt-4 border-t border-slate-100 space-y-3">
+      <div class="pt-4 border-t border-divider space-y-3">
         <div class="flex items-center gap-2">
-           <div class="w-2 h-2 rounded-full bg-primary-500"></div>
-           <h4 class="text-xs font-bold text-slate-900 uppercase">Smart Fill</h4>
+           <div class="w-2 h-2 rounded-full bg-accent-primary"></div>
+           <h4 class="text-xs font-bold text-primary uppercase">Smart Fill</h4>
         </div>
-        <p class="text-[10px] text-slate-400">Apply a profile to specific weekdays across the entire range.</p>
+        <p class="text-[10px] text-tertiary">Apply a profile to specific weekdays across the entire range.</p>
         
         <div class="space-y-2">
            <select
              v-model="smartFillProfileId"
-             class="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg px-2 py-2 outline-none focus:border-primary-500"
+             class="w-full text-xs bg-base border border-divider rounded-lg px-2 py-2 outline-none focus:border-accent-primary text-primary"
            >
              <option :value="null">Select Profile...</option>
              <option v-for="p in profiles" :key="p.id" :value="p.id">{{ p.name }}</option>
@@ -47,7 +47,7 @@
                v-for="day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']"
                :key="day"
                class="px-2 py-1 text-[10px] font-bold border rounded transition-colors"
-               :class="smartFillDays.includes(day) ? 'bg-primary-500 text-white border-primary-500' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'"
+               :class="smartFillDays.includes(day) ? 'bg-accent-primary text-white border-accent-primary' : 'bg-surface text-secondary border-divider hover:border-tertiary'"
                @click="toggleSmartFillDay(day)"
              >
                {{ day }}
@@ -55,7 +55,7 @@
            </div>
            
            <button
-             class="w-full py-2 bg-slate-900 text-white text-xs font-bold uppercase rounded-lg hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+             class="w-full py-2 bg-primary text-white text-xs font-bold uppercase rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
              :disabled="!smartFillProfileId || smartFillDays.length === 0"
              @click="applySmartFill"
            >
@@ -64,17 +64,17 @@
         </div>
       </div>
 
-      <div class="pt-4 border-t border-slate-100">
+      <div class="pt-4 border-t border-divider">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-bold text-slate-600">Validation</span>
+          <span class="text-xs font-bold text-secondary">Validation</span>
           <span 
             class="text-xs font-bold px-2 py-0.5 rounded-full"
-            :class="stats.conflicts > 0 ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'"
+            :class="stats.conflicts > 0 ? 'bg-accent-error/10 text-accent-error' : 'bg-accent-success/10 text-accent-success'"
           >
             {{ stats.conflicts }} Issues
           </span>
         </div>
-        <p class="text-xs text-slate-400 leading-relaxed">
+        <p class="text-xs text-tertiary leading-relaxed">
           {{ stats.conflicts > 0 ? 'Review conflicts marked in red on the calendar.' : 'All checks passed.' }}
         </p>
       </div>
@@ -83,21 +83,21 @@
     <!-- MODE: SINGLE SELECTION -->
     <div v-else-if="mode === 'single'" class="p-4 space-y-6">
       <div>
-        <h2 class="text-xl font-bold text-slate-900">{{ formatDate(selectedDates[0]) }}</h2>
-        <p class="text-xs text-slate-500 mt-1">Day Detail</p>
+        <h2 class="text-xl font-bold text-primary">{{ formatDate(selectedDates[0]) }}</h2>
+        <p class="text-xs text-secondary mt-1">Day Detail</p>
       </div>
 
       <div v-if="selectedProfile" class="space-y-4">
-        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
-          <div class="text-xs font-bold text-slate-400 uppercase mb-1">Assigned Profile</div>
-          <div class="font-bold text-primary-700">{{ selectedProfile.name }}</div>
-          <div class="text-xs text-slate-500 mt-1">
+        <div class="p-3 bg-base border border-divider rounded-lg">
+          <div class="text-xs font-bold text-tertiary uppercase mb-1">Assigned Profile</div>
+          <div class="font-bold text-accent-primary">{{ selectedProfile.name }}</div>
+          <div class="text-xs text-secondary mt-1">
             {{ selectedProfile.timeline?.operationalHours?.start }} - {{ selectedProfile.timeline?.operationalHours?.end }}
           </div>
         </div>
 
         <div>
-          <div class="text-xs font-bold text-slate-400 uppercase mb-2">Timeline Preview</div>
+          <div class="text-xs font-bold text-tertiary uppercase mb-2">Timeline Preview</div>
           <ScheduleMiniTimeline
             :flow-segments="selectedProfile.timeline?.flowSegments || []"
             :overlay-events="selectedProfile.timeline?.overlayEvents || []"
@@ -106,26 +106,26 @@
           />
         </div>
 
-        <div class="pt-4 border-t border-slate-100">
+        <div class="pt-4 border-t border-divider">
           <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-bold text-slate-600">Staffing</span>
-            <span class="text-[10px] text-slate-400 italic">Est.</span>
+            <span class="text-xs font-bold text-secondary">Staffing</span>
+            <span class="text-[10px] text-tertiary italic">Est.</span>
           </div>
-          <div class="flex items-center gap-2 text-sm text-slate-700">
-             <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+          <div class="flex items-center gap-2 text-sm text-primary">
+             <div class="w-2 h-2 rounded-full bg-accent-success"></div>
              <span>Readiness data unavailable</span>
           </div>
         </div>
 
         <button
-          class="w-full py-2 border border-rose-200 text-rose-600 text-xs font-bold uppercase rounded-lg hover:bg-rose-50 transition-colors"
+          class="w-full py-2 border border-accent-error/20 text-accent-error text-xs font-bold uppercase rounded-lg hover:bg-accent-error/5 transition-colors"
           @click="$emit('clear-selection')"
         >
           Clear Assignment
         </button>
       </div>
 
-      <div v-else class="text-center py-8 text-slate-400 text-sm">
+      <div v-else class="text-center py-8 text-tertiary text-sm">
         No profile assigned to this day.
         <br />
         <span class="text-xs opacity-70">Select a profile from the library to assign.</span>
@@ -134,16 +134,16 @@
 
     <!-- MODE: MULTI SELECTION -->
     <div v-else-if="mode === 'multi'" class="p-4 space-y-6">
-      <div class="bg-primary-50 border border-primary-100 rounded-lg p-4 text-center">
-        <div class="text-3xl font-black text-primary-600">{{ selectedDates.length }}</div>
-        <div class="text-xs font-bold text-primary-400 uppercase tracking-wide">Days Selected</div>
+      <div class="bg-accent-primary/10 border border-accent-primary/20 rounded-lg p-4 text-center">
+        <div class="text-3xl font-black text-accent-primary">{{ selectedDates.length }}</div>
+        <div class="text-xs font-bold text-accent-primary uppercase tracking-wide">Days Selected</div>
       </div>
 
       <div class="space-y-2">
-        <label class="block text-xs font-bold text-slate-500 uppercase">Bulk Actions</label>
+        <label class="block text-xs font-bold text-secondary uppercase">Bulk Actions</label>
         
         <select
-          class="w-full text-sm bg-white border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-primary-500/20"
+          class="w-full text-sm bg-surface border border-divider rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-accent-primary/20 text-primary"
           @change="(e: any) => $emit('apply-bulk', e.target.value)"
         >
           <option value="">Apply Profile...</option>
@@ -157,7 +157,7 @@
         </select>
 
         <button
-          class="w-full py-2 border border-slate-200 text-slate-600 text-xs font-bold uppercase rounded-lg hover:bg-slate-50 transition-colors"
+          class="w-full py-2 border border-divider text-secondary text-xs font-bold uppercase rounded-lg hover:bg-base transition-colors"
           @click="$emit('clear-bulk')"
         >
           Clear All Selected

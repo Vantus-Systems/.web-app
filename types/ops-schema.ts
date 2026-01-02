@@ -83,6 +83,7 @@ export type OpsSchemaDayProfile = {
   overlay_event_ids: string[];
   description?: string;
   color?: string;
+  doors_open_time?: string; // HH:mm
 };
 
 export type OpsSchemaCalendarAssignment = {
@@ -92,8 +93,12 @@ export type OpsSchemaCalendarAssignment = {
 
 export type OpsSchemaCalendarOverride = {
   id: string;
-  profile_id: string;
+  profile_id?: string;
+  kind?: "LOCKED" | "CLOSED" | "CLOSE_EARLY" | "PROFILE_SWAP" | "DOORS_OPEN";
   reason?: string;
+  note?: string;
+  untilTime?: string;
+  doors_open_time?: string; // HH:mm
 };
 
 export type OpsSchemaV2 = {

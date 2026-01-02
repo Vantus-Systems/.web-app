@@ -172,10 +172,68 @@
                   <BaseButton type="submit">Save Changes</BaseButton>
                 </div>
               </form>
+
+              <!-- Daily Door Operations -->
+              <div class="mt-8 border-t border-slate-200 pt-8">
+                <h4
+                  class="text-sm font-bold text-primary-900 uppercase tracking-widest mb-4"
+                >
+                  Daily Door Operations
+                </h4>
+                <p class="text-xs text-slate-500 mb-4">
+                  Set specific door opening times for specific dates. These
+                  changes will apply to the <strong>Draft Schedule</strong>.
+                  Please verify in Operations Builder before publishing.
+                </p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                  <div>
+                    <label
+                      class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"
+                      >Date</label
+                    >
+                    <input
+                      v-model="doorTimeDate"
+                      type="date"
+                      class="block w-full bg-slate-50 border-slate-200 rounded-xl px-4 py-3"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"
+                      >Doors Open Time</label
+                    >
+                    <input
+                      v-model="doorTimeValue"
+                      type="time"
+                      class="block w-full bg-slate-50 border-slate-200 rounded-xl px-4 py-3"
+                    />
+                  </div>
+                  <button
+                    :disabled="
+                      !doorTimeDate || !doorTimeValue || doorTimeLoading
+                    "
+                    class="px-6 py-3 bg-primary-900 text-gold font-bold uppercase tracking-wider text-xs rounded-xl hover:bg-primary-800 disabled:opacity-50 transition-colors"
+                    @click="saveDoorTime"
+                  >
+                    {{ doorTimeLoading ? "Saving..." : "Set Door Time" }}
+                  </button>
+                </div>
+                <p
+                  v-if="doorTimeSuccess"
+                  class="text-green-600 text-xs mt-2 font-bold"
+                >
+                  {{ doorTimeSuccess }}
+                </p>
+                <p
+                  v-if="doorTimeError"
+                  class="text-red-600 text-xs mt-2 font-bold"
+                >
+                  {{ doorTimeError }}
+                </p>
+              </div>
             </BaseCard>
           </div>
-
-
 
           <!-- W2G Tab -->
           <div v-if="currentTab === 'messages'" class="space-y-8">
@@ -263,8 +321,6 @@
               </NuxtLink>
             </div>
           </div>
-
-          
         </div>
       </div>
     </div>
@@ -407,8 +463,6 @@ const saveBusinessInfo = async () => {
   }
 };
 
-
-
 const logout = async () => {
   await refreshCsrfToken();
   await $fetch("/api/auth/logout", {
@@ -417,5 +471,31 @@ const logout = async () => {
     credentials: "include",
   });
   router.push("/admin/login");
+};
+const doorTimeDate = ref("");
+const doorTimeValue = ref("");
+const doorTimeLoading = ref(false);
+const doorTimeSuccess = ref("");
+const doorTimeError = ref("");
+
+const saveDoorTime = async () => {
+  doorTimeLoading.value = true;
+  doorTimeSuccess.value = "";
+  doorTimeError.value = "";
+  try {
+    await $fetch("/api/admin/schedule/doors-open", {
+      method: "POST",
+      body: {
+        date: doorTimeDate.value,
+        time: doorTimeValue.value,
+      },
+      ...getHeaders(),
+    });
+    doorTimeSuccess.value = "Door time updated successfully.";
+  } catch (err: any) {
+    doorTimeError.value = err.message || "Failed to update door time.";
+  } finally {
+    doorTimeLoading.value = false;
+  }
 };
 </script>
