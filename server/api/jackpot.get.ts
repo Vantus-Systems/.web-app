@@ -32,6 +32,18 @@ export default defineEventHandler(async () => {
 
   const d = data as any;
   let currentState: any = defaultStructure;
+  let needsPersistence = false;
+
+  const ensureItemIds = (state: any) => {
+    if (!state || !Array.isArray(state.items)) return false;
+    let added = false;
+    state.items = (state.items as any[]).map((item) => {
+      if (item?.id) return item;
+      added = true;
+      return { ...item, id: randomUUID() };
+    });
+    return added;
+  };
 
   // New Structure (preferred)
   if (Array.isArray(d.items)) {
@@ -64,6 +76,7 @@ export default defineEventHandler(async () => {
       lastUpdated: d.lastUpdated || new Date().toISOString(),
       lastDailyUpdate: d.lastDailyUpdate || undefined,
     };
+    needsPersistence = true;
   }
 
   // Migration for legacy single-value format
@@ -90,6 +103,12 @@ export default defineEventHandler(async () => {
       lastUpdated: d.lastUpdated || new Date().toISOString(),
       lastDailyUpdate: d.lastDailyUpdate || undefined,
     };
+    needsPersistence = true;
+  }
+
+  const missingIds = ensureItemIds(currentState);
+  if (missingIds) {
+    needsPersistence = true;
   }
 
   // --- Auto-Increment Logic ---
@@ -102,11 +121,11 @@ export default defineEventHandler(async () => {
 
   const todayStr = now.toISOString().slice(0, 10);
   const lastDailyUpdate = (currentState as any).lastDailyUpdate || "";
+  let autopRunTriggered = false;
+  let autopChange = false;
 
-  // If we haven't updated TODAY, and it's past 5 PM (17:00)
   if (now.getHours() >= 17 && lastDailyUpdate !== todayStr) {
-    let changed = false;
-
+    autopRunTriggered = true;
     const items = Array.isArray(currentState.items) ? currentState.items : [];
 
     // "update ... if it is not won"
@@ -121,14 +140,17 @@ export default defineEventHandler(async () => {
         item.current = Number(item.current || 0) + 100;
       }
 
-      changed = true;
+      autopChange = true;
     }
 
-    if (changed) {
-      (currentState as any).lastDailyUpdate = todayStr;
+    (currentState as any).lastDailyUpdate = todayStr;
+    if (autopChange) {
       currentState.lastUpdated = now.toISOString();
-      await settingsService.set("jackpot", currentState);
     }
+  }
+
+  if (needsPersistence || autopRunTriggered) {
+    await settingsService.set("jackpot", currentState);
   }
 
   return currentState;
