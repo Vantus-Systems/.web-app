@@ -59,13 +59,15 @@ export const useJackpotStore = defineStore("jackpot", () => {
 
   const currentJackpot = computed(() => {
     if (items.value.length === 0) return 0;
-    const index = activeKey.value === "legacy" ? 0 : (activeKey.value as number);
+    const index =
+      activeKey.value === "legacy" ? 0 : (activeKey.value as number);
     return items.value[index]?.current ?? 0;
   });
 
   const activeLabel = computed(() => {
     if (items.value.length === 0) return "Shamrock Progressive Jackpot";
-    const index = activeKey.value === "legacy" ? 0 : (activeKey.value as number);
+    const index =
+      activeKey.value === "legacy" ? 0 : (activeKey.value as number);
     return items.value[index]?.label || "Progressive Jackpot";
   });
 

@@ -1,6 +1,6 @@
 // server/api/admin/jackpot.post.ts
-import { defineEventHandler, readBody } from "h3";
 import { randomUUID } from "node:crypto";
+import { defineEventHandler, readBody } from "h3";
 import { z } from "zod";
 import { settingsService } from "@server/services/settings.service";
 import { auditService } from "@server/services/audit.service";

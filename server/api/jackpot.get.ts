@@ -1,6 +1,6 @@
+import { randomUUID } from "node:crypto";
 import { defineEventHandler } from "h3";
 import { settingsService } from "@server/services/settings.service";
-import { randomUUID } from "node:crypto";
 
 export default defineEventHandler(async () => {
   const data = await settingsService.get("jackpot");
