@@ -1,35 +1,94 @@
 import { defineEventHandler } from "h3";
 import { settingsService } from "@server/services/settings.service";
+import { randomUUID } from "node:crypto";
 
 export default defineEventHandler(async () => {
   const data = await settingsService.get("jackpot");
 
   // Default structure
   const defaultStructure = {
-    babes: { current: 0, backup: 0, label: "Bingo Babes Progressive" },
-    hornet: { current: 0, backup: 0, label: "Progressive Hornet" },
+    items: [
+      {
+        id: randomUUID(),
+        label: "Bingo Babes Progressive",
+        current: 0,
+        backup: 0,
+        playTime: "Daytime (4 PM)",
+        isSession: false,
+      },
+      {
+        id: randomUUID(),
+        label: "Progressive Hornet",
+        current: 0,
+        backup: 0,
+        playTime: "Session",
+        isSession: true,
+      },
+    ],
     lastUpdated: new Date().toISOString(),
   };
 
   if (!data) return defaultStructure;
 
   const d = data as any;
-  let currentState = defaultStructure;
+  let currentState: any = defaultStructure;
 
-  // If already has new structure
-  if ("babes" in d && "hornet" in d) {
+  // New Structure (preferred)
+  if (Array.isArray(d.items)) {
     currentState = d;
   }
+
+  // Migration from Object Structure { babes: ..., hornet: ... }
+  else if ("babes" in d && "hornet" in d) {
+    currentState = {
+      items: [
+        {
+          id: randomUUID(),
+          label: d.babes.label || "Bingo Babes Progressive",
+          current: d.babes.current || 0,
+          backup: d.babes.backup || 0,
+          playTime: "Daytime (4 PM)",
+          isSession: false,
+          lastWonDate: d.babes.lastWonDate || undefined,
+        },
+        {
+          id: randomUUID(),
+          label: d.hornet.label || "Progressive Hornet",
+          current: d.hornet.current || 0,
+          backup: d.hornet.backup || 0,
+          playTime: "Session",
+          isSession: true,
+          lastWonDate: d.hornet.lastWonDate || undefined,
+        },
+      ],
+      lastUpdated: d.lastUpdated || new Date().toISOString(),
+      lastDailyUpdate: d.lastDailyUpdate || undefined,
+    };
+  }
+
   // Migration for legacy single-value format
   else if ("value" in d) {
     currentState = {
-      babes: { current: 0, backup: 0, label: "Bingo Babes Progressive" },
-      hornet: {
-        current: Number(d.value) || 0,
-        backup: 0,
-        label: "Progressive Hornet",
-      },
+      items: [
+        {
+          id: randomUUID(),
+          label: "Bingo Babes Progressive",
+          current: 0,
+          backup: 0,
+          playTime: "Daytime (4 PM)",
+          isSession: false,
+        },
+        {
+          id: randomUUID(),
+          label: "Progressive Hornet",
+          current: Number(d.value) || 0,
+          backup: 0,
+          playTime: "Session",
+          isSession: true,
+        },
+      ],
       lastUpdated: d.lastUpdated || new Date().toISOString(),
+      lastDailyUpdate: d.lastDailyUpdate || undefined,
     };
   }
 
@@ -48,39 +107,20 @@ export default defineEventHandler(async () => {
   if (now.getHours() >= 17 && lastDailyUpdate !== todayStr) {
     let changed = false;
 
-    // Check Bingo Babes
-    const babes = currentState.babes as any;
-    const babesLastWon = babes.lastWonDate || "";
+    const items = Array.isArray(currentState.items) ? currentState.items : [];
 
     // "update ... if it is not won"
-    if (babesLastWon !== todayStr) {
-      if (babes.current >= 5000) {
-        babes.backup = (babes.backup || 0) + 100;
-      } else {
-        babes.current = (babes.current || 0) + 100;
-      }
-      changed = true;
-    }
+    for (const item of items) {
+      const lastWonDate = String((item as any).lastWonDate || "");
+      if (lastWonDate === todayStr) continue;
 
-    // Hornet logic? User said "each progressive".
-    // "increase the progressive amount... by $100 each day".
-    // I'll apply same logic to Hornet if not won.
-    const hornet = currentState.hornet as any;
-    const hornetLastWon = hornet.lastWonDate || "";
-
-    if (hornetLastWon !== todayStr) {
-      // Assuming Hornet has similar cap? Or just increment?
-      // User didn't specify cap for Hornet, but "once the $5,000 cap is reached" was mentioned in context of "the progressive" (singular/plural ambiguity).
-      // "Bingo Babes Progressive" context was explicit.
-      // I'll assume same $5000 cap for Hornet for consistency or just increment current.
-      // Safe bet: Increment current.
-      // Re-reading: "increase the progressive amount (or the backup once the $5,000 cap is reached) by $100 each day".
-      // I will apply to both.
-      if (hornet.current >= 5000) {
-        hornet.backup = (hornet.backup || 0) + 100;
+      // Apply same $5,000 cap behavior consistently.
+      if (Number(item.current || 0) >= 5000) {
+        item.backup = Number(item.backup || 0) + 100;
       } else {
-        hornet.current = (hornet.current || 0) + 100;
+        item.current = Number(item.current || 0) + 100;
       }
+
       changed = true;
     }
 

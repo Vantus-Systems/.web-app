@@ -1,20 +1,23 @@
 // server/api/admin/jackpot.post.ts
 import { defineEventHandler, readBody } from "h3";
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { settingsService } from "@server/services/settings.service";
 import { auditService } from "@server/services/audit.service";
 import { assertRole } from "~/server/utils/roles";
 
 const progressiveSchema = z.object({
+  id: z.string().optional(), // optional because new items might not have it yet from client, but we should generate it
+  label: z.string().optional(),
   current: z.number(),
   backup: z.number(),
-  label: z.string().optional(),
+  playTime: z.string().optional(),
+  isSession: z.boolean().optional(),
 });
 
 const jackpotSchema = z
   .object({
-    babes: progressiveSchema,
-    hornet: progressiveSchema,
+    items: z.array(progressiveSchema),
     lastUpdated: z.string().optional(),
   })
   .passthrough();
@@ -24,6 +27,12 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event);
   const parsed = jackpotSchema.parse(body);
+
+  // Ensure IDs exist
+  parsed.items = parsed.items.map((item) => ({
+    ...item,
+    id: item.id || randomUUID(),
+  }));
 
   const before = await settingsService.get("jackpot");
 

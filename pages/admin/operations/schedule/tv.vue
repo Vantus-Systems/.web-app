@@ -19,11 +19,11 @@
 
     <div class="flex-1 relative overflow-hidden">
       <ScheduleCanvas
-        v-if="opsStore.opsSchemaDraft"
+        v-if="schema"
         :range="activeDateRange"
-        :weekday-defaults="opsStore.opsSchemaDraft.calendar.weekdayDefaults"
-        :assignments="opsStore.opsSchemaDraft.calendar.assignments"
-        :overrides="opsStore.opsSchemaDraft.calendar.overrides || {}"
+        :weekday-defaults="schema.calendar?.weekdayDefaults || {}"
+        :assignments="schema.calendar?.assignments || {}"
+        :overrides="schema.calendar?.overrides || {}"
         :profiles="dayProfiles"
         :holidays="holidays"
         :shifts="shifts"
@@ -48,23 +48,31 @@ import { useNow, useDateFormat } from "@vueuse/core";
 import { useOpsStore } from "~/stores/ops";
 import ScheduleCanvas from "~/components/admin/schedule/ScheduleCanvas.vue";
 
+definePageMeta({
+  layout: "blank",
+});
+
 const opsStore = useOpsStore();
 const holidays = ref<any[]>([]);
 const shifts = ref<any[]>([]);
 const currentTime = useDateFormat(useNow(), "YYYY-MM-DD HH:mm:ss");
 
+const schema = computed(() => {
+  return opsStore.opsSchemaLive || opsStore.opsSchemaDraft;
+});
+
 const activeDateRange = computed(() => {
   return (
-    opsStore.opsSchemaDraft?.calendar.range || {
-      start: new Date().getFullYear() + "-01-01",
-      end: new Date().getFullYear() + "-12-31",
+    schema.value?.calendar?.range || {
+      start: `${new Date().getFullYear()}-01-01`,
+      end: `${new Date().getFullYear()}-12-31`,
     }
   );
 });
 
-const dayProfiles = computed(() => opsStore.opsSchemaDraft?.dayProfiles ?? []);
+const dayProfiles = computed(() => schema.value?.dayProfiles ?? []);
 
-let pollInterval: any;
+let pollInterval: ReturnType<typeof setInterval> | null = null;
 
 onMounted(async () => {
   await loadData();
@@ -83,6 +91,7 @@ const loadData = async () => {
   try {
     const { data: hData } = await useFetch("/api/admin/holiday-rules", {
       query: { year },
+      credentials: "include",
     });
     if (hData.value && hData.value.occurrences) {
       holidays.value = hData.value.occurrences;
@@ -93,6 +102,7 @@ const loadData = async () => {
         start: activeDateRange.value.start,
         end: activeDateRange.value.end,
       },
+      credentials: "include",
     });
     if (sData.value) {
       shifts.value = sData.value;
