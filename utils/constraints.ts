@@ -7,6 +7,8 @@ import {
   toMinutes,
   formatMinutes,
   normalizeTimeRange,
+  toOperationalMinutes,
+  normalizeRangeToOperational,
   detectGaps,
   detectOverlaps,
 } from "./ops-schema.utils";
@@ -35,8 +37,15 @@ export const CONSTRAINTS = {
       );
 
       if (salesClose && sessionStart) {
-        const salesTime = toMinutes(salesClose.trigger_time);
-        const sessionTime = toMinutes(sessionStart.trigger_time);
+        const opStart = state.timeline.operationalHours.start;
+        const salesTime = toOperationalMinutes(
+          salesClose.trigger_time,
+          opStart,
+        );
+        const sessionTime = toOperationalMinutes(
+          sessionStart.trigger_time,
+          opStart,
+        );
         const gap = sessionTime - salesTime;
 
         if (gap < 15) {
@@ -82,8 +91,12 @@ export const CONSTRAINTS = {
       );
 
       if (doorsOpen && sessionStart) {
-        const doorsTime = toMinutes(doorsOpen.trigger_time);
-        const sessionTime = toMinutes(sessionStart.trigger_time);
+        const opStart = state.timeline.operationalHours.start;
+        const doorsTime = toOperationalMinutes(doorsOpen.trigger_time, opStart);
+        const sessionTime = toOperationalMinutes(
+          sessionStart.trigger_time,
+          opStart,
+        );
 
         if (doorsTime >= sessionTime) {
           violations.push({
@@ -145,7 +158,10 @@ export const CONSTRAINTS = {
     severity: "error",
     check: (state: OpsSchemaV2) => {
       const violations: ConstraintViolation[] = [];
-      const overlaps = detectOverlaps(state.timeline.flowSegments);
+      const overlaps = detectOverlaps(
+        state.timeline.flowSegments,
+        state.timeline.operationalHours.start,
+      );
 
       overlaps.forEach((pair) => {
         violations.push({
@@ -178,6 +194,7 @@ export const CONSTRAINTS = {
         state.timeline.flowSegments,
         state.timeline.operationalHours.start,
         state.timeline.operationalHours.end,
+        state.timeline.operationalHours.start,
       );
 
       gaps.forEach((gap) => {
@@ -198,24 +215,35 @@ export const CONSTRAINTS = {
         state.timeline.flowSegments,
         state.timeline.operationalHours.start,
         state.timeline.operationalHours.end,
+        state.timeline.operationalHours.start,
       );
 
       if (gaps.length > 0) {
         const gap = gaps[0];
-        const breakSegment = {
-          id: `break-${Date.now()}`,
-          label: "Break",
-          time_start: formatMinutes(gap.start),
-          time_end: formatMinutes(gap.end),
-          rate_card_id: "break-card",
-          color_code: "#94a3b8",
-          allow_overlap: false,
-        };
+        if (gap) {
+          const breakSegment = {
+            id: `break-${Date.now()}`,
+            label: "Break",
+            time_start: formatMinutes(gap.start),
+            time_end: formatMinutes(gap.end),
+            rate_card_id: "break-card",
+            color_code: "#94a3b8",
+            allow_overlap: false,
+          };
 
-        state.timeline.flowSegments.push(breakSegment);
-        state.timeline.flowSegments.sort(
-          (a, b) => toMinutes(a.time_start) - toMinutes(b.time_start),
-        );
+          state.timeline.flowSegments.push(breakSegment);
+          state.timeline.flowSegments.sort(
+            (a, b) =>
+              toOperationalMinutes(
+                a.time_start,
+                state.timeline.operationalHours.start,
+              ) -
+              toOperationalMinutes(
+                b.time_start,
+                state.timeline.operationalHours.start,
+              ),
+          );
+        }
       }
 
       return state;
@@ -228,9 +256,10 @@ export const CONSTRAINTS = {
     severity: "error",
     check: (state: OpsSchemaV2) => {
       const violations: ConstraintViolation[] = [];
-      const range = normalizeTimeRange(
+      const range = normalizeRangeToOperational(
         state.timeline.operationalHours.start,
         state.timeline.operationalHours.end,
+        state.timeline.operationalHours.start,
       );
 
       if (range.start === range.end) {
@@ -315,13 +344,18 @@ export const CONSTRAINTS = {
     severity: "warning",
     check: (state: OpsSchemaV2) => {
       const violations: ConstraintViolation[] = [];
-      const opStart = toMinutes(state.timeline.operationalHours.start);
-      const opEnd = toMinutes(state.timeline.operationalHours.end);
+      // Operational hours start is 0 in operational minutes
+      const opStart = state.timeline.operationalHours.start;
+      const opRange = normalizeRangeToOperational(
+        opStart,
+        state.timeline.operationalHours.end,
+        opStart,
+      );
 
       state.logicTriggers.forEach((trigger) => {
-        const triggerTime = toMinutes(trigger.trigger_time);
+        const triggerTime = toOperationalMinutes(trigger.trigger_time, opStart);
 
-        if (triggerTime < opStart || triggerTime > opEnd) {
+        if (triggerTime < opRange.start || triggerTime > opRange.end) {
           violations.push({
             id: `violation-${Date.now()}-9`,
             constraintId: "trigger-time-within-hours",

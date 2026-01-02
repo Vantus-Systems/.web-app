@@ -72,10 +72,28 @@
         </div>
         
         <!-- Metrics -->
-        <div v-if="viewMode === 'standard'" class="flex flex-wrap gap-1 px-1">
-          <span class="text-[9px] text-secondary bg-base px-1 rounded">
-            {{ timeRange }}
-          </span>
+        <div v-if="viewMode === 'standard'" class="flex flex-col gap-0.5 px-1 mt-1">
+          <div class="flex items-center gap-1">
+             <span class="text-[9px] text-secondary bg-base px-1 rounded capitalize border border-divider">
+              {{ displayProfile.category }}
+             </span>
+             <span v-if="displayProfile.segment_ids?.length" class="text-[9px] text-tertiary" title="Segments">
+               {{ displayProfile.segment_ids.length }} Seg
+             </span>
+          </div>
+          
+          <div v-if="displayProfile.overlay_event_ids?.length" class="text-[9px] text-accent-info font-medium flex items-center gap-0.5">
+             <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/></svg>
+             {{ displayProfile.overlay_event_ids.length }} Special
+          </div>
+          
+          <!-- Override Indicators -->
+          <div v-if="assignment.doorsOpenTime" class="text-[9px] text-accent-primary font-mono">
+             Open: {{ assignment.doorsOpenTime }}
+          </div>
+          <div v-if="assignment.closeEarlyTime" class="text-[9px] text-accent-warning font-mono">
+             Close: {{ assignment.closeEarlyTime }}
+          </div>
         </div>
         
         <!-- View Mode Specifics -->
@@ -115,13 +133,14 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { EffectiveAssignment } from "~/utils/schedule-calendar";
+import type { OpsSchemaDayProfile } from "~/types/ops-schema";
 
 const props = defineProps<{
   date: string;
   dayOfWeek?: number;
   assignment: EffectiveAssignment;
-  profile?: any;
-  ghostProfile?: any;
+  profile?: OpsSchemaDayProfile;
+  ghostProfile?: OpsSchemaDayProfile;
   isSelected?: boolean;
   isHoliday?: boolean;
   holidayInfo?: any;
@@ -148,16 +167,6 @@ const isToday = computed(() => {
   const tM = today.getMonth() + 1;
   const tD = today.getDate();
   return y === tY && m === tM && d === tD;
-});
-
-const timeRange = computed(() => {
-  // If profile has specific hours logic, use it.
-  // Assuming profile has start/end if available, else 24h.
-  // Actually, ops-schema.ts says `operationalHours` is in `timeline` global, not per profile?
-  // OpsSchemaDayProfile has `segment_ids`.
-  // We don't have segments here easily unless profile object is enriched.
-  // But let's assume `profile.description` or we just skip for now.
-  return "10:00-02:00"; // Mock default
 });
 
 const revenueDisplay = computed(() => {

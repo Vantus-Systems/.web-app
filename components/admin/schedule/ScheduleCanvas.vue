@@ -87,15 +87,15 @@
 import { ref, computed, onMounted, watch, nextTick } from "vue";
 import { useInfiniteScroll, useKeyModifier } from "@vueuse/core";
 import ScheduleDayCard from "./ScheduleDayCard.vue";
-import { dateKey, resolveEffectiveAssignment } from "~/utils/schedule-calendar";
-import type { OpsSchemaCalendarAssignment, OpsSchemaCalendarOverride } from "~/types/ops-schema";
+import { dateKey, resolveEffectiveAssignment, parseDateKey, addDays } from "~/utils/schedule-calendar";
+import type { OpsSchemaCalendarAssignment, OpsSchemaCalendarOverride, OpsSchemaDayProfile } from "~/types/ops-schema";
 
 const props = defineProps<{
   range: { start: string; end: string };
   weekdayDefaults: Record<string, OpsSchemaCalendarAssignment>;
   assignments: Record<string, OpsSchemaCalendarAssignment>;
   overrides: Record<string, OpsSchemaCalendarOverride[]>;
-  profiles: any[];
+  profiles: OpsSchemaDayProfile[];
   holidays: any[];
   shifts?: any[];
   selectedDates: string[];
@@ -158,31 +158,26 @@ watch(() => props.range.start, async (newVal, oldVal) => {
 // --- Data Generation ---
 
 const weeks = computed(() => {
-  const start = new Date(props.range.start);
-  const end = new Date(props.range.end);
   const result = [];
   
-  // Align start to previous Monday
-  const current = new Date(start);
-  const day = current.getDay(); // 0=Sun, 1=Mon
+  // Align start to previous Monday using UTC
+  const startD = parseDateKey(props.range.start);
+  const day = startD.getUTCDay(); // 0=Sun, 1=Mon...
   // We want Monday start (1).
-  // diff = 1 - day.
-  // If Sun(0) -> 1 - 0 = +1 (wrong, need -6).
-  // If Mon(1) -> 1 - 1 = 0.
-  // If Tue(2) -> 1 - 2 = -1.
   const diff = day === 0 ? -6 : 1 - day;
-  current.setDate(current.getDate() + diff);
+  
+  let currentStr = addDays(props.range.start, diff);
+  const endStr = props.range.end;
 
   // Loop week by week
-  while (current <= end) {
+  while (currentStr <= endStr) {
     const weekDays = [];
     for (let i = 0; i < 7; i++) {
       weekDays.push({
-        dateStr: dateKey(current),
+        dateStr: currentStr,
         dayOfWeek: i // 0=Mon, 1=Tue... logic for display? No, let's keep it simple.
-        // Actually dateKey is enough.
       });
-      current.setDate(current.getDate() + 1);
+      currentStr = addDays(currentStr, 1);
     }
     result.push({
       startDate: weekDays[0].dateStr,

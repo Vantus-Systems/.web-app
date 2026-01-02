@@ -10,11 +10,15 @@ export type EffectiveAssignment = {
   source: "weekday_default" | "assignment" | "override" | "none";
   isLocked: boolean;
   overrideReasons: string[];
+  doorsOpenTime?: string;
+  closeEarlyTime?: string;
 };
 
 /**
  * Generates a timezone-safe date key (YYYY-MM-DD) for a given Date object.
  * Uses UTC components to ensure consistency with parsed keys.
+ * WARNING: Ensure the input Date is set to UTC midnight if you intend to represent a calendar date,
+ * or understand that this will extract the UTC date component.
  */
 export const dateKey = (date: Date): string => {
   const y = date.getUTCFullYear();
@@ -27,8 +31,20 @@ export const dateKey = (date: Date): string => {
  * Parses a YYYY-MM-DD string into a Date object (UTC midnight).
  */
 export const parseDateKey = (key: string): Date => {
-  const [y, m, d] = key.split("-").map(Number);
+  const parts = key.split("-").map(Number);
+  const y = parts[0] ?? 1970;
+  const m = parts[1] ?? 1;
+  const d = parts[2] ?? 1;
   return new Date(Date.UTC(y, m - 1, d));
+};
+
+/**
+ * Adds days to a date string safely in UTC.
+ */
+export const addDays = (dateStr: string, days: number): string => {
+  const date = parseDateKey(dateStr);
+  date.setUTCDate(date.getUTCDate() + days);
+  return dateKey(date);
 };
 
 /**
@@ -45,23 +61,17 @@ export const resolveEffectiveAssignment = (
   const dayOfWeek = dateObj.getUTCDay(); // 0=Sun, 1=Mon...
 
   // 1. Weekday Default
-  // Mapping 0-6 to schema keys?
-  // Schema keys are likely "0", "1"... or "sun", "mon".
-  // Let's assume schema uses "0" (Sun) to "6" (Sat) string keys based on typical convention if not specified.
-  // If undefined, check standard lowercase 3-letter.
-  // Actually, I should standardize this.
-  // Let's check keys in weekdayDefaults if they exist.
-  // For safety, I'll try both numeric string and 3-letter code.
-  const dayCodes = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
-  const dayKeyNum = String(dayOfWeek);
-  const dayKeyStr = dayCodes[dayOfWeek];
+  // Normalize to 3-letter code for schema lookup
+  const dayCodes = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]; // Match schema convention usually
+  // Schema types say Record<string, ...>.
+  // Let's assume standard 3-letter title case based on OpsSchemaCompiler usage ("Mon", "Tue"...)
+  const dayKeyStr = dayCodes[dayOfWeek] ?? "Sun";
 
   const base: OpsSchemaCalendarAssignment | undefined =
-    calendar.weekdayDefaults?.[dayKeyNum] ||
     calendar.weekdayDefaults?.[dayKeyStr];
 
   const result: EffectiveAssignment = {
-    status: base?.status || "open", // Default to open if no default? Or closed? Usually open if undefined is risky.
+    status: base?.status || "open",
     effectiveProfileId: base?.profile_id || null,
     source: base ? "weekday_default" : "none",
     isLocked: false,
@@ -81,30 +91,32 @@ export const resolveEffectiveAssignment = (
   // 3. Overrides
   const overrides = calendar.overrides?.[dateStr] || [];
   if (overrides.length > 0) {
-    // Sort overrides? They are an array. Assuming order matters or last wins?
-    // Usually overrides are cumulative or last wins.
-    // Let's process them in order.
     overrides.forEach((ov) => {
-      if (ov.kind === "LOCKED") {
+      // Prioritize kinds
+      const kind = ov.kind || (ov.profile_id ? "PROFILE_SWAP" : null);
+
+      if (kind === "LOCKED") {
         result.isLocked = true;
         result.overrideReasons.push(ov.reason || "Locked");
-      } else if (ov.kind === "CLOSED") {
+      } else if (kind === "CLOSED") {
         result.status = "closed";
         result.overrideReasons.push(ov.reason || "Closed");
-      } else if (ov.kind === "CLOSE_EARLY") {
-        // Handle partial close logic if we supported it in EffectiveAssignment
-        // For now, treat as open but maybe add a note?
-        result.overrideReasons.push(ov.reason || "Early Close");
-      } else if (ov.kind === "PROFILE_SWAP") {
+      } else if (kind === "CLOSE_EARLY") {
+        result.closeEarlyTime = ov.untilTime;
+        result.overrideReasons.push(
+          ov.reason || `Close Early at ${ov.untilTime}`,
+        );
+      } else if (kind === "DOORS_OPEN") {
+        result.doorsOpenTime = ov.doors_open_time;
+        result.overrideReasons.push(
+          ov.reason || `Doors Open at ${ov.doors_open_time}`,
+        );
+      } else if (kind === "PROFILE_SWAP") {
         if (ov.profile_id) {
           result.effectiveProfileId = ov.profile_id;
           result.source = "override";
           result.overrideReasons.push(ov.reason || "Profile Swap");
         }
-      } else if (ov.profile_id) {
-        // Fallback for generic overrides with profile_id
-        result.effectiveProfileId = ov.profile_id;
-        result.source = "override";
       }
     });
   }

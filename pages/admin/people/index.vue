@@ -7,7 +7,6 @@
     @logout="logout"
   >
     <div class="space-y-6">
-      <!-- Tabs -->
       <div class="flex items-center gap-4 border-b border-slate-200">
         <button
           class="px-4 py-3 text-sm font-bold uppercase tracking-wider border-b-2 transition-colors"
@@ -33,12 +32,10 @@
         </button>
       </div>
 
-      <!-- Users Tab -->
       <div v-if="activeTab === 'users'" class="space-y-6">
         <div
           class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
         >
-          <!-- Search & Filters -->
           <div class="flex items-center gap-4 flex-1 w-full md:w-auto">
             <div class="relative flex-1 md:max-w-xs">
               <span
@@ -78,7 +75,6 @@
             </select>
           </div>
 
-          <!-- Add User Button -->
           <button
             class="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wider shadow-md hover:shadow-lg transition-all"
             @click="openCreateUser"
@@ -101,7 +97,6 @@
           </button>
         </div>
 
-        <!-- Users Table -->
         <div
           class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm"
         >
@@ -237,9 +232,7 @@
         </div>
       </div>
 
-      <!-- Shifts Tab -->
       <div v-if="activeTab === 'shifts'" class="space-y-6">
-        <!-- Shift Filters -->
         <div
           class="bg-white border border-slate-200 rounded-xl p-4 flex flex-col md:flex-row gap-4 items-end md:items-center"
         >
@@ -277,7 +270,6 @@
       </div>
     </div>
 
-    <!-- User Modal -->
     <UserModal
       :is-open="userModalOpen"
       :user="selectedUser"
@@ -290,6 +282,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue";
+import { useRouter } from "vue-router";
 import AdminShell from "~/components/admin/AdminShell.vue";
 import UserModal from "~/components/admin/UserModal.vue";
 import ShiftsTable from "~/components/admin/ShiftsTable.vue";
@@ -303,7 +296,12 @@ definePageMeta({
 
 const router = useRouter();
 const { getHeaders, refreshCsrfToken } = useCsrf();
-const session = ref<{ username?: string; role?: any } | null>(null);
+const session = ref<{
+  id: string;
+  username: string;
+  role: string;
+  is_active: boolean;
+} | null>(null);
 
 // Tabs
 const activeTab = ref<"users" | "shifts">("shifts");
@@ -346,10 +344,10 @@ const filteredUsers = computed(() => {
 
 const loadUsers = async () => {
   try {
-    const fetched = await $fetch("/api/admin/users", {
+    const fetched = await $fetch<AdminUser[]>("/api/admin/users", {
       credentials: "include",
     });
-    users.value = (Array.isArray(fetched) ? fetched : []).map((u: any) => ({
+    users.value = (Array.isArray(fetched) ? fetched : []).map((u) => ({
       ...u,
       role: u.role ?? "",
     }));
@@ -360,18 +358,15 @@ const loadUsers = async () => {
 
 const loadShifts = async () => {
   try {
-    const params: any = {};
+    const params: Record<string, string> = {};
     if (shiftFilters.value.start) params.start = shiftFilters.value.start;
     if (shiftFilters.value.end) params.end = shiftFilters.value.end;
 
-    const fetched = await $fetch("/api/admin/shift-records", {
+    const fetched = await $fetch<ShiftRecord[]>("/api/admin/shift-records", {
       params,
       credentials: "include",
     });
-    shifts.value = Array.isArray(fetched) ? fetched.map(shift => ({
-      ...shift,
-      shift: shift.shift === 'AM' ? 'AM' : 'PM'
-    })) : [];
+    shifts.value = Array.isArray(fetched) ? fetched : [];
   } catch (e) {
     console.error("Failed to load shifts", e);
   }
@@ -387,12 +382,12 @@ const openEditUser = (user: AdminUser) => {
   userModalOpen.value = true;
 };
 
-const handleSaveUser = async (formData: any) => {
+const handleSaveUser = async (formData: Partial<AdminUser>) => {
   userModalLoading.value = true;
   try {
     if (selectedUser.value) {
       // Edit
-      const updated = await $fetch(
+      const updated = await $fetch<AdminUser>(
         `/api/admin/users/${selectedUser.value.id}`,
         {
           method: "PATCH",
@@ -404,17 +399,17 @@ const handleSaveUser = async (formData: any) => {
       // Update local list
       const index = users.value.findIndex((u) => u.id === updated.id);
       if (index !== -1) {
-        users.value[index] = { ...updated, role: (updated as any).role ?? "" };
+        users.value[index] = updated;
       }
     } else {
       // Create
-      const created = await $fetch("/api/admin/users", {
+      const created = await $fetch<AdminUser>("/api/admin/users", {
         method: "POST",
         body: formData,
         headers: getHeaders(),
         credentials: "include",
       });
-      users.value.push({ ...created, role: (created as any).role ?? "" });
+      users.value.push(created);
     }
     userModalOpen.value = false;
   } catch (e: any) {
@@ -453,10 +448,24 @@ const logout = async () => {
 
 // --- Lifecycle ---
 onMounted(async () => {
-  const sessionData = await $fetch("/api/auth/user", {
-    credentials: "include",
-  });
-  session.value = sessionData.user;
+  try {
+    const sessionData = await $fetch<{
+      user: {
+        id: string;
+        username: string;
+        role: string;
+        is_active: boolean;
+      };
+    }>("/api/auth/user", {
+      credentials: "include",
+    });
+    session.value = sessionData.user;
+  } catch (e) {
+    console.error("Failed to load session", e);
+    // Redirect to login if session load fails
+    router.push("/admin/login");
+    return;
+  }
 
   await loadUsers();
 
@@ -475,3 +484,7 @@ watch(activeTab, (newTab) => {
   if (newTab === "shifts") loadShifts();
 });
 </script>
+
+<style scoped>
+/* Add any custom styles here */
+</style>

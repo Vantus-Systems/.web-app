@@ -516,8 +516,8 @@
         <!-- CENTER: Timeline -->
         <div class="flex-1 border-r border-slate-200 flex flex-col min-w-0">
           <TimelineGantt
-            :flow-segments="draft.timelineConfiguration.flowSegments"
-            :overlay-events="draft.timelineConfiguration.overlayEvents"
+            :flow-segments="legacyFlowSegments"
+            :overlay-events="legacyOverlayEvents"
             :selected-id="selection?.id"
             @select="handleSelect"
             @add-flow-segment="addFlowSegment"
@@ -545,10 +545,16 @@ import { ref, watch, computed, toRaw, nextTick } from "vue";
 import RateCardLibrary from "./pricing/RateCardLibrary.vue";
 import TimelineGantt from "./pricing/TimelineGantt.vue";
 import InspectorPanel from "./pricing/InspectorPanel.vue";
-import type { OpsSchema } from "~/types/ops-schema";
+import type { OpsSchemaV2 } from "~/types/ops-schema";
+
+// Extend type to allow legacy properties for backward compatibility
+type ExtendedOpsSchema = OpsSchemaV2 & {
+  daytime?: any;
+  evening?: any;
+};
 
 const props = defineProps<{
-  modelValue: OpsSchema | null;
+  modelValue: ExtendedOpsSchema | null;
   isSaving: boolean;
 }>();
 
@@ -557,27 +563,39 @@ const emit = defineEmits(["update:modelValue", "save"]);
 // --- Local Draft Management ---
 const isSyncing = ref(false);
 
-const cloneDraft = (value: any): OpsSchema => {
+const cloneDraft = (value: any): ExtendedOpsSchema => {
   if (!value || typeof value !== "object") {
     // Return a default empty schema structure if null
     return {
+      schema_version: "2.0",
       meta: {
         name: "New Schema",
-        status: "Draft",
-        version: 1,
-        updatedAt: new Date().toISOString(),
+        status: "draft",
+        currency: "USD",
+        timezone: "America/New_York",
+        schema_version: "2.0",
       },
       definitions: { rateCards: [], bundles: [], inventoryTiers: [] },
-      timelineConfiguration: { flowSegments: [], overlayEvents: [] },
+      timeline: {
+        operationalHours: { start: "09:00", end: "23:00", isOpen: true },
+        flowSegments: [],
+        overlayEvents: [],
+      },
       logicTriggers: [],
       dayProfiles: [],
+      calendar: {
+        range: { start: "", end: "" },
+        weekdayDefaults: {},
+        assignments: {},
+        overrides: {},
+      },
     };
   }
   const rawValue = toRaw(value);
   return JSON.parse(JSON.stringify(rawValue));
 };
 
-const draft = ref<OpsSchema>(cloneDraft(props.modelValue));
+const draft = ref<ExtendedOpsSchema>(cloneDraft(props.modelValue));
 
 const syncDraftFromProps = (value: any) => {
   isSyncing.value = true;
@@ -627,12 +645,12 @@ const selectedItem = computed(() => {
   if (type === "bundle")
     return draft.value.definitions.bundles.find((x) => x.id === id);
   if (type === "flowSegment")
-    return draft.value.timelineConfiguration.flowSegments.find(
-      (x) => x.id === id,
+    return draft.value.timeline.flowSegments.find(
+      (x: any) => x.id === id,
     );
   if (type === "overlayEvent")
-    return draft.value.timelineConfiguration.overlayEvents.find(
-      (x) => x.id === id,
+    return draft.value.timeline.overlayEvents.find(
+      (x: any) => x.id === id,
     );
   return null;
 });
@@ -641,13 +659,35 @@ const selectedItem = computed(() => {
 
 const generateId = (prefix: string) => `${prefix}-${Date.now()}`;
 
+// Transform OpsSchemaV2 data to legacy format for TimelineGantt component
+const legacyFlowSegments = computed(() => {
+  return draft.value.timeline.flowSegments.map((seg: any) => ({
+    ...seg,
+    name: seg.label,
+    startTime: seg.time_start,
+    endTime: seg.time_end,
+  }));
+});
+
+const legacyOverlayEvents = computed(() => {
+  return draft.value.timeline.overlayEvents.map((evt: any) => ({
+    ...evt,
+    name: evt.label,
+    startTime: evt.time_start,
+    endTime: evt.time_end,
+  }));
+});
+
 const addRateCard = () => {
   const id = generateId("rc");
   draft.value.definitions.rateCards.push({
     id,
     name: "New Rate Card",
-    basePrice: 0,
     category: "Regular",
+    yield_configuration: {
+      mode: "standard_rate",
+      active_bundles: [],
+    },
   });
   handleSelect({ type: "rateCard", id });
 };
@@ -658,29 +698,31 @@ const addBundle = () => {
     id,
     name: "New Bundle",
     price: 0,
-    rateCardIds: [],
+    items: [],
   });
   handleSelect({ type: "bundle", id });
 };
 
 const addFlowSegment = () => {
   const id = generateId("fs");
-  draft.value.timelineConfiguration.flowSegments.push({
+  draft.value.timeline.flowSegments.push({
     id,
-    name: "New Segment",
-    startTime: "10:00",
-    endTime: "12:00",
+    label: "New Segment",
+    time_start: "10:00",
+    time_end: "12:00",
+    rate_card_id: "",
   });
   handleSelect({ type: "flowSegment", id });
 };
 
 const addOverlayEvent = () => {
   const id = generateId("oe");
-  draft.value.timelineConfiguration.overlayEvents.push({
+  draft.value.timeline.overlayEvents.push({
     id,
-    name: "New Event",
-    startTime: "19:00",
-    endTime: "19:30",
+    label: "New Event",
+    time_start: "19:00",
+    time_end: "19:30",
+    is_hard_ticket: false,
   });
   handleSelect({ type: "overlayEvent", id });
 };
@@ -698,15 +740,15 @@ const handleUpdate = ({ type, data }: { type: string; data: any }) => {
     );
     if (idx !== -1) draft.value.definitions.bundles[idx] = data;
   } else if (type === "flowSegment") {
-    const idx = draft.value.timelineConfiguration.flowSegments.findIndex(
-      (x) => x.id === data.id,
+    const idx = draft.value.timeline.flowSegments.findIndex(
+      (x: any) => x.id === data.id,
     );
-    if (idx !== -1) draft.value.timelineConfiguration.flowSegments[idx] = data;
+    if (idx !== -1) draft.value.timeline.flowSegments[idx] = data;
   } else if (type === "overlayEvent") {
-    const idx = draft.value.timelineConfiguration.overlayEvents.findIndex(
-      (x) => x.id === data.id,
+    const idx = draft.value.timeline.overlayEvents.findIndex(
+      (x: any) => x.id === data.id,
     );
-    if (idx !== -1) draft.value.timelineConfiguration.overlayEvents[idx] = data;
+    if (idx !== -1) draft.value.timeline.overlayEvents[idx] = data;
   }
   // draft watcher will emit update
 };
@@ -721,17 +763,107 @@ const handleDelete = ({ type, id }: { type: string; id: string }) => {
         (x) => x.id !== id,
       );
     } else if (type === "flowSegment") {
-      draft.value.timelineConfiguration.flowSegments =
-        draft.value.timelineConfiguration.flowSegments.filter(
-          (x) => x.id !== id,
+      draft.value.timeline.flowSegments =
+        draft.value.timeline.flowSegments.filter(
+          (x: any) => x.id !== id,
         );
     } else if (type === "overlayEvent") {
-      draft.value.timelineConfiguration.overlayEvents =
-        draft.value.timelineConfiguration.overlayEvents.filter(
-          (x) => x.id !== id,
+      draft.value.timeline.overlayEvents =
+        draft.value.timeline.overlayEvents.filter(
+          (x: any) => x.id !== id,
         );
     }
     selection.value = null;
+  }
+};
+
+// Template variables for daytime/evening tabs (legacy pricing structure)
+const tabs = ref([
+  { id: 'daytime', name: 'Daytime' },
+  { id: 'evening', name: 'Evening' }
+]);
+const activeTab = ref('daytime');
+
+const daySessionIcons = ['Sun', 'Coffee', 'Clock', 'Calendar', 'Star'];
+const machineTypeOptions = ['individual', 'bundle', 'premium'];
+
+const addDaytimeSession = () => {
+  if (!draft.value.daytime) draft.value.daytime = { sessions: [], jackpots: [] } as any;
+  if (!draft.value.daytime.sessions) draft.value.daytime.sessions = [];
+  draft.value.daytime.sessions.push({
+    id: generateId('session'),
+    name: '',
+    timeRange: '',
+    icon: 'Clock',
+    description: '',
+    jackpot: '',
+    vibe: [],
+    machines: [],
+    paperRules: { minSpend: '', minPaperCards: 1 },
+    paperRulesAdvanced: { minSpendAdvanced: '', maxPaperCards: '' }
+  });
+};
+
+const removeDaytimeSession = (index: number) => {
+  if (draft.value.daytime?.sessions) {
+    draft.value.daytime.sessions.splice(index, 1);
+  }
+};
+
+const getIcon = (iconName: string) => iconName;
+
+const addSessionVibe = (session: any) => {
+  if (!session.vibe) session.vibe = [];
+  session.vibe.push('');
+};
+
+const removeSessionVibe = (session: any, index: number) => {
+  if (session.vibe) session.vibe.splice(index, 1);
+};
+
+const addMachineToSession = (session: any) => {
+  if (!session.machines) session.machines = [];
+  session.machines.push({
+    description: '',
+    price: '',
+    type: 'individual',
+    savings: ''
+  });
+};
+
+const removeMachineFromSession = (session: any, index: number) => {
+  if (session.machines) session.machines.splice(index, 1);
+};
+
+const addDaytimeJackpot = () => {
+  if (!draft.value.daytime) draft.value.daytime = { sessions: [], jackpots: [] } as any;
+  if (!draft.value.daytime.jackpots) draft.value.daytime.jackpots = [];
+  draft.value.daytime.jackpots.push({
+    name: '',
+    prize: '',
+    time: ''
+  });
+};
+
+const removeDaytimeJackpot = (index: number) => {
+  if (draft.value.daytime?.jackpots) {
+    draft.value.daytime.jackpots.splice(index, 1);
+  }
+};
+
+const addEveningMachine = () => {
+  if (!draft.value.evening) draft.value.evening = { machines: [], startTime: '', valueProposition: '', scheduleNote: '' } as any;
+  if (!draft.value.evening.machines) draft.value.evening.machines = [];
+  draft.value.evening.machines.push({
+    description: '',
+    price: '',
+    type: 'individual'
+  });
+};
+
+const removeEveningMachine = (index: number) => {
+  if (draft.value.evening?.machines) {
+    draft.value.evening.machines.splice(index, 1);
   }
 };
 </script>

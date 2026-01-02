@@ -146,7 +146,7 @@ import ScheduleProfileLibrary from "~/components/admin/schedule/ScheduleProfileL
 import ScheduleInspector from "~/components/admin/schedule/ScheduleInspector.vue";
 import ScheduleContextMenu from "~/components/admin/schedule/ScheduleContextMenu.vue";
 import ScheduleMiniTimeline from "~/components/admin/schedule/ScheduleMiniTimeline.vue";
-import { dateKey, resolveEffectiveAssignment, applyAssignment, clearAssignment, applyOverride, removeOverride } from "~/utils/schedule-calendar";
+import { dateKey, resolveEffectiveAssignment, applyAssignment, clearAssignment, applyOverride, removeOverride, addDays, parseDateKey } from "~/utils/schedule-calendar";
 
 const props = defineProps<{
   modelValue: OpsSchemaV2;
@@ -253,27 +253,26 @@ const validationErrors = computed(() => {
 
   // 2. Gap Analysis (Open days with no profile)
   // Check range (limit to 1 year to avoid performance hit)
-  const start = new Date(activeDateRange.value.start);
-  const end = new Date(activeDateRange.value.end);
-  const current = new Date(start);
+  const startStr = activeDateRange.value.start;
+  const endStr = activeDateRange.value.end;
+  let currentStr = startStr;
   let checked = 0;
   
-  while (current <= end && checked < 370) {
-    const dStr = dateKey(current);
-    const eff = resolveEffectiveAssignment(calendar, dStr);
+  while (currentStr <= endStr && checked < 370) {
+    const eff = resolveEffectiveAssignment(calendar, currentStr);
     
     if (eff.status === 'open' && !eff.effectiveProfileId) {
        // Only report first few to avoid spam
        if (errors.length < 10) {
-         errors.push(`Gap on ${dStr}: Open status but no profile assigned.`);
+         errors.push(`Gap on ${currentStr}: Open status but no profile assigned.`);
        }
     }
     
-    current.setDate(current.getDate() + 1);
+    currentStr = addDays(currentStr, 1);
     checked++;
   }
   
-  if (checked >= 370 && current <= end) {
+  if (checked >= 370 && currentStr <= endStr) {
     // Range too big, stopped early
   }
 
@@ -357,21 +356,20 @@ const handleBulkClear = () => {
 };
 
 const handleSmartFill = (payload: { range: { start: string, end: string }, weekdays: number[], profileId: string }) => {
-  // Use iterateDateKeysInclusive from util (need to export it or just loop)
-  // I will just loop here using Dates
-  const start = new Date(payload.range.start);
-  const end = new Date(payload.range.end);
-  const current = new Date(start);
+  const startStr = payload.range.start;
+  const endStr = payload.range.end;
+  let currentStr = startStr;
   
-  while (current <= end) {
-    if (payload.weekdays.includes(current.getDay())) {
-      const k = dateKey(current);
-      applyAssignment(draft.value.calendar, k, {
+  while (currentStr <= endStr) {
+    const d = parseDateKey(currentStr);
+    // getUTCDay: 0=Sun, 1=Mon, etc.
+    if (payload.weekdays.includes(d.getUTCDay())) {
+      applyAssignment(draft.value.calendar, currentStr, {
         status: 'open',
         profile_id: payload.profileId
       });
     }
-    current.setDate(current.getDate() + 1);
+    currentStr = addDays(currentStr, 1);
   }
 };
 
@@ -434,12 +432,12 @@ const handleExtendRange = (direction: 'start' | 'end') => {
   }
 
   if (direction === 'end') {
-    const end = new Date(currentRange.end);
-    end.setMonth(end.getMonth() + 2);
+    const end = parseDateKey(currentRange.end);
+    end.setUTCMonth(end.getUTCMonth() + 2);
     draft.value.calendar.range.end = dateKey(end);
   } else {
-    const start = new Date(currentRange.start);
-    start.setMonth(start.getMonth() - 1);
+    const start = parseDateKey(currentRange.start);
+    start.setUTCMonth(start.getUTCMonth() - 1);
     draft.value.calendar.range.start = dateKey(start);
   }
 };

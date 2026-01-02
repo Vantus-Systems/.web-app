@@ -305,12 +305,12 @@
 
         <div class="flex-1 overflow-y-auto">
           <TimelineInspectorEnhanced
-            v-if="selected"
             :selected="selected"
             :rate-cards="rateCards"
             :flow-segments="flowSegments"
             :overlay-events="overlayEvents"
             :logic-triggers="logicTriggers"
+            :available-bundles="schema.definitions?.bundles || []"
             :violations="violations"
             :is-dirty="isDirty"
             :is-saving="isSaving"
@@ -321,11 +321,8 @@
             @create-linked-overlay="createLinkedOverlay"
             @delete="removeSelection"
             @apply-changes="applyChanges"
+            @select="selectItem"
           />
-          <div v-else class="p-6 text-center text-sm text-tertiary">
-            <p class="mb-2">Select an item to inspect</p>
-            <p class="text-xs">Click on a rate card, segment, overlay, or trigger</p>
-          </div>
         </div>
       </div>
 

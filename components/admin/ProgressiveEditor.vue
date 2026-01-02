@@ -82,7 +82,7 @@
         <button
           type="button"
           class="w-full bg-primary-900 hover:bg-primary-800 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-[0.98] flex items-center justify-center space-x-2"
-          @click="playNoWinner(key)"
+          @click="playNoWinner(String(key))"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

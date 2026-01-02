@@ -38,8 +38,8 @@
             class="w-2 h-2 rounded-full bg-accent-primary animate-pulse"
           />
         </div>
-        <div class="text-[10px] text-tertiary group-hover:text-secondary">
-          {{ profile.timeline?.operationalHours?.start }} - {{ profile.timeline?.operationalHours?.end }}
+        <div class="text-[10px] text-tertiary group-hover:text-secondary capitalize">
+          {{ profile.category }} • {{ profile.segment_ids.length }} Segments
         </div>
       </button>
 
@@ -63,9 +63,10 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
+import type { OpsSchemaDayProfile } from "~/types/ops-schema";
 
 const props = defineProps<{
-  profiles: any[];
+  profiles: OpsSchemaDayProfile[];
   selectedProfileId: string | null;
 }>();
 

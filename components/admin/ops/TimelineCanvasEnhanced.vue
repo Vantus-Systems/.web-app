@@ -18,7 +18,7 @@
 
         <!-- Time Scale -->
         <div class="flex-1 overflow-hidden relative" ref="rulerRef">
-          <div class="flex h-full">
+          <div class="flex h-full" :style="{ width: totalWidth + 'px' }">
             <div
               v-for="hour in timeScale"
               :key="hour.label"
@@ -78,7 +78,7 @@
         </div>
 
         <!-- Main Canvas -->
-        <div class="flex-1 relative" ref="canvasRef">
+        <div class="flex-1 relative" ref="canvasRef" :style="{ minWidth: totalWidth + 'px' }">
           <!-- Grid Lines -->
           <div v-if="showGrid" class="absolute inset-0 pointer-events-none">
             <div
@@ -120,7 +120,7 @@
             <div
               v-for="segment in flowSegments"
               :key="segment.id"
-              class="absolute top-2 h-8 rounded-md border cursor-pointer transition-all hover:shadow-sm group"
+              class="absolute top-2 h-8 rounded-md border cursor-pointer transition-all hover:shadow-sm group text-white"
               :class="[
                 selectedId === segment.id && selectedType === 'segment'
                   ? 'border-accent-primary ring-2 ring-accent-primary/20'
@@ -131,7 +131,6 @@
                 left: getSegmentLeft(segment) + 'px',
                 width: getSegmentWidth(segment) + 'px',
                 backgroundColor: segment.color_code || '#64748b',
-                color: '#fff',
               }"
               @click="selectItem('segment', segment.id)"
               @mousedown="startDrag('segment', segment.id, $event)"
@@ -227,7 +226,7 @@
               <!-- Dependency Line -->
               <svg
                 v-if="trigger.target_event || (trigger.isRelative && trigger.relativeAnchor)"
-                class="absolute top-4 left-0 w-full h-4 pointer-events-none"
+                class="absolute top-4 left-0 w-full h-4 pointer-events-none text-accent-primary"
                 :style="{ left: getTriggerLeft(trigger) + 'px' }"
               >
                 <line
@@ -235,7 +234,7 @@
                   y1="0"
                   :x2="getDependencyLineEnd(trigger)"
                   y2="4"
-                  stroke="#0A84FF"
+                  stroke="currentColor"
                   stroke-width="1"
                   stroke-dasharray="2,2"
                   opacity="0.5"
@@ -309,7 +308,7 @@ import {
   enhancedSnapMinutes,
 } from "~/utils/ops-schema-enhanced.utils";
 
-import { toMinutes, formatMinutes, normalizeTimeRange } from "~/utils/ops-schema.utils";
+import { toMinutes, formatMinutes, normalizeTimeRange, toOperationalMinutes, normalizeRangeToOperational } from "~/utils/ops-schema.utils";
 
 // Props
 const props = defineProps<{
@@ -379,25 +378,24 @@ const densityScale = computed(() => {
 
 // Time Range
 const operationalRange = computed(() => {
-  return normalizeTimeRange(props.operationalStart, props.operationalEnd);
+  return normalizeRangeToOperational(props.operationalStart, props.operationalEnd, props.operationalStart);
 });
 
 const totalWidth = computed(() => {
-  const range = operationalRange.value;
-  const duration = range.end - range.start;
-  return duration * densityScale.value;
+  return operationalRange.value.duration * densityScale.value;
 });
 
 // Time Scale for Ruler
 const timeScale = computed(() => {
   const range = operationalRange.value;
-  const duration = range.end - range.start;
-  const hours = Math.ceil(duration / 60);
+  const hours = Math.ceil(range.duration / 60);
   const widthPerHour = (60 * densityScale.value);
 
   return Array.from({ length: hours }, (_, i) => {
-    const hour = Math.floor(range.start / 60) + i;
-    const label = `${hour.toString().padStart(2, '0')}:00`;
+    // Calculate the actual hour based on operational start
+    const startHour = Math.floor(toMinutes(props.operationalStart) / 60);
+    const currentHour = (startHour + i) % 24;
+    const label = `${currentHour.toString().padStart(2, '0')}:00`;
     return { label, width: widthPerHour };
   });
 });
@@ -409,7 +407,7 @@ const gridLines = computed(() => {
   
   // Major lines every hour, minor every snap increment
   const snapMinutes = props.snapIncrement;
-  const totalMinutes = range.end - range.start;
+  const totalMinutes = range.duration;
   
   for (let minute = 0; minute <= totalMinutes; minute += snapMinutes) {
     const left = minute * densityScale.value;
@@ -426,21 +424,25 @@ const heatmapRanges = computed(() => {
   
   // Find high traffic periods (overlaps)
   props.overlayEvents.forEach(overlay => {
-    const overlayRange = normalizeTimeRange(overlay.time_start, overlay.time_end);
+    const overlayRange = normalizeRangeToOperational(overlay.time_start, overlay.time_end, props.operationalStart);
     
     props.flowSegments.forEach(segment => {
-      const segmentRange = normalizeTimeRange(segment.time_start, segment.time_end);
+      const segmentRange = normalizeRangeToOperational(segment.time_start, segment.time_end, props.operationalStart);
       
       const overlapStart = Math.max(overlayRange.start, segmentRange.start);
       const overlapEnd = Math.min(overlayRange.end, segmentRange.end);
       
       if (overlapStart < overlapEnd) {
-        const left = (overlapStart - operationalRange.value.start) * densityScale.value;
+        const left = (overlapStart - operationalRange.value.start) * densityScale.value; // operationalRange.start is 0 usually in relative terms, but let's be safe
+        // Actually operationalRange.start from normalizeRangeToOperational is 0 if we passed operationalStart as the 3rd arg.
+        // Let's check logic: normalizeRangeToOperational returns absolute minutes from 0-based operational timeline.
+        // Yes, so overlapStart is already the offset from operationalStart.
+        
         const width = (overlapEnd - overlapStart) * densityScale.value;
         ranges.push({
           start: overlapStart,
           end: overlapEnd,
-          left,
+          left: overlapStart * densityScale.value,
           width,
           density: "high",
         });
@@ -457,41 +459,38 @@ const operationalStartLeft = computed(() => {
 });
 
 const operationalWidth = computed(() => {
-  const range = operationalRange.value;
-  const duration = range.end - range.start;
-  return duration * densityScale.value;
+  return operationalRange.value.duration * densityScale.value;
+});
+
+const isEmpty = computed(() => {
+  return props.flowSegments.length === 0 && props.overlayEvents.length === 0 && props.logicTriggers.length === 0;
 });
 
 // Methods
 
 const getSegmentLeft = (segment: OpsSchemaFlowSegment): number => {
-  const range = normalizeTimeRange(segment.time_start, segment.time_end);
-  const offset = range.start - operationalRange.value.start;
-  return offset * densityScale.value;
+  const range = normalizeRangeToOperational(segment.time_start, segment.time_end, props.operationalStart);
+  return range.start * densityScale.value;
 };
 
 const getSegmentWidth = (segment: OpsSchemaFlowSegment): number => {
-  const range = normalizeTimeRange(segment.time_start, segment.time_end);
-  const duration = range.end - range.start;
-  return duration * densityScale.value;
+  const range = normalizeRangeToOperational(segment.time_start, segment.time_end, props.operationalStart);
+  return range.duration * densityScale.value;
 };
 
 const getEventLeft = (event: OpsSchemaOverlayEvent): number => {
-  const start = toMinutes(event.time_start);
-  const offset = start - operationalRange.value.start;
-  return offset * densityScale.value;
+  const start = toOperationalMinutes(event.time_start, props.operationalStart);
+  return start * densityScale.value;
 };
 
 const getEventWidth = (event: OpsSchemaOverlayEvent): number => {
-  const range = normalizeTimeRange(event.time_start, event.time_end);
-  const duration = range.end - range.start;
-  return duration * densityScale.value;
+  const range = normalizeRangeToOperational(event.time_start, event.time_end, props.operationalStart);
+  return range.duration * densityScale.value;
 };
 
 const getTriggerLeft = (trigger: EnhancedLogicTrigger): number => {
-  const time = toMinutes(trigger.trigger_time);
-  const offset = time - operationalRange.value.start;
-  return offset * densityScale.value;
+  const time = toOperationalMinutes(trigger.trigger_time, props.operationalStart);
+  return time * densityScale.value;
 };
 
 const getDependencyLineEnd = (trigger: EnhancedLogicTrigger): number => {
@@ -510,9 +509,9 @@ const getDependencyLineEnd = (trigger: EnhancedLogicTrigger): number => {
                    props.overlayEvents.find(o => o.id === trigger.relativeAnchor.targetId);
     if (target) {
       const anchorTime = trigger.relativeAnchor.anchorPoint === "start"
-        ? toMinutes(target.time_start)
-        : toMinutes(target.time_end);
-      const anchorLeft = (anchorTime - operationalRange.value.start) * densityScale.value;
+        ? toOperationalMinutes(target.time_start, props.operationalStart)
+        : toOperationalMinutes(target.time_end, props.operationalStart);
+      const anchorLeft = anchorTime * densityScale.value;
       const triggerLeft = getTriggerLeft(trigger);
       return anchorLeft - triggerLeft;
     }
@@ -522,11 +521,11 @@ const getDependencyLineEnd = (trigger: EnhancedLogicTrigger): number => {
 };
 
 const hasGapAround = (segment: OpsSchemaFlowSegment): boolean => {
-  const range = normalizeTimeRange(segment.time_start, segment.time_end);
+  const range = normalizeRangeToOperational(segment.time_start, segment.time_end, props.operationalStart);
   
   // Check if there's a gap before this segment
   const segments = props.flowSegments
-    .map(s => normalizeTimeRange(s.time_start, s.time_end))
+    .map(s => normalizeRangeToOperational(s.time_start, s.time_end, props.operationalStart))
     .sort((a, b) => a.start - b.start);
   
   const index = segments.findIndex(s => s.start === range.start && s.end === range.end);
@@ -543,8 +542,9 @@ const hasGapAround = (segment: OpsSchemaFlowSegment): boolean => {
   }
   
   // Check against operational hours
-  if (range.start > operationalRange.value.start && index === 0) return true;
-  if (range.end < operationalRange.value.end && index === segments.length - 1) return true;
+  // operationalRange.start is 0 in operational minutes
+  if (range.start > 0 && index === 0) return true;
+  if (range.end < operationalRange.value.duration && index === segments.length - 1) return true;
   
   return false;
 };

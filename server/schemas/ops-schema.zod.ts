@@ -3,7 +3,7 @@ import {
   detectOverlaps,
   isTimeWithinRange,
   normalizeTimeRange,
-} from "~/utils/ops-schema.utils";
+} from "../../utils/ops-schema.utils";
 
 const timeHHMM = z
   .string()
@@ -119,11 +119,47 @@ const calendarAssignmentSchema = z.object({
   profile_id: z.string().optional(),
 });
 
-const calendarOverrideSchema = z.object({
-  id: z.string().min(1),
-  profile_id: z.string().min(1),
-  reason: z.string().optional(),
-});
+const calendarOverrideSchema = z
+  .object({
+    id: z.string().min(1),
+    profile_id: z.string().optional(),
+    kind: z
+      .enum(["LOCKED", "CLOSED", "CLOSE_EARLY", "PROFILE_SWAP", "DOORS_OPEN"])
+      .optional(),
+    reason: z.string().optional(),
+    note: z.string().optional(),
+    untilTime: timeHHMM.optional(),
+    doors_open_time: timeHHMM.optional(),
+  })
+  .superRefine((data, ctx) => {
+    // Backward compatibility: if profile_id exists but no kind, treat as PROFILE_SWAP
+    const effectiveKind =
+      data.kind || (data.profile_id ? "PROFILE_SWAP" : null);
+
+    if (effectiveKind === "PROFILE_SWAP" && !data.profile_id) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "PROFILE_SWAP override requires a profile_id.",
+        path: ["profile_id"],
+      });
+    }
+
+    if (effectiveKind === "DOORS_OPEN" && !data.doors_open_time) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "DOORS_OPEN override requires doors_open_time.",
+        path: ["doors_open_time"],
+      });
+    }
+
+    if (effectiveKind === "CLOSE_EARLY" && !data.untilTime) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "CLOSE_EARLY override requires untilTime.",
+        path: ["untilTime"],
+      });
+    }
+  });
 
 const enumerateDates = (start: string, end: string) => {
   const dates: string[] = [];
@@ -357,7 +393,7 @@ export const opsSchemaV2Schema = z
 
     Object.entries(schema.calendar.overrides).forEach(([date, entries]) => {
       entries.forEach((entry, index) => {
-        if (!profileIds.has(entry.profile_id)) {
+        if (entry.profile_id && !profileIds.has(entry.profile_id)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: `Calendar override profile_id not found for ${date}`,

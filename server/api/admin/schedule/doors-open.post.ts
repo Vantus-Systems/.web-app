@@ -2,8 +2,8 @@ import { defineEventHandler, readBody, createError } from "h3";
 import { settingsService } from "@server/services/settings.service";
 import { auditService } from "@server/services/audit.service";
 import { v4 as uuidv4 } from "uuid";
-import { assertAnyPermission } from "~/server/utils/permissions";
 import { z, ZodError } from "zod";
+import { assertAnyPermission } from "~/server/utils/permissions";
 import type {
   OpsSchemaV2,
   OpsSchemaCalendarOverride,
@@ -29,10 +29,13 @@ const currentYearRange = () => {
 };
 
 const buildDefaultWeekdayDefaults = (): Record<string, { status: "closed" }> =>
-  weekDays.reduce((acc, day) => {
-    acc[day] = { status: "closed" };
-    return acc;
-  }, {} as Record<string, { status: "closed" }>);
+  weekDays.reduce(
+    (acc, day) => {
+      acc[day] = { status: "closed" };
+      return acc;
+    },
+    {} as Record<string, { status: "closed" }>,
+  );
 
 const buildEmptyOpsSchemaDraft = (): OpsSchemaV2 => ({
   schema_version: "v2",

@@ -7,7 +7,6 @@ import {
   toMinutes,
   formatMinutes,
   normalizeTimeRange,
-  snapMinutes,
   detectGaps,
   detectOverlaps,
 } from "./ops-schema.utils";
@@ -61,6 +60,11 @@ export const enhancedSnapMinutes = (
   anchorPoints: number[] = [],
 ): number => {
   const { gridIncrement, anchorSnapEnabled, anchorThreshold } = settings;
+
+  // Inline snapMinutes implementation
+  const snapMinutes = (minutes: number, increment: number) => {
+    return Math.round(minutes / increment) * increment;
+  };
 
   if (!anchorSnapEnabled || anchorPoints.length === 0) {
     return snapMinutes(value, gridIncrement);
@@ -128,6 +132,9 @@ export const applyRipple = (
   }
 
   const edited = sorted[editedIndex];
+  if (!edited) {
+    return { segments, error: "Segment not found" };
+  }
   const editedRange = normalizeTimeRange(edited.time_start, edited.time_end);
 
   // Calculate new times for edited segment
@@ -159,6 +166,9 @@ export const applyRipple = (
       // Add edited segment with new times
       result.push({
         ...edited,
+        id: edited.id,
+        label: edited.label,
+        rate_card_id: edited.rate_card_id,
         time_start: formatMinutes(newStart),
         time_end: formatMinutes(newEnd),
       });
@@ -166,6 +176,7 @@ export const applyRipple = (
     }
 
     const segment = sorted[i];
+    if (!segment) continue;
     const segmentRange = normalizeTimeRange(
       segment.time_start,
       segment.time_end,
@@ -182,6 +193,9 @@ export const applyRipple = (
       // For now, just apply the ripple
       result.push({
         ...segment,
+        id: segment.id,
+        label: segment.label,
+        rate_card_id: segment.rate_card_id,
         time_start: formatMinutes(newSegmentStart),
         time_end: formatMinutes(newSegmentEnd),
       });
@@ -214,6 +228,9 @@ export const applyKnifeSplit = (
   }
 
   const segment = segments[segmentIndex];
+  if (!segment) {
+    return { segments, error: "Segment not found" };
+  }
   const splitMinutes = toMinutes(splitTime);
   const range = normalizeTimeRange(segment.time_start, segment.time_end);
 
@@ -234,8 +251,12 @@ export const applyKnifeSplit = (
   }
 
   // Create left segment (original)
-  const leftSegment = {
+  const leftSegment: OpsSchemaFlowSegment = {
     ...segment,
+    id: segment.id,
+    label: segment.label,
+    rate_card_id: segment.rate_card_id,
+    time_start: segment.time_start,
     time_end: formatMinutes(splitMinutes),
   };
 
@@ -244,8 +265,10 @@ export const applyKnifeSplit = (
   const rightSegment: OpsSchemaFlowSegment = {
     ...segment,
     id: newSegmentId,
-    time_start: formatMinutes(splitMinutes),
     label: `${segment.label} (Part 2)`,
+    rate_card_id: segment.rate_card_id,
+    time_start: formatMinutes(splitMinutes),
+    time_end: segment.time_end,
   };
 
   // Replace original with left, add right
@@ -421,22 +444,24 @@ export const builtInConstraints: Constraint[] = [
 
       if (gaps.length > 0) {
         const gap = gaps[0];
-        // Create a break segment
-        const breakSegment: OpsSchemaFlowSegment = {
-          id: `break-${Date.now()}`,
-          label: "Break",
-          time_start: formatMinutes(gap.start),
-          time_end: formatMinutes(gap.end),
-          rate_card_id: "break-card", // Would need to ensure this exists
-          color_code: "#94a3b8",
-          allow_overlap: false,
-        };
+        if (gap) {
+          // Create a break segment
+          const breakSegment: OpsSchemaFlowSegment = {
+            id: `break-${Date.now()}`,
+            label: "Break",
+            time_start: formatMinutes(gap.start),
+            time_end: formatMinutes(gap.end),
+            rate_card_id: "break-card", // Would need to ensure this exists
+            color_code: "#94a3b8",
+            allow_overlap: false,
+          };
 
-        state.timeline.flowSegments.push(breakSegment);
-        // Sort segments
-        state.timeline.flowSegments.sort(
-          (a, b) => toMinutes(a.time_start) - toMinutes(b.time_start),
-        );
+          state.timeline.flowSegments.push(breakSegment);
+          // Sort segments
+          state.timeline.flowSegments.sort(
+            (a, b) => toMinutes(a.time_start) - toMinutes(b.time_start),
+          );
+        }
       }
 
       return state;
@@ -538,7 +563,7 @@ export const resolveRelativeTriggers = (
 export const deriveSimulationState = (
   schema: EnhancedOpsSchema,
   currentTime: number,
-  speed: SimulationSpeed = 1,
+  speed: 1 | 10 | 60 = 1,
 ): SimulationState => {
   const events: SimulationState["events"] = [];
 

@@ -129,8 +129,10 @@ export const generateTripleBingoPermutations = (
       const cells = Array(25).fill(0);
       for (const idx of combo) {
         const shape = shapes[idx];
-        for (const cell of shape) {
-          cells[cell] = 1;
+        if (shape) {
+          for (const cell of shape) {
+            cells[cell] = 1;
+          }
         }
       }
       cells[12] = 1; // Free space
@@ -146,7 +148,10 @@ export const generateTripleBingoPermutations = (
     for (let i = start; i < indices.length; i += 1) {
       // Limit to prevent browser crash if too many, though 17C3 is small (680)
       if (permutations.length >= 2000) return;
-      build(i + 1, [...combo, indices[i]]);
+      const indexValue = indices[i];
+      if (indexValue !== undefined) {
+        build(i + 1, [...combo, indexValue]);
+      }
     }
   };
 
@@ -173,7 +178,10 @@ export const generateSnakePattern = () => {
 
     for (let j = 0; j < snakeLength; j++) {
       const pathIndex = (i - j + path.length) % path.length;
-      cells[path[pathIndex]] = 1;
+      const cellIndex = path[pathIndex];
+      if (cellIndex !== undefined) {
+        cells[cellIndex] = 1;
+      }
     }
     frames.push(cells);
   }

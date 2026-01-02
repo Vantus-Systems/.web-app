@@ -98,7 +98,7 @@ export type OpsSchemaCalendarOverride = {
   reason?: string;
   note?: string;
   untilTime?: string;
-  doors_open_time?: string; // HH:mm
+  doors_open_time?: string;
 };
 
 export type OpsSchemaV2 = {

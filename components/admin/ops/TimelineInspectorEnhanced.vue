@@ -61,40 +61,41 @@
         <div class="pt-4 border-t border-divider">
           <div class="flex items-center justify-between mb-2">
             <h3 class="text-sm font-semibold text-primary">Active Bundles</h3>
-            <button
-              class="text-xs text-accent-primary hover:underline"
-              @click="addBundle"
-            >+ Add Bundle</button>
           </div>
           
-          <div v-if="editingRateCard.yield_configuration.active_bundles.length === 0" class="text-xs text-tertiary py-2">
-            No bundles configured
+          <div v-if="!availableBundles || availableBundles.length === 0" class="text-xs text-tertiary py-2">
+            No bundles defined in schema.
           </div>
           
-          <div v-else class="space-y-2">
-            <div
-              v-for="(bundle, idx) in editingRateCard.yield_configuration.active_bundles"
-              :key="idx"
-              class="flex items-center gap-2 p-2 bg-base rounded border border-divider"
+          <div v-else class="space-y-1 max-h-48 overflow-y-auto border border-divider rounded bg-surface p-1">
+            <label
+              v-for="bundle in availableBundles"
+              :key="bundle.id"
+              class="flex items-start gap-2 p-2 rounded hover:bg-base cursor-pointer transition-colors"
+              :class="editingRateCard.yield_configuration.active_bundles.includes(bundle.id) ? 'bg-accent-primary/5' : ''"
             >
               <input
-                v-model="bundle.name"
-                type="text"
-                placeholder="Bundle name"
-                class="flex-1 px-2 py-1 text-xs border border-divider rounded bg-surface"
+                type="checkbox"
+                :value="bundle.id"
+                v-model="editingRateCard.yield_configuration.active_bundles"
+                @change="markDirty('rateCard')"
+                class="mt-0.5 rounded border-secondary text-accent-primary focus:ring-accent-primary"
               />
-              <input
-                v-model.number="bundle.discount"
-                type="number"
-                step="0.1"
-                placeholder="Discount"
-                class="w-20 px-2 py-1 text-xs border border-divider rounded bg-surface"
-              />
-              <button
-                class="text-xs text-accent-error hover:underline"
-                @click="removeBundle(idx)"
-              >Remove</button>
-            </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-medium text-primary">{{ bundle.name }}</span>
+                  <span class="text-xs text-secondary font-mono">${{ bundle.price }}</span>
+                </div>
+                <div class="text-[10px] text-secondary truncate">
+                  {{ bundle.items.length }} items • {{ bundle.discount_label || 'No discount' }}
+                </div>
+              </div>
+            </label>
+          </div>
+          
+          <div class="mt-2 text-xs text-secondary flex justify-between">
+            <span>{{ editingRateCard.yield_configuration.active_bundles.length }} selected</span>
+            <span class="italic">Select bundles to enable for this rate</span>
           </div>
         </div>
 
@@ -529,10 +530,60 @@
         </div>
       </div>
 
-      <!-- No Selection -->
-      <div v-if="!selected" class="p-6 text-center text-sm text-tertiary">
-        <p class="mb-2">Select an item to inspect</p>
-        <p class="text-xs">Click on a rate card, segment, overlay, or trigger</p>
+      <!-- No Selection / Validation Summary -->
+      <div v-if="!selected" class="flex flex-col h-full">
+        <div class="p-6 text-center border-b border-divider">
+          <div class="text-secondary mb-2">
+            <LayoutDashboard class="w-12 h-12 mx-auto opacity-20" />
+          </div>
+          <h3 class="text-lg font-semibold text-primary mb-1">Inspector</h3>
+          <p class="text-sm text-tertiary">Select an item on the timeline to edit its properties.</p>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4">
+          <div v-if="violations.length > 0" class="space-y-4">
+            <div class="flex items-center justify-between">
+              <h4 class="text-sm font-bold text-primary flex items-center gap-2">
+                <AlertCircle class="w-4 h-4 text-accent-error" />
+                Validation Issues
+              </h4>
+              <span class="text-xs font-mono bg-accent-error/10 text-accent-error px-2 py-0.5 rounded-full">
+                {{ violations.length }}
+              </span>
+            </div>
+
+            <div class="space-y-2">
+              <div
+                v-for="(violation, index) in violations"
+                :key="index"
+                class="p-3 rounded border border-l-4 cursor-pointer transition-all hover:shadow-md"
+                :class="[
+                  violation.severity === 'error' 
+                    ? 'bg-accent-error/5 border-accent-error/20 border-l-accent-error' 
+                    : 'bg-accent-warning/5 border-accent-warning/20 border-l-accent-warning'
+                ]"
+                @click="emit('select', violation.entityType, violation.entityId)"
+              >
+                <div class="flex items-start justify-between gap-2">
+                  <span class="text-xs font-bold uppercase tracking-wider" 
+                    :class="violation.severity === 'error' ? 'text-accent-error' : 'text-accent-warning'">
+                    {{ violation.severity }}
+                  </span>
+                  <span class="text-[10px] text-tertiary uppercase">{{ violation.entityType }}</span>
+                </div>
+                <p class="text-sm text-primary mt-1 font-medium">{{ violation.message }}</p>
+                <p class="text-xs text-secondary mt-1">
+                  {{ formatMinutes(violation.time) }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div v-else class="text-center py-8 text-tertiary">
+             <CheckCircle class="w-8 h-8 mx-auto mb-2 opacity-20 text-accent-success" />
+             <p class="text-sm">No validation issues found.</p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -552,6 +603,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch, reactive } from "vue";
+import { LayoutDashboard, AlertCircle, CheckCircle } from 'lucide-vue-next';
 import type {
   OpsSchemaRateCard,
   OpsSchemaFlowSegment,
