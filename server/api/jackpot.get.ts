@@ -14,16 +14,15 @@ export default defineEventHandler(async () => {
   if (!data) return defaultStructure;
 
   const d = data as any;
+  let currentState = defaultStructure;
 
   // If already has new structure
   if ("babes" in d && "hornet" in d) {
-    return d;
+    currentState = d;
   }
-
   // Migration for legacy single-value format
-  // Old format: { value: number, lastUpdated: string }
-  if ("value" in d) {
-    return {
+  else if ("value" in d) {
+    currentState = {
       babes: { current: 0, backup: 0, label: "Bingo Babes Progressive" },
       hornet: {
         current: Number(d.value) || 0,
@@ -32,26 +31,6 @@ export default defineEventHandler(async () => {
       },
       lastUpdated: d.lastUpdated || new Date().toISOString(),
     };
-  }
-
-  // Fallback for empty object or unrecognizable format
-  let currentState = defaultStructure;
-
-  if (data) {
-    const d = data as any;
-    if ("babes" in d && "hornet" in d) {
-      currentState = d;
-    } else if ("value" in d) {
-      currentState = {
-        babes: { current: 0, backup: 0, label: "Bingo Babes Progressive" },
-        hornet: {
-          current: Number(d.value) || 0,
-          backup: 0,
-          label: "Progressive Hornet",
-        },
-        lastUpdated: d.lastUpdated || new Date().toISOString(),
-      };
-    }
   }
 
   // --- Auto-Increment Logic ---

@@ -404,6 +404,13 @@ import { ref, computed, onMounted, nextTick } from "vue";
 import BaseCard from "~/components/ui/BaseCard.vue";
 import BaseButton from "~/components/ui/BaseButton.vue";
 
+const props = defineProps<{
+  progressiveAmounts?: {
+    babes?: number;
+    hornet?: number;
+  };
+}>();
+
 const totalPayout = ref(0);
 const numWinners = ref(1);
 const idImage = ref<string | null>(null);

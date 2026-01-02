@@ -76,15 +76,15 @@
             <!-- Bingo Sales -->
             <label class="block space-y-2">
               <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
-                Bingo Sales ($)
+                Bingo Sales (Calculated)
               </span>
-              <input
-                v-model.number="formData.sales_bingo"
-                type="number"
-                step="0.01"
-                class="w-full font-bold border-slate-200 rounded-lg"
-                :class="formData.sales_bingo < 0 ? 'bg-rose-50 border-rose-300 text-rose-900' : ''"
-              />
+              <div 
+                class="w-full font-bold border rounded-lg px-3 py-2 bg-slate-100 flex items-center justify-between"
+                :class="calculatedBingo < 0 ? 'bg-rose-50 border-rose-300 text-rose-900' : 'border-slate-200 text-slate-700'"
+              >
+                <span>${{ formatCurrency(calculatedBingo) }}</span>
+                <span class="text-[10px] font-normal text-slate-500">(Deposit - Pull Tabs)</span>
+              </div>
             </label>
 
             <!-- Pull Tabs Sales -->
@@ -99,6 +99,22 @@
                 step="0.01"
                 class="w-full font-bold border-slate-200 rounded-lg"
               />
+            </label>
+          </div>
+
+          <!-- Negative Bingo Reason -->
+          <div v-if="calculatedBingo < 0" class="animate-in fade-in slide-in-from-top-2">
+            <label class="block space-y-2">
+              <span class="block text-xs font-bold text-rose-600 uppercase tracking-wider">
+                Reason for Negative Bingo
+              </span>
+              <textarea
+                v-model="formData.negative_bingo_reason"
+                rows="2"
+                class="w-full text-sm border-rose-200 bg-rose-50 rounded-lg focus:ring-rose-500 focus:border-rose-500 placeholder-rose-300"
+                placeholder="Please explain why bingo sales are negative..."
+                required
+              ></textarea>
             </label>
           </div>
 
@@ -239,7 +255,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import ShiftWizard from '~/components/admin/mic/ShiftWizard.vue';
 
 const props = defineProps<{
@@ -265,7 +281,6 @@ const denominations = [
 
 const formData = reactive({
   headcount: 0,
-  sales_bingo: 0,
   sales_pulltabs: 0,
   cash_currency: 0,
   cash_coins: 0,
@@ -293,6 +308,10 @@ const totalDeposit = computed(() => {
   return currency + (formData.cash_coins || 0) + (formData.checks_total || 0);
 });
 
+const calculatedBingo = computed(() => {
+  return totalDeposit.value - formData.sales_pulltabs;
+});
+
 const formatCurrency = (val: number) => {
   return new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 2,
@@ -309,23 +328,30 @@ const handleWorkflowSubmit = async (data: any) => {
 };
 
 const handleFormSubmit = async () => {
+  if (calculatedBingo.value < 0 && !formData.negative_bingo_reason) {
+    alert("Please provide a reason for negative bingo sales.");
+    return;
+  }
+
   const payload = {
     date: props.date,
     headcount: formData.headcount,
-    sales_bingo: formData.sales_bingo,
-    sales_pulltabs: formData.sales_bingo, // Wait, wrong field
-    // Fix:
+    sales_bingo: calculatedBingo.value,
+    sales_pulltabs: formData.sales_pulltabs,
+    
+    // Legacy/Redundant fields just in case
     pulltabs_total: formData.sales_pulltabs,
-    bingo_total: formData.sales_bingo,
+    bingo_total: calculatedBingo.value,
     
     // Deposit calculation
     deposit_total: totalDeposit.value,
     
-    // Detailed breakdown if needed
+    // Detailed breakdown
     cash_currency: enableCurrencyTracker.value ? currencyTrackerTotal.value : formData.cash_currency,
     cash_coins: formData.cash_coins,
     checks_total: formData.checks_total,
     potential_problem_checks: formData.potential_problem_checks,
+    negative_bingo_reason: formData.negative_bingo_reason,
     
     // Denominations if tracked
     denominations: enableCurrencyTracker.value ? formData.denominations : null,
@@ -351,4 +377,41 @@ const saveShift = async (payload: any) => {
     isSubmitting.value = false;
   }
 };
+
+const loadExistingShift = async () => {
+  try {
+    // Attempt to load existing record for this date
+    // Adjust endpoint/params as needed based on actual API
+    const response = await $fetch<any[]>('/api/admin/shift-records', {
+      params: { date: props.date }
+    });
+    
+    // Assuming response is array, find match or take first if filtered
+    const existing = Array.isArray(response) 
+      ? response.find((r: any) => r.date === props.date) || (response.length === 1 ? response[0] : null)
+      : response; // if object returned
+
+    if (existing) {
+      formData.headcount = existing.headcount || 0;
+      formData.sales_pulltabs = existing.sales_pulltabs || 0;
+      
+      formData.cash_currency = existing.cash_currency || 0;
+      formData.cash_coins = existing.cash_coins || 0;
+      formData.checks_total = existing.checks_total || 0;
+      formData.potential_problem_checks = existing.potential_problem_checks || '';
+      formData.negative_bingo_reason = existing.negative_bingo_reason || '';
+      
+      if (existing.denominations) {
+        formData.denominations = { ...formData.denominations, ...existing.denominations };
+        enableCurrencyTracker.value = true;
+      }
+    }
+  } catch (e) {
+    console.warn("Could not load existing shift record (might be new):", e);
+  }
+};
+
+onMounted(() => {
+  loadExistingShift();
+});
 </script>

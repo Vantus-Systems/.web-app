@@ -2,6 +2,7 @@ import { defineEventHandler, createError, readBody } from "h3";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import prisma from "@server/db/client";
+import { auditService } from "@server/services/audit.service";
 import { assertRole } from "~/server/utils/roles";
 
 const deleteUserSchema = z.object({

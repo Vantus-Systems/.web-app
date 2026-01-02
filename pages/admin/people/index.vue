@@ -306,7 +306,7 @@ const { getHeaders, refreshCsrfToken } = useCsrf();
 const session = ref<{ username?: string; role?: any } | null>(null);
 
 // Tabs
-const activeTab = ref<"users" | "shifts">("users");
+const activeTab = ref<"users" | "shifts">("shifts");
 
 // --- Users State ---
 const users = ref<AdminUser[]>([]);
@@ -368,7 +368,10 @@ const loadShifts = async () => {
       params,
       credentials: "include",
     });
-    shifts.value = Array.isArray(fetched) ? fetched : [];
+    shifts.value = Array.isArray(fetched) ? fetched.map(shift => ({
+      ...shift,
+      shift: shift.shift === 'AM' ? 'AM' : 'PM'
+    })) : [];
   } catch (e) {
     console.error("Failed to load shifts", e);
   }

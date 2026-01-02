@@ -1,4 +1,5 @@
 import { defineEventHandler, readBody, createError } from "h3";
+import { auditService } from "@server/services/audit.service";
 import prisma from "~/server/db/client";
 import { assertRole } from "~/server/utils/roles";
 import { micShiftSubmissionSchema } from "~/server/schemas/micShift.zod";
@@ -99,71 +100,84 @@ export default defineEventHandler(async (event) => {
   const K_VARIANCE_NOTE = "variance_note";
   const K_NEG_BINGO_CODE = "negative_bingo_reason_code";
 
-  // Create shift record with computed totals
-  const shiftRecord = await prisma.shiftRecord.create({
-    data: {
-      date: new Date(`${data.date}T00:00:00Z`),
-      shift: data.shift,
-      [K_PULLTABS_TOTAL]: data.sales_pulltabs, // for backward compat
-      [K_DEPOSIT_TOTAL]: salesTotal, // for backward compat
-      [K_BINGO_TOTAL]: data.sales_bingo, // for backward compat
-      players: data.headcount,
-      workflow_type: data.workflow_type || "NORMAL",
-      beginning_box: data.beginning_box,
-      ending_box: data.ending_box,
-      bingo_actual: data.bingo_actual,
-      deposit_actual: data.deposit_actual,
-      notes: data.notes,
-      created_by_user_id: event.context.user.id,
-      // NEW MIC automation fields
-      [K_SALES_BINGO]: data.sales_bingo,
-      [K_SALES_PULLTABS]: data.sales_pulltabs,
-      [K_SALES_TOTAL]: salesTotal,
-      [K_CASH_TOTAL]: cashTotal,
-      [K_CHECKS_TOTAL]: checksTotal,
-      variance: reconciliation.variance,
-      [K_VARIANCE_NOTE]: data.variance_note,
-      [K_NEG_BINGO_CODE]: data.negative_bingo_reason_code,
-      status: status as "SUBMITTED" | "FLAGGED",
-    },
+  // Use Transaction for Atomicity
+  const result = await prisma.$transaction(async (tx) => {
+    // Create shift record with computed totals
+    const shiftRecord = await tx.shiftRecord.create({
+      data: {
+        date: new Date(`${data.date}T00:00:00Z`),
+        shift: data.shift,
+        [K_PULLTABS_TOTAL]: data.sales_pulltabs, // for backward compat
+        [K_DEPOSIT_TOTAL]: salesTotal, // for backward compat
+        [K_BINGO_TOTAL]: data.sales_bingo, // for backward compat
+        players: data.headcount,
+        workflow_type: data.workflow_type || "NORMAL",
+        beginning_box: data.beginning_box,
+        ending_box: data.ending_box,
+        bingo_actual: data.bingo_actual,
+        deposit_actual: data.deposit_actual,
+        notes: data.notes,
+        created_by_user_id: event.context.user.id,
+        // NEW MIC automation fields
+        [K_SALES_BINGO]: data.sales_bingo,
+        [K_SALES_PULLTABS]: data.sales_pulltabs,
+        [K_SALES_TOTAL]: salesTotal,
+        [K_CASH_TOTAL]: cashTotal,
+        [K_CHECKS_TOTAL]: checksTotal,
+        variance: reconciliation.variance,
+        [K_VARIANCE_NOTE]: data.variance_note,
+        [K_NEG_BINGO_CODE]: data.negative_bingo_reason_code,
+        status: status as "SUBMITTED" | "FLAGGED",
+      },
+    });
+
+    // Create CashCount record
+    if (data.denominations) {
+      await tx.cashCount.create({
+        data: {
+          shift_id: shiftRecord.id,
+          ...data.denominations,
+          [K_TOTAL_VALUE]: cashTotal,
+        },
+      });
+    }
+
+    // Create CheckLog records
+    for (const check of data.check_logs) {
+      // Coerce values to the expected types to satisfy Prisma/TS
+      const playerName = String(getField(check, K_PLAYER_NAME));
+      const checkNumber = String(getField(check, K_CHECK_NUMBER));
+      const stampedRaw = getField(check, K_STAMPED_ON_BACK);
+      const phoneRaw = getField(check, K_PHONE_DL_WRITTEN);
+      const toBoolean = (v: any) =>
+        typeof v === "string" ? v === "true" : Boolean(v);
+
+      await tx.checkLog.create({
+        data: {
+          shift_id: shiftRecord.id,
+          [K_PLAYER_NAME]: playerName,
+          [K_CHECK_NUMBER]: checkNumber,
+          amount: Number(check.amount),
+          [K_STAMPED_ON_BACK]: toBoolean(stampedRaw),
+          [K_PHONE_DL_WRITTEN]: toBoolean(phoneRaw),
+          [K_IS_BLOCKED]: false,
+        },
+      });
+    }
+
+    return shiftRecord;
   });
 
-  // Create CashCount record
-  if (data.denominations) {
-    await prisma.cashCount.create({
-      data: {
-        shift_id: shiftRecord.id,
-        ...data.denominations,
-        [K_TOTAL_VALUE]: cashTotal,
-      },
-    });
-  }
-
-  // Create CheckLog records
-  for (const check of data.check_logs) {
-    // Coerce values to the expected types to satisfy Prisma/TS
-    const playerName = String(getField(check, K_PLAYER_NAME));
-    const checkNumber = String(getField(check, K_CHECK_NUMBER));
-    const stampedRaw = getField(check, K_STAMPED_ON_BACK);
-    const phoneRaw = getField(check, K_PHONE_DL_WRITTEN);
-    const toBoolean = (v: any) =>
-      typeof v === "string" ? v === "true" : Boolean(v);
-
-    await prisma.checkLog.create({
-      data: {
-        shift_id: shiftRecord.id,
-        [K_PLAYER_NAME]: playerName,
-        [K_CHECK_NUMBER]: checkNumber,
-        amount: Number(check.amount),
-        [K_STAMPED_ON_BACK]: toBoolean(stampedRaw),
-        [K_PHONE_DL_WRITTEN]: toBoolean(phoneRaw),
-        [K_IS_BLOCKED]: false,
-      },
-    });
-  }
+  // Log audit outside transaction (to avoid locking, though inside is also fine)
+  await auditService.log({
+    actorUserId: event.context.user.id,
+    action: "CREATE_SHIFT_MIC",
+    entity: `shift:${result.id}`,
+    after: result,
+  });
 
   return await prisma.shiftRecord.findUnique({
-    where: { id: shiftRecord.id },
+    where: { id: result.id },
     include: {
       created_by: {
         select: { id: true, username: true, first_name: true, last_name: true },

@@ -1,13 +1,26 @@
 import { defineEventHandler, createError, readBody } from "h3";
 import prisma from "@server/db/client";
 import { authService } from "@server/services/auth.service";
+import { auditService } from "@server/services/audit.service";
 import { z } from "zod";
 import { normalizeRole } from "~/utils/roles";
 import { assertRole } from "~/server/utils/roles";
 
+// Strong password validation
+const passwordSchema = z
+  .string()
+  .min(12, "Password must be at least 12 characters")
+  .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+  .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+  .regex(/[0-9]/, "Password must contain at least one number")
+  .regex(
+    /[^a-zA-Z0-9]/,
+    "Password must contain at least one special character",
+  );
+
 const updateUserSchema = z.object({
   username: z.string().min(3).optional(),
-  password: z.string().min(6).optional(),
+  password: passwordSchema.optional(),
   role: z
     .enum(["OWNER", "CHARITY", "MIC", "admin", "mic", "CALLER", "caller"])
     .optional(),

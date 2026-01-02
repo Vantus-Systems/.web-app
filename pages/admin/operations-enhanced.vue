@@ -1,7 +1,6 @@
 <template>
   <div class="h-screen bg-base overflow-hidden">
     <div class="h-full flex flex-col">
-      <!-- Header -->
       <header
         class="bg-surface border-b border-divider px-6 py-4 flex items-center justify-between"
       >
@@ -25,7 +24,6 @@
         </div>
       </header>
 
-      <!-- Main Editor -->
       <div class="flex-1 min-h-0">
         <OpsSchemaPricingEditorEnhanced
           v-if="schema"
@@ -36,7 +34,6 @@
       </div>
     </div>
 
-    <!-- Loading State -->
     <div
       v-if="loading"
       class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
@@ -51,7 +48,6 @@
       </div>
     </div>
 
-    <!-- Error Toast -->
     <div
       v-if="error"
       class="fixed bottom-6 right-6 px-4 py-3 bg-accent-error text-white rounded-lg shadow-lg z-50 flex items-center gap-2"
@@ -86,17 +82,26 @@ const opsStore = useOpsStore();
 // Load schema
 onMounted(async () => {
   try {
-    await opsStore.loadSchema();
+    await opsStore.loadAll();
 
     // Use existing schema or create default
-    if (opsStore.draftSchema) {
-      schema.value = opsStore.draftSchema;
+    if (opsStore.opsSchemaDraft) {
+      schema.value = opsStore.opsSchemaDraft;
     } else {
       // Create a default schema
+      const now = new Date();
       schema.value = {
-        id: `ops-${Date.now()}`,
-        version: 2,
+        schema_version: "v2",
+        meta: {
+          name: "Operations Schema",
+          status: "draft",
+          currency: "USD",
+          timezone: "America/Los_Angeles",
+          schema_version: "v2",
+        },
         definitions: {
+          inventoryTiers: [],
+          bundles: [],
           rateCards: [
             {
               id: "rate-standard",
@@ -119,8 +124,8 @@ onMounted(async () => {
               },
             },
           ],
-          dayProfiles: [],
         },
+        dayProfiles: [],
         timeline: {
           operationalHours: {
             isOpen: true,
@@ -132,8 +137,17 @@ onMounted(async () => {
         },
         logicTriggers: [],
         calendar: {
-          assignments: [],
-          overrides: [],
+          range: {
+            start: new Date(Date.UTC(now.getUTCFullYear(), 0, 1))
+              .toISOString()
+              .slice(0, 10),
+            end: new Date(Date.UTC(now.getUTCFullYear(), 11, 31))
+              .toISOString()
+              .slice(0, 10),
+          },
+          weekdayDefaults: {},
+          assignments: {},
+          overrides: {},
         },
       };
     }
@@ -149,7 +163,8 @@ const saveDraft = async () => {
   if (!schema.value) return;
 
   try {
-    await opsStore.saveDraft(schema.value);
+    opsStore.updateOpsSchemaDraft(schema.value);
+    await opsStore.saveOpsSchema();
     error.value = "Draft saved successfully!";
     setTimeout(() => (error.value = ""), 2000);
   } catch (err) {
@@ -169,7 +184,7 @@ const publishSchema = async () => {
   }
 
   try {
-    await opsStore.publishSchema();
+    await opsStore.publishOpsSchema();
     error.value = "Published successfully!";
     setTimeout(() => (error.value = ""), 2000);
   } catch (err) {

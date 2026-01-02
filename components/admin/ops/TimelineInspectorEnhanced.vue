@@ -104,7 +104,7 @@
               variant="primary"
               size="small"
               label="Apply Changes"
-              :disabled="!isDirty"
+              :disabled="!localIsDirty"
               @click="applyRateCardChanges"
             />
             <BaseButtonEnhanced
@@ -193,7 +193,7 @@
               variant="primary"
               size="small"
               label="Apply Changes"
-              :disabled="!isDirty"
+              :disabled="!localIsDirty"
               @click="applySegmentChanges"
             />
             <BaseButtonEnhanced
@@ -272,7 +272,7 @@
               variant="primary"
               size="small"
               label="Apply Changes"
-              :disabled="!isDirty"
+              :disabled="!localIsDirty"
               @click="applyOverlayChanges"
             />
             <BaseButtonEnhanced
@@ -286,201 +286,246 @@
       </div>
 
       <!-- Logic Trigger Inspector -->
-      <div v-if="selected.type === 'trigger'" class="space-y-4 p-4">
-        <div class="space-y-3">
-          <InspectorField
-            id="trg-type"
-            label="Trigger Type"
-            v-model="editingTrigger.type"
-            type="select"
-            :options="[
-              { value: 'hard_reset', label: 'Hard Reset' },
-              { value: 'sales_window_open', label: 'Sales Window Open' },
-              { value: 'sales_window_close', label: 'Sales Window Close' },
-              { value: 'doors_open', label: 'Doors Open' },
-              { value: 'doors_close', label: 'Doors Close' },
-              { value: 'session_start', label: 'Session Start' },
-              { value: 'session_end', label: 'Session End' },
-              { value: 'jackpot_reset', label: 'Jackpot Reset' },
-              { value: 'custom', label: 'Custom' },
-            ]"
-            required
-            helper-text="Determines what action is performed"
-            :status="fieldStatus('type')"
-            @update:model-value="markDirty('trigger')"
-          />
+      <div v-if="selected.type === 'trigger'" class="flex flex-col h-full">
+        <!-- Header -->
+        <div class="p-4 border-b border-divider bg-base">
+          <div class="text-xs font-semibold text-secondary uppercase tracking-wider mb-1">Configuration</div>
+          <h3 class="text-lg font-bold text-primary">
+            {{ getTriggerLabel(editingTrigger.type) }}
+          </h3>
+        </div>
 
-          <!-- Absolute Time Mode -->
-          <div v-if="!editingTrigger.isRelative">
-            <InspectorField
-              id="trg-time"
-              label="Trigger Time"
-              v-model="editingTrigger.trigger_time"
-              type="time"
-              required
-              helper-text="When this automation fires. Use relative mode to follow an event."
-              :status="fieldStatus('trigger_time')"
-              @update:model-value="markDirty('trigger')"
-            />
-          </div>
-
-          <!-- Relative Mode -->
-          <div v-else class="space-y-2 p-3 bg-base rounded border border-divider">
-            <div class="text-xs font-semibold text-secondary mb-2">Relative Configuration</div>
+        <div class="flex-1 overflow-y-auto p-4 space-y-6">
+          <!-- Step 1: Trigger Type -->
+          <section class="space-y-3">
+            <div class="flex items-center justify-between">
+              <label class="text-sm font-semibold text-primary">Trigger Type</label>
+              <span class="text-xs text-secondary bg-surface px-2 py-1 rounded border border-divider">Step 1</span>
+            </div>
             
-            <InspectorField
-              id="trg-anchor-target"
-              label="Anchor Event"
-              v-model="editingTrigger.relativeAnchor.targetId"
-              type="select"
-              :options="anchorOptions"
-              helper-text="Event to anchor to"
-              @update:model-value="markDirty('trigger')"
-            />
-
-            <InspectorField
-              id="trg-anchor-point"
-              label="Anchor Point"
-              v-model="editingTrigger.relativeAnchor.anchorPoint"
-              type="select"
-              :options="[
-                { value: 'start', label: 'Start' },
-                { value: 'end', label: 'End' },
-              ]"
-              helper-text="Anchor to start or end of event"
-              @update:model-value="markDirty('trigger')"
-            />
-
-            <InspectorField
-              id="trg-offset"
-              label="Offset (minutes)"
-              v-model.number="editingTrigger.relativeAnchor.offsetMinutes"
-              type="number"
-              helper-text="Positive = after, Negative = before"
-              @update:model-value="markDirty('trigger')"
-            />
-
-            <div class="text-xs text-secondary mt-2">
-              Computed Time: <span class="font-mono font-semibold">{{ derivedTime }}</span>
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                v-for="typeDef in triggerTypeDefinitions"
+                :key="typeDef.value"
+                class="flex flex-col items-start p-3 rounded border text-left transition-all hover:shadow-sm"
+                :class="editingTrigger.type === typeDef.value 
+                  ? 'border-accent-primary bg-accent-primary/5 ring-1 ring-accent-primary' 
+                  : 'border-divider bg-surface hover:border-accent-primary/50'"
+                @click="updateTriggerType(typeDef.value)"
+              >
+                <span class="text-xs font-semibold mb-1" :class="editingTrigger.type === typeDef.value ? 'text-accent-primary' : 'text-primary'">
+                  {{ typeDef.label }}
+                </span>
+                <span class="text-[10px] text-secondary leading-tight">
+                  {{ typeDef.description }}
+                </span>
+              </button>
             </div>
-          </div>
+          </section>
 
-          <!-- Relative Toggle -->
-          <div class="flex items-center gap-2">
-            <input
-              id="trg-relative"
-              type="checkbox"
-              v-model="editingTrigger.isRelative"
-              class="rounded"
-              @change="toggleRelativeMode"
-            />
-            <label for="trg-relative" class="text-sm text-secondary">
-              Use Relative Timing
-            </label>
-          </div>
+          <!-- Step 2: Timing -->
+          <section class="space-y-3 pt-4 border-t border-divider">
+            <div class="flex items-center justify-between">
+              <label class="text-sm font-semibold text-primary">Timing</label>
+              <span class="text-xs text-secondary bg-surface px-2 py-1 rounded border border-divider">Step 2</span>
+            </div>
 
-          <!-- Target Event (for hard_reset) -->
-          <div v-if="editingTrigger.type === 'hard_reset'">
-            <InspectorField
-              id="trg-target"
-              label="Target Event"
-              v-model="editingTrigger.target_event"
-              type="select"
-              :options="overlayOptions"
-              helper-text="The event this trigger affects (required for hard reset)"
-              :validation-message="!editingTrigger.target_event ? 'Target event is required' : ''"
-              @update:model-value="markDirty('trigger')"
-            />
-          </div>
+            <!-- Mode Toggle -->
+            <div class="flex bg-surface p-1 rounded-lg border border-divider">
+              <button
+                class="flex-1 py-1.5 text-xs font-medium rounded transition-colors"
+                :class="!editingTrigger.isRelative ? 'bg-white shadow-sm text-primary' : 'text-secondary hover:text-primary'"
+                @click="setRelativeMode(false)"
+              >
+                Absolute Time
+              </button>
+              <button
+                class="flex-1 py-1.5 text-xs font-medium rounded transition-colors"
+                :class="editingTrigger.isRelative ? 'bg-white shadow-sm text-primary' : 'text-secondary hover:text-primary'"
+                @click="setRelativeMode(true)"
+              >
+                Relative to Event
+              </button>
+            </div>
 
-          <!-- Custom Fields -->
-          <div v-if="editingTrigger.type === 'custom'" class="space-y-2">
-            <InspectorField
-              id="trg-custom-label"
-              label="Custom Label"
-              v-model="editingTrigger.customLabel"
-              type="text"
-              helper-text="Descriptive name for this custom trigger"
-              @update:model-value="markDirty('trigger')"
-            />
+            <!-- Absolute Input -->
+            <div v-if="!editingTrigger.isRelative" class="animate-in fade-in slide-in-from-top-1">
+              <InspectorField
+                id="trg-time"
+                label="Trigger Time"
+                v-model="editingTrigger.trigger_time"
+                type="time"
+                required
+                helper-text="Exact time when this trigger fires"
+                :status="fieldStatus('trigger_time')"
+                @update:model-value="markDirty('trigger')"
+              />
+            </div>
 
-            <InspectorField
-              id="trg-custom-desc"
-              label="Description"
-              v-model="editingTrigger.customDescription"
-              type="textarea"
-              helper-text="What does this trigger do?"
-              @update:model-value="markDirty('trigger')"
-            />
+            <!-- Relative Input -->
+            <div v-else class="space-y-3 animate-in fade-in slide-in-from-top-1">
+              <InspectorField
+                id="trg-anchor-target"
+                label="Anchor Event"
+                v-model="editingTrigger.relativeAnchor.targetId"
+                type="select"
+                :options="anchorOptions"
+                helper-text="Which event controls this trigger?"
+                @update:model-value="markDirty('trigger')"
+              />
 
-            <div class="space-y-1">
-              <div class="flex items-center justify-between">
-                <label class="text-sm font-semibold text-primary">Parameters</label>
-                <button
-                  class="text-xs text-accent-primary hover:underline"
-                  @click="addCustomParam"
-                >+ Add Param</button>
+              <div class="grid grid-cols-2 gap-3">
+                <InspectorField
+                  id="trg-anchor-point"
+                  label="Anchor Point"
+                  v-model="editingTrigger.relativeAnchor.anchorPoint"
+                  type="select"
+                  :options="[
+                    { value: 'start', label: 'Start of Event' },
+                    { value: 'end', label: 'End of Event' },
+                  ]"
+                  @update:model-value="markDirty('trigger')"
+                />
+
+                <InspectorField
+                  id="trg-offset"
+                  label="Offset (mins)"
+                  v-model.number="editingTrigger.relativeAnchor.offsetMinutes"
+                  type="number"
+                  helper-text="- for before, + for after"
+                  @update:model-value="markDirty('trigger')"
+                />
+              </div>
+
+              <div class="p-2 bg-accent-info/5 rounded border border-accent-info/20 text-xs text-secondary flex justify-between items-center">
+                <span>Calculated Time:</span>
+                <span class="font-mono font-bold text-primary">{{ derivedTime }}</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Step 3: Action Details -->
+          <section class="space-y-3 pt-4 border-t border-divider">
+            <div class="flex items-center justify-between">
+              <label class="text-sm font-semibold text-primary">Action Details</label>
+              <span class="text-xs text-secondary bg-surface px-2 py-1 rounded border border-divider">Step 3</span>
+            </div>
+
+            <!-- Hard Reset Specific -->
+            <div v-if="editingTrigger.type === 'hard_reset'" class="space-y-3">
+              <div class="p-3 bg-accent-warning/5 rounded border border-accent-warning/20 text-xs text-secondary">
+                <strong class="text-accent-warning block mb-1">⚠ State Reset (Hard Reset)</strong>
+                This trigger completely resets the timeline state. It is used to clear all previous segments/overlays and start a new event sequence (e.g. switching from Matinee to Evening session).
+                You MUST select a Target Event to define the starting point of the new state.
               </div>
               
-              <div v-if="!editingTrigger.customParams || Object.keys(editingTrigger.customParams).length === 0" class="text-xs text-tertiary py-1">
-                No parameters
-              </div>
+              <InspectorField
+                id="trg-target"
+                label="Target Overlay Event"
+                v-model="editingTrigger.target_event"
+                type="select"
+                :options="overlayOptions"
+                helper-text="Select the event that defines the new state"
+                required
+                :validation-message="!editingTrigger.target_event ? 'Target event is required' : ''"
+                @update:model-value="markDirty('trigger')"
+              />
               
-              <div v-else class="space-y-1">
-                <div
-                  v-for="(value, key) in editingTrigger.customParams"
-                  :key="key"
-                  class="flex items-center gap-1"
+              <div class="flex justify-end">
+                <button 
+                  class="text-xs text-accent-primary hover:underline flex items-center gap-1"
+                  @click="createAndLinkOverlay"
                 >
-                  <input
-                    :value="key"
-                    @input="updateParamKey(key, $event.target.value)"
-                    type="text"
-                    placeholder="Key"
-                    class="flex-1 px-2 py-1 text-xs border border-divider rounded bg-surface"
-                  />
-                  <input
-                    v-model="editingTrigger.customParams[key]"
-                    type="text"
-                    placeholder="Value"
-                    class="flex-1 px-2 py-1 text-xs border border-divider rounded bg-surface"
-                  />
-                  <button
-                    class="text-xs text-accent-error hover:underline"
-                    @click="removeCustomParam(key)"
-                  >✕</button>
-                </div>
+                  <span>+ Create new Overlay Event</span>
+                </button>
               </div>
             </div>
-          </div>
+
+            <!-- Custom Specific -->
+            <div v-if="editingTrigger.type === 'custom'" class="space-y-3">
+              <InspectorField
+                id="trg-custom-label"
+                label="Label"
+                v-model="editingTrigger.customLabel"
+                type="text"
+                placeholder="e.g. 'Notify Manager'"
+                @update:model-value="markDirty('trigger')"
+              />
+              
+              <InspectorField
+                id="trg-custom-desc"
+                label="Description"
+                v-model="editingTrigger.customDescription"
+                type="textarea"
+                placeholder="Describe what this custom trigger does..."
+                @update:model-value="markDirty('trigger')"
+              />
+
+              <!-- Parameters -->
+               <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-medium text-secondary">Parameters</span>
+                  <button
+                    class="text-xs text-accent-primary hover:underline"
+                    @click="addCustomParam"
+                  >+ Add</button>
+                </div>
+                
+                <div v-if="!editingTrigger.customParams || Object.keys(editingTrigger.customParams).length === 0" class="text-xs text-tertiary py-1">
+                  No parameters
+                </div>
+                
+                <div v-else class="space-y-1">
+                  <div
+                    v-for="(value, key) in editingTrigger.customParams"
+                    :key="key"
+                    class="flex items-center gap-1"
+                  >
+                    <input
+                      :value="key"
+                      @input="updateParamKey(key, $event.target.value)"
+                      type="text"
+                      placeholder="Key"
+                      class="flex-1 px-2 py-1 text-xs border border-divider rounded bg-surface"
+                    />
+                    <input
+                      v-model="editingTrigger.customParams[key]"
+                      type="text"
+                      placeholder="Value"
+                      class="flex-1 px-2 py-1 text-xs border border-divider rounded bg-surface"
+                    />
+                    <button
+                      class="text-xs text-accent-error hover:underline"
+                      @click="removeCustomParam(key)"
+                    >✕</button>
+                  </div>
+                </div>
+               </div>
+            </div>
+
+            <!-- Default info for other types -->
+            <div v-if="!['hard_reset', 'custom'].includes(editingTrigger.type)" class="text-xs text-secondary italic">
+              No additional configuration required for {{ getTriggerLabel(editingTrigger.type) }}.
+            </div>
+          </section>
         </div>
 
-        <div class="pt-4 border-t border-divider">
-          <div class="flex gap-2">
-            <BaseButtonEnhanced
-              variant="primary"
-              size="small"
-              label="Apply Changes"
-              :disabled="!isDirty"
-              @click="applyTriggerChanges"
-            />
-            <BaseButtonEnhanced
-              variant="danger"
-              size="small"
-              label="Delete"
-              @click="deleteSelection"
-            />
-          </div>
-        </div>
-
-        <!-- Dependency Warning -->
-        <div v-if="editingTrigger.type === 'hard_reset' && !editingTrigger.target_event" class="pt-2 text-xs text-accent-warning flex items-center gap-1">
-          <span>⚠</span> Hard reset requires a target event
-        </div>
-
-        <!-- Relative Warning -->
-        <div v-if="editingTrigger.isRelative && !editingTrigger.relativeAnchor?.targetId" class="pt-2 text-xs text-accent-warning flex items-center gap-1">
-          <span>⚠</span> Relative trigger requires an anchor event
+        <!-- Footer Actions -->
+        <div class="p-4 border-t border-divider bg-base flex gap-2">
+          <BaseButtonEnhanced
+            variant="primary"
+            size="small"
+            label="Save Changes"
+            class="flex-1"
+            :disabled="!localIsDirty"
+            @click="applyTriggerChanges"
+          />
+          <BaseButtonEnhanced
+            variant="danger"
+            size="small"
+            label="Delete"
+            @click="deleteSelection"
+          />
         </div>
       </div>
 
@@ -494,7 +539,7 @@
     <!-- Status Bar -->
     <div class="border-t border-divider px-4 py-2 text-xs flex items-center justify-between bg-surface">
       <div>
-        <span v-if="isDirty" class="text-accent-warning">● Edited</span>
+        <span v-if="localIsDirty" class="text-accent-warning">● Edited</span>
         <span v-else-if="selected" class="text-accent-success">● Saved</span>
         <span v-else class="text-tertiary">● Ready</span>
       </div>
@@ -542,6 +587,7 @@ const emit = defineEmits<{
   (e: "update-segment", segment: OpsSchemaFlowSegment): void;
   (e: "update-overlay", overlay: OpsSchemaOverlayEvent): void;
   (e: "update-trigger", trigger: EnhancedLogicTrigger): void;
+  (e: "create-linked-overlay", triggerId: string, name: string): void;
   (e: "delete"): void;
   (e: "apply-changes"): void;
 }>();
@@ -552,8 +598,58 @@ const editingSegment = ref<OpsSchemaFlowSegment | null>(null);
 const editingOverlay = ref<OpsSchemaOverlayEvent | null>(null);
 const editingTrigger = ref<EnhancedLogicTrigger | null>(null);
 
+// Trigger Definitions
+const triggerTypeDefinitions = [
+  { value: "hard_reset", label: "State Reset", description: "Clear all state & start new event" },
+  { value: "sales_window_open", label: "Open Sales", description: "Allow sales to begin" },
+  { value: "sales_window_close", label: "Close Sales", description: "Stop all sales" },
+  { value: "doors_open", label: "Doors Open", description: "Open venue doors" },
+  { value: "doors_close", label: "Doors Close", description: "Close venue doors" },
+  { value: "session_start", label: "Session Start", description: "Begin gaming session" },
+  { value: "session_end", label: "Session End", description: "End gaming session" },
+  { value: "jackpot_reset", label: "Jackpot Reset", description: "Reset progressive values" },
+  { value: "custom", label: "Custom", description: "User-defined action" },
+];
+
+const getTriggerLabel = (type: string) => {
+  const def = triggerTypeDefinitions.find(d => d.value === type);
+  return def ? def.label : type.replace(/_/g, " ");
+};
+
+const updateTriggerType = (type: string) => {
+  if (editingTrigger.value) {
+    editingTrigger.value.type = type as any;
+    markDirty("trigger");
+  }
+};
+
+const setRelativeMode = (isRelative: boolean) => {
+  if (editingTrigger.value) {
+    editingTrigger.value.isRelative = isRelative;
+    if (isRelative && !editingTrigger.value.relativeAnchor) {
+      // Default anchor
+      editingTrigger.value.relativeAnchor = {
+        targetId: props.flowSegments[0]?.id || "",
+        anchorPoint: "start",
+        offsetMinutes: 0
+      };
+    }
+    markDirty("trigger");
+  }
+};
+
+const createAndLinkOverlay = () => {
+  if (!editingTrigger.value) return;
+  
+  const name = prompt("Enter name for new overlay event:");
+  if (name) {
+    emit("create-linked-overlay", editingTrigger.value.id, name);
+  }
+};
+
 // Field dirty tracking
 const dirtyFields = reactive<Record<string, boolean>>({});
+const localIsDirty = ref(false);
 
 // Computed
 const rateCardOptions = computed(() => {
@@ -638,38 +734,40 @@ const segmentErrors = computed(() => {
 
 // Methods
 const markDirty = (type: "rateCard" | "segment" | "overlay" | "trigger") => {
-  // Mark all fields as dirty for simplicity
-  // In a real implementation, you'd track individual fields
-  emit("apply-changes");
+  localIsDirty.value = true;
 };
 
 const fieldStatus = (field: string): "edited" | "saved" | undefined => {
   if (props.isSaving) return "loading";
-  if (props.isDirty) return "edited";
+  if (localIsDirty.value) return "edited";
   return undefined;
 };
 
 const applyRateCardChanges = () => {
   if (editingRateCard.value) {
     emit("update-rate-card", editingRateCard.value);
+    localIsDirty.value = false;
   }
 };
 
 const applySegmentChanges = () => {
   if (editingSegment.value && segmentErrors.value.length === 0) {
     emit("update-segment", editingSegment.value);
+    localIsDirty.value = false;
   }
 };
 
 const applyOverlayChanges = () => {
   if (editingOverlay.value) {
     emit("update-overlay", editingOverlay.value);
+    localIsDirty.value = false;
   }
 };
 
 const applyTriggerChanges = () => {
   if (editingTrigger.value) {
     emit("update-trigger", editingTrigger.value);
+    localIsDirty.value = false;
   }
 };
 
@@ -776,7 +874,7 @@ watch(
     // Reset dirty fields
     Object.keys(dirtyFields).forEach(key => delete dirtyFields[key]);
   },
-  { immediate: true, deep: true }
+  { immediate: true }
 );
 </script>
 

@@ -1,4 +1,5 @@
 import { defineEventHandler, readBody } from "h3";
+import { auditService } from "@server/services/audit.service";
 import prisma from "~/server/db/client";
 import { assertAnyPermission } from "~/server/utils/permissions";
 import { shiftRecordInputSchema } from "~/server/schemas/shift-record.zod";
@@ -40,6 +41,13 @@ export default defineEventHandler(async (event) => {
       prev_shift_id: data.prev_shift_id ?? prevShift?.id,
       created_by_user_id: event.context.user.id,
     },
+  });
+
+  await auditService.log({
+    actorUserId: event.context.user.id,
+    action: "CREATE_SHIFT",
+    entity: `shift:${record.id}`,
+    after: record,
   });
 
   return record;

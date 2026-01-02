@@ -318,6 +318,7 @@
             @update-segment="updateSegment"
             @update-overlay="updateOverlay"
             @update-trigger="updateTrigger"
+            @create-linked-overlay="createLinkedOverlay"
             @delete="removeSelection"
             @apply-changes="applyChanges"
           />
@@ -871,11 +872,15 @@ const updateSegment = (updated: OpsSchemaFlowSegment) => {
 // Overlays
 const addOverlayEvent = () => {
   const id = `event-${Date.now()}`;
+  // Add buffer to avoid boundary constraints
+  const startMins = toMinutes(operationalHours.value.start);
+  const endMins = toMinutes(operationalHours.value.end);
+  
   schema.value.timeline.overlayEvents.push({
     id,
     label: "Overlay Event",
-    time_start: operationalHours.value.start,
-    time_end: operationalHours.value.end,
+    time_start: formatMinutes(startMins + 15),
+    time_end: formatMinutes(endMins - 15),
     is_hard_ticket: false,
   });
   selectItem("overlay", id);
@@ -894,10 +899,12 @@ const updateOverlay = (updated: OpsSchemaOverlayEvent) => {
 // Triggers
 const addTrigger = () => {
   const id = `trigger-${Date.now()}`;
+  const startMins = toMinutes(operationalHours.value.start);
+  
   const newTrigger: EnhancedLogicTrigger = {
     id,
-    trigger_time: operationalHours.value.start,
-    type: "hard_reset",
+    trigger_time: formatMinutes(startMins + 15),
+    type: "doors_open",
     isRelative: false,
   };
   schema.value.logicTriggers.push(newTrigger);
@@ -922,6 +929,31 @@ const updateTrigger = (updated: EnhancedLogicTrigger) => {
     isDirty.value = true;
     validate();
   }
+};
+
+const createLinkedOverlay = (triggerId: string, name: string) => {
+  // Create the overlay
+  const overlayId = `event-${Date.now()}`;
+  const startMins = toMinutes(operationalHours.value.start);
+  const endMins = toMinutes(operationalHours.value.end);
+
+  schema.value.timeline.overlayEvents.push({
+    id: overlayId,
+    label: name,
+    time_start: formatMinutes(startMins + 15),
+    time_end: formatMinutes(endMins - 15),
+    is_hard_ticket: false,
+  });
+  
+  // Link it to the trigger
+  const triggerIdx = logicTriggers.value.findIndex(t => t.id === triggerId);
+  if (triggerIdx >= 0) {
+    const trigger = schema.value.logicTriggers[triggerIdx];
+    trigger.target_event = overlayId;
+    updateTrigger(trigger);
+  }
+  
+  validate();
 };
 
 // Removal
