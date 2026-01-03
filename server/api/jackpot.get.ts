@@ -2,11 +2,28 @@ import { randomUUID } from "node:crypto";
 import { defineEventHandler } from "h3";
 import { settingsService } from "@server/services/settings.service";
 
+// Define interfaces for type safety
+interface JackpotItem {
+  id: string;
+  label: string;
+  current: number;
+  backup: number;
+  playTime: string;
+  isSession: boolean;
+  lastWonDate?: string;
+}
+
+interface JackpotState {
+  items: JackpotItem[];
+  lastUpdated: string;
+  lastDailyUpdate?: string;
+}
+
 export default defineEventHandler(async () => {
   const data = await settingsService.get("jackpot");
 
   // Default structure
-  const defaultStructure = {
+  const defaultStructure: JackpotState = {
     items: [
       {
         id: randomUUID(),
@@ -31,57 +48,55 @@ export default defineEventHandler(async () => {
   if (!data) return defaultStructure;
 
   const d = data as any;
-  let currentState: any = defaultStructure;
+  let currentState: JackpotState = defaultStructure;
   let needsPersistence = false;
 
-  const ensureItemIds = (state: any) => {
-    if (!state || !Array.isArray(state.items)) return false;
+  // Helper to ensure IDs exist
+  const ensureItemIds = (items: any[]) => {
     let added = false;
-    state.items = (state.items as any[]).map((item) => {
-      if (item?.id) return item;
+    const newItems = items.map((item) => {
+      if (item && item.id) return item;
       added = true;
       return { ...item, id: randomUUID() };
     });
-    return added;
+    return { added, items: newItems };
   };
 
   // Migration logic
-
-  // Case 1: Already in the new structure
-  if (Array.isArray(d.items)) {
-    currentState = d;
-    // We still check if IDs are missing later
-  }
-  // Case 2: Migration from Object Structure { babes: ..., hornet: ... }
-  else if ("babes" in d && "hornet" in d) {
+  if (d && Array.isArray(d.items)) {
+    // Case 1: Already in the new structure
+    currentState = d as JackpotState;
+  } else if (d && "babes" in d && "hornet" in d) {
+    // Case 2: Migration from Object Structure { babes: ..., hornet: ... }
+    const babes = d.babes || {};
+    const hornet = d.hornet || {};
     currentState = {
       items: [
         {
           id: randomUUID(),
-          label: d.babes?.label || "Bingo Babes Progressive",
-          current: Number(d.babes?.current) || 0,
-          backup: Number(d.babes?.backup) || 0,
+          label: babes.label || "Bingo Babes Progressive",
+          current: Number(babes.current) || 0,
+          backup: Number(babes.backup) || 0,
           playTime: "Daytime (4 PM)",
           isSession: false,
-          lastWonDate: d.babes.lastWonDate || undefined,
+          lastWonDate: babes.lastWonDate || undefined,
         },
         {
           id: randomUUID(),
-          label: d.hornet?.label || "Progressive Hornet",
-          current: Number(d.hornet?.current) || 0,
-          backup: Number(d.hornet?.backup) || 0,
+          label: hornet.label || "Progressive Hornet",
+          current: Number(hornet.current) || 0,
+          backup: Number(hornet.backup) || 0,
           playTime: "Session",
           isSession: true,
-          lastWonDate: d.hornet.lastWonDate || undefined,
+          lastWonDate: hornet.lastWonDate || undefined,
         },
       ],
       lastUpdated: d.lastUpdated || new Date().toISOString(),
       lastDailyUpdate: d.lastDailyUpdate || undefined,
     };
     needsPersistence = true;
-  }
-  // Case 3: Migration for legacy single-value format
-  else if ("value" in d) {
+  } else if (d && "value" in d) {
+    // Case 3: Migration for legacy single-value format
     currentState = {
       items: [
         {
@@ -105,33 +120,39 @@ export default defineEventHandler(async () => {
       lastDailyUpdate: d.lastDailyUpdate || undefined,
     };
     needsPersistence = true;
-  }
-  // Case 4: Unknown structure
-  else {
+  } else {
+    // Case 4: Unknown structure
     currentState = defaultStructure;
     needsPersistence = true;
   }
 
-  const missingIds = ensureItemIds(currentState);
-  if (missingIds) {
+  // Ensure IDs
+  if (currentState.items && Array.isArray(currentState.items)) {
+    const { added, items } = ensureItemIds(currentState.items);
+    if (added) {
+      currentState.items = items as JackpotItem[];
+      needsPersistence = true;
+    }
+  } else {
+    // Should not happen if migration logic is correct, but safe fallback
+    currentState.items = defaultStructure.items;
     needsPersistence = true;
   }
 
   // --- Auto-Increment Logic ---
   const now = new Date();
   const todayStr = now.toISOString().slice(0, 10);
-  const lastDailyUpdate = (currentState as any).lastDailyUpdate || "";
+  const lastDailyUpdate = currentState.lastDailyUpdate || "";
   let autopRunTriggered = false;
   let autopChange = false;
 
-  // Assuming server time is roughly what we want, or we accept this limitation.
+  // Assuming server time is roughly what we want
   if (now.getHours() >= 17 && lastDailyUpdate !== todayStr) {
     autopRunTriggered = true;
-    const items = Array.isArray(currentState.items) ? currentState.items : [];
 
     // "update ... if it is not won"
-    for (const item of items) {
-      const lastWonDate = String((item as any).lastWonDate || "");
+    for (const item of currentState.items) {
+      const lastWonDate = item.lastWonDate || "";
       if (lastWonDate === todayStr) continue;
 
       // Apply same $5,000 cap behavior consistently.
@@ -144,7 +165,7 @@ export default defineEventHandler(async () => {
       autopChange = true;
     }
 
-    (currentState as any).lastDailyUpdate = todayStr;
+    currentState.lastDailyUpdate = todayStr;
     if (autopChange) {
       currentState.lastUpdated = now.toISOString();
     }
