@@ -62,14 +62,12 @@ export default defineEventHandler(async () => {
     return { added, items: newItems };
   };
 
-  // Migration logic
-  if (d && Array.isArray(d.items)) {
-    // Case 1: Already in the new structure
-    currentState = d as JackpotState;
-  } else if (d && "babes" in d && "hornet" in d) {
-    // Case 2: Migration from Object Structure { babes: ..., hornet: ... }
-    const babes = d.babes || {};
-    const hornet = d.hornet || {};
+  // New Structure (preferred)
+  if (Array.isArray(d.items)) {
+    currentState = d;
+  }
+  // Migration from Object Structure { babes: ..., hornet: ... }
+  else if ("babes" in d && "hornet" in d) {
     currentState = {
       items: [
         {
@@ -95,8 +93,9 @@ export default defineEventHandler(async () => {
       lastDailyUpdate: d.lastDailyUpdate || undefined,
     };
     needsPersistence = true;
-  } else if (d && "value" in d) {
-    // Case 3: Migration for legacy single-value format
+  }
+  // Migration for legacy single-value format
+  else if ("value" in d) {
     currentState = {
       items: [
         {
@@ -141,6 +140,9 @@ export default defineEventHandler(async () => {
 
   // --- Auto-Increment Logic ---
   const now = new Date();
+  // Central Time Check (Approximate or use server local if configured, assuming server is local or UTC)
+  // For simplicity, checking hour >= 17.
+
   const todayStr = now.toISOString().slice(0, 10);
   const lastDailyUpdate = currentState.lastDailyUpdate || "";
   let autopRunTriggered = false;

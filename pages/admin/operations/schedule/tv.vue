@@ -64,7 +64,7 @@
             >
               {{ day.holidayName || "Holiday" }}
             </div>
-
+ 
             <div
               v-else-if="day.status === 'closed'"
               class="text-slate-400 font-black uppercase tracking-widest"
@@ -97,9 +97,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from "vue";
-import { resolveEffectiveAssignment } from "~/utils/schedule-calendar";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useOpsStore } from "~/stores/ops";
+import { resolveEffectiveAssignment } from "~/utils/schedule-calendar";
 import type { OpsSchemaDayProfile, OpsSchemaV2 } from "~/types/ops-schema";
 
 definePageMeta({
