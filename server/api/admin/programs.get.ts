@@ -33,9 +33,15 @@ export default defineEventHandler(async (event) => {
         name: g.pattern.name,
         definition: JSON.parse(g.pattern.definition),
       },
-      pricing: g.pricing_config ? JSON.parse(g.pricing_config) : { model: "included" },
-      payout: g.payout_config ? JSON.parse(g.payout_config) : { type: "fixed", amount: 0 },
-      timeline: g.timeline_config ? JSON.parse(g.timeline_config) : { estimatedDuration: 10, isBreak: false },
+      pricing: g.pricing_config
+        ? JSON.parse(g.pricing_config)
+        : { model: "included" },
+      payout: g.payout_config
+        ? JSON.parse(g.payout_config)
+        : { type: "fixed", amount: 0 },
+      timeline: g.timeline_config
+        ? JSON.parse(g.timeline_config)
+        : { estimatedDuration: 10, isBreak: false },
     })),
   }));
 });

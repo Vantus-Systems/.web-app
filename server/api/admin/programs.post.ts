@@ -4,48 +4,73 @@ import prisma from "~/server/db/client";
 import { auditService } from "~/server/services/audit.service";
 import { assertRole } from "~/server/utils/roles";
 
-const gameSchema = z.object({
-  sortOrder: z.number().int().min(0).max(999),
-  title: z.string().min(1),
-  paperColor: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Invalid hex color"),
-  notes: z.string().optional(),
-  patternSlug: z.string().min(1),
-  pricing: z
-    .object({
-      model: z.enum(["standard", "premium", "included"]).optional(),
-      price: z.number().min(0).optional(),
-      currency: z.string().optional(),
-    })
-    .optional(),
-  payout: z
-    .object({
-      type: z.enum(["fixed", "percentage", "progressive", "merchandise"]).optional(),
-      amount: z.number().min(0).optional(),
-      percentage: z.number().min(0).max(100).optional(),
-      description: z.string().optional(),
-      currency: z.string().optional(),
-    })
-    .optional(),
-  timeline: z
-    .object({
-      estimatedDuration: z.number().min(1).optional(),
-      isBreak: z.boolean().optional(),
-    })
-    .optional(),
-});
+const gameSchema = z
+  .object({
+    sortOrder: z.number().int().min(0).max(999),
+    title: z.string().min(1).max(255),
+    paperColor: z
+      .string()
+      .regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Invalid hex color"),
+    notes: z.string().max(1000).optional(),
+    patternSlug: z.string().min(1).max(255),
+    pricing: z
+      .object({
+        model: z.enum(["standard", "premium", "included"]).optional(),
+        price: z.number().min(0).max(999999).optional(),
+        currency: z.string().max(3).optional(),
+      })
+      .strict()
+      .optional(),
+    payout: z
+      .object({
+        type: z
+          .enum(["fixed", "percentage", "progressive", "merchandise"])
+          .optional(),
+        amount: z.number().min(0).max(999999).optional(),
+        percentage: z.number().min(0).max(100).optional(),
+        description: z.string().max(500).optional(),
+        currency: z.string().max(3).optional(),
+      })
+      .strict()
+      .optional(),
+    timeline: z
+      .object({
+        estimatedDuration: z.number().min(1).max(480).optional(),
+        isBreak: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
 
-const programSchema = z.object({
-  slug: z.string().min(1),
-  name: z.string().min(1),
-  description: z.string().optional(),
-  games: z.array(gameSchema),
-});
+const programSchema = z
+  .object({
+    slug: z.string().min(1).max(255),
+    name: z.string().min(1).max(255),
+    description: z.string().max(1000).optional(),
+    games: z.array(gameSchema).max(100),
+  })
+  .strict();
 
 export default defineEventHandler(async (event) => {
   assertRole(event.context.user?.role, ["OWNER"]);
 
   const body = await readBody(event);
-  const data = programSchema.parse(body);
+  let data;
+  try {
+    data = programSchema.parse(body);
+  } catch (validationError: any) {
+    throw createError({
+      statusCode: 400,
+      message: "Validation failed",
+      data: {
+        errors: validationError.errors?.map((e: any) => ({
+          path: e.path.join("."),
+          message: e.message,
+        })),
+      },
+    });
+  }
 
   // Validate pattern slugs exist
   const patternSlugs = [...new Set(data.games.map((g) => g.patternSlug))];
@@ -113,13 +138,25 @@ export default defineEventHandler(async (event) => {
     return prog;
   });
 
+  // Log comprehensive audit trail
+  const after = await prisma.bingoProgram.findUnique({
+    where: { slug: data.slug },
+    include: { games: true },
+  });
+
   await auditService.log({
     actorUserId: event.context.user.id,
     action: before ? "UPDATE_PROGRAM" : "CREATE_PROGRAM",
     entity: `bingoProgram:${data.slug}`,
-    before: before ? { ...before, games: before.games } : null,
-    after: data,
+    before: before || null,
+    after: after || null,
   });
 
-  return { success: true, slug: result.slug };
+  return {
+    success: true,
+    slug: result.slug,
+    message: before
+      ? "Program updated successfully"
+      : "Program created successfully",
+  };
 });

@@ -99,10 +99,22 @@ const handlePatternDelete = async (slug: string) => {
 const handleProgramSave = async (p: any) => {
   isProgramSaving.value = true;
   try {
-    await opsStore.saveProgram(p);
-    toast.success(`Program "${p?.name || "Untitled"}" saved.`, {
-      title: "Program Saved",
-    });
+    const result = await opsStore.saveProgram(p);
+    if (result.success) {
+      toast.success(`Program "${p?.name || "Untitled"}" saved successfully.`, {
+        title: "Program Saved",
+      });
+      isProgramDirty.value = false;
+    } else {
+      // Handle validation errors
+      const errorMessage = result.validationErrors?.length
+        ? `Validation errors: ${result.validationErrors.map((e: any) => `${e.path}: ${e.message}`).join("; ")}`
+        : result.error || "Failed to save program";
+      toast.error(errorMessage, {
+        title: "Save Failed",
+        duration: 5000,
+      });
+    }
   } catch (e: any) {
     toast.error(e?.message || "Failed to save program.", { title: "Error" });
   } finally {
@@ -111,9 +123,16 @@ const handleProgramSave = async (p: any) => {
 };
 
 const handleProgramDelete = async (slug: string) => {
+  if (!confirm("Are you sure you want to delete this program? This action cannot be undone.")) {
+    return;
+  }
   try {
-    await opsStore.deleteProgram(slug);
-    toast.success("Program deleted.", { title: "Deleted" });
+    const result = await opsStore.deleteProgram(slug);
+    if (result.success) {
+      toast.success(result.data?.message || "Program deleted successfully.", { title: "Deleted" });
+    } else {
+      toast.error(result.error || "Failed to delete program.", { title: "Error" });
+    }
   } catch (e: any) {
     toast.error(e?.message || "Failed to delete program.", { title: "Error" });
   }

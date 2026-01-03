@@ -373,22 +373,40 @@ export const useOpsStore = defineStore("ops", {
     // Programs
     async saveProgram(program: any) {
       const { getHeaders } = useCsrf();
-      await $fetch("/api/admin/programs", {
-        method: "POST",
-        body: program,
-        headers: getHeaders(),
-        credentials: "include",
-      });
-      await this.refreshPrograms();
+      try {
+        const response = await $fetch("/api/admin/programs", {
+          method: "POST",
+          body: program,
+          headers: getHeaders(),
+          credentials: "include",
+        });
+        await this.refreshPrograms();
+        return { success: true, data: response };
+      } catch (error: any) {
+        const validationErrors = error?.data?.errors || [];
+        return {
+          success: false,
+          error: error?.message || "Failed to save program",
+          validationErrors,
+        };
+      }
     },
     async deleteProgram(slug: string) {
       const { getHeaders } = useCsrf();
-      await $fetch(`/api/admin/programs?slug=${slug}`, {
-        method: "DELETE",
-        headers: getHeaders(),
-        credentials: "include",
-      });
-      await this.refreshPrograms();
+      try {
+        const response = await $fetch(`/api/admin/programs?slug=${slug}`, {
+          method: "DELETE",
+          headers: getHeaders(),
+          credentials: "include",
+        });
+        await this.refreshPrograms();
+        return { success: true, data: response };
+      } catch (error: any) {
+        return {
+          success: false,
+          error: error?.message || "Failed to delete program",
+        };
+      }
     },
     async refreshPrograms() {
       this.programs = await $fetch<any>("/api/admin/programs", {

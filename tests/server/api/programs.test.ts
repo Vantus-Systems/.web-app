@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { readBody } from "h3";
 import getHandler from "~/server/api/admin/programs.get";
 import postHandler from "~/server/api/admin/programs.post";
 import prisma from "~/server/db/client";
 import { auditService } from "~/server/services/audit.service";
 import { assertRole } from "~/server/utils/roles";
-import { readBody, createError } from "h3";
 
 // Mock dependencies
 vi.mock("~/server/db/client", () => ({
@@ -83,9 +83,15 @@ describe("Admin Programs API", () => {
 
       expect(assertRole).toHaveBeenCalledWith("OWNER", ["OWNER"]);
       expect(result).toHaveLength(1);
-      expect(result[0].games[0].pricing).toEqual({ model: "standard", price: 10 });
+      expect(result[0].games[0].pricing).toEqual({
+        model: "standard",
+        price: 10,
+      });
       expect(result[0].games[0].payout).toEqual({ type: "fixed", amount: 100 });
-      expect(result[0].games[0].timeline).toEqual({ estimatedDuration: 15, isBreak: false });
+      expect(result[0].games[0].timeline).toEqual({
+        estimatedDuration: 15,
+        isBreak: false,
+      });
     });
 
     it("should handle missing config fields with defaults", async () => {
@@ -113,7 +119,10 @@ describe("Admin Programs API", () => {
 
       expect(result[0].games[0].pricing).toEqual({ model: "included" });
       expect(result[0].games[0].payout).toEqual({ type: "fixed", amount: 0 });
-      expect(result[0].games[0].timeline).toEqual({ estimatedDuration: 10, isBreak: false });
+      expect(result[0].games[0].timeline).toEqual({
+        estimatedDuration: 10,
+        isBreak: false,
+      });
     });
   });
 
@@ -140,17 +149,22 @@ describe("Admin Programs API", () => {
       (prisma.bingoPattern.findMany as any).mockResolvedValue([
         { id: "pat-1", slug: "pattern-1" },
       ]);
-      (prisma.bingoProgram.upsert as any).mockResolvedValue({ id: "prog-1", slug: "new-program" });
+      (prisma.bingoProgram.upsert as any).mockResolvedValue({
+        id: "prog-1",
+        slug: "new-program",
+      });
       (prisma.bingoGame.create as any).mockResolvedValue({});
 
       await postHandler(mockEvent as any);
 
       expect(assertRole).toHaveBeenCalledWith("OWNER", ["OWNER"]);
-      
+
       // Check transaction calls
       expect(prisma.bingoProgram.upsert).toHaveBeenCalled();
-      expect(prisma.bingoGame.deleteMany).toHaveBeenCalledWith({ where: { program_id: "prog-1" } });
-      
+      expect(prisma.bingoGame.deleteMany).toHaveBeenCalledWith({
+        where: { program_id: "prog-1" },
+      });
+
       expect(prisma.bingoGame.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           program_id: "prog-1",
@@ -177,7 +191,10 @@ describe("Admin Programs API", () => {
     });
 
     it("should validate input schema", async () => {
-      const invalidPayload = { ...mockPayload, games: [{ ...mockPayload.games[0], paperColor: "invalid" }] };
+      const invalidPayload = {
+        ...mockPayload,
+        games: [{ ...mockPayload.games[0], paperColor: "invalid" }],
+      };
       (readBody as any).mockResolvedValue(invalidPayload);
 
       try {

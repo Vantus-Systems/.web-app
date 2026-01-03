@@ -95,23 +95,41 @@
           <input
             v-model="form.name"
             class="mt-1.5 w-full rounded-lg border-divider bg-base px-3 py-2 text-sm focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary outline-none transition-all"
+            :class="{ 'border-rose-500 focus:ring-rose-500/20 focus:border-rose-500': validationErrors.name }"
           />
+          <p v-if="validationErrors.name" class="text-xs text-rose-500 mt-1 font-medium">
+            {{ validationErrors.name }}
+          </p>
         </label>
         <label class="block">
           <span class="text-xs font-bold text-secondary uppercase tracking-wider">Slug</span>
           <input
             v-model="form.slug"
             class="mt-1.5 w-full rounded-lg border-divider bg-base px-3 py-2 text-sm focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary outline-none transition-all disabled:opacity-50"
+            :class="{ 'border-rose-500 focus:ring-rose-500/20 focus:border-rose-500': validationErrors.slug }"
             :disabled="!editingProgram?.isNew"
           />
+          <p v-if="validationErrors.slug" class="text-xs text-rose-500 mt-1 font-medium">
+            {{ validationErrors.slug }}
+          </p>
         </label>
         <label class="block">
           <span class="text-xs font-bold text-secondary uppercase tracking-wider">Description</span>
           <input
             v-model="form.description"
             class="mt-1.5 w-full rounded-lg border-divider bg-base px-3 py-2 text-sm focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary outline-none transition-all"
+            :class="{ 'border-rose-500 focus:ring-rose-500/20 focus:border-rose-500': validationErrors.description }"
           />
+          <p v-if="validationErrors.description" class="text-xs text-rose-500 mt-1 font-medium">
+            {{ validationErrors.description }}
+          </p>
         </label>
+      </div>
+
+      <!-- Games Validation Error -->
+      <div v-if="validationErrors.games" class="bg-rose-50 border border-rose-200 rounded-xl p-4 flex gap-3">
+        <AlertCircle class="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+        <p class="text-sm text-rose-600 font-medium">{{ validationErrors.games }}</p>
       </div>
 
       <div class="bg-surface border border-divider rounded-xl flex flex-col shadow-sm flex-1 min-h-[400px]">
@@ -584,10 +602,34 @@
       </div>
     </div>
   </div>
+
+  <Teleport to="body">
+    <div
+      v-if="contextMenu.visible"
+      ref="contextMenuRef"
+      class="fixed z-50 bg-surface border border-divider rounded-lg shadow-lg py-1 min-w-[160px]"
+      :style="{ left: `${contextMenu.x}px`, top: `${contextMenu.y}px` }"
+    >
+      <button
+        class="w-full text-left px-4 py-2 text-sm text-primary hover:bg-base flex items-center gap-2"
+        @click="duplicateGame"
+      >
+        <Copy class="w-4 h-4" />
+        Duplicate
+      </button>
+      <button
+        class="w-full text-left px-4 py-2 text-sm text-rose-500 hover:bg-rose-50 flex items-center gap-2"
+        @click="deleteGameFromMenu"
+      >
+        <Trash2 class="w-4 h-4" />
+        Delete
+      </button>
+    </div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from "vue";
+import { computed, ref, onMounted, onUnmounted, watch } from "vue";
 import { useMagicKeys, whenever } from "@vueuse/core";
 import BingoPatternGrid from "~/components/bingo/BingoPatternGrid.vue";
 import { 
@@ -668,6 +710,7 @@ const filteredPatterns = computed(() => {
 });
 
 const showInspector = ref(false);
+const validationErrors = ref<Record<string, string>>({});
 
 const confirmationModal = ref({
   visible: false,
@@ -676,8 +719,11 @@ const confirmationModal = ref({
 
 const originalForm = ref("");
 
+// Deep equality check for dirty detection to prevent false positives
 const isDirty = computed(() => {
-  return JSON.stringify(form.value) !== originalForm.value;
+  if (!originalForm.value) return false;
+  const current = JSON.stringify(form.value);
+  return current !== originalForm.value;
 });
 
 watch(isDirty, (newVal) => {
@@ -766,13 +812,13 @@ const removeGame = (idx: number) => {
   if (selectedGameIndex.value === idx) {
     selectedGameIndex.value = null;
   }
-}; sum;
- }, 0);
-});
+};
 
-cont totalDration = coputed(() => {
+const totalDuration = computed(() => {
   return form.value.games.reduce((sum, game) => {
-    return sum + (Number(game.timeline?.estimatedDuration) || 0)
+    return sum + (Number(game.timeline?.estimatedDuration) || 0);
+  }, 0);
+});
 
 const reorder = (targetIndex: number) => {
   if (dragIndex.value === null) return;
@@ -793,6 +839,36 @@ const selectedGame = computed(() =>
 );
 
 const saveProgram = () => {
+  // Clear previous validation errors
+  validationErrors.value = {};
+
+  // Basic client-side validation
+  if (!form.value.slug || !form.value.slug.trim()) {
+    validationErrors.value["slug"] = "Program slug is required";
+    return;
+  }
+  if (!form.value.name || !form.value.name.trim()) {
+    validationErrors.value["name"] = "Program name is required";
+    return;
+  }
+  if (form.value.games.length === 0) {
+    validationErrors.value["games"] = "At least one game is required";
+    return;
+  }
+
+  // Validate games
+  for (let i = 0; i < form.value.games.length; i++) {
+    const game = form.value.games[i];
+    if (!game.title || !game.title.trim()) {
+      validationErrors.value[`games[${i}].title`] = "Game title is required";
+      return;
+    }
+    if (!game.patternSlug) {
+      validationErrors.value[`games[${i}].patternSlug`] = "Game pattern is required";
+      return;
+    }
+  }
+
   form.value.games.forEach((game, i) => (game.sortOrder = i + 1));
   emit("save", form.value);
 };
@@ -891,7 +967,6 @@ const prevFrame = () => {
 };
 
 // Reset frame when selection changes
-import { watch } from "vue";
 watch(selectedGameIndex, () => {
   pausePlayback();
   currentFrame.value = 0;
@@ -985,27 +1060,3 @@ import { onClickOutside } from "@vueuse/core";
 const contextMenuRef = ref(null);
 onClickOutside(contextMenuRef, closeContextMenu);
 </script>
-
-<template>
-  <div
-    v-if="contextMenu.visible"
-    ref="contextMenuRef"
-    class="fixed z-50 bg-surface border border-divider rounded-lg shadow-lg py-1 min-w-[160px]"
-    :style="{ left: `${contextMenu.x}px`, top: `${contextMenu.y}px` }"
-  >
-    <button
-      class="w-full text-left px-4 py-2 text-sm text-primary hover:bg-base flex items-center gap-2"
-      @click="duplicateGame"
-    >
-      <Copy class="w-4 h-4" />
-      Duplicate
-    </button>
-    <button
-      class="w-full text-left px-4 py-2 text-sm text-rose-500 hover:bg-rose-50 flex items-center gap-2"
-      @click="deleteGameFromMenu"
-    >
-      <Trash2 class="w-4 h-4" />
-      Delete
-    </button>
-  </div>
-</template>
