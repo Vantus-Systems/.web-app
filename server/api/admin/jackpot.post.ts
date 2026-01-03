@@ -28,22 +28,33 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const parsed = jackpotSchema.parse(body);
 
-  // Ensure IDs exist
-  parsed.items = parsed.items.map((item) => ({
-    ...item,
+  // Normalize incoming items and ensure IDs exist (persist canonical shape)
+  const normalizedItems = parsed.items.map((item) => ({
     id: item.id || randomUUID(),
+    label: item.label || "Progressive",
+    current: Number(item.current) || 0,
+    backup: Number(item.backup) || 0,
+    playTime: item.playTime || "",
+    isSession: Boolean(item.isSession),
+    lastWonDate: item.lastWonDate || undefined,
   }));
+
+  const normalized = {
+    items: normalizedItems,
+    lastUpdated: parsed.lastUpdated || new Date().toISOString(),
+    lastDailyUpdate: parsed.lastDailyUpdate || undefined,
+  };
 
   const before = await settingsService.get("jackpot");
 
-  await settingsService.set("jackpot", parsed);
+  await settingsService.set("jackpot", normalized);
 
   await auditService.log({
     actorUserId: event.context.user.id,
     action: "UPDATE_SETTING",
     entity: "setting:jackpot",
     before,
-    after: parsed,
+    after: normalized,
   });
 
   return { success: true };

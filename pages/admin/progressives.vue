@@ -81,19 +81,14 @@
             Auto-fill enabled for scanned IDs
           </span>
         </div>
-        <W2GGenerator
-          :progressive-amounts="{
-            babes: jackpotData?.babes?.current,
-            hornet: jackpotData?.hornet?.current,
-          }"
-        />
+        <W2GGenerator :progressive-amounts="progressiveAmounts" />
       </section>
     </div>
   </AdminShell>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, onMounted, onBeforeUnmount, computed } from "vue";
 import AdminShell from "~/components/admin/AdminShell.vue";
 import AdminPageHeader from "~/components/admin/ui/AdminPageHeader.vue";
 import ProgressiveEditor from "~/components/admin/ProgressiveEditor.vue";
@@ -113,6 +108,17 @@ const toast = useToast();
 
 const sessionUser = ref<{ username: string; role: string } | null>(null);
 const jackpotData = ref<any>({});
+
+const progressiveAmounts = computed(() => {
+  const items = jackpotData.value?.items || [];
+  const find = (needle: string) =>
+    items.find((i: any) => i.label?.toLowerCase().includes(needle));
+  return {
+    babes: find("babes")?.current || 0,
+    hornet: find("hornet")?.current || 0,
+  };
+});
+
 const pending = ref(true);
 const isSavingJackpot = ref(false);
 const lastSystemSync = ref("");

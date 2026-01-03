@@ -64,34 +64,57 @@ export default defineEventHandler(async () => {
 
   // New Structure (preferred)
   if (Array.isArray(d.items)) {
-    currentState = d;
+    // Keep the structure but ensure we have lastUpdated/lastDailyUpdate fields present
+    currentState = {
+      items: d.items,
+      lastUpdated: d.lastUpdated || new Date().toISOString(),
+      lastDailyUpdate: d.lastDailyUpdate || undefined,
+    } as JackpotState;
   }
   // Migration from Object Structure { babes: ..., hornet: ... }
   else if ("babes" in d && "hornet" in d) {
+    // Support both shaped objects and numeric legacy values
+    const babesRaw = d.babes;
+    const hornetRaw = d.hornet;
+
+    const babesObj =
+      typeof babesRaw === "object" && babesRaw !== null
+        ? babesRaw
+        : { current: Number(babesRaw) || 0 };
+    const hornetObj =
+      typeof hornetRaw === "object" && hornetRaw !== null
+        ? hornetRaw
+        : { current: Number(hornetRaw) || 0 };
+
+    const babesItem: JackpotItem = {
+      id: (babesObj.id as string) || randomUUID(),
+      label: babesObj.label || "Bingo Babes Progressive",
+      current: Number(babesObj.current) || 0,
+      backup: Number(babesObj.backup) || 0,
+      playTime: babesObj.playTime || "Daytime (4 PM)",
+      isSession: Boolean(babesObj.isSession) || false,
+      lastWonDate: babesObj.lastWonDate || undefined,
+    };
+
+    const hornetItem: JackpotItem = {
+      id: (hornetObj.id as string) || randomUUID(),
+      label: hornetObj.label || "Progressive Hornet",
+      current: Number(hornetObj.current) || 0,
+      backup: Number(hornetObj.backup) || 0,
+      playTime: hornetObj.playTime || "Session",
+      isSession: Boolean(hornetObj.isSession) || true,
+      lastWonDate: hornetObj.lastWonDate || undefined,
+    };
+
     currentState = {
-      items: [
-        {
-          id: randomUUID(),
-          label: babes.label || "Bingo Babes Progressive",
-          current: Number(babes.current) || 0,
-          backup: Number(babes.backup) || 0,
-          playTime: "Daytime (4 PM)",
-          isSession: false,
-          lastWonDate: babes.lastWonDate || undefined,
-        },
-        {
-          id: randomUUID(),
-          label: hornet.label || "Progressive Hornet",
-          current: Number(hornet.current) || 0,
-          backup: Number(hornet.backup) || 0,
-          playTime: "Session",
-          isSession: true,
-          lastWonDate: hornet.lastWonDate || undefined,
-        },
-      ],
+      items: [babesItem, hornetItem],
       lastUpdated: d.lastUpdated || new Date().toISOString(),
       lastDailyUpdate: d.lastDailyUpdate || undefined,
-    };
+      // Provide backwards-compatible references (non-authoritative)
+      babes: { ...babesItem },
+      hornet: { ...hornetItem },
+    } as any;
+
     needsPersistence = true;
   }
   // Migration for legacy single-value format
@@ -131,7 +154,22 @@ export default defineEventHandler(async () => {
     if (added) {
       currentState.items = items as JackpotItem[];
       needsPersistence = true;
+    } else {
+      // Defensive cast
+      currentState.items = currentState.items as JackpotItem[];
     }
+
+    // Backwards-compatible shortcuts for legacy UI that expects top-level properties
+    const findByLabel = (needle: string) =>
+      currentState.items.find((it) =>
+        (it.label || "").toLowerCase().includes(needle),
+      );
+
+    const babesItem = findByLabel("babes");
+    const hornetItem = findByLabel("hornet");
+
+    if (babesItem) (currentState as any).babes = { ...babesItem };
+    if (hornetItem) (currentState as any).hornet = { ...hornetItem };
   } else {
     // Should not happen if migration logic is correct, but safe fallback
     currentState.items = defaultStructure.items;
