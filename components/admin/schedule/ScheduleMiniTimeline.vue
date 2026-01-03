@@ -22,17 +22,17 @@
       <!-- Segments -->
       <template v-if="profile && timeline">
         <div 
-           v-for="seg in resolvedSegments" 
-           :key="seg.id"
+           v-for="(segStyles, idx) in resolvedSegments"
+           :key="idx"
            class="absolute top-8 h-8 rounded shadow-sm group z-10"
            :style="[
-             getSegmentStyle(seg),
-             { backgroundColor: seg.color_code || '#6366f1' }
+             segStyles.style,
+             { backgroundColor: segStyles.segment.color_code || '#6366f1' }
            ]"
         >
            <!-- Tooltip -->
            <div class="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-surface-dark text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-             {{ seg.label }} ({{ seg.time_start }}-{{ seg.time_end }})
+             {{ segStyles.segment.label }} ({{ segStyles.segment.time_start }}-{{ segStyles.segment.time_end }})
            </div>
         </div>
       </template>
@@ -98,39 +98,51 @@ const profileName = computed(() => props.profile?.name);
 
 const resolvedSegments = computed(() => {
   if (!props.profile || !props.timeline) return [];
-  return props.timeline.flowSegments.filter(s => props.profile!.segment_ids.includes(s.id));
+  const segs = props.timeline.flowSegments.filter(s => props.profile!.segment_ids.includes(s.id));
+
+  // Transform into style objects, splitting overnighters
+  const result: { segment: any; style: any }[] = [];
+
+  segs.forEach(seg => {
+    const start = timeToPct(seg.time_start);
+    const end = timeToPct(seg.time_end);
+
+    if (end < start) {
+      // Overnight: Two parts.
+      // Part 1: Start -> 100%
+      result.push({
+        segment: seg,
+        style: {
+          left: `${start}%`,
+          width: `${100 - start}%`
+        }
+      });
+      // Part 2: 0% -> End
+      result.push({
+        segment: seg,
+        style: {
+          left: '0%',
+          width: `${end}%`
+        }
+      });
+    } else {
+      result.push({
+        segment: seg,
+        style: {
+          left: `${start}%`,
+          width: `${Math.max(0, end - start)}%`
+        }
+      });
+    }
+  });
+
+  return result;
 });
 
 const resolvedEvents = computed(() => {
   if (!props.profile || !props.timeline) return [];
   return props.timeline.overlayEvents.filter(e => props.profile!.overlay_event_ids.includes(e.id));
 });
-
-const getSegmentStyle = (seg: any) => {
-  const start = timeToPct(seg.time_start);
-  const end = timeToPct(seg.time_end);
-  
-  if (end < start) {
-    // Overnight: splits into two parts.
-    // CSS cannot handle two rects in one div unless we use box-shadow or gradient hack.
-    // Easier: Just render until end (overflows) or clamp?
-    // "Render overnight segments correctly (split into two bars or otherwise represent wrap)."
-    // Since we are in a v-for, we can't easily emit two divs.
-    // But we can use linear-gradient to simulate split?
-    // Or just render it as one long bar that overflows? No, parent has overflow-hidden.
-    // Let's treat it as ending at 100% for this visual.
-    // Or, we can use a small hack: width goes to 100% and we rely on that.
-    return {
-      left: `${start}%`,
-      width: `${100 - start}%` // Visual approximation for overnight start part
-    };
-  }
-  
-  return {
-    left: `${start}%`,
-    width: `${Math.max(0, end - start)}%`
-  };
-};
 
 const timeToPct = (time: string) => {
   const parts = time.split(':').map(Number);
