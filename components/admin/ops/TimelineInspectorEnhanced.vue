@@ -166,6 +166,38 @@
           />
 
           <InspectorField
+            id="seg-program"
+            label="Linked Program"
+            v-model="editingSegment.program_id"
+            type="select"
+            :options="programOptions"
+            helper-text="Link to a Bingo Program"
+            :status="fieldStatus('program_id')"
+            @update:model-value="markDirty('segment')"
+          />
+
+          <div
+            v-if="selectedProgram"
+            class="mt-2 mb-4 p-2 bg-base border border-divider rounded text-xs"
+          >
+            <div class="flex justify-between">
+              <span class="text-secondary">Program Duration:</span>
+              <span class="font-mono">{{ programDuration }}m</span>
+            </div>
+            <div class="flex justify-between mt-1">
+              <span class="text-secondary">Segment Duration:</span>
+              <span class="font-mono">{{ segmentDuration }}m</span>
+            </div>
+            <div
+              v-if="Math.abs(programDuration - segmentDuration) > 5"
+              class="mt-1 text-accent-warning flex items-center gap-1"
+            >
+              <AlertCircle class="w-3 h-3" />
+              <span>Duration Mismatch</span>
+            </div>
+          </div>
+
+          <InspectorField
             id="seg-color"
             label="Color Override"
             v-model="editingSegment.color_code"
@@ -629,6 +661,12 @@ const props = defineProps<{
   flowSegments: OpsSchemaFlowSegment[];
   overlayEvents: OpsSchemaOverlayEvent[];
   logicTriggers: EnhancedLogicTrigger[];
+  availableBundles: any[];
+  programs: {
+    id: string;
+    name: string;
+    games: { timeline: { estimatedDuration: number } }[];
+  }[];
   violations: ConstraintViolation[];
   isDirty: boolean;
   isSaving: boolean;
@@ -709,6 +747,37 @@ const rateCardOptions = computed(() => {
     value: card.id,
     label: card.name,
   }));
+});
+
+const programOptions = computed(() => {
+  return [
+    { value: "", label: "None" },
+    ...props.programs.map((p) => ({
+      value: p.id,
+      label: p.name,
+    })),
+  ];
+});
+
+const selectedProgram = computed(() => {
+  if (!editingSegment.value?.program_id) return null;
+  return props.programs.find((p) => p.id === editingSegment.value?.program_id);
+});
+
+const programDuration = computed(() => {
+  if (!selectedProgram.value) return 0;
+  return selectedProgram.value.games.reduce(
+    (sum, g) => sum + (g.timeline?.estimatedDuration || 0),
+    0
+  );
+});
+
+const segmentDuration = computed(() => {
+  if (!editingSegment.value) return 0;
+  return (
+    toMinutes(editingSegment.value.time_end) -
+    toMinutes(editingSegment.value.time_start)
+  );
 });
 
 const overlayOptions = computed(() => {

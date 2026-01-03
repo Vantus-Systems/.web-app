@@ -258,6 +258,9 @@ model bingoGame {
   title       String
   paperColor  String
   notes       String?
+  pricing_config String?   @default("{}")
+  payout_config  String?   @default("{}")
+  timeline_config String?  @default("{}")
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 

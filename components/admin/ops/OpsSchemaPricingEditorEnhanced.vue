@@ -271,6 +271,7 @@
           :active-tool="activeTool"
           :ripple-options="rippleOptions"
           :snap-increment="snapIncrement"
+          :programs="programs"
           :violations="violations"
           @select="selectItem"
           @add-segment="addSegmentFromDrop"
@@ -311,6 +312,7 @@
             :overlay-events="overlayEvents"
             :logic-triggers="logicTriggers"
             :available-bundles="schema.definitions?.bundles || []"
+            :programs="programs"
             :violations="violations"
             :is-dirty="isDirty"
             :is-saving="isSaving"
@@ -632,6 +634,7 @@ const showIssuesPanel = ref(false);
 // Inspector State
 const isDirty = ref(false);
 const isSaving = ref(false);
+const programs = ref<{ id: string; name: string }[]>([]);
 
 // Simulation
 const showSimulation = ref(false);
@@ -1220,7 +1223,13 @@ watch(
 
 // ===== LIFECYCLE =====
 
-onMounted(() => {
+onMounted(async () => {
+  try {
+    const data = await $fetch("/api/admin/programs");
+    programs.value = data;
+  } catch (e) {
+    console.error("Failed to fetch programs:", e);
+  }
   validate();
 });
 

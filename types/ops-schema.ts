@@ -35,7 +35,8 @@ export type OpsSchemaFlowSegment = {
   label: string;
   time_start: string;
   time_end: string;
-  rate_card_id: string;
+  rate_card_id?: string;
+  program_id?: string;
   color_code?: string;
   allow_overlap?: boolean;
 };

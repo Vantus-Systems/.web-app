@@ -140,7 +140,7 @@
                 <span
                   v-if="showLabels"
                   class="text-xs font-semibold truncate"
-                >{{ segment.label }}</span>
+                >{{ getSegmentLabel(segment) }}</span>
                 
                 <!-- Resize Handles -->
                 <div
@@ -328,6 +328,7 @@ const props = defineProps<{
   activeTool: "standard" | "ripple" | "knife";
   rippleOptions: RippleOptions;
   snapIncrement: number;
+  programs: { id: string; name: string }[];
   violations: ConstraintViolation[];
 }>();
 
@@ -467,6 +468,14 @@ const isEmpty = computed(() => {
 });
 
 // Methods
+
+const getSegmentLabel = (segment: OpsSchemaFlowSegment) => {
+  if (segment.program_id) {
+    const program = props.programs.find(p => p.id === segment.program_id);
+    if (program) return `${segment.label} (${program.name})`;
+  }
+  return segment.label;
+};
 
 const getSegmentLeft = (segment: OpsSchemaFlowSegment): number => {
   const range = normalizeRangeToOperational(segment.time_start, segment.time_end, props.operationalStart);

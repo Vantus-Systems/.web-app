@@ -7,9 +7,31 @@ import { assertRole } from "~/server/utils/roles";
 const gameSchema = z.object({
   sortOrder: z.number().int().min(0).max(999),
   title: z.string().min(1),
-  paperColor: z.string().min(1), // Hex check? "paperColor required"
+  paperColor: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Invalid hex color"),
   notes: z.string().optional(),
   patternSlug: z.string().min(1),
+  pricing: z
+    .object({
+      model: z.enum(["standard", "premium", "included"]).optional(),
+      price: z.number().min(0).optional(),
+      currency: z.string().optional(),
+    })
+    .optional(),
+  payout: z
+    .object({
+      type: z.enum(["fixed", "percentage", "progressive", "merchandise"]).optional(),
+      amount: z.number().min(0).optional(),
+      percentage: z.number().min(0).max(100).optional(),
+      description: z.string().optional(),
+      currency: z.string().optional(),
+    })
+    .optional(),
+  timeline: z
+    .object({
+      estimatedDuration: z.number().min(1).optional(),
+      isBreak: z.boolean().optional(),
+    })
+    .optional(),
 });
 
 const programSchema = z.object({
@@ -80,6 +102,9 @@ export default defineEventHandler(async (event) => {
             paperColor: g.paperColor,
             notes: g.notes,
             pattern_id: patternMap.get(g.patternSlug)!,
+            pricing_config: JSON.stringify(g.pricing || {}),
+            payout_config: JSON.stringify(g.payout || {}),
+            timeline_config: JSON.stringify(g.timeline || {}),
           },
         }),
       ),

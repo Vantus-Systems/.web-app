@@ -25,6 +25,8 @@ const currentStep = ref("overview"); // overview | pricing | patterns | programs
 type Density = "compact" | "standard" | "detail";
 const density = ref<Density>("standard");
 const isSaving = ref(false);
+const isProgramSaving = ref(false);
+const isProgramDirty = ref(false);
 const isPublishing = ref(false);
 const isRollingBack = ref(false);
 
@@ -39,6 +41,16 @@ const steps = [
   { id: "patterns", label: "Patterns", icon: Grid },
   { id: "programs", label: "Programs", icon: Layers },
 ];
+
+const confirmNavigation = (stepId: string) => {
+  if (currentStep.value === 'programs' && isProgramDirty.value) {
+    if (!confirm("You have unsaved changes in the Program Editor. Discard them?")) {
+      return;
+    }
+    isProgramDirty.value = false;
+  }
+  currentStep.value = stepId;
+};
 
 const opsSchemaMeta = computed(() => opsStore.opsSchemaDraft?.meta);
 const opsSchemaStatus = computed(() => opsSchemaMeta.value?.status || "draft");
@@ -85,6 +97,7 @@ const handlePatternDelete = async (slug: string) => {
 };
 
 const handleProgramSave = async (p: any) => {
+  isProgramSaving.value = true;
   try {
     await opsStore.saveProgram(p);
     toast.success(`Program "${p?.name || "Untitled"}" saved.`, {
@@ -92,6 +105,8 @@ const handleProgramSave = async (p: any) => {
     });
   } catch (e: any) {
     toast.error(e?.message || "Failed to save program.", { title: "Error" });
+  } finally {
+    isProgramSaving.value = false;
   }
 };
 
@@ -194,7 +209,7 @@ const statusColors = {
               ? 'bg-accent-primary/10 text-accent-primary'
               : 'text-secondary hover:bg-base hover:text-primary'
           "
-          @click="currentStep = step.id"
+          @click="confirmNavigation(step.id)"
         >
           <component :is="step.icon" class="w-4 h-4" />
           {{ step.label }}
@@ -453,9 +468,11 @@ const statusColors = {
             <ProgramEditor
               :programs="opsStore.programs"
               :patterns="opsStore.patterns"
+              :is-saving="isProgramSaving"
               @save="handleProgramSave"
               @delete="handleProgramDelete"
-              @navigate="(step) => (currentStep = step)"
+              @navigate="(step) => confirmNavigation(step)"
+              @dirty-change="(val) => isProgramDirty = val"
             />
           </div>
 

@@ -50,7 +50,8 @@ const flowSegmentSchema = z.object({
   label: z.string().min(1),
   time_start: timeHHMM,
   time_end: timeHHMM,
-  rate_card_id: z.string().min(1),
+  rate_card_id: z.string().optional(),
+  program_id: z.string().optional(),
   color_code: z.string().optional(),
   allow_overlap: z.boolean().optional(),
 });
