@@ -202,6 +202,50 @@ async function main() {
   }
   console.log("Seeded Patterns");
 
+  // Ensure database has the expected bingo_programs config columns.
+  // In some developer environments schema.prisma may have fields that
+  // were not applied to an existing SQLite DB. Attempt to add missing
+  // columns non-destructively so seeding can proceed.
+  async function ensureBingoProgramColumns() {
+    try {
+      const url = process.env.DATABASE_URL || "";
+      // SQLite path detection
+      const isSqlite = url.startsWith("file:") || url.includes(".db") || url.startsWith("sqlite:");
+
+      const needed = [
+        { name: "pricing_config", sql: "ALTER TABLE bingo_programs ADD COLUMN pricing_config TEXT DEFAULT '{}'" },
+        { name: "schedule_config", sql: "ALTER TABLE bingo_programs ADD COLUMN schedule_config TEXT DEFAULT '{}'" },
+        { name: "specials_config", sql: "ALTER TABLE bingo_programs ADD COLUMN specials_config TEXT DEFAULT '{}'" },
+      ];
+
+      if (isSqlite) {
+        const rows = await prisma.$queryRawUnsafe("PRAGMA table_info('bingo_programs')");
+        const cols = (rows || []).map((r) => (r && (r.name || r.NAME || r.Name)) || Object.values(r || {})[1]).filter(Boolean);
+        for (const col of needed) {
+          if (!cols.includes(col.name)) {
+            console.log(`[seed] Adding missing column ${col.name} to bingo_programs`);
+            await prisma.$executeRawUnsafe(col.sql);
+          }
+        }
+      } else {
+        // Generic fallback: try information_schema (Postgres/MySQL)
+        const rows = await prisma.$queryRawUnsafe("SELECT column_name FROM information_schema.columns WHERE table_name = 'bingo_programs'");
+        const cols = (rows || []).map((r) => r && (r.column_name || r.COLUMN_NAME || Object.values(r || {})[0])).filter(Boolean);
+        for (const col of needed) {
+          if (!cols.includes(col.name)) {
+            console.log(`[seed] Adding missing column ${col.name} to bingo_programs via ALTER TABLE`);
+            // Postgres/MySQL compatible SQL - TEXT with default
+            await prisma.$executeRawUnsafe(`ALTER TABLE bingo_programs ADD COLUMN ${col.name} TEXT DEFAULT '{}'`);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[seed] Could not ensure bingo_programs columns:', e && e.message ? e.message : e);
+    }
+  }
+
+  await ensureBingoProgramColumns();
+
   console.log("Seeding Bingo Programs...");
 
   const programs = [

@@ -18,11 +18,11 @@
         <!-- View Toggle -->
         <div class="flex items-center bg-base p-1 rounded-lg">
           <button 
-            v-for="mode in ['standard', 'heatmap', 'staffing']" 
+            v-for="mode in VIEW_MODES" 
             :key="mode"
             class="px-3 py-1 text-xs font-bold rounded-md transition-all capitalize"
             :class="viewMode === mode ? 'bg-surface text-primary shadow-sm' : 'text-secondary hover:text-primary'"
-            @click="viewMode = mode as any"
+            @click="viewMode = mode"
           >
             {{ mode }}
           </button>
@@ -90,7 +90,9 @@
           @select-date="handleDateSelection"
           @paint-range="handlePaintRange"
           @open-inspector="handleOpenInspector"
-          @clear-selection="handleBulkClear"
+          @clear-selection="selectedDates = []"
+          @clear-selection-content="handleBulkClear"
+          @clear-tool="selectedProfileId = null"
           @copy-day="handleCopyDay"
           @paste-day="handlePasteDay"
           @context-menu="handleContextMenu"
@@ -106,6 +108,7 @@
           :calendar="draft.calendar"
           :profiles="dayProfiles"
           :holidays="holidays"
+          :timeline="draft.timeline"
           @clear-selection="selectedDates = []"
           @apply-bulk="handleBulkApply"
           @clear-bulk="handleBulkClear"
@@ -131,8 +134,19 @@
       :position="{ x: contextMenu.x, y: contextMenu.y }"
       :date="contextMenu.date"
       :assignment="resolveEffectiveAssignment(draft.calendar, contextMenu.date)"
+      :clipboard="clipboard"
       @close="contextMenu = null"
       @action="handleContextAction"
+    />
+
+    <!-- Time Prompt Modal -->
+    <ScheduleTimePrompt
+      v-if="timePrompt"
+      :title="timePrompt.title"
+      :description="timePrompt.description"
+      :initial-time="timePrompt.initialTime"
+      @confirm="handleTimePromptConfirm"
+      @cancel="timePrompt = null"
     />
   </div>
 </template>
@@ -146,6 +160,7 @@ import ScheduleProfileLibrary from "~/components/admin/schedule/ScheduleProfileL
 import ScheduleInspector from "~/components/admin/schedule/ScheduleInspector.vue";
 import ScheduleContextMenu from "~/components/admin/schedule/ScheduleContextMenu.vue";
 import ScheduleMiniTimeline from "~/components/admin/schedule/ScheduleMiniTimeline.vue";
+import ScheduleTimePrompt from "~/components/admin/schedule/ScheduleTimePrompt.vue";
 import { dateKey, resolveEffectiveAssignment, applyAssignment, clearAssignment, applyOverride, removeOverride, addDays, parseDateKey } from "~/utils/schedule-calendar";
 
 const props = defineProps<{
@@ -167,18 +182,24 @@ const selectedDates = ref<string[]>([]);
 const clipboard = ref<string | null>(null);
 const contextMenu = ref<{ x: number; y: number; date: string } | null>(null);
 const previewDate = ref<string | null>(null);
+const timePrompt = ref<{ title: string; description: string; initialTime: string; action: 'DOORS_OPEN' | 'CLOSE_EARLY'; date: string } | null>(null);
+
+const initialSnapshot = ref<string>("");
 
 // --- Fetch Data ---
 onMounted(async () => {
+  initialSnapshot.value = JSON.stringify(props.modelValue.calendar);
   try {
     const year = new Date().getFullYear();
-    const { data: hData } = await useFetch('/api/admin/holiday-rules', { query: { year } });
-    if (hData.value && hData.value.occurrences) {
+    const { data: hData, error: hError } = await useFetch('/api/admin/holiday-rules', { query: { year } });
+    if (hError.value) {
+      console.error("Failed to fetch holiday rules:", hError.value);
+    } else if (hData.value && hData.value.occurrences) {
       holidays.value = hData.value.occurrences;
     }
     
     // Reactive fetch for shifts based on active range
-    const { data: sData, refresh: refreshShifts } = await useFetch('/api/admin/shift-records', {
+    const { data: sData, error: sError, refresh: refreshShifts } = await useFetch('/api/admin/shift-records', {
        query: computed(() => ({
          start: activeDateRange.value.start,
          end: activeDateRange.value.end
@@ -187,7 +208,9 @@ onMounted(async () => {
     });
     
     watch(sData, (newData) => {
-      if (newData) {
+      if (sError.value) {
+        console.error("Failed to fetch shift records:", sError.value);
+      } else if (newData) {
         shifts.value = newData;
       }
     }, { immediate: true });
@@ -215,16 +238,18 @@ const dateRangeLabel = computed(() => {
 
 const diffSummary = computed(() => {
   if (!isDirty.value) return "";
-  const initial = props.modelValue.calendar;
+  const initial = JSON.parse(initialSnapshot.value || "{}");
   const current = draft.value.calendar;
   
+  // Diff assignments
   const changedDays = Object.keys(current.assignments).filter(k => 
-    JSON.stringify(current.assignments[k]) !== JSON.stringify(initial.assignments[k])
+    JSON.stringify(current.assignments[k]) !== JSON.stringify(initial.assignments?.[k])
   ).length;
   
+  // Diff overrides
   const overrideCount = Object.keys(current.overrides || {}).reduce((acc, k) => acc + (current.overrides[k]?.length || 0), 0);
   
-  return `${changedDays} days changed, ${overrideCount} overrides`;
+  return `${changedDays} days modified, ${overrideCount} overrides`;
 });
 
 const validationErrors = computed(() => {
@@ -299,26 +324,31 @@ const selectProfile = (id: string) => {
   }
 };
 
-const handleDateSelection = (payload: { date: string; multi: boolean }) => {
-  if (payload.multi) {
-    if (selectedDates.value.includes(payload.date)) {
-      selectedDates.value = selectedDates.value.filter(d => d !== payload.date);
-    } else {
-      selectedDates.value = [...selectedDates.value, payload.date];
-    }
-  } else {
-    if (selectedProfileId.value) {
-      // Paint single click
-      handlePaintRange({ dates: [payload.date], profileId: selectedProfileId.value });
-    } else {
-      // Toggle selection
-      if (selectedDates.value.includes(payload.date)) {
-        selectedDates.value = [];
+const handleDateSelection = (payload: { date: string | string[]; multi: boolean; replace?: boolean }) => {
+  if (payload.replace && Array.isArray(payload.date)) {
+    selectedDates.value = payload.date;
+    return;
+  }
+  
+  const dates = Array.isArray(payload.date) ? payload.date : [payload.date];
+  
+  dates.forEach(date => {
+    if (payload.multi) {
+      if (selectedDates.value.includes(date)) {
+        selectedDates.value = selectedDates.value.filter(d => d !== date);
       } else {
-        selectedDates.value = [payload.date];
+        selectedDates.value = [...selectedDates.value, date];
+      }
+    } else {
+      // Toggle logic for single click without modifiers
+      // But if we want exact behavior "Click again clears selection", we check if it's the ONLY selected date.
+      if (selectedDates.value.length === 1 && selectedDates.value[0] === date) {
+         selectedDates.value = [];
+      } else {
+         selectedDates.value = [date];
       }
     }
-  }
+  });
 };
 
 const handlePaintRange = (payload: { dates: string[]; profileId: string }) => {
@@ -356,8 +386,8 @@ const handleBulkClear = () => {
 };
 
 const handleSmartFill = (payload: { range: { start: string, end: string }, weekdays: number[], profileId: string }) => {
-  const startStr = payload.range.start;
-  const endStr = payload.range.end;
+  const startStr = payload.range?.start || activeDateRange.value.start;
+  const endStr = payload.range?.end || activeDateRange.value.end;
   let currentStr = startStr;
   
   while (currentStr <= endStr) {
@@ -399,25 +429,85 @@ const handleContextAction = (action: string, payload?: any) => {
   const date = contextMenu.value.date;
   
   if (action === 'clear') {
-    clearAssignment(draft.value.calendar, date);
-    if (draft.value.calendar.overrides?.[date]) {
-      delete draft.value.calendar.overrides[date];
+    handleBulkClear(); // This handles selectedDates. But context menu is on a specific date.
+    // If date is in selectedDates, clear all. If not, just clear that date.
+    if (selectedDates.value.includes(date)) {
+      handleBulkClear();
+    } else {
+      clearAssignment(draft.value.calendar, date);
+      if (draft.value.calendar.overrides?.[date]) {
+        delete draft.value.calendar.overrides[date];
+      }
     }
   } else if (action === 'lock') {
-    applyOverride(draft.value.calendar, date, {
-      id: crypto.randomUUID(),
-      kind: 'LOCKED',
-      reason: 'Manual Lock'
-    });
+    // Toggle lock
+    const eff = resolveEffectiveAssignment(draft.value.calendar, date);
+    if (eff.isLocked) {
+      // Find lock override and remove
+      const overrides = draft.value.calendar.overrides?.[date] || [];
+      const lockOverride = overrides.find(o => o.kind === 'LOCKED');
+      if (lockOverride) {
+        removeOverride(draft.value.calendar, date, lockOverride.id);
+      }
+    } else {
+      applyOverride(draft.value.calendar, date, {
+        id: crypto.randomUUID(),
+        kind: 'LOCKED',
+        reason: 'Manual Lock'
+      });
+    }
   } else if (action === 'close') {
     applyOverride(draft.value.calendar, date, {
       id: crypto.randomUUID(),
       kind: 'CLOSED',
       reason: 'Manual Close'
     });
+  } else if (action === 'paste') {
+    if (clipboard.value) {
+      handlePaintRange({ dates: [date], profileId: clipboard.value });
+    }
+  } else if (action === 'doors_open') {
+    timePrompt.value = {
+      title: 'Set Doors Open Time',
+      description: `Set override time for ${date}`,
+      initialTime: '10:00',
+      action: 'DOORS_OPEN',
+      date
+    };
+  } else if (action === 'close_early') {
+    timePrompt.value = {
+      title: 'Close Early Time',
+      description: `Set closing time for ${date}`,
+      initialTime: '17:00',
+      action: 'CLOSE_EARLY',
+      date
+    };
   }
   
   contextMenu.value = null;
+};
+
+const handleTimePromptConfirm = (time: string) => {
+  if (!timePrompt.value) return;
+  const { action, date } = timePrompt.value;
+  
+  if (action === 'DOORS_OPEN') {
+    applyOverride(draft.value.calendar, date, {
+      id: crypto.randomUUID(),
+      kind: 'DOORS_OPEN',
+      doors_open_time: time,
+      reason: `Doors Open ${time}`
+    });
+  } else if (action === 'CLOSE_EARLY') {
+    applyOverride(draft.value.calendar, date, {
+      id: crypto.randomUUID(),
+      kind: 'CLOSE_EARLY',
+      untilTime: time,
+      reason: `Close Early ${time}`
+    });
+  }
+  
+  timePrompt.value = null;
 };
 
 const handlePreviewDay = (date: string) => {

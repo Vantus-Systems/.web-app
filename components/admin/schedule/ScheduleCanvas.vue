@@ -18,7 +18,7 @@
     </div>
 
     <!-- Scroll Container -->
-    <div ref="container" class="flex-1 overflow-y-auto overflow-x-hidden bg-base custom-scrollbar">
+    <div ref="scrollContainer" v-bind="containerProps" class="flex-1 overflow-y-auto overflow-x-hidden bg-base custom-scrollbar">
       <!-- Top Loader Trigger -->
       <div ref="topTrigger" class="h-4 w-full"></div>
 
@@ -26,14 +26,12 @@
         No dates in range
       </div>
 
-      <div v-else class="relative">
-         <!-- Virtual List Wrapper is tricky with variable height or dynamic content.
-             For now, we render plain list. 1 year = 52 divs. 
-             If performance is bad, we switch to virtual. -->
+      <div v-else class="relative" v-bind="wrapperProps">
+         <!-- Virtual List -->
          <div
-            v-for="(week, wIdx) in weeks"
+            v-for="{ data: week, index: wIdx } in list"
             :key="week.startDate"
-            class="grid grid-cols-7 border-b border-divider bg-surface min-h-[140px]"
+            class="grid grid-cols-7 border-b border-divider bg-surface min-h-[140px] h-[140px]"
          >
             <div
               v-for="day in week.days"
@@ -85,7 +83,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from "vue";
-import { useInfiniteScroll, useKeyModifier } from "@vueuse/core";
+import { useInfiniteScroll, useKeyModifier, useVirtualList } from "@vueuse/core";
 import ScheduleDayCard from "./ScheduleDayCard.vue";
 import { dateKey, resolveEffectiveAssignment, parseDateKey, addDays } from "~/utils/schedule-calendar";
 import type { OpsSchemaCalendarAssignment, OpsSchemaCalendarOverride, OpsSchemaDayProfile } from "~/types/ops-schema";
@@ -106,30 +104,28 @@ const props = defineProps<{
 const emit = defineEmits([
   "select-date", "paint-range", "open-inspector", 
   "clear-selection", "copy-day", "paste-day", 
-  "context-menu", "preview-day", "extend-range"
+  "context-menu", "preview-day", "extend-range",
+  "clear-tool", "clear-selection-content"
 ]);
 
 // --- Infinite Scroll Triggers ---
-const container = ref<HTMLElement | null>(null);
+const scrollContainer = ref<HTMLElement | null>(null);
 const topTrigger = ref<HTMLElement | null>(null);
 const bottomTrigger = ref<HTMLElement | null>(null);
 
-useInfiniteScroll(container, () => {
-  // Check scroll position to decide direction
-  // But useInfiniteScroll usually triggers when reaching bottom.
-  // We need bi-directional.
-  // For simplicity, I'll rely on intersection observer on triggers manually if useInfiniteScroll is limited.
-  // Actually, standard InfiniteScroll is bottom only.
-  // Let's use IntersectionObserver.
-}, { distance: 100 });
-
-// Custom Intersection Observer for Top/Bottom
+// Custom Intersection Observer for Top/Bottom with throttling
 let observer: IntersectionObserver;
+const lastExtend = ref(0);
+const EXTEND_COOLDOWN = 1000;
 
 onMounted(() => {
   observer = new IntersectionObserver((entries) => {
+    const now = Date.now();
+    if (now - lastExtend.value < EXTEND_COOLDOWN) return;
+
     entries.forEach(entry => {
       if (entry.isIntersecting) {
+        lastExtend.value = Date.now();
         if (entry.target === topTrigger.value) {
           emit('extend-range', 'start');
         } else if (entry.target === bottomTrigger.value) {
@@ -137,7 +133,7 @@ onMounted(() => {
         }
       }
     });
-  }, { root: container.value, rootMargin: '200px' });
+  }, { root: scrollContainer.value, rootMargin: '200px' });
 
   if (topTrigger.value) observer.observe(topTrigger.value);
   if (bottomTrigger.value) observer.observe(bottomTrigger.value);
@@ -187,55 +183,138 @@ const weeks = computed(() => {
   return result;
 });
 
+// Virtual List
+const { list, containerProps, wrapperProps } = useVirtualList(
+  weeks,
+  {
+    itemHeight: 140, // Fixed height per requirement
+    overscan: 5,
+  }
+);
+
 // --- Interactions ---
 const isPainting = ref(false);
 const paintStartKey = ref<string | null>(null);
 const shiftPressed = useKeyModifier('Shift');
+const anchorDate = ref<string | null>(null);
 
 const startPaint = (date: string, event: MouseEvent) => {
   if (event.button !== 0) return; // Left click only
   
-  isPainting.value = true;
-  paintStartKey.value = date;
-  
-  // Emit selection start
-  emit('select-date', { date, multi: shiftPressed.value || props.activeToolProfileId });
+  // If tool is selected, we are painting.
+  if (props.activeToolProfileId) {
+    isPainting.value = true;
+    paintStartKey.value = date;
+    // Paint immediately
+    emit('paint-range', { dates: [date], profileId: props.activeToolProfileId });
+  } else {
+    // Selection mode
+    isPainting.value = true;
+    paintStartKey.value = date;
+    
+    if (shiftPressed.value && anchorDate.value) {
+      // Range select from anchor to date
+      selectRange(anchorDate.value, date);
+    } else {
+      if (event.ctrlKey || event.metaKey) {
+        // Toggle single
+        emit('select-date', { date, multi: true });
+        anchorDate.value = date; // Update anchor
+      } else {
+        // Single select (clear others)
+        // If already selected and no modifier, clicking might just select this one.
+        // Wait, "Click (no tool selected): selects that day... Click again clears".
+        // If we click a new day, we select it and clear others.
+        // If we click the same day, we toggle it off?
+        const alreadySelected = props.selectedDates.includes(date) && props.selectedDates.length === 1;
+        if (alreadySelected) {
+           emit('select-date', { date, multi: true }); // Toggle logic in parent will remove it
+           anchorDate.value = null;
+        } else {
+           // Select just this one
+           // We need a way to clear others first. Parent 'select-date' with multi=false handles "toggle selection" if clicked same, or "select [date]" if new.
+           // But if we want to clear others and select this one:
+           // Parent logic: "multi=false... if includes -> [] else -> [date]"
+           // This matches "Click again clears selection".
+           emit('select-date', { date, multi: false });
+           anchorDate.value = date;
+        }
+      }
+    }
+  }
 };
 
 const onMouseEnter = (date: string) => {
-  if (isPainting.value && paintStartKey.value) {
-    // We are dragging.
-    // Calculate range from start to current.
-    // For now, we assume simple selection logic, handled by parent?
-    // Parent "handleDateSelection" toggles. Dragging creates a stream of toggles? Bad.
-    // We should emit a "range selection" event or accumulate locally.
-    // User requested "Paint interactions".
-    // I'll emit 'select-date' for each entered cell if it's not already selected?
-    // Or better: emit 'paint-range' at the end.
-    // But visual feedback is needed.
-    // I'll emit 'select-date' with multi=true to add to selection.
-    
-    // Optimisation: only emit if not in selectedDates.
-    if (!props.selectedDates.includes(date)) {
-      emit('select-date', { date, multi: true });
-    }
+  if (!isPainting.value || !paintStartKey.value) return;
+
+  if (props.activeToolProfileId) {
+    // Painting drag
+    // Paint this date if not already painted in this drag?
+    // We want "contiguous date range from drag start -> current hover".
+    // But we are painting *live*.
+    // So we should paint the range from paintStartKey to date.
+    // And we need to avoid repainting or spamming.
+    // Ideally we just emit 'paint-range' for the new dates.
+    // For simplicity, let's just paint the current hovered date if different?
+    // No, fast drag might skip dates.
+    // We should compute range [paintStartKey, date] and paint all.
+    const range = getRange(paintStartKey.value, date);
+    emit('paint-range', { dates: range, profileId: props.activeToolProfileId });
+  } else {
+    // Selection drag
+    // "selects a contiguous date range from drag start -> current hover"
+    // We should update selection to be exactly this range.
+    // But we need to keep what was selected before if Ctrl?
+    // Requirement: "Drag (no tool): selects a contiguous date range from drag start -> current hover... and sets selectedDates to exactly that range on mouseup."
+    // "Live highlight" means we should update selectedDates live.
+    // So we replace selection with [start...current].
+    const range = getRange(paintStartKey.value, date);
+    // We need to emit a set-selection event?
+    // 'select-date' isn't enough.
+    // We reuse 'select-date' with a new payload or emit a new event?
+    // Parent `handleDateSelection` does: multi ? append/remove : toggle/set.
+    // We need "Replace Selection".
+    // I'll emit 'clear-selection' then 'select-date' loop? No, that's flashy.
+    // I will add a new event `set-selection` to ScheduleCanvas and OpsSchemaCalendarEditor?
+    // Or just abuse `select-date`?
+    // OpsSchemaCalendarEditor `handleDateSelection` logic:
+    // if (!multi) { if includes ? [] : [date] }
+    // This is for click.
+    // For drag, we need to override `selectedDates`.
+    // I will modify `OpsSchemaCalendarEditor` to accept `set-selection` event or modify `handleDateSelection` to accept a list.
+    emit('select-date', { date: range, multi: false, replace: true });
   }
 };
 
 const endPaint = () => {
-  if (isPainting.value) {
-    isPainting.value = false;
-    paintStartKey.value = null;
-    
-    // If we have an active tool, we should apply it to the selected dates now?
-    // OpsSchemaCalendarEditor handles `handleDateSelection`.
-    // If we just finished a drag, the dates are selected.
-    // If activeToolProfileId is set, we should paint them.
-    if (props.activeToolProfileId && props.selectedDates.length > 0) {
-      emit('paint-range', { dates: props.selectedDates, profileId: props.activeToolProfileId });
-      // clear selection after paint? Maybe not, keep selected for further edits.
-    }
+  isPainting.value = false;
+  paintStartKey.value = null;
+};
+
+// --- Range Helpers ---
+const getRange = (start: string, end: string) => {
+  const d1 = parseDateKey(start);
+  const d2 = parseDateKey(end);
+  const result = [];
+  
+  // Determine min/max
+  const startTime = d1.getTime();
+  const endTime = d2.getTime();
+  const min = startTime < endTime ? d1 : d2;
+  const max = startTime < endTime ? d2 : d1;
+  
+  let curr = new Date(min);
+  while (curr <= max) {
+    result.push(dateKey(curr));
+    curr.setUTCDate(curr.getUTCDate() + 1);
   }
+  return result;
+};
+
+const selectRange = (start: string, end: string) => {
+    const range = getRange(start, end);
+    // Emit replace
+    emit('select-date', { date: range, multi: false, replace: true });
 };
 
 const onContextMenu = (date: string, event: MouseEvent) => {
@@ -247,16 +326,25 @@ const onDoubleClick = (date: string) => {
 };
 
 const handleKeyDown = (e: KeyboardEvent) => {
-  if (e.key === 'c' && (e.metaKey || e.ctrlKey)) {
+  if (e.key === 'Escape') {
+     emit('clear-selection');
+     // Also clear active tool - we need to tell parent to clear selectedProfileId
+     // We can reuse 'clear-selection' for both? Or parent needs to know.
+     // Parent `handleBulkClear` just clears dates.
+     // I need a way to clear tool.
+     // I will emit a new event 'clear-tool'.
+     emit('clear-tool');
+  } else if (e.key === 'c' && (e.metaKey || e.ctrlKey)) {
     if (props.selectedDates.length > 0) {
       emit('copy-day', props.selectedDates[props.selectedDates.length - 1]);
     }
   } else if (e.key === 'v' && (e.metaKey || e.ctrlKey)) {
+    // Paste to active date (last selected)
     if (props.selectedDates.length > 0) {
       emit('paste-day', props.selectedDates[props.selectedDates.length - 1]);
     }
   } else if (e.key === 'Delete' || e.key === 'Backspace') {
-    emit('clear-selection');
+    emit('clear-selection-content'); // New event to clear assignments
   }
 };
 
@@ -271,18 +359,18 @@ const getEffectiveAssignment = (date: string) => {
   } as any, date);
 };
 
-const getProfile = (date: string) => {
+const getProfile = (date: string): OpsSchemaDayProfile | undefined => {
   const eff = getEffectiveAssignment(date);
   if (eff.effectiveProfileId) {
     return props.profiles.find(p => p.id === eff.effectiveProfileId);
   }
-  return null;
+  return undefined;
 };
 
-const getGhostProfile = (date: string) => {
+const getGhostProfile = (date: string): OpsSchemaDayProfile | undefined => {
   // If hovering with a tool, show ghost?
   // Logic could be complex. Skip for now or implement if easy.
-  return null;
+  return undefined;
 };
 
 const isSelected = (date: string) => {
@@ -297,9 +385,21 @@ const getHoliday = (date: string) => {
   return props.holidays.find(h => h.date === date);
 };
 
+const shiftsByDate = computed(() => {
+  if (!props.shifts) return new Map();
+  const map = new Map();
+  props.shifts.forEach(shift => {
+    const date = shift.date.split('T')[0]; // Extract date part
+    if (!map.has(date)) {
+      map.set(date, []);
+    }
+    map.get(date).push(shift);
+  });
+  return map;
+});
+
 const getShiftsForDate = (date: string) => {
-  if (!props.shifts) return [];
-  return props.shifts.filter(s => s.date.startsWith(date));
+  return shiftsByDate.value.get(date) || [];
 };
 
 const hasConflict = (date: string) => {
@@ -320,7 +420,15 @@ const getMonthLabel = (date: string) => {
   // But here we have string.
   // new Date(date) parses as UTC if YYYY-MM-DD? No, YYYY-MM-DD is usually UTC in ES5, but local in some browsers?
   // Safe way: split.
-  const [y, m, d_str] = date.split('-').map(Number);
+  const parts = date.split('-').map(Number);
+  const y = parts[0];
+  const m = parts[1];
+  const d_str = parts[2];
+  
+  if (!y || !m || !d_str) {
+    return '';
+  }
+  
   const localDate = new Date(y, m - 1, d_str);
   return localDate.toLocaleDateString(undefined, { month: 'long' });
 };

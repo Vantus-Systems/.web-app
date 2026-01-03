@@ -239,6 +239,9 @@ model bingoProgram {
   slug        String   @unique
   name        String
   description String?
+  pricing_config String?   @default("{}")  // JSON string { cards_per_set: number; set_price: number; ... }
+  schedule_config String?  @default("{}")  // JSON string { days: string[]; start_date: string; end_date: string; ... }
+  specials_config String?  @default("{}")  // JSON string
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 

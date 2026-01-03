@@ -83,7 +83,7 @@
     <!-- MODE: SINGLE SELECTION -->
     <div v-else-if="mode === 'single'" class="p-4 space-y-6">
       <div>
-        <h2 class="text-xl font-bold text-primary">{{ formatDate(selectedDates[0]) }}</h2>
+        <h2 class="text-xl font-bold text-primary">{{ formatDate(selectedDate) }}</h2>
         <p class="text-xs text-secondary mt-1">Day Detail</p>
       </div>
 
@@ -107,19 +107,16 @@
         <div>
           <div class="text-xs font-bold text-tertiary uppercase mb-2">Timeline Preview</div>
           <ScheduleMiniTimeline
-            v-if="selectedProfile"
+            v-if="selectedProfile && selectedDate"
+            :date="selectedDate"
             :profile="selectedProfile"
-            :timeline="{ flowSegments: [], overlayEvents: [], operationalHours: { start: '09:00', end: '03:00', isOpen: true } }" 
+            :timeline="timeline" 
           />
-          <!-- Note: Passing full timeline would require props drilling. For now passing partial or needing fetch. 
-               Ideally ScheduleInspector should receive full schema or timeline defs. 
-               For now, assume ScheduleMiniTimeline can handle profile-only if segments are enriched, 
-               or we need to pass timeline from OpsSchemaCalendarEditor. -->
         </div>
 
         <button
           class="w-full py-2 border border-accent-error/20 text-accent-error text-xs font-bold uppercase rounded-lg hover:bg-accent-error/5 transition-colors"
-          @click="$emit('clear-selection')"
+          @click="$emit('clear-bulk')"
         >
           Clear Assignment
         </button>
@@ -130,7 +127,7 @@
          <p class="text-xs text-secondary mb-4">This day is marked as closed.</p>
          <button
           class="px-4 py-2 bg-base border border-divider rounded hover:bg-surface text-xs font-bold"
-          @click="$emit('clear-selection')"
+          @click="$emit('clear-bulk')"
         >
           Re-open
         </button>
@@ -146,12 +143,20 @@
       <div class="pt-4 border-t border-divider space-y-2">
          <label class="text-xs font-bold text-secondary uppercase">Overrides</label>
          <div class="grid grid-cols-2 gap-2">
-           <button class="p-2 border border-divider rounded text-xs hover:bg-base" @click="emitOverride('DOORS_OPEN')">
-             Set Doors Open
-           </button>
-           <button class="p-2 border border-divider rounded text-xs hover:bg-base" @click="emitOverride('CLOSE_EARLY')">
-             Close Early
-           </button>
+           <div class="col-span-1">
+             <label class="text-[9px] text-tertiary uppercase font-bold block mb-1">Doors Open</label>
+             <div class="flex gap-1">
+               <input type="time" v-model="overrideDoorsTime" class="flex-1 text-xs bg-base border border-divider rounded px-1 py-1" />
+               <button class="px-2 border border-divider rounded text-xs hover:bg-base" @click="emitOverride('DOORS_OPEN')">Set</button>
+             </div>
+           </div>
+           <div class="col-span-1">
+              <label class="text-[9px] text-tertiary uppercase font-bold block mb-1">Close Early</label>
+              <div class="flex gap-1">
+                <input type="time" v-model="overrideCloseTime" class="flex-1 text-xs bg-base border border-divider rounded px-1 py-1" />
+                <button class="px-2 border border-divider rounded text-xs hover:bg-base" @click="emitOverride('CLOSE_EARLY')">Set</button>
+              </div>
+           </div>
            <button class="p-2 border border-divider rounded text-xs hover:bg-base" @click="emitOverride('CLOSED')">
              Close Day
            </button>
@@ -208,12 +213,15 @@ const props = defineProps<{
   calendar: OpsSchemaV2['calendar'];
   profiles: OpsSchemaDayProfile[];
   holidays: any[];
+  timeline?: OpsSchemaV2['timeline'];
 }>();
 
 const emit = defineEmits(["clear-selection", "apply-bulk", "clear-bulk", "smart-fill", "update-override"]);
 
 const smartFillProfileId = ref<string | null>(null);
 const smartFillDays = ref<number[]>([]); // 0=Sun, 1=Mon...
+const overrideDoorsTime = ref("10:00");
+const overrideCloseTime = ref("17:00");
 
 const toggleSmartFillDay = (dayIndex: number) => {
   if (smartFillDays.value.includes(dayIndex)) {
@@ -227,7 +235,8 @@ const applySmartFill = () => {
   if (smartFillProfileId.value && smartFillDays.value.length > 0) {
     emit("smart-fill", {
       profileId: smartFillProfileId.value,
-      weekdays: smartFillDays.value
+      weekdays: smartFillDays.value,
+      range: props.calendar.range // Pass range from calendar
     });
   }
 };
@@ -247,9 +256,13 @@ const modeLabel = computed(() => {
   }
 });
 
+// selected date helper (always a string to satisfy child components/TS)
+const selectedDate = computed(() => props.selectedDates[0] ?? "");
+
 const selectedAssignment = computed(() => {
   if (mode.value !== 'single') return { status: 'open', effectiveProfileId: null, overrideReasons: [] };
-  return resolveEffectiveAssignment(props.calendar, props.selectedDates[0]);
+  if (!selectedDate.value) return { status: 'open', effectiveProfileId: null, overrideReasons: [] };
+  return resolveEffectiveAssignment(props.calendar, selectedDate.value);
 });
 
 const selectedProfile = computed(() => {
@@ -315,7 +328,15 @@ const stats = computed(() => {
 
 const formatDate = (dateStr: string) => {
   if (!dateStr) return "";
-  const [y, m, d] = dateStr.split("-").map(Number);
+  const parts = dateStr.split("-").map(Number);
+  const y = parts[0];
+  const m = parts[1];
+  const d = parts[2];
+  
+  if (!y || !m || !d) {
+    return dateStr;
+  }
+  
   return new Date(y, m - 1, d).toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
 };
 
@@ -324,7 +345,7 @@ const formatMoney = (val: number) => {
 };
 
 const emitOverride = (kind: "LOCKED" | "CLOSED" | "CLOSE_EARLY" | "DOORS_OPEN") => {
-  const date = props.selectedDates[0];
+  const date = selectedDate.value;
   if (!date) return;
   
   const override: OpsSchemaCalendarOverride = {

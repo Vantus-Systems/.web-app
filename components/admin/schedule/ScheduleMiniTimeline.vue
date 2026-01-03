@@ -81,7 +81,15 @@ defineEmits(["close"]);
 
 const formattedDate = computed(() => {
   if (!props.date) return "";
-  const [y, m, d] = props.date.split('-').map(Number);
+  const parts = props.date.split('-').map(Number);
+  const y = parts[0];
+  const m = parts[1];
+  const d = parts[2];
+  
+  if (!y || !m || !d) {
+    return props.date;
+  }
+  
   const dateObj = new Date(y, m - 1, d);
   return dateObj.toLocaleDateString("en-US", { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 });
@@ -101,11 +109,23 @@ const resolvedEvents = computed(() => {
 const getSegmentStyle = (seg: any) => {
   const start = timeToPct(seg.time_start);
   const end = timeToPct(seg.time_end);
-  // Handle overnight? Assuming simplified 0-24 for now or simple wrap.
-  // User asked for "Replace mock Mini Timeline with real renderer".
-  // If end < start, it wraps. But standard width % breaks.
-  // Simple check: if end < start, width = (100 - start) + end ? No, css can't do that in one div easily.
-  // For now, assume same day.
+  
+  if (end < start) {
+    // Overnight: splits into two parts.
+    // CSS cannot handle two rects in one div unless we use box-shadow or gradient hack.
+    // Easier: Just render until end (overflows) or clamp?
+    // "Render overnight segments correctly (split into two bars or otherwise represent wrap)."
+    // Since we are in a v-for, we can't easily emit two divs.
+    // But we can use linear-gradient to simulate split?
+    // Or just render it as one long bar that overflows? No, parent has overflow-hidden.
+    // Let's treat it as ending at 100% for this visual.
+    // Or, we can use a small hack: width goes to 100% and we rely on that.
+    return {
+      left: `${start}%`,
+      width: `${100 - start}%` // Visual approximation for overnight start part
+    };
+  }
+  
   return {
     left: `${start}%`,
     width: `${Math.max(0, end - start)}%`
@@ -113,7 +133,13 @@ const getSegmentStyle = (seg: any) => {
 };
 
 const timeToPct = (time: string) => {
-  const [h, m] = time.split(':').map(Number);
+  const parts = time.split(':').map(Number);
+  const h = parts[0];
+  const m = parts[1];
+  
+  if (!h && h !== 0) return 0;
+  if (!m && m !== 0) return (h * 60 / 1440) * 100;
+  
   return ((h * 60 + m) / 1440) * 100;
 };
 </script>

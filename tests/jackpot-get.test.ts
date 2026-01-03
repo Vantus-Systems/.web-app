@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+// Import handler after mocking
+import handlerModule from "../server/api/jackpot.get";
+import { settingsService } from "../server/services/settings.service";
+
 // Mock settingsService before importing the handler
 vi.mock("../server/services/settings.service", () => ({
   settingsService: {
@@ -7,10 +11,6 @@ vi.mock("../server/services/settings.service", () => ({
     set: vi.fn(),
   },
 }));
-
-// Import handler after mocking
-import handlerModule from "../server/api/jackpot.get";
-import { settingsService } from "../server/services/settings.service";
 
 describe("/api/jackpot GET handler", () => {
   beforeEach(() => {
@@ -24,7 +24,7 @@ describe("/api/jackpot GET handler", () => {
     expect(result).toBeDefined();
     expect(Array.isArray(result.items)).toBe(true);
     expect(result.items.length).toBeGreaterThanOrEqual(2);
-    expect((settingsService.set as any)).not.toHaveBeenCalled();
+    expect(settingsService.set as any).not.toHaveBeenCalled();
   });
 
   it("migrates legacy object structure (babes/hornet) to items and persists", async () => {
@@ -48,7 +48,7 @@ describe("/api/jackpot GET handler", () => {
     expect(result.hornet?.current).toBe(222);
 
     // Persist called because migration happened
-    expect((settingsService.set as any)).toHaveBeenCalled();
+    expect(settingsService.set as any).toHaveBeenCalled();
   });
 
   it("keeps existing items structure and adds legacy shortcuts", async () => {

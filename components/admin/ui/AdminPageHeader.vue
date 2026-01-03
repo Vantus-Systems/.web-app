@@ -75,7 +75,7 @@
         <div v-if="instructionsOpen" class="px-4 pb-4">
           <div
             class="prose prose-sm max-w-none text-slate-700"
-            v-html="instructions"
+            v-text="instructions"
           ></div>
         </div>
       </Transition>
