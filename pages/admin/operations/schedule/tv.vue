@@ -64,7 +64,7 @@
             >
               {{ day.holidayName || "Holiday" }}
             </div>
-
+ 
             <div
               v-else-if="day.status === 'closed'"
               class="text-slate-400 font-black uppercase tracking-widest"
