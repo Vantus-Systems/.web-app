@@ -169,6 +169,8 @@ const props = defineProps<{
 
 const emit = defineEmits(["update:modelValue"]);
 
+const VIEW_MODES = ['standard', 'heatmap', 'staffing'] as const;
+
 // --- State Management ---
 const isTvMode = ref(false);
 const viewMode = ref<'standard' | 'heatmap' | 'staffing'>('standard');
@@ -237,19 +239,33 @@ const dateRangeLabel = computed(() => {
 });
 
 const diffSummary = computed(() => {
-  if (!isDirty.value) return "";
   const initial = JSON.parse(initialSnapshot.value || "{}");
   const current = draft.value.calendar;
   
+  if (!initial.assignments) return ""; // Not loaded yet
+
   // Diff assignments
-  const changedDays = Object.keys(current.assignments).filter(k => 
+  const changedAssignments = Object.keys(current.assignments || {}).filter(k =>
     JSON.stringify(current.assignments[k]) !== JSON.stringify(initial.assignments?.[k])
-  ).length;
+  );
+
+  // Also count deleted assignments (in initial but not in current)
+  const deletedAssignments = Object.keys(initial.assignments || {}).filter(k => !current.assignments?.[k]);
+
+  const totalAssignmentChanges = new Set([...changedAssignments, ...deletedAssignments]).size;
   
   // Diff overrides
-  const overrideCount = Object.keys(current.overrides || {}).reduce((acc, k) => acc + (current.overrides[k]?.length || 0), 0);
+  const currentOverrides = current.overrides || {};
+  const initialOverrides = initial.overrides || {};
   
-  return `${changedDays} days modified, ${overrideCount} overrides`;
+  // Simplistic override count: total count diff? Or detailed?
+  // Let's just count total override objects
+  const currOvCount = Object.values(currentOverrides).reduce((acc: number, val: any) => acc + val.length, 0);
+  const initOvCount = Object.values(initialOverrides).reduce((acc: number, val: any) => acc + val.length, 0);
+
+  const overrideDiff = Math.abs(currOvCount - initOvCount); // Approximation
+
+  return `${totalAssignmentChanges} days modified, ${currOvCount} overrides`;
 });
 
 const validationErrors = computed(() => {
@@ -309,8 +325,11 @@ const emitUpdate = useDebounceFn(() => {
   emit("update:modelValue", draft.value);
 }, 1000);
 
-watch(draft, () => {
-  isDirty.value = true;
+watch(draft, (newVal) => {
+  // Check dirty status
+  const currentJson = JSON.stringify(newVal.calendar);
+  isDirty.value = currentJson !== initialSnapshot.value;
+
   emitUpdate();
 }, { deep: true });
 
@@ -429,8 +448,7 @@ const handleContextAction = (action: string, payload?: any) => {
   const date = contextMenu.value.date;
   
   if (action === 'clear') {
-    handleBulkClear(); // This handles selectedDates. But context menu is on a specific date.
-    // If date is in selectedDates, clear all. If not, just clear that date.
+    // If date is in selectedDates, clear all selected. If not, just clear that date.
     if (selectedDates.value.includes(date)) {
       handleBulkClear();
     } else {
@@ -470,7 +488,7 @@ const handleContextAction = (action: string, payload?: any) => {
     timePrompt.value = {
       title: 'Set Doors Open Time',
       description: `Set override time for ${date}`,
-      initialTime: '10:00',
+      initialTime: '09:00',
       action: 'DOORS_OPEN',
       date
     };
@@ -478,7 +496,7 @@ const handleContextAction = (action: string, payload?: any) => {
     timePrompt.value = {
       title: 'Close Early Time',
       description: `Set closing time for ${date}`,
-      initialTime: '17:00',
+      initialTime: '21:00',
       action: 'CLOSE_EARLY',
       date
     };

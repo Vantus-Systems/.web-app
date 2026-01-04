@@ -89,10 +89,6 @@ const dateLabel = computed(() => {
 const isLocked = computed(() => props.assignment?.isLocked);
 
 const emitAction = (action: string) => {
-  // If locked, maybe warn? Parent handles warning or check.
-  // But requirement says: "If a day is locked... actions that mutate the day should require an explicit confirmation... OR be disabled".
-  // I will disable them here for visual feedback if locked, except 'lock' (which might be unlock?) or just let parent handle.
-  // Let's disable destructive actions if locked.
   emit('action', action);
   emit('close');
 };

@@ -220,8 +220,8 @@ const emit = defineEmits(["clear-selection", "apply-bulk", "clear-bulk", "smart-
 
 const smartFillProfileId = ref<string | null>(null);
 const smartFillDays = ref<number[]>([]); // 0=Sun, 1=Mon...
-const overrideDoorsTime = ref("10:00");
-const overrideCloseTime = ref("17:00");
+const overrideDoorsTime = ref("09:00");
+const overrideCloseTime = ref("21:00");
 
 const toggleSmartFillDay = (dayIndex: number) => {
   if (smartFillDays.value.includes(dayIndex)) {
