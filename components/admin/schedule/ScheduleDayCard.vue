@@ -133,14 +133,14 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { EffectiveAssignment } from "~/utils/schedule-calendar";
-import type { OpsSchemaDayProfile } from "~/types/ops-schema";
+import type { BingoProgramExtended } from "~/types/bingo";
 
 const props = defineProps<{
   date: string;
   dayOfWeek?: number;
   assignment: EffectiveAssignment;
-  profile?: OpsSchemaDayProfile;
-  ghostProfile?: OpsSchemaDayProfile;
+  program?: BingoProgramExtended;
+  ghostProgram?: BingoProgramExtended;
   isSelected?: boolean;
   isHoliday?: boolean;
   holidayInfo?: any;
@@ -151,7 +151,7 @@ const props = defineProps<{
 
 defineEmits(['preview']);
 
-const displayProfile = computed(() => props.ghostProfile || props.profile);
+const displayProgram = computed(() => props.ghostProgram || props.program);
 const isClosed = computed(() => props.assignment.status === 'closed');
 const isLocked = computed(() => props.assignment.isLocked);
 const dayNumber = computed(() => {
@@ -171,7 +171,7 @@ const isToday = computed(() => {
 
 const revenueDisplay = computed(() => {
   // Mock revenue based on profile complexity
-  return (displayProfile.value?.name?.length || 0) * 1000; 
+  return (displayProgram.value?.name?.length || 0) * 1000; 
 });
 
 const shiftCoverage = computed(() => {

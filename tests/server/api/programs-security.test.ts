@@ -60,11 +60,15 @@ describe("Admin Programs Security & DELETE API", () => {
 
       // Test DELETE
       (getQuery as any).mockReturnValue({ slug: "test-program" });
-      await expect(deleteHandler(mockEvent as any)).rejects.toThrow("Insufficient permissions");
+      await expect(deleteHandler(mockEvent as any)).rejects.toThrow(
+        "Insufficient permissions",
+      );
 
       // Test POST
       (readBody as any).mockResolvedValue({});
-      await expect(postHandler(mockEvent as any)).rejects.toThrow("Insufficient permissions");
+      await expect(postHandler(mockEvent as any)).rejects.toThrow(
+        "Insufficient permissions",
+      );
     });
   });
 
@@ -91,12 +95,14 @@ describe("Admin Programs Security & DELETE API", () => {
       expect(prisma.bingoProgram.delete).toHaveBeenCalledWith({
         where: { slug: "test-program" },
       });
-      expect(auditService.log).toHaveBeenCalledWith(expect.objectContaining({
-        action: "DELETE_PROGRAM",
-        entity: "bingoProgram:test-program",
-        before: mockProgram,
-        after: null,
-      }));
+      expect(auditService.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: "DELETE_PROGRAM",
+          entity: "bingoProgram:test-program",
+          before: mockProgram,
+          after: null,
+        }),
+      );
       expect(result.success).toBe(true);
     });
 
@@ -126,11 +132,11 @@ describe("Admin Programs Security & DELETE API", () => {
 
   describe("Input Sanitization / XSS Checks", () => {
     it("should allow storing special characters (XSS payloads) but validated by schema", async () => {
-      // The API relies on Schema validation. 
-      // It should NOT strip special chars blindly, but store them. 
+      // The API relies on Schema validation.
+      // It should NOT strip special chars blindly, but store them.
       // Frontend is responsible for escaping.
       // However, we want to ensure basic strings are allowed.
-      
+
       const payloadWithXSS = {
         slug: "xss-test",
         name: "<script>alert('xss')</script>",
@@ -140,18 +146,22 @@ describe("Admin Programs Security & DELETE API", () => {
 
       (readBody as any).mockResolvedValue(payloadWithXSS);
       (prisma.bingoPattern.findMany as any).mockResolvedValue([]);
-      (prisma.bingoProgram.upsert as any).mockResolvedValue({ slug: "xss-test" });
+      (prisma.bingoProgram.upsert as any).mockResolvedValue({
+        slug: "xss-test",
+      });
 
       await postHandler(mockEvent as any);
 
       // Verify that the data passed to DB includes the tags (it's not sanitized at API level)
       // This is expected behavior for modern apps where frontend handles escaping.
       // We just want to confirm the API doesn't crash or behave unexpectedly.
-      expect(prisma.bingoProgram.upsert).toHaveBeenCalledWith(expect.objectContaining({
-        create: expect.objectContaining({
-          name: "<script>alert('xss')</script>",
+      expect(prisma.bingoProgram.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          create: expect.objectContaining({
+            name: "<script>alert('xss')</script>",
+          }),
         }),
-      }));
+      );
     });
   });
 });

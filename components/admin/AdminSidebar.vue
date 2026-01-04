@@ -88,6 +88,7 @@ const navItems = computed(() => {
       { label: "People & Shifts", to: "/admin/people" },
       { label: "MIC Dashboard", to: "/admin/mic" },
       { label: "Operations Builder", to: "/admin/operations" },
+      { label: "Pricing Manager", to: "/admin/pricing" },
       { label: "Owner", to: "/admin/owner" },
       { label: "Charities", to: "/admin/charities" },
     ];

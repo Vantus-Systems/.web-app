@@ -738,8 +738,14 @@ const startEdit = (program?: any) => {
         name: program.name,
         description: program.description,
         games: program.games.map((game: any) => ({
-          ...game,
           sortOrder: game.sortOrder,
+          title: game.title,
+          paperColor: game.paperColor,
+          notes: game.notes,
+          patternSlug: game.patternSlug,
+          pricing: game.pricing,
+          payout: game.payout,
+          timeline: game.timeline,
         })),
       }),
     );

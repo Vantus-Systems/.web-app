@@ -122,6 +122,7 @@
                   <input
                     v-model="session.timeRange"
                     type="text"
+                    placeholder="e.g. 10:30 AM – 12:30 PM"
                     class="mt-1 block w-full rounded-xl border-slate-200 bg-slate-50 focus:border-gold focus:ring-gold"
                   />
                 </label>
@@ -143,65 +144,41 @@
                     </option>
                   </select>
                 </label>
-                <label class="block">
-                  <span
-                    class="text-xs uppercase tracking-[0.3em] text-slate-500 font-bold"
-                    >Description</span
-                  >
-                  <textarea
-                    v-model="session.description"
-                    rows="2"
-                    class="mt-1 block w-full rounded-xl border-slate-200 bg-slate-50 focus:border-gold focus:ring-gold"
-                  ></textarea>
-                </label>
               </div>
 
-              <div class="space-y-4">
-                <label class="block">
+              <!-- Vibes / Tags -->
+              <div>
+                <label class="block mb-2">
                   <span
                     class="text-xs uppercase tracking-[0.3em] text-slate-500 font-bold"
-                    >Jackpot Spot</span
+                    >Session Vibes</span
                   >
-                  <input
-                    v-model="session.jackpot"
-                    type="text"
-                    class="mt-1 block w-full rounded-xl border-slate-200 bg-slate-50 focus:border-gold focus:ring-gold"
-                    placeholder="$250 Hourly"
-                  />
                 </label>
-
-                <div class="block">
+                <div class="flex flex-wrap gap-2">
                   <span
-                    class="text-xs uppercase tracking-[0.3em] text-slate-500 font-bold block mb-2"
-                    >Vibe Tags</span
+                    v-for="(vibe, vibeIndex) in session.vibe ?? []"
+                    :key="vibeIndex"
+                    class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 border border-slate-200"
                   >
-                  <div class="flex flex-wrap gap-2">
-                    <span
-                      v-for="(vibe, vibeIndex) in session.vibe ?? []"
-                      :key="`${session.id}-vibe-${vibeIndex}`"
-                      class="flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-700 shadow-sm"
-                    >
-                      <input
-                        v-model="session.vibe[vibeIndex]"
-                        type="text"
-                        class="w-20 bg-transparent text-xs border-none p-0 focus:ring-0"
-                      />
-                      <button
-                        type="button"
-                        class="text-slate-400 hover:text-rose-500"
-                        @click="removeSessionVibe(session, Number(vibeIndex))"
-                      >
-                        &times;
-                      </button>
-                    </span>
+                    <input
+                      v-model="session.vibe![vibeIndex]"
+                      class="w-20 bg-transparent text-xs border-none p-0 focus:ring-0"
+                    />
                     <button
                       type="button"
-                      class="text-xs font-bold uppercase tracking-[0.3em] text-primary-600 bg-primary-50 px-3 py-1 rounded-full hover:bg-primary-100"
-                      @click="addSessionVibe(session)"
+                      class="text-slate-400 hover:text-rose-500"
+                      @click="removeSessionVibe(session, Number(vibeIndex))"
                     >
-                      + Add
+                      &times;
                     </button>
-                  </div>
+                  </span>
+                  <button
+                    type="button"
+                    class="text-xs font-bold uppercase tracking-[0.3em] text-primary-600 bg-primary-50 px-3 py-1 rounded-full hover:bg-primary-100"
+                    @click="addSessionVibe(session)"
+                  >
+                    + Add
+                  </button>
                 </div>
               </div>
             </div>
@@ -335,55 +312,67 @@
           </article>
         </div>
 
-        <!-- Daytime Jackpots -->
-        <div
-          class="bg-primary-950 rounded-2xl p-6 text-white relative overflow-hidden"
-        >
-          <div
-            class="absolute top-0 right-0 w-64 h-64 bg-gold/10 rounded-full blur-3xl -mr-32 -mt-32"
-          ></div>
-          <div class="relative z-10">
-            <div class="flex items-center justify-between mb-6">
-              <h4 class="text-xl font-bold text-gold">Daytime Jackpots</h4>
+        <!-- Jackpots Section -->
+        <div class="space-y-6 pt-8 border-t border-slate-200">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xl font-black text-primary-900">
+              Daytime Jackpots
+            </h4>
+            <BaseButton
+              variant="outline"
+              class-name="px-3 py-2 text-xs uppercase tracking-[0.3em]"
+              type="button"
+              @click="addDaytimeJackpot"
+            >
+              + Add Jackpot
+            </BaseButton>
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div
+              v-for="(jackpot, index) in draft.daytime?.jackpots ?? []"
+              :key="index"
+              class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm relative group"
+            >
               <button
-                class="text-xs bg-gold/20 hover:bg-gold/30 text-gold px-3 py-1 rounded-full uppercase tracking-wider font-bold transition"
-                @click="addDaytimeJackpot"
+                type="button"
+                class="absolute top-2 right-2 text-slate-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"
+                @click="removeDaytimeJackpot(Number(index))"
               >
-                + Add Jackpot
+                &times;
               </button>
-            </div>
-            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <div
-                v-for="(jackpot, index) in draft.daytime?.jackpots ?? []"
-                :key="`jackpot-${index}`"
-                class="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3 backdrop-blur-sm"
-              >
+              <div class="space-y-3">
                 <input
                   v-model="jackpot.name"
-                  class="w-full bg-black/20 border-white/10 rounded-lg text-white placeholder-white/30 text-sm font-bold"
                   placeholder="Jackpot Name"
+                  class="w-full font-bold text-primary-900 border-none p-0 focus:ring-0 text-lg placeholder:text-slate-300"
                 />
                 <input
                   v-model="jackpot.prize"
-                  class="w-full bg-black/20 border-white/10 rounded-lg text-gold placeholder-gold/30 text-lg font-black"
-                  placeholder="$ Prize"
+                  placeholder="Prize Amount"
+                  class="w-full text-gold-600 font-bold border-none p-0 focus:ring-0 text-sm placeholder:text-slate-300"
                 />
                 <input
                   v-model="jackpot.time"
-                  class="w-full bg-black/20 border-white/10 rounded-lg text-white/70 placeholder-white/20 text-xs"
-                  placeholder="Time Window"
+                  placeholder="Draw Time"
+                  class="w-full text-xs uppercase tracking-wider text-slate-500 border-none p-0 focus:ring-0 placeholder:text-slate-300"
                 />
-                <div class="flex justify-end">
-                  <button
-                    class="text-xs text-rose-400 hover:text-rose-300"
-                    @click="removeDaytimeJackpot(Number(index))"
-                  >
-                    Remove
-                  </button>
-                </div>
               </div>
             </div>
           </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span
+            v-if="isSaving"
+            class="text-xs font-bold text-slate-400 animate-pulse"
+            >SAVING...</span
+          >
+          <button
+            class="px-4 py-2 bg-primary-900 text-white text-xs font-bold uppercase tracking-wider rounded hover:bg-primary-800 transition"
+            @click="$emit('save')"
+          >
+            Deploy Pricing Schema
+          </button>
         </div>
       </div>
 
@@ -392,18 +381,19 @@
         v-if="activeTab === 'evening'"
         class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500"
       >
-        <div class="grid lg:grid-cols-2 gap-8">
+        <div class="grid gap-8 lg:grid-cols-2">
           <div class="space-y-6">
-            <h4 class="text-lg font-black text-primary-900">
+            <h4 class="text-xl font-black text-primary-900">
               Evening Configuration
             </h4>
-            <div class="space-y-4">
+            <div class="space-y-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
               <label class="block">
                 <span
                   class="text-xs uppercase tracking-[0.3em] text-slate-500 font-bold"
-                  >Start Time</span
+                  >Session Start Time</span
                 >
                 <input
+                  v-if="draft.evening"
                   v-model="draft.evening.startTime"
                   type="text"
                   class="mt-1 w-full rounded-xl border-slate-200 bg-slate-50"
@@ -415,6 +405,7 @@
                   >Value Prop</span
                 >
                 <textarea
+                  v-if="draft.evening"
                   v-model="draft.evening.valueProposition"
                   rows="2"
                   class="mt-1 w-full rounded-xl border-slate-200 bg-slate-50"
@@ -426,6 +417,7 @@
                   >Schedule Note</span
                 >
                 <textarea
+                  v-if="draft.evening"
                   v-model="draft.evening.scheduleNote"
                   rows="2"
                   class="mt-1 w-full rounded-xl border-slate-200 bg-slate-50"
@@ -498,63 +490,17 @@
           </button>
         </div>
       </div>
-
-      <!-- Main Workspace -->
-      <div class="flex-1 flex overflow-hidden">
-        <!-- LEFT: Library -->
-        <div class="w-64 shrink-0 flex flex-col">
-          <RateCardLibrary
-            :rate-cards="draft.definitions.rateCards"
-            :bundles="draft.definitions.bundles"
-            :selected-id="selection?.id"
-            @select="handleSelect"
-            @add-rate-card="addRateCard"
-            @add-bundle="addBundle"
-          />
-        </div>
-
-        <!-- CENTER: Timeline -->
-        <div class="flex-1 border-r border-slate-200 flex flex-col min-w-0">
-          <TimelineGantt
-            :flow-segments="legacyFlowSegments"
-            :overlay-events="legacyOverlayEvents"
-            :selected-id="selection?.id"
-            @select="handleSelect"
-            @add-flow-segment="addFlowSegment"
-            @add-overlay-event="addOverlayEvent"
-          />
-        </div>
-
-        <!-- RIGHT: Inspector -->
-        <div class="w-80 shrink-0 bg-white">
-          <InspectorPanel
-            :item="selectedItem"
-            :type="selection?.type"
-            :all-rate-cards="draft.definitions.rateCards"
-            @update="handleUpdate"
-            @delete="handleDelete"
-          />
-        </div>
-      </div>
     </BaseCard>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, toRaw, nextTick } from "vue";
-import RateCardLibrary from "./pricing/RateCardLibrary.vue";
-import TimelineGantt from "./pricing/TimelineGantt.vue";
-import InspectorPanel from "./pricing/InspectorPanel.vue";
-import type { OpsSchemaV2 } from "~/types/ops-schema";
-
-// Extend type to allow legacy properties for backward compatibility
-type ExtendedOpsSchema = OpsSchemaV2 & {
-  daytime?: any;
-  evening?: any;
-};
+import { ref, watch, toRaw, nextTick } from "vue";
+import type { PricingConfig, PricingSession, PricingMachine, PricingJackpot } from "~/types/pricing";
+import { Trash2 } from "lucide-vue-next";
 
 const props = defineProps<{
-  modelValue: ExtendedOpsSchema | null;
+  modelValue: PricingConfig | null;
   isSaving: boolean;
 }>();
 
@@ -563,39 +509,27 @@ const emit = defineEmits(["update:modelValue", "save"]);
 // --- Local Draft Management ---
 const isSyncing = ref(false);
 
-const cloneDraft = (value: any): ExtendedOpsSchema => {
+const cloneDraft = (value: any): PricingConfig => {
   if (!value || typeof value !== "object") {
     // Return a default empty schema structure if null
     return {
-      schema_version: "2.0",
-      meta: {
-        name: "New Schema",
-        status: "draft",
-        currency: "USD",
-        timezone: "America/New_York",
-        schema_version: "2.0",
+      daytime: {
+        sessions: [],
+        jackpots: []
       },
-      definitions: { rateCards: [], bundles: [], inventoryTiers: [] },
-      timeline: {
-        operationalHours: { start: "09:00", end: "23:00", isOpen: true },
-        flowSegments: [],
-        overlayEvents: [],
-      },
-      logicTriggers: [],
-      dayProfiles: [],
-      calendar: {
-        range: { start: "", end: "" },
-        weekdayDefaults: {},
-        assignments: {},
-        overrides: {},
-      },
+      evening: {
+        startTime: "6:00 PM",
+        valueProposition: "",
+        scheduleNote: "",
+        machines: []
+      }
     };
   }
   const rawValue = toRaw(value);
   return JSON.parse(JSON.stringify(rawValue));
 };
 
-const draft = ref<ExtendedOpsSchema>(cloneDraft(props.modelValue));
+const draft = ref<PricingConfig>(cloneDraft(props.modelValue));
 
 const syncDraftFromProps = (value: any) => {
   isSyncing.value = true;
@@ -608,10 +542,6 @@ const syncDraftFromProps = (value: any) => {
 watch(
   () => props.modelValue,
   (value) => {
-    // Only sync from props if we are not actively editing (or if it's a remote update)
-    // Here we rely on the parent not bouncing back the same object reference constantly.
-    // If opsStore.updateOpsSchemaDraft replaces the reference, this fires.
-    // We check JSON string equality to avoid unnecessary updates if needed, but deep watch does that.
     syncDraftFromProps(value);
   },
   { deep: true, immediate: true },
@@ -627,157 +557,7 @@ watch(
   { deep: true },
 );
 
-// --- Selection Management ---
-const selection = ref<{
-  type: "rateCard" | "bundle" | "flowSegment" | "overlayEvent";
-  id: string;
-} | null>(null);
-
-const handleSelect = (sel: { type: any; id: string }) => {
-  selection.value = sel;
-};
-
-const selectedItem = computed(() => {
-  if (!selection.value) return null;
-  const { type, id } = selection.value;
-  if (type === "rateCard")
-    return draft.value.definitions.rateCards.find((x) => x.id === id);
-  if (type === "bundle")
-    return draft.value.definitions.bundles.find((x) => x.id === id);
-  if (type === "flowSegment")
-    return draft.value.timeline.flowSegments.find(
-      (x: any) => x.id === id,
-    );
-  if (type === "overlayEvent")
-    return draft.value.timeline.overlayEvents.find(
-      (x: any) => x.id === id,
-    );
-  return null;
-});
-
-// --- Actions ---
-
-const generateId = (prefix: string) => `${prefix}-${Date.now()}`;
-
-// Transform OpsSchemaV2 data to legacy format for TimelineGantt component
-const legacyFlowSegments = computed(() => {
-  return draft.value.timeline.flowSegments.map((seg: any) => ({
-    ...seg,
-    name: seg.label,
-    startTime: seg.time_start,
-    endTime: seg.time_end,
-  }));
-});
-
-const legacyOverlayEvents = computed(() => {
-  return draft.value.timeline.overlayEvents.map((evt: any) => ({
-    ...evt,
-    name: evt.label,
-    startTime: evt.time_start,
-    endTime: evt.time_end,
-  }));
-});
-
-const addRateCard = () => {
-  const id = generateId("rc");
-  draft.value.definitions.rateCards.push({
-    id,
-    name: "New Rate Card",
-    category: "Regular",
-    yield_configuration: {
-      mode: "standard_rate",
-      active_bundles: [],
-    },
-  });
-  handleSelect({ type: "rateCard", id });
-};
-
-const addBundle = () => {
-  const id = generateId("bn");
-  draft.value.definitions.bundles.push({
-    id,
-    name: "New Bundle",
-    price: 0,
-    items: [],
-  });
-  handleSelect({ type: "bundle", id });
-};
-
-const addFlowSegment = () => {
-  const id = generateId("fs");
-  draft.value.timeline.flowSegments.push({
-    id,
-    label: "New Segment",
-    time_start: "10:00",
-    time_end: "12:00",
-    rate_card_id: "",
-  });
-  handleSelect({ type: "flowSegment", id });
-};
-
-const addOverlayEvent = () => {
-  const id = generateId("oe");
-  draft.value.timeline.overlayEvents.push({
-    id,
-    label: "New Event",
-    time_start: "19:00",
-    time_end: "19:30",
-    is_hard_ticket: false,
-  });
-  handleSelect({ type: "overlayEvent", id });
-};
-
-const handleUpdate = ({ type, data }: { type: string; data: any }) => {
-  // Update the item in the draft
-  if (type === "rateCard") {
-    const idx = draft.value.definitions.rateCards.findIndex(
-      (x) => x.id === data.id,
-    );
-    if (idx !== -1) draft.value.definitions.rateCards[idx] = data;
-  } else if (type === "bundle") {
-    const idx = draft.value.definitions.bundles.findIndex(
-      (x) => x.id === data.id,
-    );
-    if (idx !== -1) draft.value.definitions.bundles[idx] = data;
-  } else if (type === "flowSegment") {
-    const idx = draft.value.timeline.flowSegments.findIndex(
-      (x: any) => x.id === data.id,
-    );
-    if (idx !== -1) draft.value.timeline.flowSegments[idx] = data;
-  } else if (type === "overlayEvent") {
-    const idx = draft.value.timeline.overlayEvents.findIndex(
-      (x: any) => x.id === data.id,
-    );
-    if (idx !== -1) draft.value.timeline.overlayEvents[idx] = data;
-  }
-  // draft watcher will emit update
-};
-
-const handleDelete = ({ type, id }: { type: string; id: string }) => {
-  if (confirm("Are you sure you want to delete this item?")) {
-    if (type === "rateCard") {
-      draft.value.definitions.rateCards =
-        draft.value.definitions.rateCards.filter((x) => x.id !== id);
-    } else if (type === "bundle") {
-      draft.value.definitions.bundles = draft.value.definitions.bundles.filter(
-        (x) => x.id !== id,
-      );
-    } else if (type === "flowSegment") {
-      draft.value.timeline.flowSegments =
-        draft.value.timeline.flowSegments.filter(
-          (x: any) => x.id !== id,
-        );
-    } else if (type === "overlayEvent") {
-      draft.value.timeline.overlayEvents =
-        draft.value.timeline.overlayEvents.filter(
-          (x: any) => x.id !== id,
-        );
-    }
-    selection.value = null;
-  }
-};
-
-// Template variables for daytime/evening tabs (legacy pricing structure)
+// Template variables
 const tabs = ref([
   { id: 'daytime', name: 'Daytime' },
   { id: 'evening', name: 'Evening' }
@@ -787,20 +567,20 @@ const activeTab = ref('daytime');
 const daySessionIcons = ['Sun', 'Coffee', 'Clock', 'Calendar', 'Star'];
 const machineTypeOptions = ['individual', 'bundle', 'premium'];
 
+const generateId = (prefix: string) => `${prefix}-${Date.now()}`;
+
 const addDaytimeSession = () => {
-  if (!draft.value.daytime) draft.value.daytime = { sessions: [], jackpots: [] } as any;
+  if (!draft.value.daytime) draft.value.daytime = { sessions: [], jackpots: [] };
   if (!draft.value.daytime.sessions) draft.value.daytime.sessions = [];
   draft.value.daytime.sessions.push({
     id: generateId('session'),
     name: '',
     timeRange: '',
     icon: 'Clock',
-    description: '',
-    jackpot: '',
-    vibe: [],
     machines: [],
     paperRules: { minSpend: '', minPaperCards: 1 },
-    paperRulesAdvanced: { minSpendAdvanced: '', maxPaperCards: '' }
+    paperRulesAdvanced: { minSpendAdvanced: '', maxPaperCards: '' },
+    vibe: []
   });
 };
 
@@ -812,16 +592,16 @@ const removeDaytimeSession = (index: number) => {
 
 const getIcon = (iconName: string) => iconName;
 
-const addSessionVibe = (session: any) => {
+const addSessionVibe = (session: PricingSession) => {
   if (!session.vibe) session.vibe = [];
   session.vibe.push('');
 };
 
-const removeSessionVibe = (session: any, index: number) => {
+const removeSessionVibe = (session: PricingSession, index: number) => {
   if (session.vibe) session.vibe.splice(index, 1);
 };
 
-const addMachineToSession = (session: any) => {
+const addMachineToSession = (session: PricingSession) => {
   if (!session.machines) session.machines = [];
   session.machines.push({
     description: '',
@@ -831,17 +611,17 @@ const addMachineToSession = (session: any) => {
   });
 };
 
-const removeMachineFromSession = (session: any, index: number) => {
+const removeMachineFromSession = (session: PricingSession, index: number) => {
   if (session.machines) session.machines.splice(index, 1);
 };
 
 const addDaytimeJackpot = () => {
-  if (!draft.value.daytime) draft.value.daytime = { sessions: [], jackpots: [] } as any;
+  if (!draft.value.daytime) draft.value.daytime = { sessions: [], jackpots: [] };
   if (!draft.value.daytime.jackpots) draft.value.daytime.jackpots = [];
   draft.value.daytime.jackpots.push({
     name: '',
-    prize: '',
-    time: ''
+    time: '',
+    prize: ''
   });
 };
 
@@ -852,7 +632,7 @@ const removeDaytimeJackpot = (index: number) => {
 };
 
 const addEveningMachine = () => {
-  if (!draft.value.evening) draft.value.evening = { machines: [], startTime: '', valueProposition: '', scheduleNote: '' } as any;
+  if (!draft.value.evening) draft.value.evening = { machines: [], startTime: '', valueProposition: '', scheduleNote: '' };
   if (!draft.value.evening.machines) draft.value.evening.machines = [];
   draft.value.evening.machines.push({
     description: '',

@@ -39,8 +39,8 @@
               class="relative border-r border-divider last:border-r-0 select-none group"
               :class="{
                 'bg-accent-primary/5 ring-inset ring-2 ring-accent-primary/20': isSelected(day.dateStr),
-                'cursor-crosshair': activeToolProfileId,
-                'cursor-pointer': !activeToolProfileId
+                'cursor-crosshair': activeToolProgramSlug,
+                'cursor-pointer': !activeToolProgramSlug
               }"
               @mousedown.left="startPaint(day.dateStr, $event)"
               @mouseenter="onMouseEnter(day.dateStr)"
@@ -51,8 +51,8 @@
                 :date="day.dateStr"
                 :day-of-week="day.dayOfWeek"
                 :assignment="getEffectiveAssignment(day.dateStr)"
-                :profile="getProfile(day.dateStr)"
-                :ghost-profile="getGhostProfile(day.dateStr)"
+                :program="getProgram(day.dateStr)"
+                :ghost-program="getGhostProgram(day.dateStr)"
                 :is-selected="isSelected(day.dateStr)"
                 :is-holiday="isHoliday(day.dateStr)"
                 :holiday-info="getHoliday(day.dateStr)"
@@ -86,18 +86,18 @@ import { ref, computed, onMounted, watch, nextTick } from "vue";
 import { useInfiniteScroll, useKeyModifier, useVirtualList } from "@vueuse/core";
 import ScheduleDayCard from "./ScheduleDayCard.vue";
 import { dateKey, resolveEffectiveAssignment, parseDateKey, addDays } from "~/utils/schedule-calendar";
-import type { OpsSchemaCalendarAssignment, OpsSchemaCalendarOverride, OpsSchemaDayProfile } from "~/types/ops-schema";
+import type { WeeklyScheduleSlot, CalendarOverride } from "~/types/schedule";
+import type { BingoProgramExtended } from "~/types/bingo";
 
 const props = defineProps<{
   range: { start: string; end: string };
-  weekdayDefaults: Record<string, OpsSchemaCalendarAssignment>;
-  assignments: Record<string, OpsSchemaCalendarAssignment>;
-  overrides: Record<string, OpsSchemaCalendarOverride[]>;
-  profiles: OpsSchemaDayProfile[];
+  slots: WeeklyScheduleSlot[];
+  overrides: Record<string, CalendarOverride[]>;
+  programs: BingoProgramExtended[];
   holidays: any[];
   shifts?: any[];
   selectedDates: string[];
-  activeToolProfileId: string | null;
+  activeToolProgramSlug: string | null;
   viewMode?: 'standard' | 'heatmap' | 'staffing';
 }>();
 
@@ -209,36 +209,20 @@ const startPaint = (date: string, event: MouseEvent) => {
   isPainting.value = true;
   paintStartKey.value = date;
 
-  if (props.activeToolProfileId) {
+  if (props.activeToolProgramSlug) {
     // Tool selected: Paint immediately
-    emit('paint-range', { dates: [date], profileId: props.activeToolProfileId });
+    emit('paint-range', { dates: [date], programSlug: props.activeToolProgramSlug });
   } else {
     // Selection mode
     if (event.shiftKey) {
       // Toggle day in selection (multi-select)
-      // Prompt says "Shift+click (no tool): toggles day in selection"
       emit('select-date', { date, multi: true });
       anchorDate.value = date;
     } else if (event.ctrlKey || event.metaKey) {
-      // Standard multi-select toggle usually cmd-click, but prompt requested shift for toggle?
-      // "Shift+click (no tool): toggles day in selection"
-      // Wait, standard is usually Shift=Range, Cmd=Toggle.
-      // Prompt: "Shift+click (no tool): toggles day in selection (multi-select)."
-      // "Click (no tool): selects that day. Click again clears selection."
-      // "Drag (no tool): selects a contiguous date range".
-
-      // I will implement prompt requests:
-      // Shift+Click -> Toggle
-      // Click -> Select Single / Clear if same
-
-      // But also commonly Cmd/Ctrl is toggle. I'll support both for toggle if user wants?
-      // Prompt: "Shift+click... toggles".
-
       emit('select-date', { date, multi: true });
       anchorDate.value = date;
     } else {
       // Single Click
-      // "Click (no tool selected): selects that day. Click again clears selection."
       const alreadySelected = props.selectedDates.length === 1 && props.selectedDates.includes(date);
       if (alreadySelected) {
          emit('clear-selection');
@@ -256,40 +240,11 @@ const onMouseEnter = (date: string) => {
 
   if (!isPainting.value || !paintStartKey.value) return;
 
-  if (props.activeToolProfileId) {
+  if (props.activeToolProgramSlug) {
     // Drag with tool: Paint range from start to current
-    // "Drag (tool selected): paints a contiguous date range from drag start -> current hover... and applies ON mouseup."
-    // Wait, prompt said: "applies ON mouseup".
-    // "live visual feedback".
-    // So I should NOT emit 'paint-range' here yet?
-    // But currently I don't have a "preview paint" mechanism in OpsSchemaCalendarEditor.
-    // OpsSchemaCalendarEditor `handlePaintRange` applies assignment.
-    // If I want "live visual feedback" but "apply ON mouseup", I need a local preview state in ScheduleCanvas.
-    // I will assume "live visual feedback" means "select them" or "show ghost"?
-    // "with live visual feedback".
-    // If I paint immediately, it applies immediately.
-    // "applies ON mouseup" implies batching.
-    // To support this properly, I would need a `previewAssignments` prop or similar.
-    // Or I can misuse selection to show the range?
-    // Let's implement immediate paint for now as "live feedback" because refactoring the whole data flow for preview is risky.
-    // Wait, "applies ON mouseup" is explicit.
-    // If I paint immediately, I create many undo steps / network requests if not debounced.
-    // I will USE SELECTION to show the range during drag, and paint on mouseup.
-    // This gives visual feedback (selection highlight) and single commit.
-    // But selection color is blue, paint is profile color.
-    // Users might find it confusing if they don't see the profile color.
-    // I will use a local `ghostPaintRange` state.
+    // See notes on ghost painting
   } else {
     // Drag no tool: Select range
-    // "Drag (no tool): selects a contiguous date range from drag start -> current hover, with live highlight, and sets selectedDates to exactly that range on mouseup."
-    // Wait, "sets selectedDates... on mouseup".
-    // "live highlight".
-    // Does it mean I shouldn't update `selectedDates` until mouseup?
-    // "selects a contiguous date range... with live highlight".
-    // I can update `selectedDates` live, provided `OpsSchemaCalendarEditor` handles it fast enough.
-    // Given the prompt "sets selectedDates to exactly that range on mouseup", it implies potentially separation.
-    // But if I update `selectedDates` live, I achieve "live highlight" easily.
-    // I will update live.
     const range = getRange(paintStartKey.value, date);
     emit('select-date', { date: range, multi: false, replace: true });
   }
@@ -297,10 +252,10 @@ const onMouseEnter = (date: string) => {
 
 const endPaint = () => {
   if (isPainting.value && paintStartKey.value && activeHoverDate.value) {
-     if (props.activeToolProfileId) {
+     if (props.activeToolProgramSlug) {
         // Paint on mouseup
         const range = getRange(paintStartKey.value, activeHoverDate.value);
-        emit('paint-range', { dates: range, profileId: props.activeToolProfileId });
+        emit('paint-range', { dates: range, programSlug: props.activeToolProgramSlug });
      }
      // Selection was updated live, so nothing to do.
   }
@@ -347,9 +302,6 @@ const handleKeyDown = (e: KeyboardEvent) => {
     }
   } else if (e.key === 'v' && (e.metaKey || e.ctrlKey)) {
     if (props.selectedDates.length > 0) {
-      // Paste to ALL selected dates or just active? Prompt said "paste clipboard profile id onto the active date (or all selected if you choose)".
-      // Consistent with context menu "Paste" which pastes to active date, or if multiple selected?
-      // I'll paste to active date (last selected) for safety.
       emit('paste-day', props.selectedDates[props.selectedDates.length - 1]);
     }
   } else if (e.key === 'Delete' || e.key === 'Backspace') {
@@ -360,30 +312,29 @@ const handleKeyDown = (e: KeyboardEvent) => {
 // --- Helpers ---
 
 const getEffectiveAssignment = (date: string) => {
-  return resolveEffectiveAssignment({
-    weekdayDefaults: props.weekdayDefaults,
-    assignments: props.assignments,
-    overrides: props.overrides,
-    range: props.range
-  } as any, date);
+  return resolveEffectiveAssignment(
+    date,
+    props.slots,
+    props.overrides
+  );
 };
 
-const getProfile = (date: string): OpsSchemaDayProfile | undefined => {
+const getProgram = (date: string): BingoProgramExtended | undefined => {
   const eff = getEffectiveAssignment(date);
-  if (eff.effectiveProfileId) {
-    return props.profiles.find(p => p.id === eff.effectiveProfileId);
+  if (eff.programSlug) {
+    return props.programs.find(p => p.slug === eff.programSlug);
   }
   return undefined;
 };
 
-const getGhostProfile = (date: string): OpsSchemaDayProfile | undefined => {
-  if (isPainting.value && props.activeToolProfileId && paintStartKey.value && activeHoverDate.value) {
+const getGhostProgram = (date: string): BingoProgramExtended | undefined => {
+  if (isPainting.value && props.activeToolProgramSlug && paintStartKey.value && activeHoverDate.value) {
      const range = getRange(paintStartKey.value, activeHoverDate.value);
      if (range.includes(date)) {
-        return props.profiles.find(p => p.id === props.activeToolProfileId);
+        return props.programs.find(p => p.slug === props.activeToolProgramSlug);
      }
-  } else if (activeHoverDate.value === date && props.activeToolProfileId) {
-      return props.profiles.find(p => p.id === props.activeToolProfileId);
+  } else if (activeHoverDate.value === date && props.activeToolProgramSlug) {
+      return props.programs.find(p => p.slug === props.activeToolProgramSlug);
   }
   return undefined;
 };

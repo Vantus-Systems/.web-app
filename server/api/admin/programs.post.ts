@@ -4,53 +4,46 @@ import prisma from "~/server/db/client";
 import { auditService } from "~/server/services/audit.service";
 import { assertRole } from "~/server/utils/roles";
 
-const gameSchema = z
-  .object({
-    sortOrder: z.number().int().min(0).max(999),
-    title: z.string().min(1).max(255),
-    paperColor: z
-      .string()
-      .regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Invalid hex color"),
-    notes: z.string().max(1000).optional(),
-    patternSlug: z.string().min(1).max(255),
-    pricing: z
-      .object({
-        model: z.enum(["standard", "premium", "included"]).optional(),
-        price: z.number().min(0).max(999999).optional(),
-        currency: z.string().max(3).optional(),
-      })
-      .strict()
-      .optional(),
-    payout: z
-      .object({
-        type: z
-          .enum(["fixed", "percentage", "progressive", "merchandise"])
-          .optional(),
-        amount: z.number().min(0).max(999999).optional(),
-        percentage: z.number().min(0).max(100).optional(),
-        description: z.string().max(500).optional(),
-        currency: z.string().max(3).optional(),
-      })
-      .strict()
-      .optional(),
-    timeline: z
-      .object({
-        estimatedDuration: z.number().min(1).max(480).optional(),
-        isBreak: z.boolean().optional(),
-      })
-      .strict()
-      .optional(),
-  })
-  .strict();
+const gameSchema = z.object({
+  sortOrder: z.number().int().min(0).max(999),
+  title: z.string().min(1).max(255),
+  paperColor: z
+    .string()
+    .regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Invalid hex color"),
+  notes: z.string().max(1000).optional(),
+  patternSlug: z.string().min(1).max(255),
+  pricing: z
+    .object({
+      model: z.enum(["standard", "premium", "included"]).optional(),
+      price: z.number().min(0).max(999999).optional(),
+      currency: z.string().max(3).optional(),
+    })
+    .optional(),
+  payout: z
+    .object({
+      type: z
+        .enum(["fixed", "percentage", "progressive", "merchandise"])
+        .optional(),
+      amount: z.number().min(0).max(999999).optional(),
+      percentage: z.number().min(0).max(100).optional(),
+      description: z.string().max(500).optional(),
+      currency: z.string().max(3).optional(),
+    })
+    .optional(),
+  timeline: z
+    .object({
+      estimatedDuration: z.number().min(1).max(480).optional(),
+      isBreak: z.boolean().optional(),
+    })
+    .optional(),
+});
 
-const programSchema = z
-  .object({
-    slug: z.string().min(1).max(255),
-    name: z.string().min(1).max(255),
-    description: z.string().max(1000).optional(),
-    games: z.array(gameSchema).max(100),
-  })
-  .strict();
+const programSchema = z.object({
+  slug: z.string().min(1).max(255),
+  name: z.string().min(1).max(255),
+  description: z.string().max(1000).optional(),
+  games: z.array(gameSchema).max(100),
+});
 
 export default defineEventHandler(async (event) => {
   assertRole(event.context.user?.role, ["OWNER"]);

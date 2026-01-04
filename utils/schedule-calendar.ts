@@ -1,13 +1,9 @@
-import type {
-  OpsSchemaV2,
-  OpsSchemaCalendarAssignment,
-  OpsSchemaCalendarOverride,
-} from "~/types/ops-schema";
+import type { WeeklyScheduleSlot, CalendarOverride } from "~/types/schedule";
 
 export type EffectiveAssignment = {
   status: "open" | "closed";
-  effectiveProfileId: string | null;
-  source: "weekday_default" | "assignment" | "override" | "none";
+  programSlug: string | null;
+  source: "weekday_default" | "override" | "none";
   isLocked: boolean;
   overrideReasons: string[];
   doorsOpenTime?: string;
@@ -49,51 +45,34 @@ export const addDays = (dateStr: string, days: number): string => {
 
 /**
  * Resolves the effective assignment for a given date by layering:
- * 1. Weekday Defaults
- * 2. Specific Assignments (Day-level)
- * 3. Overrides (highest priority)
+ * 1. Weekday Defaults (from ScheduleSlots)
+ * 2. Overrides (highest priority)
  */
 export const resolveEffectiveAssignment = (
-  calendar: OpsSchemaV2["calendar"],
   dateStr: string,
+  slots: WeeklyScheduleSlot[],
+  overridesMap: Record<string, CalendarOverride[]>,
 ): EffectiveAssignment => {
   const dateObj = parseDateKey(dateStr);
   const dayOfWeek = dateObj.getUTCDay(); // 0=Sun, 1=Mon...
 
   // 1. Weekday Default
-  // Normalize to 3-letter code for schema lookup
-  const dayCodes = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]; // Match schema convention usually
-  // Schema types say Record<string, ...>.
-  // Let's assume standard 3-letter title case based on OpsSchemaCompiler usage ("Mon", "Tue"...)
-  const dayKeyStr = dayCodes[dayOfWeek] ?? "Sun";
-
-  const base: OpsSchemaCalendarAssignment | undefined =
-    calendar.weekdayDefaults?.[dayKeyStr];
+  const slot = slots.find((s) => s.day_of_week === dayOfWeek);
 
   const result: EffectiveAssignment = {
-    status: base?.status || "open",
-    effectiveProfileId: base?.profile_id || null,
-    source: base ? "weekday_default" : "none",
+    status: slot ? "open" : "closed",
+    programSlug: slot ? slot.program_slug : null,
+    source: slot ? "weekday_default" : "none",
     isLocked: false,
     overrideReasons: [],
   };
 
-  // 2. Specific Assignment
-  const assignment = calendar.assignments?.[dateStr];
-  if (assignment) {
-    result.status = assignment.status;
-    if (assignment.profile_id) {
-      result.effectiveProfileId = assignment.profile_id;
-    }
-    result.source = "assignment";
-  }
-
-  // 3. Overrides
-  const overrides = calendar.overrides?.[dateStr] || [];
+  // 2. Overrides
+  const overrides = overridesMap[dateStr] || [];
   if (overrides.length > 0) {
     overrides.forEach((ov) => {
       // Prioritize kinds
-      const kind = ov.kind || (ov.profile_id ? "PROFILE_SWAP" : null);
+      const kind = ov.kind;
 
       if (kind === "LOCKED") {
         result.isLocked = true;
@@ -102,87 +81,23 @@ export const resolveEffectiveAssignment = (
         result.status = "closed";
         result.overrideReasons.push(ov.reason || "Closed");
       } else if (kind === "CLOSE_EARLY") {
-        result.closeEarlyTime = ov.untilTime;
-        result.overrideReasons.push(
-          ov.reason || `Close Early at ${ov.untilTime}`,
-        );
+        // result.closeEarlyTime = ov.untilTime; // Legacy had untilTime, new type doesn't support it yet unless I add it
+        result.overrideReasons.push(ov.reason || "Close Early");
       } else if (kind === "DOORS_OPEN") {
-        result.doorsOpenTime = ov.doors_open_time;
+        result.doorsOpenTime = ov.doorsOpenTime;
         result.overrideReasons.push(
-          ov.reason || `Doors Open at ${ov.doors_open_time}`,
+          ov.reason || `Doors Open at ${ov.doorsOpenTime}`,
         );
-      } else if (kind === "PROFILE_SWAP") {
-        if (ov.profile_id) {
-          result.effectiveProfileId = ov.profile_id;
-          result.source = "override";
-          result.overrideReasons.push(ov.reason || "Profile Swap");
-        }
       }
     });
+
+    // If any override exists, mark source as override?
+    // Or only if it changes the core assignment?
+    // For now, let's say if we have overrides, source is effectively influenced by them.
+    // But "source" usually meant "where did the profile come from".
+    // If just doors open changed, profile is still from default.
+    // If CLOSED, status changed.
   }
 
   return result;
-};
-
-/**
- * Applies a specific assignment to the calendar.
- */
-export const applyAssignment = (
-  calendar: OpsSchemaV2["calendar"],
-  date: string,
-  assignment: OpsSchemaCalendarAssignment,
-) => {
-  if (!calendar.assignments) calendar.assignments = {};
-  // If assignment matches default, maybe remove it to save space?
-  // For now, explicit write.
-  calendar.assignments[date] = { ...assignment };
-};
-
-/**
- * Clears assignment for a date.
- */
-export const clearAssignment = (
-  calendar: OpsSchemaV2["calendar"],
-  date: string,
-) => {
-  if (calendar.assignments && calendar.assignments[date]) {
-    delete calendar.assignments[date];
-  }
-};
-
-/**
- * Applies an override.
- */
-export const applyOverride = (
-  calendar: OpsSchemaV2["calendar"],
-  date: string,
-  override: OpsSchemaCalendarOverride,
-) => {
-  if (!calendar.overrides) calendar.overrides = {};
-  if (!calendar.overrides[date]) calendar.overrides[date] = [];
-
-  // If replacing same ID?
-  const idx = calendar.overrides[date].findIndex((o) => o.id === override.id);
-  if (idx >= 0) {
-    calendar.overrides[date][idx] = override;
-  } else {
-    calendar.overrides[date].push(override);
-  }
-};
-
-/**
- * Removes an override.
- */
-export const removeOverride = (
-  calendar: OpsSchemaV2["calendar"],
-  date: string,
-  overrideId: string,
-) => {
-  if (!calendar.overrides || !calendar.overrides[date]) return;
-  calendar.overrides[date] = calendar.overrides[date].filter(
-    (o) => o.id !== overrideId,
-  );
-  if (calendar.overrides[date].length === 0) {
-    delete calendar.overrides[date];
-  }
 };

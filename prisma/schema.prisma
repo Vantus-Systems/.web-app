@@ -270,3 +270,45 @@ model bingoGame {
   @@unique([program_id, sort_order])
   @@map("bingo_games")
 }
+
+// --- New Models for Schedule & Pricing Versioning ---
+
+model scheduleVersion {
+  id           String    @id @default(uuid())
+  status       String    @default("DRAFT") // DRAFT | ACTIVE | ARCHIVED
+  created_at   DateTime  @default(now())
+  created_by   String
+  published_at DateTime?
+  published_by String?
+  week_start   DateTime?
+  
+  slots        scheduleSlot[]
+  
+  @@map("schedule_versions")
+}
+
+model scheduleSlot {
+  id                 String          @id @default(uuid())
+  schedule_version_id String
+  day_of_week        Int
+  start_time         String          // HH:MM
+  duration_minutes   Int
+  program_slug       String
+  overrides          String?         // JSON
+  
+  schedule_version   scheduleVersion @relation(fields: [schedule_version_id], references: [id], onDelete: Cascade)
+  
+  @@map("schedule_slots")
+}
+
+model pricingVersion {
+  id           String    @id @default(uuid())
+  status       String    @default("DRAFT") // DRAFT | ACTIVE | ARCHIVED
+  created_at   DateTime  @default(now())
+  created_by   String
+  published_at DateTime?
+  published_by String?
+  content      String    // JSON
+  
+  @@map("pricing_versions")
+}
