@@ -6,7 +6,9 @@
     @click="handleClick"
   >
     <span v-if="loading" class="inline-flex items-center gap-2">
-      <span class="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+      <span
+        class="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin"
+      ></span>
       <span v-if="label">{{ label }}</span>
       <slot v-else />
     </span>
@@ -100,6 +102,8 @@ const computedClass = computed(() => {
     ],
   }[props.variant];
 
-  return [...baseClasses, sizeClasses, ...variantClasses].filter(Boolean).join(" ");
+  return [...baseClasses, sizeClasses, ...variantClasses]
+    .filter(Boolean)
+    .join(" ");
 });
 </script>

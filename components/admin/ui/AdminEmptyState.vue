@@ -1,6 +1,8 @@
 <template>
   <div class="text-center py-12 px-4">
-    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
+    <div
+      class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4"
+    >
       <svg
         class="w-8 h-8 text-slate-400"
         fill="none"

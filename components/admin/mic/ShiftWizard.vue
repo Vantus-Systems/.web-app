@@ -325,7 +325,12 @@
           Total Checks
         </div>
         <div class="text-3xl font-black text-primary-900">
-          ${{ formatCurrency(data.check_logs.reduce((sum, c) => sum + c.amount, 0), 2) }}
+          ${{
+            formatCurrency(
+              data.check_logs.reduce((sum, c) => sum + c.amount, 0),
+              2,
+            )
+          }}
         </div>
       </div>
     </div>
@@ -354,10 +359,13 @@
             Actual Deposited
           </div>
           <div class="text-3xl font-black text-primary-900 mt-2">
-            ${{ formatCurrency(
-              calculateCashTotal() + data.check_logs.reduce((sum, c) => sum + c.amount, 0),
-              2,
-            ) }}
+            ${{
+              formatCurrency(
+                calculateCashTotal() +
+                  data.check_logs.reduce((sum, c) => sum + c.amount, 0),
+                2,
+              )
+            }}
           </div>
         </div>
         <div
@@ -400,7 +408,10 @@
         class="bg-amber-50 border border-amber-200 rounded-xl p-6 space-y-4"
       >
         <p class="text-sm font-bold text-amber-700">
-          ⚠️ Variance of ${{ formatCurrency(Math.abs(reconciliationResult.variance), 2) }} detected
+          ⚠️ Variance of ${{
+            formatCurrency(Math.abs(reconciliationResult.variance), 2)
+          }}
+          detected
         </p>
         <label
           class="block text-xs font-bold text-amber-700 uppercase tracking-wider"

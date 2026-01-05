@@ -14,17 +14,16 @@
         aria-labelledby="help-panel-title"
       >
         <!-- Header -->
-        <div class="flex items-center justify-between p-6 border-b border-slate-200">
-          <h2
-            id="help-panel-title"
-            class="text-lg font-bold text-primary-950"
-          >
+        <div
+          class="flex items-center justify-between p-6 border-b border-slate-200"
+        >
+          <h2 id="help-panel-title" class="text-lg font-bold text-primary-950">
             {{ title }}
           </h2>
           <button
             class="p-2 rounded-lg hover:bg-slate-100 transition-colors"
-            @click="close"
             aria-label="Close help panel"
+            @click="close"
           >
             <svg
               class="w-5 h-5 text-slate-500"
@@ -63,7 +62,14 @@
                 d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <span>Need more help? Press <kbd class="px-1.5 py-0.5 bg-white rounded border border-slate-300 font-mono">⌘K</kbd> to search</span>
+            <span
+              >Need more help? Press
+              <kbd
+                class="px-1.5 py-0.5 bg-white rounded border border-slate-300 font-mono"
+                >⌘K</kbd
+              >
+              to search</span
+            >
           </div>
         </div>
       </div>

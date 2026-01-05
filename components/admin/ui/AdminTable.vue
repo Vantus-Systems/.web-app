@@ -19,9 +19,9 @@
               <svg
                 class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity"
                 :class="{
-                  'opacity-100 text-primary-900':
-                    sortKey === column.key,
-                  'rotate-180': sortKey === column.key && sortDirection === 'desc',
+                  'opacity-100 text-primary-900': sortKey === column.key,
+                  'rotate-180':
+                    sortKey === column.key && sortDirection === 'desc',
                 }"
                 fill="none"
                 stroke="currentColor"

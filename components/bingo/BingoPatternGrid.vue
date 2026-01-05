@@ -20,7 +20,8 @@ const currentFrameIndex = ref(0);
 const intervalId = ref<any>(null);
 
 const frames = computed<number[][]>(() => {
-  if (!props.definition || !props.definition.frames) return [Array(25).fill(0) as number[]];
+  if (!props.definition || !props.definition.frames)
+    return [Array(25).fill(0) as number[]];
   return props.definition.frames as number[][];
 });
 

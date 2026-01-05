@@ -307,14 +307,20 @@ const beginningBoxLocked = computed(() => {
 
 const bingoTotalDisplay = computed(() => {
   if (draft.value.workflow_type === "NEGATIVE_BINGO_BOX") {
-    return formatCurrency((draft.value.ending_box ?? 0) - (draft.value.beginning_box ?? 0), 2);
+    return formatCurrency(
+      (draft.value.ending_box ?? 0) - (draft.value.beginning_box ?? 0),
+      2,
+    );
   }
   if (draft.value.workflow_type === "RECUPERATION_BOX_RETURN") {
     if (draft.value.bingo_actual !== undefined) {
       return formatCurrency(draft.value.bingo_actual, 2);
     }
   }
-  return formatCurrency((draft.value.deposit_total ?? 0) - (draft.value.pulltabs_total ?? 0), 2);
+  return formatCurrency(
+    (draft.value.deposit_total ?? 0) - (draft.value.pulltabs_total ?? 0),
+    2,
+  );
 });
 
 const formulaLabel = computed(() => {

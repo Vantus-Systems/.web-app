@@ -386,7 +386,9 @@
             <h4 class="text-xl font-black text-primary-900">
               Evening Configuration
             </h4>
-            <div class="space-y-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div
+              class="space-y-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm"
+            >
               <label class="block">
                 <span
                   class="text-xs uppercase tracking-[0.3em] text-slate-500 font-bold"
@@ -496,7 +498,12 @@
 
 <script setup lang="ts">
 import { ref, watch, toRaw, nextTick } from "vue";
-import type { PricingConfig, PricingSession, PricingMachine, PricingJackpot } from "~/types/pricing";
+import type {
+  PricingConfig,
+  PricingSession,
+  PricingMachine,
+  PricingJackpot,
+} from "~/types/pricing";
 import { Trash2 } from "lucide-vue-next";
 
 const props = defineProps<{
@@ -515,14 +522,14 @@ const cloneDraft = (value: any): PricingConfig => {
     return {
       daytime: {
         sessions: [],
-        jackpots: []
+        jackpots: [],
       },
       evening: {
         startTime: "6:00 PM",
         valueProposition: "",
         scheduleNote: "",
-        machines: []
-      }
+        machines: [],
+      },
     };
   }
   const rawValue = toRaw(value);
@@ -559,28 +566,29 @@ watch(
 
 // Template variables
 const tabs = ref([
-  { id: 'daytime', name: 'Daytime' },
-  { id: 'evening', name: 'Evening' }
+  { id: "daytime", name: "Daytime" },
+  { id: "evening", name: "Evening" },
 ]);
-const activeTab = ref('daytime');
+const activeTab = ref("daytime");
 
-const daySessionIcons = ['Sun', 'Coffee', 'Clock', 'Calendar', 'Star'];
-const machineTypeOptions = ['individual', 'bundle', 'premium'];
+const daySessionIcons = ["Sun", "Coffee", "Clock", "Calendar", "Star"];
+const machineTypeOptions = ["individual", "bundle", "premium"];
 
 const generateId = (prefix: string) => `${prefix}-${Date.now()}`;
 
 const addDaytimeSession = () => {
-  if (!draft.value.daytime) draft.value.daytime = { sessions: [], jackpots: [] };
+  if (!draft.value.daytime)
+    draft.value.daytime = { sessions: [], jackpots: [] };
   if (!draft.value.daytime.sessions) draft.value.daytime.sessions = [];
   draft.value.daytime.sessions.push({
-    id: generateId('session'),
-    name: '',
-    timeRange: '',
-    icon: 'Clock',
+    id: generateId("session"),
+    name: "",
+    timeRange: "",
+    icon: "Clock",
     machines: [],
-    paperRules: { minSpend: '', minPaperCards: 1 },
-    paperRulesAdvanced: { minSpendAdvanced: '', maxPaperCards: '' },
-    vibe: []
+    paperRules: { minSpend: "", minPaperCards: 1 },
+    paperRulesAdvanced: { minSpendAdvanced: "", maxPaperCards: "" },
+    vibe: [],
   });
 };
 
@@ -594,7 +602,7 @@ const getIcon = (iconName: string) => iconName;
 
 const addSessionVibe = (session: PricingSession) => {
   if (!session.vibe) session.vibe = [];
-  session.vibe.push('');
+  session.vibe.push("");
 };
 
 const removeSessionVibe = (session: PricingSession, index: number) => {
@@ -604,10 +612,10 @@ const removeSessionVibe = (session: PricingSession, index: number) => {
 const addMachineToSession = (session: PricingSession) => {
   if (!session.machines) session.machines = [];
   session.machines.push({
-    description: '',
-    price: '',
-    type: 'individual',
-    savings: ''
+    description: "",
+    price: "",
+    type: "individual",
+    savings: "",
   });
 };
 
@@ -616,12 +624,13 @@ const removeMachineFromSession = (session: PricingSession, index: number) => {
 };
 
 const addDaytimeJackpot = () => {
-  if (!draft.value.daytime) draft.value.daytime = { sessions: [], jackpots: [] };
+  if (!draft.value.daytime)
+    draft.value.daytime = { sessions: [], jackpots: [] };
   if (!draft.value.daytime.jackpots) draft.value.daytime.jackpots = [];
   draft.value.daytime.jackpots.push({
-    name: '',
-    time: '',
-    prize: ''
+    name: "",
+    time: "",
+    prize: "",
   });
 };
 
@@ -632,12 +641,18 @@ const removeDaytimeJackpot = (index: number) => {
 };
 
 const addEveningMachine = () => {
-  if (!draft.value.evening) draft.value.evening = { machines: [], startTime: '', valueProposition: '', scheduleNote: '' };
+  if (!draft.value.evening)
+    draft.value.evening = {
+      machines: [],
+      startTime: "",
+      valueProposition: "",
+      scheduleNote: "",
+    };
   if (!draft.value.evening.machines) draft.value.evening.machines = [];
   draft.value.evening.machines.push({
-    description: '',
-    price: '',
-    type: 'individual'
+    description: "",
+    price: "",
+    type: "individual",
   });
 };
 

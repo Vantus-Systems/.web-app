@@ -6,10 +6,12 @@
       </h3>
     </div>
 
-    <form @submit.prevent="handleSubmit" class="space-y-4">
+    <form class="space-y-4" @submit.prevent="handleSubmit">
       <!-- Date -->
       <div>
-        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+        <label
+          class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1"
+        >
           Date
         </label>
         <input
@@ -23,12 +25,17 @@
       <div class="grid grid-cols-2 gap-4">
         <!-- Pulltab Totals -->
         <div>
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+          <label
+            class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1"
+          >
             Pulltab Total
           </label>
           <div class="relative">
-             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
-             <input
+            <span
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono"
+              >$</span
+            >
+            <input
               v-model.number="form.pulltabs_total"
               type="number"
               step="0.01"
@@ -40,11 +47,16 @@
 
         <!-- Deposit -->
         <div>
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+          <label
+            class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1"
+          >
             Total Deposit
           </label>
-           <div class="relative">
-             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
+          <div class="relative">
+            <span
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono"
+              >$</span
+            >
             <input
               v-model.number="form.deposit_total"
               type="number"
@@ -52,19 +64,23 @@
               required
               class="w-full pl-7 rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-sm font-mono font-bold focus:ring-2 focus:ring-primary-500 outline-none"
             />
-           </div>
+          </div>
         </div>
       </div>
 
       <!-- Bingo Totals (Calculated) -->
       <div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
-        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+        <label
+          class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1"
+        >
           Bingo Total
         </label>
         <div class="text-xl font-mono font-black text-primary-700">
           {{ formatCurrency(bingoTotal) }}
         </div>
-        <p class="text-[10px] text-slate-400 mt-1">Calculated: Deposit - Pulltabs</p>
+        <p class="text-[10px] text-slate-400 mt-1">
+          Calculated: Deposit - Pulltabs
+        </p>
       </div>
 
       <button
@@ -79,11 +95,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useCsrf } from '~/composables/useCsrf';
-import { formatCurrency } from '~/utils/format';
+import { ref, computed } from "vue";
+import { useCsrf } from "~/composables/useCsrf";
+import { formatCurrency } from "~/utils/format";
 
-const emit = defineEmits(['saved']);
+const emit = defineEmits(["saved"]);
 const { getHeaders } = useCsrf();
 
 const isSubmitting = ref(false);
@@ -117,7 +133,7 @@ const handleSubmit = async () => {
       credentials: "include",
     });
 
-    emit('saved');
+    emit("saved");
     form.value = {
       date: new Date().toISOString().slice(0, 10),
       pulltabs_total: 0,

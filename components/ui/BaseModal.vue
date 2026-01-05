@@ -52,10 +52,10 @@ watch(
     if (isOpen) {
       // Save currently focused element
       previousActiveElement.value = document.activeElement as HTMLElement;
-      
+
       // Wait for next tick to ensure modal is rendered
       await nextTick();
-      
+
       // Focus first focusable element in modal
       if (modalRef.value) {
         const firstFocusable = modalRef.value.querySelector<HTMLElement>(
@@ -63,13 +63,13 @@ watch(
         );
         firstFocusable?.focus();
       }
-      
+
       // Prevent body scroll
       document.body.style.overflow = "hidden";
     } else {
       // Restore body scroll
       document.body.style.overflow = "";
-      
+
       // Restore focus to previous element
       previousActiveElement.value?.focus();
     }

@@ -38,9 +38,15 @@
             <td class="px-3 py-2 font-semibold text-slate-700">
               {{ row.shift }}
             </td>
-            <td class="px-3 py-2 text-right">${{ formatCurrency(row.pulltabs, 2) }}</td>
-            <td class="px-3 py-2 text-right">${{ formatCurrency(row.deposit, 2) }}</td>
-            <td class="px-3 py-2 text-right">{{ formatCurrency(row.bingo, 2) }}</td>
+            <td class="px-3 py-2 text-right">
+              ${{ formatCurrency(row.pulltabs, 2) }}
+            </td>
+            <td class="px-3 py-2 text-right">
+              ${{ formatCurrency(row.deposit, 2) }}
+            </td>
+            <td class="px-3 py-2 text-right">
+              {{ formatCurrency(row.bingo, 2) }}
+            </td>
             <td class="px-3 py-2 text-right">{{ row.players }}</td>
           </tr>
           <tr
@@ -53,7 +59,9 @@
             <td class="px-3 py-2 text-right">
               ${{ formatCurrency(totals.deposit, 2) }}
             </td>
-            <td class="px-3 py-2 text-right">{{ formatCurrency(totals.bingo, 2) }}</td>
+            <td class="px-3 py-2 text-right">
+              {{ formatCurrency(totals.bingo, 2) }}
+            </td>
             <td class="px-3 py-2 text-right">{{ totals.players }}</td>
           </tr>
         </tbody>

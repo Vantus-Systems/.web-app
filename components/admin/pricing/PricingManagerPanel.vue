@@ -1,11 +1,15 @@
 <template>
   <div class="h-full flex flex-col bg-base">
     <!-- Header -->
-    <div class="px-6 py-4 border-b border-divider bg-surface flex flex-col gap-4 shrink-0">
+    <div
+      class="px-6 py-4 border-b border-divider bg-surface flex flex-col gap-4 shrink-0"
+    >
       <div class="flex items-center justify-between">
         <div>
           <h2 class="text-lg font-bold text-primary">Pricing Manager V2</h2>
-          <p class="text-xs text-secondary">Manage templates, calendar, and promotions.</p>
+          <p class="text-xs text-secondary">
+            Manage templates, calendar, and promotions.
+          </p>
         </div>
         <div class="flex items-center gap-3">
           <div
@@ -31,10 +35,10 @@
 
           <button
             class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider border border-divider rounded hover:bg-base transition-colors"
-            @click="handleSaveDraft"
             :disabled="store.saving || !store.dirty"
+            @click="handleSaveDraft"
           >
-            {{ store.saving ? 'Saving...' : 'Save Draft' }}
+            {{ store.saving ? "Saving..." : "Save Draft" }}
           </button>
           <button
             class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider border border-divider rounded hover:bg-base transition-colors"
@@ -44,10 +48,10 @@
           </button>
           <button
             class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-accent-primary text-white rounded hover:bg-accent-primary/90 transition-colors"
-            @click="handlePublish"
             :disabled="store.publishing"
+            @click="handlePublish"
           >
-            {{ store.publishing ? 'Publishing...' : 'Publish' }}
+            {{ store.publishing ? "Publishing..." : "Publish" }}
           </button>
         </div>
       </div>
@@ -57,13 +61,13 @@
         <button
           v-for="tab in tabs"
           :key="tab.id"
-          @click="currentTab = tab.id"
           :class="[
             'pb-3 px-1 text-sm font-bold border-b-2 transition-colors',
             currentTab === tab.id
               ? 'border-accent-primary text-accent-primary'
-              : 'border-transparent text-secondary hover:text-primary hover:border-divider'
+              : 'border-transparent text-secondary hover:text-primary hover:border-divider',
           ]"
+          @click="currentTab = tab.id"
         >
           {{ tab.name }}
         </button>
@@ -73,7 +77,9 @@
     <!-- Main Editor -->
     <div class="flex-1 overflow-hidden p-6 bg-base">
       <div v-if="store.loading" class="flex justify-center py-20">
-        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-accent-primary"></div>
+        <div
+          class="animate-spin rounded-full h-10 w-10 border-b-2 border-accent-primary"
+        ></div>
       </div>
 
       <div v-else-if="store.draftContent" class="h-full">
@@ -108,12 +114,19 @@
           class="absolute inset-0 bg-black/50 transition-opacity"
           @click="showHistory = false"
         ></div>
-        <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
+        <div
+          class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10"
+        >
           <div class="pointer-events-auto w-screen max-w-md">
-            <div class="flex h-full flex-col overflow-y-scroll bg-surface shadow-xl">
+            <div
+              class="flex h-full flex-col overflow-y-scroll bg-surface shadow-xl"
+            >
               <div class="bg-primary-900 px-4 py-6 sm:px-6">
                 <div class="flex items-center justify-between">
-                  <h2 id="slide-over-title" class="text-base font-semibold leading-6 text-white">
+                  <h2
+                    id="slide-over-title"
+                    class="text-base font-semibold leading-6 text-white"
+                  >
                     Version History
                   </h2>
                   <div class="ml-3 flex h-7 items-center">
@@ -124,8 +137,19 @@
                     >
                       <span class="absolute -inset-2.5"></span>
                       <span class="sr-only">Close panel</span>
-                      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      <svg
+                        class="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -138,15 +162,25 @@
               </div>
               <div class="relative flex-1 px-4 py-6 sm:px-6 bg-base">
                 <div v-if="loadingHistory" class="text-center py-8">
-                  <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-accent-primary mx-auto"></div>
+                  <div
+                    class="animate-spin rounded-full h-6 w-6 border-b-2 border-accent-primary mx-auto"
+                  ></div>
                 </div>
                 <ul v-else role="list" class="space-y-4">
-                  <li v-for="version in store.versions" :key="version.id" class="bg-surface border border-divider rounded-lg p-4 hover:border-accent-primary transition-colors">
+                  <li
+                    v-for="version in store.versions"
+                    :key="version.id"
+                    class="bg-surface border border-divider rounded-lg p-4 hover:border-accent-primary transition-colors"
+                  >
                     <div class="flex justify-between items-start mb-2">
                       <div>
                         <span
                           class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
-                          :class="version.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-slate-50 text-slate-700 ring-slate-600/20'"
+                          :class="
+                            version.status === 'ACTIVE'
+                              ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
+                              : 'bg-slate-50 text-slate-700 ring-slate-600/20'
+                          "
                         >
                           {{ version.status }}
                         </span>
@@ -156,8 +190,8 @@
                       </div>
                       <button
                         v-if="version.status !== 'ACTIVE'"
-                        @click="restoreVersion(version)"
                         class="text-xs font-bold text-accent-primary hover:text-accent-primary/80"
+                        @click="restoreVersion(version)"
                       >
                         Restore
                       </button>
@@ -217,8 +251,8 @@ function ensureV2Structure() {
           name: "Standard Pricing",
           description: "Default pricing configuration",
           config: store.draftContent || {}, // Use existing content as default config if possible
-          isVisible: true
-        }
+          isVisible: true,
+        },
       ],
       weeklyRotation: {
         Mon: "default",
@@ -227,11 +261,11 @@ function ensureV2Structure() {
         Thu: "default",
         Fri: "default",
         Sat: "default",
-        Sun: "default"
+        Sun: "default",
       },
       dateOverrides: [],
       promotions: [],
-      defaultTemplateId: "default"
+      defaultTemplateId: "default",
     };
     store.updateDraftContent(initialV2);
   }
@@ -246,13 +280,21 @@ async function handleSaveDraft() {
 }
 
 async function handlePublish() {
-  if (confirm("Are you sure you want to publish these changes? This will update the live pricing immediately.")) {
+  if (
+    confirm(
+      "Are you sure you want to publish these changes? This will update the live pricing immediately.",
+    )
+  ) {
     await store.publish();
   }
 }
 
 async function restoreVersion(version: any) {
-  if (confirm("Are you sure you want to restore this version? Current draft changes will be lost.")) {
+  if (
+    confirm(
+      "Are you sure you want to restore this version? Current draft changes will be lost.",
+    )
+  ) {
     await store.rollback(version.id);
     showHistory.value = false;
     ensureV2Structure();
