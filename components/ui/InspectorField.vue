@@ -7,23 +7,20 @@
         class="text-sm font-semibold text-primary flex items-center gap-1"
       >
         {{ label }}
-        <span
-          v-if="required"
-          class="text-accent-error"
-          aria-label="required"
-        >*</span>
+        <span v-if="required" class="text-accent-error" aria-label="required"
+          >*</span
+        >
         <span
           v-if="tooltip"
           class="text-tertiary cursor-help"
           :title="tooltip"
           aria-label="help"
-        >ⓘ</span>
+          >ⓘ</span
+        >
       </label>
-      <span
-        v-if="status"
-        class="text-xs font-medium"
-        :class="statusClass"
-      >{{ status }}</span>
+      <span v-if="status" class="text-xs font-medium" :class="statusClass">{{
+        status
+      }}</span>
     </div>
 
     <!-- Input Control -->
@@ -36,7 +33,9 @@
         @change="handleInput"
         @blur="handleBlur"
       >
-        <option v-if="placeholder" value="" disabled selected>{{ placeholder }}</option>
+        <option v-if="placeholder" value="" disabled selected>
+          {{ placeholder }}
+        </option>
         <option
           v-for="option in options"
           :key="option.value"
@@ -47,8 +46,8 @@
       </select>
     </template>
     <component
-      v-else
       :is="componentType"
+      v-else
       :id="id"
       :value="modelValue"
       :type="type"
@@ -67,8 +66,8 @@
     <!-- Helper Text (Always Visible) -->
     <p
       v-if="helperText"
-      class="text-xs text-secondary mt-1"
       :id="`${id}-helper`"
+      class="text-xs text-secondary mt-1"
     >
       {{ helperText }}
     </p>
@@ -76,8 +75,8 @@
     <!-- Validation Message -->
     <p
       v-if="validationMessage"
-      class="text-xs text-accent-error mt-1 flex items-center gap-1"
       :id="`${id}-error`"
+      class="text-xs text-accent-error mt-1 flex items-center gap-1"
       role="alert"
     >
       <span>⚠</span> {{ validationMessage }}
@@ -86,8 +85,8 @@
     <!-- Success Message -->
     <p
       v-if="successMessage"
-      class="text-xs text-accent-success mt-1 flex items-center gap-1"
       :id="`${id}-success`"
+      class="text-xs text-accent-success mt-1 flex items-center gap-1"
     >
       <span>✓</span> {{ successMessage }}
     </p>
@@ -102,10 +101,17 @@ interface Props {
   id: string;
   label: string;
   modelValue: any;
-  
+
   // Input type
-  type?: "text" | "number" | "select" | "textarea" | "color" | "time" | "checkbox";
-  
+  type?:
+    | "text"
+    | "number"
+    | "select"
+    | "textarea"
+    | "color"
+    | "time"
+    | "checkbox";
+
   // Validation & State
   required?: boolean;
   disabled?: boolean;
@@ -113,7 +119,7 @@ interface Props {
   loading?: boolean;
   valid?: boolean;
   invalid?: boolean;
-  
+
   // Content
   placeholder?: string;
   helperText?: string;
@@ -121,15 +127,15 @@ interface Props {
   validationMessage?: string;
   successMessage?: string;
   status?: "edited" | "saved" | "loading";
-  
+
   // Constraints
   min?: number;
   max?: number;
   step?: number;
-  
+
   // Options for select
   options?: Array<{ value: string | number; label: string }>;
-  
+
   // Custom styling
   className?: string;
 }
@@ -173,7 +179,9 @@ const inputClasses = computed(() => {
   } else if (props.valid) {
     base.push("border-accent-success bg-green-50 focus:ring-accent-success");
   } else {
-    base.push("border-divider bg-base hover:border-accent-primary focus:ring-accent-primary");
+    base.push(
+      "border-divider bg-base hover:border-accent-primary focus:ring-accent-primary",
+    );
   }
 
   // Disabled state
@@ -188,7 +196,9 @@ const inputClasses = computed(() => {
 
   // Type-specific styling
   if (props.type === "checkbox") {
-    base.push("w-4 h-4 rounded border-gray-300 text-accent-primary focus:ring-accent-primary");
+    base.push(
+      "w-4 h-4 rounded border-gray-300 text-accent-primary focus:ring-accent-primary",
+    );
   } else if (props.type === "color") {
     base.push("h-10 w-20 p-1 cursor-pointer");
   } else if (props.type === "textarea") {
@@ -223,7 +233,10 @@ const statusClass = computed(() => {
 
 // Event handlers
 const handleInput = (event: Event) => {
-  const target = event.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+  const target = event.target as
+    | HTMLInputElement
+    | HTMLTextAreaElement
+    | HTMLSelectElement;
   let value: any;
 
   if (props.type === "checkbox") {
@@ -249,8 +262,13 @@ const handleBlur = (event: Event) => {
 
 <style scoped>
 /* Smooth transitions for status changes */
-input, select, textarea {
-  transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+input,
+select,
+textarea {
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease;
 }
 
 /* Custom select arrow */
@@ -264,14 +282,14 @@ select {
 
 /* Checkbox styling */
 input[type="checkbox"] {
-  accent-color: #0A84FF;
+  accent-color: #0a84ff;
 }
 
 /* Focus visible for accessibility */
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid #0A84FF;
+  outline: 2px solid #0a84ff;
   outline-offset: 2px;
 }
 </style>

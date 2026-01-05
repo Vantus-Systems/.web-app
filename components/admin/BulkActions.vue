@@ -8,16 +8,16 @@
         <button
           v-if="selectedCount > 0"
           type="button"
-          @click="bulkApprove"
           class="py-2 px-3 rounded-lg bg-emerald-100 text-emerald-700 font-bold text-xs hover:bg-emerald-200 transition-colors"
+          @click="bulkApprove"
         >
           Bulk Approve
         </button>
         <button
           v-if="selectedCount > 0"
           type="button"
-          @click="bulkDeactivate"
           class="py-2 px-3 rounded-lg bg-amber-100 text-amber-700 font-bold text-xs hover:bg-amber-200 transition-colors"
+          @click="bulkDeactivate"
         >
           Bulk Deactivate
         </button>

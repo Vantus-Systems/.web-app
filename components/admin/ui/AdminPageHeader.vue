@@ -14,7 +14,10 @@
         <h1 class="text-4xl font-black text-primary-950 tracking-tight">
           {{ title }}
         </h1>
-        <p v-if="description" class="mt-2 text-slate-600 text-sm leading-relaxed">
+        <p
+          v-if="description"
+          class="mt-2 text-slate-600 text-sm leading-relaxed"
+        >
           {{ description }}
         </p>
       </div>

@@ -1,14 +1,22 @@
 <template>
-  <div 
+  <div
     class="grid gap-0 h-full select-none"
-    :style="{ gridTemplateColumns: `${leftPanelWidth}px 4px minmax(0,1fr) 4px ${rightPanelWidth}px` }"
+    :style="{
+      gridTemplateColumns: `${leftPanelWidth}px 4px minmax(0,1fr) 4px ${rightPanelWidth}px`,
+    }"
   >
     <!-- Library Sidebar -->
-    <div class="h-full flex flex-col bg-surface border border-divider rounded-xl overflow-hidden shadow-sm">
+    <div
+      class="h-full flex flex-col bg-surface border border-divider rounded-xl overflow-hidden shadow-sm"
+    >
       <div class="p-4 space-y-3 border-b border-divider bg-base/30">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-[10px] uppercase tracking-widest text-secondary font-bold">Library</p>
+            <p
+              class="text-[10px] uppercase tracking-widest text-secondary font-bold"
+            >
+              Library
+            </p>
             <h3 class="text-lg font-bold text-primary">Programs</h3>
           </div>
           <button
@@ -31,7 +39,19 @@
           v-if="!patternsReady"
           class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[10px] font-bold text-amber-700 flex items-center gap-2"
         >
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+          <svg
+            class="w-3 h-3"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
+          </svg>
           Add patterns before creating programs.
         </div>
       </div>
@@ -48,7 +68,11 @@
           @click="confirmAction(() => startEdit(p))"
         >
           <div class="flex justify-between items-start">
-            <div class="text-sm font-bold text-primary group-hover:text-accent-primary transition-colors">{{ p.name }}</div>
+            <div
+              class="text-sm font-bold text-primary group-hover:text-accent-primary transition-colors"
+            >
+              {{ p.name }}
+            </div>
             <button
               class="text-[10px] font-bold text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity hover:text-rose-700"
               @click.stop="deleteProgram(p.slug)"
@@ -56,7 +80,9 @@
               Delete
             </button>
           </div>
-          <div class="text-[10px] uppercase tracking-widest text-secondary mt-1">
+          <div
+            class="text-[10px] uppercase tracking-widest text-secondary mt-1"
+          >
             {{ p.games.length }} games
           </div>
         </button>
@@ -73,68 +99,123 @@
     <div class="flex flex-col gap-4 h-full overflow-y-auto px-2">
       <div class="flex items-center justify-between shrink-0">
         <div>
-          <p class="text-[10px] uppercase tracking-widest text-secondary font-bold">Program Orchestrator</p>
+          <p
+            class="text-[10px] uppercase tracking-widest text-secondary font-bold"
+          >
+            Program Orchestrator
+          </p>
           <h3 class="text-xl font-bold text-primary flex items-center gap-2">
             {{ form.name || "Select a Program" }}
-            <span v-if="isDirty" class="text-amber-500 text-sm" title="Unsaved changes">*</span>
+            <span
+              v-if="isDirty"
+              class="text-amber-500 text-sm"
+              title="Unsaved changes"
+              >*</span
+            >
           </h3>
         </div>
         <div class="flex gap-2">
-           <div class="text-xs text-secondary font-bold bg-surface px-3 py-1.5 rounded-lg border border-divider">
+          <div
+            class="text-xs text-secondary font-bold bg-surface px-3 py-1.5 rounded-lg border border-divider"
+          >
             Total Payout: ${{ totalPayout }}
           </div>
-          <div class="text-xs text-secondary font-bold bg-surface px-3 py-1.5 rounded-lg border border-divider">
+          <div
+            class="text-xs text-secondary font-bold bg-surface px-3 py-1.5 rounded-lg border border-divider"
+          >
             Duration: {{ totalDuration }}m
           </div>
         </div>
       </div>
 
-      <div class="bg-surface border border-divider rounded-xl p-6 grid grid-cols-1 md:grid-cols-3 gap-4 shadow-sm">
+      <div
+        class="bg-surface border border-divider rounded-xl p-6 grid grid-cols-1 md:grid-cols-3 gap-4 shadow-sm"
+      >
         <label class="block">
-          <span class="text-xs font-bold text-secondary uppercase tracking-wider">Name</span>
+          <span
+            class="text-xs font-bold text-secondary uppercase tracking-wider"
+            >Name</span
+          >
           <input
             v-model="form.name"
             class="mt-1.5 w-full rounded-lg border-divider bg-base px-3 py-2 text-sm focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary outline-none transition-all"
-            :class="{ 'border-rose-500 focus:ring-rose-500/20 focus:border-rose-500': validationErrors.name }"
+            :class="{
+              'border-rose-500 focus:ring-rose-500/20 focus:border-rose-500':
+                validationErrors.name,
+            }"
           />
-          <p v-if="validationErrors.name" class="text-xs text-rose-500 mt-1 font-medium">
+          <p
+            v-if="validationErrors.name"
+            class="text-xs text-rose-500 mt-1 font-medium"
+          >
             {{ validationErrors.name }}
           </p>
         </label>
         <label class="block">
-          <span class="text-xs font-bold text-secondary uppercase tracking-wider">Slug</span>
+          <span
+            class="text-xs font-bold text-secondary uppercase tracking-wider"
+            >Slug</span
+          >
           <input
             v-model="form.slug"
             class="mt-1.5 w-full rounded-lg border-divider bg-base px-3 py-2 text-sm focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary outline-none transition-all disabled:opacity-50"
-            :class="{ 'border-rose-500 focus:ring-rose-500/20 focus:border-rose-500': validationErrors.slug }"
+            :class="{
+              'border-rose-500 focus:ring-rose-500/20 focus:border-rose-500':
+                validationErrors.slug,
+            }"
             :disabled="!editingProgram?.isNew"
           />
-          <p v-if="validationErrors.slug" class="text-xs text-rose-500 mt-1 font-medium">
+          <p
+            v-if="validationErrors.slug"
+            class="text-xs text-rose-500 mt-1 font-medium"
+          >
             {{ validationErrors.slug }}
           </p>
         </label>
         <label class="block">
-          <span class="text-xs font-bold text-secondary uppercase tracking-wider">Description</span>
+          <span
+            class="text-xs font-bold text-secondary uppercase tracking-wider"
+            >Description</span
+          >
           <input
             v-model="form.description"
             class="mt-1.5 w-full rounded-lg border-divider bg-base px-3 py-2 text-sm focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary outline-none transition-all"
-            :class="{ 'border-rose-500 focus:ring-rose-500/20 focus:border-rose-500': validationErrors.description }"
+            :class="{
+              'border-rose-500 focus:ring-rose-500/20 focus:border-rose-500':
+                validationErrors.description,
+            }"
           />
-          <p v-if="validationErrors.description" class="text-xs text-rose-500 mt-1 font-medium">
+          <p
+            v-if="validationErrors.description"
+            class="text-xs text-rose-500 mt-1 font-medium"
+          >
             {{ validationErrors.description }}
           </p>
         </label>
       </div>
 
       <!-- Games Validation Error -->
-      <div v-if="validationErrors.games" class="bg-rose-50 border border-rose-200 rounded-xl p-4 flex gap-3">
+      <div
+        v-if="validationErrors.games"
+        class="bg-rose-50 border border-rose-200 rounded-xl p-4 flex gap-3"
+      >
         <AlertCircle class="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
-        <p class="text-sm text-rose-600 font-medium">{{ validationErrors.games }}</p>
+        <p class="text-sm text-rose-600 font-medium">
+          {{ validationErrors.games }}
+        </p>
       </div>
 
-      <div class="bg-surface border border-divider rounded-xl flex flex-col shadow-sm flex-1 min-h-[400px]">
-        <div class="p-4 border-b border-divider flex items-center justify-between bg-base/30">
-          <div class="text-xs font-bold uppercase tracking-widest text-secondary">Setlist</div>
+      <div
+        class="bg-surface border border-divider rounded-xl flex flex-col shadow-sm flex-1 min-h-[400px]"
+      >
+        <div
+          class="p-4 border-b border-divider flex items-center justify-between bg-base/30"
+        >
+          <div
+            class="text-xs font-bold uppercase tracking-widest text-secondary"
+          >
+            Setlist
+          </div>
           <div class="flex gap-2">
             <button
               class="text-xs font-bold border border-divider bg-surface hover:bg-base text-primary rounded-lg px-3 py-1.5 transition-colors flex items-center gap-1"
@@ -160,7 +241,9 @@
               isBreak(game)
                 ? 'border-dashed border-divider bg-base/50'
                 : 'border-divider bg-surface hover:border-accent-primary/50',
-              selectedGameIndex === idx ? 'ring-2 ring-accent-primary border-transparent' : ''
+              selectedGameIndex === idx
+                ? 'ring-2 ring-accent-primary border-transparent'
+                : '',
             ]"
             draggable="true"
             @dragstart="dragIndex = idx"
@@ -169,14 +252,18 @@
             @click="selectGame(idx)"
             @contextmenu.prevent="showContextMenu($event, idx)"
           >
-            <div class="text-xs font-bold text-secondary w-6 text-center select-none cursor-grab active:cursor-grabbing">
+            <div
+              class="text-xs font-bold text-secondary w-6 text-center select-none cursor-grab active:cursor-grabbing"
+            >
               {{ idx + 1 }}
             </div>
             <div class="flex-1">
               <div class="text-sm font-bold text-primary">
                 {{ game.title }}
               </div>
-              <div class="text-[10px] uppercase tracking-widest text-secondary mt-0.5">
+              <div
+                class="text-[10px] uppercase tracking-widest text-secondary mt-0.5"
+              >
                 {{ game.patternSlug || "No Pattern" }}
               </div>
             </div>
@@ -193,7 +280,9 @@
             class="flex flex-col items-center justify-center h-40 text-secondary border-2 border-dashed border-divider rounded-xl bg-base/30"
           >
             <p class="text-sm font-medium">No games yet</p>
-            <p class="text-xs mt-1">Add a game or break to start building the program.</p>
+            <p class="text-xs mt-1">
+              Add a game or break to start building the program.
+            </p>
           </div>
         </div>
       </div>
@@ -206,23 +295,43 @@
     ></div>
 
     <!-- Inspector Panel -->
-    <div class="h-full bg-surface border border-divider rounded-xl overflow-hidden shadow-sm flex flex-col">
-      <div class="p-4 border-b border-divider bg-base/30 flex justify-between items-center">
+    <div
+      class="h-full bg-surface border border-divider rounded-xl overflow-hidden shadow-sm flex flex-col"
+    >
+      <div
+        class="p-4 border-b border-divider bg-base/30 flex justify-between items-center"
+      >
         <div>
-          <p class="text-[10px] uppercase tracking-widest text-secondary font-bold">Inspector</p>
+          <p
+            class="text-[10px] uppercase tracking-widest text-secondary font-bold"
+          >
+            Inspector
+          </p>
           <h3 class="text-lg font-bold text-primary truncate max-w-[200px]">
             {{ selectedGame ? selectedGame.title : "No Selection" }}
           </h3>
         </div>
         <div class="flex gap-1">
-             <button 
-              v-if="selectedGame"
-              class="p-1 hover:bg-base rounded text-secondary hover:text-primary transition-colors"
-              title="Toggle JSON Inspector"
-              @click="showInspector = !showInspector"
+          <button
+            v-if="selectedGame"
+            class="p-1 hover:bg-base rounded text-secondary hover:text-primary transition-colors"
+            title="Toggle JSON Inspector"
+            @click="showInspector = !showInspector"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
-            </button>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+              />
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -230,7 +339,13 @@
         <!-- Inspector Tabs -->
         <div class="flex border-b border-divider bg-base/30">
           <button
-            v-for="tab in ['General', 'Payout', 'Pricing', 'Timeline', 'Preview']"
+            v-for="tab in [
+              'General',
+              'Payout',
+              'Pricing',
+              'Timeline',
+              'Preview',
+            ]"
             :key="tab"
             class="flex-1 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors border-b-2"
             :class="
@@ -246,16 +361,25 @@
 
         <div class="p-4 space-y-6 overflow-y-auto flex-1">
           <!-- General Tab -->
-          <div v-if="activeTab === 'General'" class="space-y-4 animate-in fade-in duration-300">
+          <div
+            v-if="activeTab === 'General'"
+            class="space-y-4 animate-in fade-in duration-300"
+          >
             <label class="block">
-              <span class="text-xs font-bold text-secondary uppercase tracking-wider">Title</span>
+              <span
+                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                >Title</span
+              >
               <input
                 v-model="selectedGame.title"
                 class="mt-1.5 w-full rounded-lg border-divider bg-base px-3 py-2 text-sm focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary outline-none transition-all"
               />
             </label>
             <label class="block">
-              <span class="text-xs font-bold text-secondary uppercase tracking-wider">Paper Color</span>
+              <span
+                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                >Paper Color</span
+              >
               <div class="flex items-center gap-2 mt-1.5">
                 <input
                   :value="selectedGame.paperColor || '#ffffff'"
@@ -267,11 +391,16 @@
                     ).value
                   "
                 />
-                <span class="text-xs font-mono text-secondary">{{ selectedGame.paperColor || '#ffffff' }}</span>
+                <span class="text-xs font-mono text-secondary">{{
+                  selectedGame.paperColor || "#ffffff"
+                }}</span>
               </div>
             </label>
             <label class="block">
-              <span class="text-xs font-bold text-secondary uppercase tracking-wider">Notes</span>
+              <span
+                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                >Notes</span
+              >
               <textarea
                 v-model="selectedGame.notes"
                 rows="3"
@@ -280,7 +409,11 @@
             </label>
 
             <div class="border-t border-divider pt-6 space-y-4">
-              <div class="text-xs font-bold uppercase tracking-widest text-secondary">Pattern Picker</div>
+              <div
+                class="text-xs font-bold uppercase tracking-widest text-secondary"
+              >
+                Pattern Picker
+              </div>
               <div class="space-y-2">
                 <input
                   v-model="patternSearch"
@@ -301,8 +434,10 @@
                   </option>
                 </select>
               </div>
-              
-              <div class="grid grid-cols-2 gap-2 max-h-[240px] overflow-y-auto pr-1">
+
+              <div
+                class="grid grid-cols-2 gap-2 max-h-[240px] overflow-y-auto pr-1"
+              >
                 <button
                   v-for="pattern in filteredPatterns"
                   :key="pattern.slug"
@@ -317,7 +452,9 @@
                   <div class="text-xs font-bold text-primary mb-2 truncate">
                     {{ pattern.name }}
                   </div>
-                  <div class="aspect-square bg-white rounded border border-divider/50 overflow-hidden">
+                  <div
+                    class="aspect-square bg-white rounded border border-divider/50 overflow-hidden"
+                  >
                     <BingoPatternGrid
                       :name="pattern.name"
                       :definition="pattern.definition"
@@ -331,9 +468,15 @@
           </div>
 
           <!-- Payout Tab -->
-          <div v-if="activeTab === 'Payout'" class="space-y-4 animate-in fade-in duration-300">
+          <div
+            v-if="activeTab === 'Payout'"
+            class="space-y-4 animate-in fade-in duration-300"
+          >
             <label class="block">
-              <span class="text-xs font-bold text-secondary uppercase tracking-wider">Payout Type</span>
+              <span
+                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                >Payout Type</span
+              >
               <select
                 v-model="selectedGame.payout.type"
                 class="mt-1.5 w-full rounded-lg border-divider bg-base px-3 py-2 text-sm focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary outline-none transition-all"
@@ -345,8 +488,17 @@
               </select>
             </label>
 
-            <div v-if="selectedGame.payout.type === 'fixed' || selectedGame.payout.type === 'progressive'" class="block">
-              <span class="text-xs font-bold text-secondary uppercase tracking-wider">Amount ($)</span>
+            <div
+              v-if="
+                selectedGame.payout.type === 'fixed' ||
+                selectedGame.payout.type === 'progressive'
+              "
+              class="block"
+            >
+              <span
+                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                >Amount ($)</span
+              >
               <input
                 v-model.number="selectedGame.payout.amount"
                 type="number"
@@ -357,7 +509,10 @@
             </div>
 
             <div v-if="selectedGame.payout.type === 'percentage'" class="block">
-              <span class="text-xs font-bold text-secondary uppercase tracking-wider">Percentage (%)</span>
+              <span
+                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                >Percentage (%)</span
+              >
               <input
                 v-model.number="selectedGame.payout.percentage"
                 type="number"
@@ -368,7 +523,10 @@
             </div>
 
             <label class="block">
-              <span class="text-xs font-bold text-secondary uppercase tracking-wider">Description / Notes</span>
+              <span
+                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                >Description / Notes</span
+              >
               <textarea
                 v-model="selectedGame.payout.description"
                 rows="3"
@@ -379,9 +537,15 @@
           </div>
 
           <!-- Pricing Tab -->
-          <div v-if="activeTab === 'Pricing'" class="space-y-4 animate-in fade-in duration-300">
-             <label class="block">
-              <span class="text-xs font-bold text-secondary uppercase tracking-wider">Pricing Model</span>
+          <div
+            v-if="activeTab === 'Pricing'"
+            class="space-y-4 animate-in fade-in duration-300"
+          >
+            <label class="block">
+              <span
+                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                >Pricing Model</span
+              >
               <select
                 v-model="selectedGame.pricing.model"
                 class="mt-1.5 w-full rounded-lg border-divider bg-base px-3 py-2 text-sm focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary outline-none transition-all"
@@ -393,7 +557,10 @@
             </label>
 
             <div v-if="selectedGame.pricing.model !== 'included'" class="block">
-              <span class="text-xs font-bold text-secondary uppercase tracking-wider">Price ($)</span>
+              <span
+                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                >Price ($)</span
+              >
               <input
                 v-model.number="selectedGame.pricing.price"
                 type="number"
@@ -402,16 +569,28 @@
                 class="mt-1.5 w-full rounded-lg border-divider bg-base px-3 py-2 text-sm focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary outline-none transition-all"
               />
             </div>
-             <div class="p-4 rounded-lg bg-blue-50 border border-blue-100 text-blue-800 text-xs">
+            <div
+              class="p-4 rounded-lg bg-blue-50 border border-blue-100 text-blue-800 text-xs"
+            >
               <p class="font-bold mb-1">Pricing Note</p>
-              <p>"Included" games are covered by the base session fee. "Standard" and "Premium" allow defining specific costs for extra cards or special games.</p>
+              <p>
+                "Included" games are covered by the base session fee. "Standard"
+                and "Premium" allow defining specific costs for extra cards or
+                special games.
+              </p>
             </div>
           </div>
 
           <!-- Timeline Tab -->
-          <div v-if="activeTab === 'Timeline'" class="space-y-4 animate-in fade-in duration-300">
-             <label class="block">
-              <span class="text-xs font-bold text-secondary uppercase tracking-wider">Estimated Duration (Minutes)</span>
+          <div
+            v-if="activeTab === 'Timeline'"
+            class="space-y-4 animate-in fade-in duration-300"
+          >
+            <label class="block">
+              <span
+                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                >Estimated Duration (Minutes)</span
+              >
               <input
                 v-model.number="selectedGame.timeline.estimatedDuration"
                 type="number"
@@ -420,73 +599,100 @@
               />
             </label>
 
-            <label class="flex items-center gap-3 p-3 rounded-lg border border-divider bg-base">
+            <label
+              class="flex items-center gap-3 p-3 rounded-lg border border-divider bg-base"
+            >
               <input
                 v-model="selectedGame.timeline.isBreak"
                 type="checkbox"
                 class="w-5 h-5 rounded border-gray-300 text-accent-primary focus:ring-accent-primary"
               />
-              <span class="text-sm font-bold text-primary">Is this a Break / Intermission?</span>
+              <span class="text-sm font-bold text-primary"
+                >Is this a Break / Intermission?</span
+              >
             </label>
           </div>
 
           <!-- Preview Tab -->
-          <div v-if="activeTab === 'Preview'" class="space-y-4 animate-in fade-in duration-300 h-full flex flex-col">
-            <div class="flex-1 flex items-center justify-center bg-base/50 rounded-lg border border-divider p-4 relative min-h-[200px]">
-              <div v-if="selectedPattern" class="flex flex-col items-center gap-4">
-                 <div class="text-sm font-bold text-primary">{{ selectedPattern.name }}</div>
-                 <BingoPatternGrid
-                    :name="selectedPattern.name"
-                    :definition="{ frames: [selectedPattern.definition.frames?.[currentFrame] || []] }"
-                    :fill-color="selectedGame.paperColor"
-                    size="md"
-                  />
-                  <div class="text-xs text-secondary font-mono">
-                    Frame {{ currentFrame + 1 }} / {{ maxFrames }}
-                  </div>
+          <div
+            v-if="activeTab === 'Preview'"
+            class="space-y-4 animate-in fade-in duration-300 h-full flex flex-col"
+          >
+            <div
+              class="flex-1 flex items-center justify-center bg-base/50 rounded-lg border border-divider p-4 relative min-h-[200px]"
+            >
+              <div
+                v-if="selectedPattern"
+                class="flex flex-col items-center gap-4"
+              >
+                <div class="text-sm font-bold text-primary">
+                  {{ selectedPattern.name }}
+                </div>
+                <BingoPatternGrid
+                  :name="selectedPattern.name"
+                  :definition="{
+                    frames: [
+                      selectedPattern.definition.frames?.[currentFrame] || [],
+                    ],
+                  }"
+                  :fill-color="selectedGame.paperColor"
+                  size="md"
+                />
+                <div class="text-xs text-secondary font-mono">
+                  Frame {{ currentFrame + 1 }} / {{ maxFrames }}
+                </div>
               </div>
-              <div v-else class="text-secondary text-sm">No Pattern Selected</div>
+              <div v-else class="text-secondary text-sm">
+                No Pattern Selected
+              </div>
             </div>
 
             <!-- Playback Controls -->
-            <div class="bg-surface border border-divider rounded-lg p-3 space-y-3">
+            <div
+              class="bg-surface border border-divider rounded-lg p-3 space-y-3"
+            >
               <div class="flex items-center justify-center gap-4">
-                <button 
+                <button
                   class="p-2 hover:bg-base rounded-full transition-colors disabled:opacity-50"
                   :disabled="maxFrames <= 1"
-                  @click="prevFrame"
                   title="Previous Frame"
+                  @click="prevFrame"
                 >
                   <SkipBack class="w-4 h-4" />
                 </button>
-                <button 
+                <button
                   class="p-3 bg-accent-primary text-white rounded-full hover:bg-accent-primary/90 transition-all shadow-sm disabled:opacity-50"
                   :disabled="maxFrames <= 1"
-                  @click="togglePlayback"
                   :title="isPlaying ? 'Pause' : 'Play'"
+                  @click="togglePlayback"
                 >
-                  <component :is="isPlaying ? Pause : Play" class="w-5 h-5 fill-current" />
+                  <component
+                    :is="isPlaying ? Pause : Play"
+                    class="w-5 h-5 fill-current"
+                  />
                 </button>
-                <button 
+                <button
                   class="p-2 hover:bg-base rounded-full transition-colors disabled:opacity-50"
                   :disabled="maxFrames <= 1"
-                  @click="nextFrame"
                   title="Next Frame"
+                  @click="nextFrame"
                 >
                   <SkipForward class="w-4 h-4" />
                 </button>
               </div>
-              
+
               <div class="space-y-1">
-                <div class="flex justify-between text-[10px] uppercase tracking-wider text-secondary font-bold">
+                <div
+                  class="flex justify-between text-[10px] uppercase tracking-wider text-secondary font-bold"
+                >
                   <span>Speed</span>
                   <span>{{ playbackSpeed }}ms</span>
                 </div>
-                <input 
-                  v-model.number="playbackSpeed" 
-                  type="range" 
-                  min="100" 
-                  max="2000" 
+                <input
+                  v-model.number="playbackSpeed"
+                  type="range"
+                  min="100"
+                  max="2000"
                   step="100"
                   class="w-full accent-accent-primary"
                 />
@@ -495,30 +701,42 @@
 
             <!-- Metrics & Inspection -->
             <div class="space-y-2">
-              <div class="text-[10px] uppercase tracking-widest text-secondary font-bold">Performance Metrics</div>
+              <div
+                class="text-[10px] uppercase tracking-widest text-secondary font-bold"
+              >
+                Performance Metrics
+              </div>
               <div class="grid grid-cols-2 gap-2">
                 <div class="bg-base/50 p-2 rounded border border-divider">
-                  <div class="text-[10px] text-secondary uppercase">Est. Duration</div>
+                  <div class="text-[10px] text-secondary uppercase">
+                    Est. Duration
+                  </div>
                   <div class="text-sm font-mono font-bold text-primary">
-                      {{ selectedGame.timeline?.estimatedDuration || 0 }} min
+                    {{ selectedGame.timeline?.estimatedDuration || 0 }} min
                   </div>
                 </div>
                 <div class="bg-base/50 p-2 rounded border border-divider">
-                  <div class="text-[10px] text-secondary uppercase">Payout Density</div>
+                  <div class="text-[10px] text-secondary uppercase">
+                    Payout Density
+                  </div>
                   <div class="text-sm font-mono font-bold text-primary">
-                      ${{ payoutDensity }}/min
+                    ${{ payoutDensity }}/min
                   </div>
                 </div>
                 <div class="bg-base/50 p-2 rounded border border-divider">
-                  <div class="text-[10px] text-secondary uppercase">Active Cells</div>
+                  <div class="text-[10px] text-secondary uppercase">
+                    Active Cells
+                  </div>
                   <div class="text-sm font-mono font-bold text-primary">
-                      {{ currentActiveCells }} / 25
+                    {{ currentActiveCells }} / 25
                   </div>
                 </div>
-                 <div class="bg-base/50 p-2 rounded border border-divider">
-                  <div class="text-[10px] text-secondary uppercase">Saturation</div>
+                <div class="bg-base/50 p-2 rounded border border-divider">
+                  <div class="text-[10px] text-secondary uppercase">
+                    Saturation
+                  </div>
                   <div class="text-sm font-mono font-bold text-primary">
-                      {{ saturationPercentage }}%
+                    {{ saturationPercentage }}%
                   </div>
                 </div>
               </div>
@@ -526,38 +744,61 @@
 
             <!-- Variable Inspector -->
             <div class="space-y-2">
-              <button 
+              <button
                 class="flex items-center gap-2 text-[10px] uppercase tracking-widest text-secondary font-bold hover:text-primary transition-colors w-full text-left"
                 @click="showInspector = !showInspector"
               >
-                <span class="transform transition-transform" :class="showInspector ? 'rotate-90' : ''">▶</span>
+                <span
+                  class="transform transition-transform"
+                  :class="showInspector ? 'rotate-90' : ''"
+                  >▶</span
+                >
                 Debug & State Inspector
               </button>
-              
-              <div v-if="showInspector" class="bg-gray-900 rounded-lg p-3 space-y-3 overflow-hidden animate-in slide-in-from-top-2 duration-200">
+
+              <div
+                v-if="showInspector"
+                class="bg-gray-900 rounded-lg p-3 space-y-3 overflow-hidden animate-in slide-in-from-top-2 duration-200"
+              >
                 <!-- Live State -->
-                <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px] font-mono text-gray-300 border-b border-gray-700 pb-2">
-                   <div class="text-gray-500">State</div><div>{{ isPlaying ? 'Playing' : 'Paused' }}</div>
-                   <div class="text-gray-500">Frame</div><div>{{ currentFrame }} / {{ maxFrames }}</div>
-                   <div class="text-gray-500">Speed</div><div>{{ playbackSpeed }}ms</div>
-                   <div class="text-gray-500">Pattern</div><div class="truncate">{{ selectedGame.patternSlug }}</div>
+                <div
+                  class="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px] font-mono text-gray-300 border-b border-gray-700 pb-2"
+                >
+                  <div class="text-gray-500">State</div>
+                  <div>{{ isPlaying ? "Playing" : "Paused" }}</div>
+                  <div class="text-gray-500">Frame</div>
+                  <div>{{ currentFrame }} / {{ maxFrames }}</div>
+                  <div class="text-gray-500">Speed</div>
+                  <div>{{ playbackSpeed }}ms</div>
+                  <div class="text-gray-500">Pattern</div>
+                  <div class="truncate">{{ selectedGame.patternSlug }}</div>
                 </div>
 
                 <!-- Raw Data -->
                 <div class="space-y-1">
-                   <div class="text-[10px] text-gray-500 font-bold uppercase">Game Data Model</div>
-                   <pre class="text-[9px] text-green-400 overflow-auto max-h-[150px] scrollbar-thin scrollbar-thumb-gray-700">{{ JSON.stringify(selectedGame, null, 2) }}</pre>
+                  <div class="text-[10px] text-gray-500 font-bold uppercase">
+                    Game Data Model
+                  </div>
+                  <pre
+                    class="text-[9px] text-green-400 overflow-auto max-h-[150px] scrollbar-thin scrollbar-thumb-gray-700"
+                    >{{ JSON.stringify(selectedGame, null, 2) }}</pre
+                  >
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      
-      <div v-else class="flex-1 flex items-center justify-center text-secondary p-8 text-center">
+
+      <div
+        v-else
+        class="flex-1 flex items-center justify-center text-secondary p-8 text-center"
+      >
         <div>
           <p class="text-sm font-medium">No Game Selected</p>
-          <p class="text-xs mt-1">Select a game from the setlist to edit its details.</p>
+          <p class="text-xs mt-1">
+            Select a game from the setlist to edit its details.
+          </p>
         </div>
       </div>
 
@@ -568,7 +809,10 @@
           @click="saveProgram"
         >
           <SaveIcon v-if="!isSaving" class="w-4 h-4" />
-          <div v-else class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+          <div
+            v-else
+            class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
+          ></div>
           {{ isSaving ? "Saving..." : "Save Program" }}
         </button>
       </div>
@@ -577,7 +821,9 @@
       v-if="confirmationModal.visible"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
     >
-      <div class="bg-surface border border-divider rounded-xl shadow-2xl p-6 max-w-sm w-full mx-4 animate-in fade-in zoom-in duration-200">
+      <div
+        class="bg-surface border border-divider rounded-xl shadow-2xl p-6 max-w-sm w-full mx-4 animate-in fade-in zoom-in duration-200"
+      >
         <div class="flex items-center gap-3 text-amber-500 mb-4">
           <AlertCircle class="w-6 h-6" />
           <h3 class="text-lg font-bold text-primary">Unsaved Changes</h3>
@@ -632,16 +878,16 @@
 import { computed, ref, onMounted, onUnmounted, watch } from "vue";
 import { useMagicKeys, whenever } from "@vueuse/core";
 import BingoPatternGrid from "~/components/bingo/BingoPatternGrid.vue";
-import { 
-  Play, 
-  Pause, 
-  SkipBack, 
-  SkipForward, 
-  MoreVertical, 
-  Trash2, 
-  Copy, 
+import {
+  Play,
+  Pause,
+  SkipBack,
+  SkipForward,
+  MoreVertical,
+  Trash2,
+  Copy,
   Save as SaveIcon,
-  AlertCircle
+  AlertCircle,
 } from "lucide-vue-next";
 
 const props = defineProps<{
@@ -870,7 +1116,8 @@ const saveProgram = () => {
       return;
     }
     if (!game.patternSlug) {
-      validationErrors.value[`games[${i}].patternSlug`] = "Game pattern is required";
+      validationErrors.value[`games[${i}].patternSlug`] =
+        "Game pattern is required";
       return;
     }
   }
@@ -913,7 +1160,7 @@ const playbackSpeed = ref(1000);
 
 const selectedPattern = computed(() => {
   if (!selectedGame.value?.patternSlug) return null;
-  return props.patterns.find(p => p.slug === selectedGame.value.patternSlug);
+  return props.patterns.find((p) => p.slug === selectedGame.value.patternSlug);
 });
 
 const maxFrames = computed(() => {
@@ -969,7 +1216,8 @@ const nextFrame = () => {
 
 const prevFrame = () => {
   if (maxFrames.value <= 1) return;
-  currentFrame.value = (currentFrame.value - 1 + maxFrames.value) % maxFrames.value;
+  currentFrame.value =
+    (currentFrame.value - 1 + maxFrames.value) % maxFrames.value;
 };
 
 // Reset frame when selection changes
@@ -1049,7 +1297,10 @@ const resizeLeft = (e: MouseEvent) => {
 const resizeRight = (e: MouseEvent) => {
   if (!isResizingRight.value) return;
   const containerWidth = document.body.clientWidth;
-  rightPanelWidth.value = Math.max(250, Math.min(600, containerWidth - e.clientX - 24));
+  rightPanelWidth.value = Math.max(
+    250,
+    Math.min(600, containerWidth - e.clientX - 24),
+  );
 };
 
 const stopResize = () => {

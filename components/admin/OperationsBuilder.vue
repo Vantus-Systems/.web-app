@@ -1,11 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import {
-  Grid,
-  Layers,
-  Calendar,
-  DollarSign,
-} from "lucide-vue-next";
+import { Grid, Layers, Calendar, DollarSign } from "lucide-vue-next";
 import WeeklyScheduleEditor from "./schedule/WeeklyScheduleEditor.vue";
 import PatternEditor from "./PatternEditor.vue";
 import ProgramEditor from "./ProgramEditor.vue";
@@ -35,8 +30,8 @@ onMounted(() => {
   }
 });
 
-const isOwner = computed(() =>
-  normalizeRole(props.userRole ?? user.value?.role) === "OWNER",
+const isOwner = computed(
+  () => normalizeRole(props.userRole ?? user.value?.role) === "OWNER",
 );
 
 const steps = computed(() => {
@@ -45,17 +40,19 @@ const steps = computed(() => {
     { id: "programs", label: "Programs", icon: Layers },
     { id: "schedule", label: "Schedule", icon: Calendar },
   ];
-  
+
   if (isOwner.value) {
     items.push({ id: "pricing", label: "Pricing", icon: DollarSign });
   }
-  
+
   return items;
 });
 
 const confirmNavigation = (stepId: string) => {
-  if (currentStep.value === 'programs' && isProgramDirty.value) {
-    if (!confirm("You have unsaved changes in the Program Editor. Discard them?")) {
+  if (currentStep.value === "programs" && isProgramDirty.value) {
+    if (
+      !confirm("You have unsaved changes in the Program Editor. Discard them?")
+    ) {
       return;
     }
     isProgramDirty.value = false;

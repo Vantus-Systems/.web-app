@@ -71,7 +71,9 @@
                   :is="item.icon"
                   class="w-5 h-5 flex-shrink-0"
                   :class="
-                    selectedIndex === index ? 'text-primary-600' : 'text-slate-400'
+                    selectedIndex === index
+                      ? 'text-primary-600'
+                      : 'text-slate-400'
                   "
                 />
                 <div class="flex-1 min-w-0">
@@ -108,7 +110,11 @@
                 Close
               </span>
             </div>
-            <div>Press <kbd class="px-1.5 py-0.5 bg-slate-100 rounded border">⌘K</kbd> to open</div>
+            <div>
+              Press
+              <kbd class="px-1.5 py-0.5 bg-slate-100 rounded border">⌘K</kbd> to
+              open
+            </div>
           </div>
         </div>
       </div>

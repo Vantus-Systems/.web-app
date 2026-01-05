@@ -15,9 +15,7 @@
       </label>
 
       <label class="block">
-        <span class="text-xs font-bold text-slate-600 block mb-2">
-          Role
-        </span>
+        <span class="text-xs font-bold text-slate-600 block mb-2"> Role </span>
         <select
           v-model="localFilters.role"
           class="w-full rounded-lg border-slate-200 bg-white text-sm"
@@ -48,8 +46,8 @@
       <div class="flex items-end gap-2">
         <button
           type="button"
-          @click="resetFilters"
           class="flex-1 py-2 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 text-sm font-bold text-slate-700 transition-colors"
+          @click="resetFilters"
         >
           Reset
         </button>
@@ -91,7 +89,10 @@ const resetFilters = () => {
   emitFilters();
 };
 
-watch(() => props.search, (newVal) => {
-  localSearch.value = newVal;
-});
+watch(
+  () => props.search,
+  (newVal) => {
+    localSearch.value = newVal;
+  },
+);
 </script>

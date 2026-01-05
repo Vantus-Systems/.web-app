@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 const emit = defineEmits<{
-  (e: 'create-supply', item?: string): void
+  (e: "create-supply", item?: string): void;
 }>();
 const items = ["Tape", "Forms", "Pens", "Tubes", "Markers"];
 </script>

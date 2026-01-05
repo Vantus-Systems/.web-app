@@ -9,9 +9,7 @@
       </h3>
       <p class="text-xs text-slate-500">
         Variance:
-        <span class="font-semibold"
-          >${{ formatCurrency(variance, 2) }}</span
-        >
+        <span class="font-semibold">${{ formatCurrency(variance, 2) }}</span>
       </p>
     </div>
     <div class="bg-white border border-slate-200 rounded-xl p-5 space-y-3">

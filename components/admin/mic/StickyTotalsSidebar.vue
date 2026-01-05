@@ -1,7 +1,11 @@
 <template>
-  <div class="sticky top-0 bg-white border-l border-slate-200 rounded-xl p-6 space-y-4 h-fit">
+  <div
+    class="sticky top-0 bg-white border-l border-slate-200 rounded-xl p-6 space-y-4 h-fit"
+  >
     <div>
-      <p class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold">
+      <p
+        class="text-[10px] uppercase tracking-[0.4em] text-slate-400 font-bold"
+      >
         Daily Totals
       </p>
       <h3 class="text-lg font-black text-primary-900">{{ formattedDate }}</h3>
@@ -39,14 +43,20 @@
       </div>
     </div>
 
-    <div v-if="needsApproval" class="bg-amber-50 border border-amber-200 rounded-lg p-3">
+    <div
+      v-if="needsApproval"
+      class="bg-amber-50 border border-amber-200 rounded-lg p-3"
+    >
       <p class="text-xs font-bold text-amber-900">⚠ Approval Required</p>
       <p class="text-xs text-amber-700 mt-1">
         {{ pendingApprovalCount }} shift(s) awaiting approval
       </p>
     </div>
 
-    <div v-if="allApproved" class="bg-green-50 border border-green-200 rounded-lg p-3">
+    <div
+      v-if="allApproved"
+      class="bg-green-50 border border-green-200 rounded-lg p-3"
+    >
       <p class="text-xs font-bold text-green-900">✓ All Approved</p>
       <p class="text-xs text-green-700 mt-1">
         All {{ approvedCount }} shift(s) have been approved
@@ -56,8 +66,8 @@
     <button
       v-if="showSaveButton"
       type="button"
-      @click="$emit('save')"
       class="w-full py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm rounded-lg transition-colors"
+      @click="$emit('save')"
     >
       Save Changes
     </button>
@@ -65,8 +75,8 @@
     <button
       v-if="showSubmitButton"
       type="button"
-      @click="$emit('submit')"
       class="w-full py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-lg transition-colors"
+      @click="$emit('submit')"
     >
       Submit for Approval
     </button>
@@ -129,6 +139,6 @@ const allApproved = computed(
 
 const showSaveButton = computed(() => props.isDirty && !props.isSubmitting);
 const showSubmitButton = computed(
-  () => allApproved && !props.isSubmitting && props.shifts.length > 0,
+  () => allApproved.value && !props.isSubmitting && props.shifts.length > 0,
 );
 </script>

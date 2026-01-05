@@ -58,10 +58,7 @@
                   </svg>
                 </div>
                 <div>
-                  <h3
-                    :id="titleId"
-                    class="text-lg font-bold text-primary-950"
-                  >
+                  <h3 :id="titleId" class="text-lg font-bold text-primary-950">
                     {{ title }}
                   </h3>
                 </div>
@@ -69,8 +66,8 @@
               <button
                 v-if="!persistent"
                 class="p-1 rounded-lg hover:bg-slate-100 transition-colors"
-                @click="cancel"
                 aria-label="Close dialog"
+                @click="cancel"
               >
                 <svg
                   class="w-5 h-5 text-slate-500"
@@ -96,7 +93,9 @@
           </div>
 
           <!-- Footer -->
-          <div class="px-6 py-4 border-t border-slate-200 flex justify-end gap-3 bg-slate-50">
+          <div
+            class="px-6 py-4 border-t border-slate-200 flex justify-end gap-3 bg-slate-50"
+          >
             <button
               v-if="showCancel"
               class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"

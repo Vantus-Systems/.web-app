@@ -3,15 +3,19 @@
     v-if="isOpen"
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
   >
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden">
+    <div
+      class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden"
+    >
       <!-- Header -->
-      <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+      <div
+        class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50"
+      >
         <h3 class="text-lg font-black text-slate-800 uppercase tracking-wide">
           {{ isEditing ? "Edit User" : "Create User" }}
         </h3>
         <button
-          @click="close"
           class="text-slate-400 hover:text-slate-600 transition-colors"
+          @click="close"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -32,11 +36,13 @@
 
       <!-- Body -->
       <div class="p-6 space-y-4">
-        <form @submit.prevent="submit" id="userForm" class="space-y-4">
+        <form id="userForm" class="space-y-4" @submit.prevent="submit">
           <!-- Identity -->
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+              <label
+                class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1"
+              >
                 Username <span class="text-red-500">*</span>
               </label>
               <input
@@ -49,7 +55,9 @@
               />
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+              <label
+                class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1"
+              >
                 Role <span class="text-red-500">*</span>
               </label>
               <select
@@ -68,7 +76,9 @@
           <!-- Name -->
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+              <label
+                class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1"
+              >
                 First Name
               </label>
               <input
@@ -79,7 +89,9 @@
               />
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+              <label
+                class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1"
+              >
                 Last Name
               </label>
               <input
@@ -94,7 +106,9 @@
           <!-- Contact -->
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+              <label
+                class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1"
+              >
                 Email
               </label>
               <input
@@ -105,7 +119,9 @@
               />
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+              <label
+                class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1"
+              >
                 Phone
               </label>
               <input
@@ -120,7 +136,9 @@
           <!-- Security & Status -->
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+              <label
+                class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1"
+              >
                 Password {{ isEditing ? "(Leave blank to keep)" : "*" }}
               </label>
               <input
@@ -131,7 +149,8 @@
                 placeholder="••••••••••••"
               />
               <p v-if="!isEditing" class="text-[10px] text-slate-400 mt-1">
-                Must be at least 12 chars, incl. uppercase, lowercase, number, special char.
+                Must be at least 12 chars, incl. uppercase, lowercase, number,
+                special char.
               </p>
             </div>
             <div class="flex items-end pb-2">
@@ -141,7 +160,9 @@
                   type="checkbox"
                   class="rounded text-primary-600 focus:ring-primary-500 w-5 h-5 border-slate-300"
                 />
-                <span class="text-sm font-semibold text-slate-700">Account Active</span>
+                <span class="text-sm font-semibold text-slate-700"
+                  >Account Active</span
+                >
               </label>
             </div>
           </div>
@@ -149,11 +170,13 @@
       </div>
 
       <!-- Footer -->
-      <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+      <div
+        class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3"
+      >
         <button
-          @click="close"
           type="button"
           class="px-4 py-2 text-sm font-bold text-slate-600 hover:text-slate-800 transition-colors uppercase tracking-wider"
+          @click="close"
         >
           Cancel
         </button>
@@ -223,7 +246,7 @@ watch(
       };
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const close = () => {

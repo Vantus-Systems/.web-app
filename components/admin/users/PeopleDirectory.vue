@@ -6,9 +6,7 @@
     >
       <div class="flex items-center gap-4 flex-1 w-full md:w-auto">
         <div class="relative flex-1 md:max-w-xs">
-          <span
-            class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-          >
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="h-4 w-4"
@@ -149,9 +147,7 @@
                   </svg>
                   {{ user.phone }}
                 </div>
-                <span
-                  v-if="!user.email && !user.phone"
-                  class="text-slate-300"
+                <span v-if="!user.email && !user.phone" class="text-slate-300"
                   >-</span
                 >
               </td>
@@ -163,9 +159,7 @@
                   ></div>
                   <span
                     class="text-xs font-medium"
-                    :class="
-                      user.is_active ? 'text-green-700' : 'text-red-700'
-                    "
+                    :class="user.is_active ? 'text-green-700' : 'text-red-700'"
                   >
                     {{ user.is_active ? "Active" : "Inactive" }}
                   </span>

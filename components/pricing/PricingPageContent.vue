@@ -16,11 +16,15 @@
 
       <div class="container mx-auto px-4 relative z-10 text-center">
         <h1 class="text-5xl md:text-7xl font-black mb-6 tracking-tight">
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-gold-300 to-gold-500">
+          <span
+            class="text-transparent bg-clip-text bg-gradient-to-r from-gold-300 to-gold-500"
+          >
             Pricing & Sessions
           </span>
         </h1>
-        <p class="text-xl md:text-2xl text-primary-100 max-w-3xl mx-auto font-light mb-10">
+        <p
+          class="text-xl md:text-2xl text-primary-100 max-w-3xl mx-auto font-light mb-10"
+        >
           Transparent pricing. Big jackpots. No hidden fees.
           <span class="block mt-2 font-bold text-white">
             Play your way, every day.
@@ -46,22 +50,32 @@
 
     <div class="container mx-auto px-4 py-20">
       <div class="space-y-32">
-        
         <!-- ===== TODAY'S PROMOTIONS (V2) ===== -->
-        <section v-if="pricing.promotions && pricing.promotions.length > 0" id="promotions" class="scroll-mt-20">
-           <div class="text-center mb-12">
-            <span class="text-gold-600 font-bold uppercase tracking-widest text-sm">🔥 Limited Time</span>
-            <h2 class="text-4xl md:text-5xl font-black text-primary-900 mt-4 mb-6">
+        <section
+          v-if="pricing.promotions && pricing.promotions.length > 0"
+          id="promotions"
+          class="scroll-mt-20"
+        >
+          <div class="text-center mb-12">
+            <span
+              class="text-gold-600 font-bold uppercase tracking-widest text-sm"
+              >🔥 Limited Time</span
+            >
+            <h2
+              class="text-4xl md:text-5xl font-black text-primary-900 mt-4 mb-6"
+            >
               Active Promotions
             </h2>
           </div>
           <div class="grid md:grid-cols-2 gap-6">
-            <div 
-              v-for="(promo, idx) in pricing.promotions" 
+            <div
+              v-for="(promo, idx) in pricing.promotions"
               :key="idx"
               class="bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-500 p-6 rounded-r-xl shadow-sm"
             >
-              <h3 class="text-xl font-bold text-red-900 mb-2">{{ promo.title }}</h3>
+              <h3 class="text-xl font-bold text-red-900 mb-2">
+                {{ promo.title }}
+              </h3>
               <p class="text-red-800">{{ promo.description }}</p>
             </div>
           </div>

@@ -1,7 +1,9 @@
 <template>
   <div class="h-full flex flex-col bg-surface border-r border-divider">
     <div class="p-4 border-b border-divider">
-      <h3 class="text-xs font-bold text-tertiary uppercase tracking-[0.2em] mb-2">
+      <h3
+        class="text-xs font-bold text-tertiary uppercase tracking-[0.2em] mb-2"
+      >
         Profile Library
       </h3>
       <div class="relative">
@@ -29,7 +31,11 @@
         <div class="flex items-center justify-between mb-1">
           <span
             class="text-sm font-bold"
-            :class="selectedProfileId === profile.id ? 'text-accent-primary' : 'text-primary'"
+            :class="
+              selectedProfileId === profile.id
+                ? 'text-accent-primary'
+                : 'text-primary'
+            "
           >
             {{ profile.name }}
           </span>
@@ -38,7 +44,9 @@
             class="w-2 h-2 rounded-full bg-accent-primary animate-pulse"
           />
         </div>
-        <div class="text-[10px] text-tertiary group-hover:text-secondary capitalize">
+        <div
+          class="text-[10px] text-tertiary group-hover:text-secondary capitalize"
+        >
           {{ profile.category }} • {{ profile.segment_ids.length }} Segments
         </div>
       </button>
@@ -47,7 +55,7 @@
         <p class="text-xs text-tertiary">No profiles found.</p>
       </div>
     </div>
-    
+
     <!-- Footer actions -->
     <div class="p-3 border-t border-divider bg-base">
       <button
@@ -77,6 +85,6 @@ const search = ref("");
 const filteredProfiles = computed(() => {
   if (!search.value) return props.profiles;
   const q = search.value.toLowerCase();
-  return props.profiles.filter(p => p.name.toLowerCase().includes(q));
+  return props.profiles.filter((p) => p.name.toLowerCase().includes(q));
 });
 </script>

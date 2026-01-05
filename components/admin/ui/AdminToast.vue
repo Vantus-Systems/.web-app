@@ -80,8 +80,8 @@
             <!-- Close Button -->
             <button
               class="flex-shrink-0 p-1 rounded hover:bg-slate-100 transition-colors"
-              @click="close"
               aria-label="Close notification"
+              @click="close"
             >
               <svg
                 class="w-4 h-4 text-slate-500"
