@@ -26,11 +26,17 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const data = micShiftSubmissionSchema.parse(body);
 
-  // Calculate cashTotal from denominations
-  const cashTotal = calculateCashTotal(data.denominations);
+  // Calculate cashTotal: Use manual override if provided, otherwise sum denominations
+  const cashTotal =
+    data.cash_total_manual !== undefined
+      ? data.cash_total_manual
+      : calculateCashTotal(data.denominations);
 
-  // Calculate checksTotal from check logs
-  const checksTotal = calculateChecksTotal(data.check_logs);
+  // Calculate checksTotal: Use manual override if provided, otherwise sum check logs
+  const checksTotal =
+    data.checks_total_manual !== undefined
+      ? data.checks_total_manual
+      : calculateChecksTotal(data.check_logs);
 
   // Calculate salesTotal
   const salesTotal = data.sales_bingo + data.sales_pulltabs;
