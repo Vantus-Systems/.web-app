@@ -54,7 +54,11 @@ export default defineEventHandler(async (event) => {
           start_time: s.start_time,
           duration_minutes: s.duration_minutes,
           program_slug: s.program_slug,
-          overrides: s.overrides ? JSON.stringify(s.overrides) : null,
+          overrides: s.overrides
+            ? typeof s.overrides === "string"
+              ? s.overrides
+              : JSON.stringify(s.overrides)
+            : null,
         })),
       });
     }

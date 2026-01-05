@@ -2,7 +2,7 @@ import { defineEventHandler, createError, readBody } from "h3";
 import { PrismaClient } from "@prisma/client";
 import { assertRole } from "~/server/utils/roles";
 import { assertPermission } from "~/server/utils/permissions";
-import { pricingDraftSchema } from "~/server/schemas/admin";
+import { pricingContentSchema } from "~/server/schemas/admin";
 
 const prisma = new PrismaClient();
 
@@ -13,11 +13,13 @@ export default defineEventHandler(async (event) => {
   assertPermission(user.role, "ops:edit");
 
   const body = await readBody(event);
-  const result = pricingDraftSchema.safeParse(body);
+  const contentToValidate = body.content || body;
+
+  const result = pricingContentSchema.safeParse(contentToValidate);
   if (!result.success) {
     throw createError({ statusCode: 400, message: result.error.message });
   }
-  const { content } = result.data;
+  const content = result.data;
 
   let draft = await prisma.pricingVersion.findFirst({
     where: { status: "DRAFT" },

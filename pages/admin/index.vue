@@ -53,7 +53,7 @@
       </div>
 
       <div v-if="currentTab === 'operations'" class="h-full flex flex-col">
-        <OperationsBuilder />
+        <OperationsBuilder :user-role="sessionUser?.role" />
       </div>
 
       <div v-else>

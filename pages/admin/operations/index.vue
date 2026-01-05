@@ -9,7 +9,7 @@
     <div
       class="bg-white border border-slate-200 rounded-xl overflow-hidden h-[calc(100vh-8rem)]"
     >
-      <OperationsBuilder />
+      <OperationsBuilder :user-role="session?.role" />
     </div>
   </AdminShell>
 </template>

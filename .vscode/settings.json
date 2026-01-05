@@ -1,0 +1,49 @@
+{
+    "chat.mcp.serverSampling": {
+        "med/.vscode/mcp.json: Worksapce-Serena": {
+            "allowedModels": [
+                "copilot/claude-sonnet-4.5",
+                "openrouter/arcee-ai/trinity-mini:free",
+                "copilot/auto",
+                "copilot/claude-haiku-4.5",
+                "copilot/claude-opus-4.5",
+                "copilot/claude-sonnet-4",
+                "copilot/gemini-2.5-pro",
+                "copilot/gemini-3-flash-preview",
+                "copilot/gemini-3-pro-preview",
+                "openrouter/google/gemini-2.0-flash-exp:free",
+                "openrouter/google/gemma-3-27b-it:free",
+                "copilot/gpt-4.1",
+                "copilot/gpt-4o",
+                "copilot/gpt-5",
+                "copilot/gpt-5-mini",
+                "copilot/gpt-5-codex",
+                "copilot/gpt-5.1",
+                "copilot/gpt-5.1-codex",
+                "copilot/gpt-5.1-codex-max",
+                "copilot/gpt-5.1-codex-mini",
+                "copilot/gpt-5.2",
+                "copilot/grok-code-fast-1",
+                "openrouter/kwaipilot/kat-coder-pro:free",
+                "openrouter/meta-llama/llama-3.3-70b-instruct:free",
+                "openrouter/mistralai/devstral-2512:free",
+                "openrouter/mistralai/mistral-7b-instruct:free",
+                "openrouter/mistralai/mistral-small-3.1-24b-instruct:free",
+                "openrouter/nex-agi/deepseek-v3.1-nex-n1:free",
+                "openrouter/nvidia/nemotron-3-nano-30b-a3b:free",
+                "openrouter/nvidia/nemotron-nano-12b-v2-vl:free",
+                "openrouter/nvidia/nemotron-nano-9b-v2:free",
+                "openrouter/openai/gpt-oss-120b:free",
+                "openrouter/openai/gpt-oss-20b:free",
+                "openrouter/qwen/qwen3-4b:free",
+                "openrouter/qwen/qwen3-coder:free",
+                "copilot/oswe-vscode-prime",
+                "openrouter/tngtech/tng-r1t-chimera:free",
+                "openrouter/alibaba/tongyi-deepresearch-30b-a3b:free",
+                "openrouter/x-ai/grok-code-fast-1",
+                "openrouter/xiaomi/mimo-v2-flash:free",
+                "openrouter/z-ai/glm-4.5-air:free"
+            ]
+        }
+    }
+}

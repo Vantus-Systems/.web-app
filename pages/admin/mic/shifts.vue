@@ -8,7 +8,9 @@
   >
     <div class="max-w-4xl mx-auto">
       <!-- Header Controls -->
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+      <div
+        class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6"
+      >
         <!-- Progress Stepper (Only visible in Step Mode) -->
         <div v-if="viewMode === 'step'" class="flex-1">
           <div class="flex items-center justify-between relative max-w-lg">
@@ -45,7 +47,9 @@
         </div>
 
         <!-- View Mode Toggle -->
-        <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-200 self-end md:self-auto">
+        <div
+          class="flex bg-slate-100 p-1 rounded-lg border border-slate-200 self-end md:self-auto"
+        >
           <button
             type="button"
             class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-md transition-all flex items-center gap-2"
@@ -79,16 +83,26 @@
         :class="{ 'space-y-12 divide-y divide-slate-100': viewMode === 'form' }"
       >
         <form @submit.prevent="handleSubmit">
-
-          <!-- SECTION 1: SHIFT SETUP -->
-          <div v-show="viewMode === 'form' || currentStep === 1" class="pt-6 first:pt-0">
-            <h3 class="text-xl font-black text-slate-900 mb-6 flex items-center gap-2">
-              <span v-if="viewMode === 'form'" class="text-slate-300 text-sm font-bold uppercase tracking-wider">01</span>
+          <!-- SECTION 1: SHIFT DETAILS -->
+          <div
+            v-show="viewMode === 'form' || currentStep === 1"
+            class="pt-6 first:pt-0"
+          >
+            <h3
+              class="text-xl font-black text-slate-900 mb-6 flex items-center gap-2"
+            >
+              <span
+                v-if="viewMode === 'form'"
+                class="text-slate-300 text-sm font-bold uppercase tracking-wider"
+                >01</span
+              >
               Shift Details
             </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                <label
+                  class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"
+                >
                   Date
                 </label>
                 <input
@@ -99,26 +113,50 @@
                 />
               </div>
               <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                <label
+                  class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"
+                >
                   Shift
                 </label>
                 <div class="flex gap-2">
-                  <label class="flex-1 flex items-center justify-center gap-2 cursor-pointer border rounded-lg p-2 transition-colors"
-                    :class="form.shift === 'AM' ? 'bg-orange-50 border-orange-200 text-orange-800' : 'border-slate-200 hover:bg-slate-50'"
+                  <label
+                    class="flex-1 flex items-center justify-center gap-2 cursor-pointer border rounded-lg p-2 transition-colors"
+                    :class="
+                      form.shift === 'AM'
+                        ? 'bg-orange-50 border-orange-200 text-orange-800'
+                        : 'border-slate-200 hover:bg-slate-50'
+                    "
                   >
-                    <input v-model="form.shift" type="radio" value="AM" class="sr-only" />
+                    <input
+                      v-model="form.shift"
+                      type="radio"
+                      value="AM"
+                      class="sr-only"
+                    />
                     <span class="text-sm font-bold">Day (AM)</span>
                   </label>
-                  <label class="flex-1 flex items-center justify-center gap-2 cursor-pointer border rounded-lg p-2 transition-colors"
-                    :class="form.shift === 'PM' ? 'bg-indigo-50 border-indigo-200 text-indigo-800' : 'border-slate-200 hover:bg-slate-50'"
+                  <label
+                    class="flex-1 flex items-center justify-center gap-2 cursor-pointer border rounded-lg p-2 transition-colors"
+                    :class="
+                      form.shift === 'PM'
+                        ? 'bg-indigo-50 border-indigo-200 text-indigo-800'
+                        : 'border-slate-200 hover:bg-slate-50'
+                    "
                   >
-                    <input v-model="form.shift" type="radio" value="PM" class="sr-only" />
+                    <input
+                      v-model="form.shift"
+                      type="radio"
+                      value="PM"
+                      class="sr-only"
+                    />
                     <span class="text-sm font-bold">Night (PM)</span>
                   </label>
                 </div>
               </div>
               <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                <label
+                  class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"
+                >
                   Headcount
                 </label>
                 <input
@@ -129,143 +167,111 @@
                   class="w-full rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none"
                 />
               </div>
+            </div>
+          </div>
+
+          <!-- SECTION 2: THE BANKS -->
+          <div v-show="viewMode === 'form' || currentStep === 2" class="pt-6">
+            <h3
+              class="text-xl font-black text-slate-900 mb-6 flex items-center gap-2"
+            >
+              <span
+                v-if="viewMode === 'form'"
+                class="text-slate-300 text-sm font-bold uppercase tracking-wider"
+                >02</span
+              >
+              The Banks
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <!-- Starting Bank -->
               <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                <label
+                  class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"
+                >
                   Starting Bank
                 </label>
                 <div class="relative">
-                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
+                  <span
+                    class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono"
+                    >$</span
+                  >
                   <input
                     v-model.number="form.beginning_box"
                     type="number"
                     min="0"
                     step="0.01"
                     placeholder="0.00"
-                    class="w-full pl-8 pr-4 py-2 rounded-lg border-slate-200 bg-slate-50 text-sm font-mono font-bold focus:ring-2 focus:ring-primary-500 outline-none"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- SECTION 2: SALES -->
-          <div v-show="viewMode === 'form' || currentStep === 2" class="pt-6">
-            <h3 class="text-xl font-black text-slate-900 mb-6 flex items-center gap-2">
-              <span v-if="viewMode === 'form'" class="text-slate-300 text-sm font-bold uppercase tracking-wider">02</span>
-              Sales Entry
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div class="space-y-4">
-                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Bingo Sales
-                </label>
-                <div class="relative">
-                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
-                  <input
-                    v-model.number="form.sales_bingo"
-                    type="number"
-                    step="0.01"
-                    required
                     class="w-full pl-8 pr-4 py-3 rounded-lg border-slate-200 bg-slate-50 text-lg font-mono font-bold focus:ring-2 focus:ring-primary-500 outline-none"
-                    :class="form.sales_bingo < 0 ? 'text-red-600' : 'text-slate-900'"
                   />
-                </div>
-                <div v-if="form.sales_bingo < 0" class="bg-red-50 border border-red-100 rounded-lg p-4 animate-fade-in">
-                  <label class="block text-xs font-bold text-red-700 uppercase tracking-wider mb-2">
-                    Reason for Negative Sales
-                  </label>
-                  <select
-                    v-model="form.negative_bingo_reason_code"
-                    required
-                    class="w-full rounded-lg border-red-200 bg-white px-3 py-2 text-sm text-red-900 focus:ring-2 focus:ring-red-500 outline-none"
-                  >
-                    <option value="" disabled>Select Reason...</option>
-                    <option value="HighPayouts">High Payouts</option>
-                    <option value="JackpotHit">Jackpot Hit</option>
-                    <option value="PromoNight">Promo Night</option>
-                    <option value="Other">Other</option>
-                  </select>
                 </div>
               </div>
 
-              <div class="space-y-4">
-                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Pulltab Sales
+              <!-- Ending Bank -->
+              <div>
+                <label
+                  class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"
+                >
+                  Ending Bank
                 </label>
                 <div class="relative">
-                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
-                  <input
-                    v-model.number="form.sales_pulltabs"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    required
-                    class="w-full pl-8 pr-4 py-3 rounded-lg border-slate-200 bg-slate-50 text-lg font-mono font-bold focus:ring-2 focus:ring-primary-500 outline-none text-slate-900"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- SECTION 3: RECONCILIATION (Ending Bank) -->
-          <!-- In Wizard Mode, this is part of Step 3 (Cash) or inserted before?
-               User requested: "Place this in Step 3: Cash, right before Total Cash Deposit".
-               So in Wizard, it's inside Step 3. In Form view, it's its own section 3. -->
-          <div v-show="viewMode === 'form'" class="pt-6">
-             <h3 class="text-xl font-black text-slate-900 mb-6 flex items-center gap-2">
-              <span class="text-slate-300 text-sm font-bold uppercase tracking-wider">03</span>
-              Reconciliation
-            </h3>
-             <div class="bg-slate-50 rounded-xl p-6 border border-slate-200">
-                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                  Ending Bank (Left in Drawer)
-                </label>
-                <div class="relative max-w-sm">
-                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
+                  <span
+                    class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono"
+                    >$</span
+                  >
                   <input
                     v-model.number="form.ending_box"
                     type="number"
                     min="0"
                     step="0.01"
+                    placeholder="0.00"
                     class="w-full pl-8 pr-4 py-3 rounded-lg border-slate-200 bg-white text-lg font-mono font-bold focus:ring-2 focus:ring-primary-500 outline-none"
                   />
                 </div>
-                <p class="text-xs text-slate-400 mt-2">Enter the amount of cash left in the drawer (not deposited).</p>
-             </div>
-          </div>
-
-
-          <!-- SECTION 4: DEPOSIT (Cash + Checks) -->
-          <!-- In Wizard Mode, this is split into Step 3 (Cash) and Step 4 (Checks). -->
-
-          <!-- Wizard Step 3 Content (Cash) -->
-          <div v-show="viewMode === 'form' || currentStep === 3" class="pt-6">
-            <h3 class="text-xl font-black text-slate-900 mb-6 flex items-center gap-2">
-              <span v-if="viewMode === 'form'" class="text-slate-300 text-sm font-bold uppercase tracking-wider">04</span>
-              Deposit
-            </h3>
-
-            <!-- In Wizard, we show Ending Bank here too -->
-            <div v-if="viewMode === 'step'" class="mb-8">
-               <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                  Ending Bank (Left in Drawer)
-                </label>
-                <div class="relative">
-                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
-                  <input
-                    v-model.number="form.ending_box"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    class="w-full pl-8 pr-4 py-3 rounded-lg border-slate-200 bg-slate-50 text-lg font-mono font-bold focus:ring-2 focus:ring-primary-500 outline-none"
-                  />
-                </div>
+                <p class="text-xs text-slate-400 mt-2">
+                  Amount left in drawer (not deposited).
+                </p>
+              </div>
             </div>
 
-            <!-- Cash Section -->
+            <!-- Warning for Large Increase -->
+            <div
+              v-if="
+                (form.ending_box || 0) > (form.beginning_box || 0) + 500 &&
+                totalDeposit === 0
+              "
+              class="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center gap-3 animate-fade-in"
+            >
+              <span class="text-2xl">⚠️</span>
+              <div>
+                <p class="text-sm font-bold text-yellow-800">
+                  Large increase in bank detected
+                </p>
+                <p class="text-xs text-yellow-700">
+                  Please verify your ending bank amount.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 3: DEPOSITS -->
+          <div v-show="viewMode === 'form' || currentStep === 3" class="pt-6">
+            <h3
+              class="text-xl font-black text-slate-900 mb-6 flex items-center gap-2"
+            >
+              <span
+                v-if="viewMode === 'form'"
+                class="text-slate-300 text-sm font-bold uppercase tracking-wider"
+                >03</span
+              >
+              Deposits
+            </h3>
+
+            <!-- Cash Drop -->
             <div class="space-y-4 mb-8">
               <div class="flex items-center justify-between">
-                <label class="block text-sm font-bold text-slate-700 uppercase tracking-wider">
+                <label
+                  class="block text-sm font-bold text-slate-700 uppercase tracking-wider"
+                >
                   Cash Drop
                 </label>
                 <button
@@ -280,7 +286,10 @@
 
               <!-- Manual Cash Input -->
               <div class="relative">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
+                <span
+                  class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono"
+                  >$</span
+                >
                 <input
                   v-model.number="form.cash_total_manual"
                   type="number"
@@ -288,19 +297,27 @@
                   step="0.01"
                   :readonly="showBillCounter"
                   class="w-full pl-8 pr-4 py-3 rounded-lg border-slate-200 bg-slate-50 text-lg font-mono font-bold focus:ring-2 focus:ring-primary-500 outline-none transition-colors"
-                  :class="{ 'bg-slate-100 text-slate-500 cursor-not-allowed': showBillCounter }"
+                  :class="{
+                    'bg-slate-100 text-slate-500 cursor-not-allowed':
+                      showBillCounter,
+                  }"
                 />
               </div>
 
               <!-- Bill Counter Grid -->
-              <div v-if="showBillCounter" class="bg-slate-50 rounded-xl p-4 border border-slate-200 animate-fade-in">
-                 <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+              <div
+                v-if="showBillCounter"
+                class="bg-slate-50 rounded-xl p-4 border border-slate-200 animate-fade-in"
+              >
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
                   <div
                     v-for="(label, key) in denominationsMap"
                     :key="key"
                     class="bg-white p-2 rounded-lg border border-slate-100 shadow-sm"
                   >
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 text-center">
+                    <label
+                      class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 text-center"
+                    >
                       {{ label }}
                     </label>
                     <input
@@ -315,10 +332,12 @@
               </div>
             </div>
 
-            <!-- Check Section (Visible in Form View or Step 4) -->
-            <div v-if="viewMode === 'form'" class="space-y-4 pt-4 border-t border-slate-100">
-               <div class="flex items-center justify-between">
-                <label class="block text-sm font-bold text-slate-700 uppercase tracking-wider">
+            <!-- Check Drop -->
+            <div class="space-y-4 pt-4 border-t border-slate-100">
+              <div class="flex items-center justify-between">
+                <label
+                  class="block text-sm font-bold text-slate-700 uppercase tracking-wider"
+                >
                   Check Drop
                 </label>
                 <button
@@ -331,9 +350,12 @@
                 </button>
               </div>
 
-               <!-- Manual Check Input -->
+              <!-- Manual Check Input -->
               <div class="relative">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
+                <span
+                  class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono"
+                  >$</span
+                >
                 <input
                   v-model.number="form.checks_total_manual"
                   type="number"
@@ -341,256 +363,202 @@
                   step="0.01"
                   :readonly="showCheckList"
                   class="w-full pl-8 pr-4 py-3 rounded-lg border-slate-200 bg-slate-50 text-lg font-mono font-bold focus:ring-2 focus:ring-primary-500 outline-none transition-colors"
-                   :class="{ 'bg-slate-100 text-slate-500 cursor-not-allowed': showCheckList }"
+                  :class="{
+                    'bg-slate-100 text-slate-500 cursor-not-allowed':
+                      showCheckList,
+                  }"
                 />
               </div>
 
               <!-- Check List -->
               <div v-if="showCheckList" class="space-y-3 animate-fade-in">
-                  <div
-                    v-for="(check, index) in form.check_logs"
-                    :key="index"
-                    class="bg-slate-50 rounded-xl p-4 border border-slate-200 relative group"
+                <div
+                  v-for="(check, index) in form.check_logs"
+                  :key="index"
+                  class="bg-slate-50 rounded-xl p-4 border border-slate-200 relative group"
+                >
+                  <button
+                    type="button"
+                    class="absolute top-2 right-2 text-slate-300 hover:text-red-500 transition-colors"
+                    @click="removeCheck(index)"
                   >
-                     <button
-                        type="button"
-                        class="absolute top-2 right-2 text-slate-300 hover:text-red-500 transition-colors"
-                        @click="removeCheck(index)"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                        </svg>
-                      </button>
-                       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
-                        <input v-model="check.player_name" type="text" placeholder="Name" class="rounded border-slate-200 text-xs px-2 py-1" />
-                        <input v-model="check.check_number" type="text" placeholder="Check #" class="rounded border-slate-200 text-xs px-2 py-1 font-mono" />
-                        <input v-model.number="check.amount" type="number" placeholder="0.00" class="rounded border-slate-200 text-xs px-2 py-1 font-mono font-bold" />
-                      </div>
-                      <div class="flex gap-4">
-                        <label class="flex items-center gap-1"><input type="checkbox" v-model="check.stamped_on_back" class="rounded text-green-600 scale-75" /> <span class="text-[10px] uppercase font-bold text-slate-500">Stamped</span></label>
-                        <label class="flex items-center gap-1"><input type="checkbox" v-model="check.phone_dl_written" class="rounded text-green-600 scale-75" /> <span class="text-[10px] uppercase font-bold text-slate-500">Phone/DL</span></label>
-                      </div>
-                  </div>
-                  <button type="button" @click="addCheck" class="w-full py-2 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 font-bold text-xs uppercase hover:border-primary-300 hover:text-primary-600 transition-colors">
-                    + Add Check
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
                   </button>
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+                    <input
+                      v-model="check.player_name"
+                      type="text"
+                      placeholder="Name"
+                      class="rounded border-slate-200 text-xs px-2 py-1"
+                    />
+                    <input
+                      v-model="check.check_number"
+                      type="text"
+                      placeholder="Check #"
+                      class="rounded border-slate-200 text-xs px-2 py-1 font-mono"
+                    />
+                    <input
+                      v-model.number="check.amount"
+                      type="number"
+                      placeholder="0.00"
+                      class="rounded border-slate-200 text-xs px-2 py-1 font-mono font-bold"
+                    />
+                  </div>
+                  <div class="flex gap-4">
+                    <label class="flex items-center gap-1"
+                      ><input
+                        v-model="check.stamped_on_back"
+                        type="checkbox"
+                        class="rounded text-green-600 scale-75"
+                      />
+                      <span
+                        class="text-[10px] uppercase font-bold text-slate-500"
+                        >Stamped</span
+                      ></label
+                    >
+                    <label class="flex items-center gap-1"
+                      ><input
+                        v-model="check.phone_dl_written"
+                        type="checkbox"
+                        class="rounded text-green-600 scale-75"
+                      />
+                      <span
+                        class="text-[10px] uppercase font-bold text-slate-500"
+                        >Phone/DL</span
+                      ></label
+                    >
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  class="w-full py-2 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 font-bold text-xs uppercase hover:border-primary-300 hover:text-primary-600 transition-colors"
+                  @click="addCheck"
+                >
+                  + Add Check
+                </button>
               </div>
             </div>
           </div>
 
-          <!-- Wizard Step 4 (Checks) - Only visible in Step Mode -->
-           <div v-if="viewMode === 'step' && currentStep === 4" class="space-y-6">
-              <div class="flex justify-between items-center">
-                <h3 class="text-xl font-black text-slate-900">Checks</h3>
-                 <button
-                  type="button"
-                  class="text-xs font-bold text-primary-600 uppercase tracking-wider hover:text-primary-800 flex items-center gap-1"
-                  @click="toggleCheckList"
-                >
-                  <span v-if="showCheckList">➖ Switch to Simple Input</span>
-                  <span v-else>📝 Itemize Checks</span>
-                </button>
-              </div>
-
-               <!-- Manual Check Input -->
-              <div v-if="!showCheckList" class="space-y-4">
-                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Total Check Amount
-                </label>
-                <div class="relative">
-                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
-                  <input
-                    v-model.number="form.checks_total_manual"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    class="w-full pl-8 pr-4 py-3 rounded-lg border-slate-200 bg-slate-50 text-lg font-mono font-bold focus:ring-2 focus:ring-primary-500 outline-none"
-                  />
-                </div>
-              </div>
-
-              <!-- Itemized View -->
-              <div v-else class="space-y-4">
-                <div
-                v-for="(check, index) in form.check_logs"
-                :key="index"
-                class="bg-slate-50 rounded-xl p-4 border border-slate-200 relative group"
+          <!-- SECTION 4: PULLTAB PROFIT -->
+          <div v-show="viewMode === 'form' || currentStep === 4" class="pt-6">
+            <h3
+              class="text-xl font-black text-slate-900 mb-6 flex items-center gap-2"
+            >
+              <span
+                v-if="viewMode === 'form'"
+                class="text-slate-300 text-sm font-bold uppercase tracking-wider"
+                >04</span
               >
-                <button
-                  type="button"
-                  class="absolute top-2 right-2 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                  @click="removeCheck(index)"
+              Pulltab Profit
+            </h3>
+            <div class="space-y-4">
+              <label
+                class="block text-xs font-bold text-slate-500 uppercase tracking-wider"
+              >
+                Net Pulltab Income
+              </label>
+              <div class="relative">
+                <span
+                  class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono"
+                  >$</span
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-5 w-5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                </button>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <div>
-                    <label
-                      class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1"
-                      >Player Name</label
-                    >
-                    <input
-                      v-model="check.player_name"
-                      type="text"
-                      required
-                      placeholder="Full Name"
-                      class="w-full rounded-lg border-slate-200 text-sm px-3 py-2"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1"
-                      >Check #</label
-                    >
-                    <input
-                      v-model="check.check_number"
-                      type="text"
-                      required
-                      placeholder="1234"
-                      class="w-full rounded-lg border-slate-200 text-sm px-3 py-2 font-mono"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1"
-                      >Amount</label
-                    >
-                    <div class="relative">
-                      <span
-                        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"
-                        >$</span
-                      >
-                      <input
-                        v-model.number="check.amount"
-                        type="number"
-                        min="0.01"
-                        step="0.01"
-                        required
-                        class="w-full rounded-lg border-slate-200 text-sm pl-6 pr-3 py-2 font-mono font-bold"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div class="flex gap-6 border-t border-slate-200 pt-3">
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input
-                      v-model="check.stamped_on_back"
-                      type="checkbox"
-                      class="rounded text-green-600 focus:ring-green-500"
-                    />
-                    <span
-                      class="text-xs font-bold text-slate-600 uppercase tracking-wider"
-                      >Stamped on Back</span
-                    >
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input
-                      v-model="check.phone_dl_written"
-                      type="checkbox"
-                      class="rounded text-green-600 focus:ring-green-500"
-                    />
-                    <span
-                      class="text-xs font-bold text-slate-600 uppercase tracking-wider"
-                      >Phone/DL Written</span
-                    >
-                  </label>
-                </div>
+                <input
+                  v-model.number="form.net_pulltab_income"
+                  type="number"
+                  step="0.01"
+                  required
+                  class="w-full pl-8 pr-4 py-3 rounded-lg border-slate-200 bg-slate-50 text-lg font-mono font-bold focus:ring-2 focus:ring-primary-500 outline-none text-slate-900"
+                />
               </div>
-               <button
-                  type="button"
-                  class="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 font-bold text-xs uppercase hover:border-primary-300 hover:text-primary-600 transition-colors"
-                  @click="addCheck"
-                >
-                  + Add Another Check
-                </button>
-              </div>
+              <p class="text-xs text-slate-400">
+                Total profit from pulltab machines/tins.
+              </p>
+            </div>
+          </div>
 
-               <div
-                  class="bg-slate-50 rounded-xl p-6 flex justify-between items-center border border-slate-200"
-                >
-                  <span
-                    class="text-sm font-bold text-slate-500 uppercase tracking-wider"
-                    >Total Checks</span
-                  >
-                  <span class="text-2xl font-black text-slate-900 font-mono">{{
-                    formatCurrency(totalChecks)
-                  }}</span>
-                </div>
-           </div>
-
-
-          <!-- SECTION 5: REVIEW -->
+          <!-- SECTION 5: RESULTS -->
           <div v-show="viewMode === 'form' || currentStep === 5" class="pt-6">
-            <h3 class="text-xl font-black text-slate-900 mb-6 flex items-center gap-2">
-              <span v-if="viewMode === 'form'" class="text-slate-300 text-sm font-bold uppercase tracking-wider">05</span>
-              Review & Submit
+            <h3
+              class="text-xl font-black text-slate-900 mb-6 flex items-center gap-2"
+            >
+              <span
+                v-if="viewMode === 'form'"
+                class="text-slate-300 text-sm font-bold uppercase tracking-wider"
+                >05</span
+              >
+              Results
             </h3>
 
-             <!-- Summary Card -->
-            <div class="bg-slate-900 text-white rounded-xl p-6 shadow-xl mb-6">
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div>
-                   <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Starting Bank</p>
-                   <p class="text-lg font-mono font-bold">{{ formatCurrency(form.beginning_box || 0) }}</p>
-                </div>
-                 <div>
-                   <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Total Sales</p>
-                   <p class="text-lg font-mono font-bold">{{ formatCurrency(totalSales) }}</p>
-                </div>
-                <div>
-                   <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Ending Bank</p>
-                   <p class="text-lg font-mono font-bold">{{ formatCurrency(form.ending_box || 0) }}</p>
-                </div>
-                <div>
-                   <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Deposit</p>
-                   <p class="text-lg font-mono font-bold text-green-400">{{ formatCurrency(totalDeposit) }}</p>
-                </div>
+            <!-- Summary Card -->
+            <div
+              class="bg-slate-900 text-white rounded-xl p-6 shadow-xl mb-6 space-y-4"
+            >
+              <!-- Row 1: Net Cash Generated -->
+              <div
+                class="flex justify-between items-center border-b border-slate-700 pb-4"
+              >
+                <span
+                  class="text-sm font-bold text-slate-400 uppercase tracking-wider"
+                  >Net Cash Generated</span
+                >
+                <span class="text-xl font-mono font-bold">{{
+                  formatCurrency(netCashGenerated)
+                }}</span>
               </div>
 
-              <div class="mt-6 pt-6 border-t border-slate-700">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-                  <div>
-                    <p
-                      class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1"
-                    >
-                      Variance
-                    </p>
-                    <p class="text-[10px] text-slate-500 font-mono">
-                      (Start + Sales) - (End + Deposit)
-                    </p>
-                  </div>
-                  <p
-                    class="text-4xl font-mono font-black"
-                    :class="
-                      variance === 0
-                        ? 'text-white'
-                        : variance > 0
-                          ? 'text-red-400'
-                          : 'text-green-400'
-                    "
-                  >
-                    {{ formatCurrency(variance) }}
-                    <span v-if="variance > 0" class="text-xs font-bold uppercase tracking-wide text-red-500 ml-2">Shortage</span>
-                    <span v-if="variance < 0" class="text-xs font-bold uppercase tracking-wide text-green-500 ml-2">Overage</span>
-                  </p>
-                </div>
+              <!-- Row 2: Less Pulltab Income -->
+              <div
+                class="flex justify-between items-center border-b border-slate-700 pb-4"
+              >
+                <span
+                  class="text-sm font-bold text-slate-400 uppercase tracking-wider"
+                  >Less Pulltab Income</span
+                >
+                <span class="text-xl font-mono font-bold text-red-400"
+                  >-{{ formatCurrency(form.net_pulltab_income || 0) }}</span
+                >
+              </div>
+
+              <!-- Row 3: Calculated Bingo Revenue -->
+              <div class="flex justify-between items-center pt-2">
+                <span
+                  class="text-lg font-black text-white uppercase tracking-wider"
+                  >Calculated Bingo Revenue</span
+                >
+                <span class="text-3xl font-mono font-black text-green-400">{{
+                  formatCurrency(calculatedBingoRevenue)
+                }}</span>
+              </div>
+
+              <!-- Dynamic Alert -->
+              <div
+                v-if="calculatedBingoRevenue < 0"
+                class="bg-blue-900/50 border border-blue-500/50 rounded-lg p-4 flex gap-3 mt-4"
+              >
+                <span class="text-xl">ℹ️</span>
+                <p class="text-sm text-blue-200">
+                  Bingo operated at a loss of
+                  <span class="font-bold">{{
+                    formatCurrency(calculatedBingoRevenue)
+                  }}</span
+                  >. This is expected if payouts exceeded sales.
+                </p>
               </div>
             </div>
 
-             <!-- Validation Errors -->
+            <!-- Validation Errors -->
             <div
               v-if="validationErrors.length > 0"
               class="bg-red-50 border border-red-100 rounded-xl p-4 mb-6"
@@ -613,23 +581,20 @@
                 class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"
               >
                 Shift Notes
-                <span v-if="variance !== 0" class="text-red-500"
-                  >* (Required for variance)</span
-                >
               </label>
               <textarea
                 v-model="form.notes"
                 rows="3"
                 class="w-full rounded-lg border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:ring-2 focus:ring-primary-500 outline-none"
-                placeholder="Any issues, incidents, or explanations for variance..."
-                :required="variance !== 0"
+                placeholder="Any issues, incidents, or explanations..."
               ></textarea>
             </div>
           </div>
 
-
-           <!-- Footer Actions -->
-          <div class="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center bg-white sticky bottom-0 z-10">
+          <!-- Footer Actions -->
+          <div
+            class="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center bg-white sticky bottom-0 z-10"
+          >
             <!-- Wizard Nav -->
             <button
               v-if="viewMode === 'step'"
@@ -641,26 +606,26 @@
               Back
             </button>
 
-             <!-- Submit / Next -->
-             <div class="flex gap-4 ml-auto">
-                 <button
-                  v-if="viewMode === 'step' && currentStep < 5"
-                  type="button"
-                  class="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-lg font-bold uppercase tracking-wider text-sm shadow-lg hover:shadow-xl transition-all"
-                  @click="nextStep"
-                >
-                  Next
-                </button>
+            <!-- Submit / Next -->
+            <div class="flex gap-4 ml-auto">
+              <button
+                v-if="viewMode === 'step' && currentStep < 5"
+                type="button"
+                class="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-lg font-bold uppercase tracking-wider text-sm shadow-lg hover:shadow-xl transition-all"
+                @click="nextStep"
+              >
+                Next
+              </button>
 
-                <button
-                  v-if="viewMode === 'form' || currentStep === 5"
-                  type="submit"
-                  :disabled="isSubmitting || validationErrors.length > 0"
-                  class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-bold uppercase tracking-wider text-sm shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {{ isSubmitting ? "Submitting..." : "Submit Shift" }}
-                </button>
-             </div>
+              <button
+                v-if="viewMode === 'form' || currentStep === 5"
+                type="submit"
+                :disabled="isSubmitting || validationErrors.length > 0"
+                class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-bold uppercase tracking-wider text-sm shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {{ isSubmitting ? "Submitting..." : "Submit Shift" }}
+              </button>
+            </div>
           </div>
         </form>
       </div>
@@ -685,11 +650,11 @@ const session = ref<{ username?: string; role?: any } | null>(null);
 
 // --- Constants ---
 const steps = [
-  { number: 1, label: "Setup" },
-  { number: 2, label: "Sales" },
-  { number: 3, label: "Cash" },
-  { number: 4, label: "Checks" },
-  { number: 5, label: "Review" },
+  { number: 1, label: "Shift Details" },
+  { number: 2, label: "The Banks" },
+  { number: 3, label: "Deposits" },
+  { number: 4, label: "Pulltab Profit" },
+  { number: 5, label: "Results" },
 ];
 
 const denominationsMap: Record<string, string> = {
@@ -719,7 +684,7 @@ const denomValues: Record<string, number> = {
 };
 
 // --- State ---
-const viewMode = ref<'step' | 'form'>('step');
+const viewMode = ref<"step" | "form">("form"); // Default to Quick Form as requested
 const currentStep = ref(1);
 const isSubmitting = ref(false);
 
@@ -732,10 +697,8 @@ const form = ref({
   shift: "AM" as "AM" | "PM",
   headcount: 0,
   beginning_box: 0, // Starting Bank
-  ending_box: 0,    // Ending Bank
-  sales_bingo: 0,
-  sales_pulltabs: 0,
-  negative_bingo_reason_code: "",
+  ending_box: 0, // Ending Bank
+  net_pulltab_income: 0, // Replaces sales_pulltabs
   cash_total_manual: 0,
   checks_total_manual: 0,
   denominations: {
@@ -755,9 +718,6 @@ const form = ref({
 });
 
 // --- Computed ---
-const totalSales = computed(
-  () => (form.value.sales_bingo || 0) + (form.value.sales_pulltabs || 0),
-);
 
 // Calculated from Bill Counter Grid
 const calculatedCashTotal = computed(() => {
@@ -777,46 +737,56 @@ const calculatedChecksTotal = computed(() => {
   return Number(sum.toFixed(2));
 });
 
-// The final totals we use (logic: if expanded, use calculated. Else use manual)
-// BUT we sync them. If showBillCounter is true, we update manual.
-// If showBillCounter is false, user edits manual.
+// The final totals we use
 const totalCash = computed(() => form.value.cash_total_manual);
 const totalChecks = computed(() => form.value.checks_total_manual);
 
-const totalDeposit = computed(() => (totalCash.value || 0) + (totalChecks.value || 0));
+const totalDeposit = computed(
+  () => (totalCash.value || 0) + (totalChecks.value || 0),
+);
 
-// Variance: (Starting + Sales) - (Ending + Deposit)
-// Positive = Shortage (Expected > Actual)
-// Negative = Overage (Actual > Expected)
-const variance = computed(() => {
+// Logic (The Golden Formula):
+// netCashGenerated = (endingBank + cashDrop + checkDrop) - startingBank
+// calculatedBingoRevenue = netCashGenerated - netPulltabIncome
+
+const netCashGenerated = computed(() => {
   const starting = form.value.beginning_box || 0;
   const ending = form.value.ending_box || 0;
+  const deposit = totalDeposit.value;
 
-  const expected = starting + totalSales.value;
-  const actual = ending + totalDeposit.value;
+  return ending + deposit - starting;
+});
 
-  // Note: Standard variance is usually Actual - Expected.
-  // But user formula is Expected - Actual (Start+Sales) - (End+Deposit).
-  // If Result > 0, we have LESS than expected (Shortage).
-  return Number((expected - actual).toFixed(2));
+const calculatedBingoRevenue = computed(() => {
+  const pulltabIncome = form.value.net_pulltab_income || 0;
+  return netCashGenerated.value - pulltabIncome;
 });
 
 const validationErrors = computed(() => {
   const errors = [];
-  if (variance.value !== 0 && !form.value.notes) {
-    errors.push(
-      "Variance detected. You must provide a note explaining the difference.",
-    );
+
+  // Validation: If endingBank > startingBank + 500 AND totalDeposit == 0
+  const starting = form.value.beginning_box || 0;
+  const ending = form.value.ending_box || 0;
+
+  if (ending > starting + 500 && totalDeposit.value === 0) {
+    // This is a warning, not strictly an error preventing submission, but usually we block or warn.
+    // The requirement says "show a Yellow Warning".
+    // I'll add it to a warnings list or handle it in the UI.
+    // If it's just a warning, maybe I shouldn't block submission.
+    // But for now I'll just check for required fields.
   }
 
   // Only validate checks if we are using the check list
   if (showCheckList.value && form.value.check_logs.length > 0) {
-      const invalidChecks = form.value.check_logs.some(
-        (c) => !c.stamped_on_back || !c.phone_dl_written,
+    const invalidChecks = form.value.check_logs.some(
+      (c) => !c.stamped_on_back || !c.phone_dl_written,
+    );
+    if (invalidChecks) {
+      errors.push(
+        "All itemized checks must be stamped and have contact info written.",
       );
-      if (invalidChecks) {
-        errors.push("All itemized checks must be stamped and have contact info written.");
-      }
+    }
   }
 
   return errors;
@@ -826,36 +796,34 @@ const validationErrors = computed(() => {
 
 // If Bill Counter is visible, sync grid sum to manual total
 watch(calculatedCashTotal, (newVal) => {
-    if (showBillCounter.value) {
-        form.value.cash_total_manual = newVal;
-    }
+  if (showBillCounter.value) {
+    form.value.cash_total_manual = newVal;
+  }
 });
 
 // If Check List is visible, sync list sum to manual total
 watch(calculatedChecksTotal, (newVal) => {
-    if (showCheckList.value) {
-        form.value.checks_total_manual = newVal;
-    }
+  if (showCheckList.value) {
+    form.value.checks_total_manual = newVal;
+  }
 });
 
 // --- Methods ---
 
 const toggleBillCounter = () => {
-    showBillCounter.value = !showBillCounter.value;
-    // If opening, force sync
-    if (showBillCounter.value) {
-        form.value.cash_total_manual = calculatedCashTotal.value;
-    }
+  showBillCounter.value = !showBillCounter.value;
+  // If opening, force sync
+  if (showBillCounter.value) {
+    form.value.cash_total_manual = calculatedCashTotal.value;
+  }
 };
 
 const toggleCheckList = () => {
-    showCheckList.value = !showCheckList.value;
-    if (showCheckList.value) {
-        form.value.checks_total_manual = calculatedChecksTotal.value;
-    }
+  showCheckList.value = !showCheckList.value;
+  if (showCheckList.value) {
+    form.value.checks_total_manual = calculatedChecksTotal.value;
+  }
 };
-
-const getDenomValue = (key: string) => denomValues[key] || 0;
 
 const addCheck = () => {
   form.value.check_logs.push({
@@ -892,7 +860,8 @@ const handleSubmit = async () => {
       // or at least ensure the manual total is sent.
       // The backend prioritizes `cash_total_manual` if present.
       // We send everything.
-      variance_note: variance.value !== 0 ? form.value.notes : undefined,
+      variance_note:
+        calculatedBingoRevenue.value !== 0 ? form.value.notes : undefined,
     };
 
     // Note: If using manual input, we might want to clear denominations/checks to avoid confusion in DB?

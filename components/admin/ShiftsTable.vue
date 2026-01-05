@@ -12,6 +12,7 @@
             <th class="px-6 py-3 text-right">Actual Deposit</th>
             <th class="px-6 py-3 text-right">Variance</th>
             <th class="px-6 py-3 text-left">Notes</th>
+            <th class="px-6 py-3 text-right">Actions</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
@@ -60,6 +61,11 @@
                 {{ shift.notes }}
               </p>
               <span v-else class="text-slate-300">-</span>
+            </td>
+            <td class="px-6 py-4 text-right">
+              <NuxtLink :to="`/admin/mic/shifts/${shift.id}`" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-primary-100 hover:text-primary-600 transition-colors" title="Edit Shift">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+              </NuxtLink>
             </td>
           </tr>
           <tr v-if="shifts.length === 0">

@@ -1,31 +1,57 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import {
   Grid,
   Layers,
   Calendar,
+  DollarSign,
 } from "lucide-vue-next";
 import WeeklyScheduleEditor from "./schedule/WeeklyScheduleEditor.vue";
 import PatternEditor from "./PatternEditor.vue";
 import ProgramEditor from "./ProgramEditor.vue";
+import PricingManagerPanel from "./pricing/PricingManagerPanel.vue";
 import { useOpsStore } from "~/stores/ops";
 import { useToast } from "~/composables/useToast";
+import { useAuthUser } from "~/composables/useAuthUser";
+import { normalizeRole } from "~/utils/roles";
+
+const props = defineProps<{
+  userRole?: string | null;
+}>();
 
 const opsStore = useOpsStore();
 const toast = useToast();
-const currentStep = ref("schedule"); // schedule | patterns | programs
+const { user, fetchUser } = useAuthUser();
+const currentStep = ref("patterns"); // patterns | programs | schedule | pricing
 const isProgramSaving = ref(false);
 const isProgramDirty = ref(false);
 
 onMounted(() => {
   opsStore.loadAll();
+  // In some admin views, the session role is fetched at the page level and not stored globally.
+  // Fetch it here as a fallback so OWNER-only steps (like Pricing) render reliably.
+  if (!props.userRole) {
+    fetchUser();
+  }
 });
 
-const steps = [
-  { id: "schedule", label: "Schedule", icon: Calendar },
-  { id: "patterns", label: "Patterns", icon: Grid },
-  { id: "programs", label: "Programs", icon: Layers },
-];
+const isOwner = computed(() =>
+  normalizeRole(props.userRole ?? user.value?.role) === "OWNER",
+);
+
+const steps = computed(() => {
+  const items = [
+    { id: "patterns", label: "Patterns", icon: Grid },
+    { id: "programs", label: "Programs", icon: Layers },
+    { id: "schedule", label: "Schedule", icon: Calendar },
+  ];
+  
+  if (isOwner.value) {
+    items.push({ id: "pricing", label: "Pricing", icon: DollarSign });
+  }
+  
+  return items;
+});
 
 const confirmNavigation = (stepId: string) => {
   if (currentStep.value === 'programs' && isProgramDirty.value) {
@@ -54,6 +80,15 @@ const handlePatternDelete = async (slug: string) => {
     toast.success("Pattern deleted.", { title: "Deleted" });
   } catch (e: any) {
     toast.error(e?.message || "Failed to delete pattern.", { title: "Error" });
+  }
+};
+
+const handleProgramDelete = async (slug: string) => {
+  try {
+    await opsStore.deleteProgram(slug);
+    toast.success("Program deleted.", { title: "Deleted" });
+  } catch (e: any) {
+    toast.error(e?.message || "Failed to delete program.", { title: "Error" });
   }
 };
 
@@ -111,34 +146,25 @@ const handleProgramSave = async (p: any) => {
 
     <!-- Main Content -->
     <main class="flex-1 overflow-hidden relative">
-      <Transition
-        enter-active-class="transition duration-200 ease-out"
-        enter-from-class="opacity-0 translate-y-2"
-        enter-to-class="opacity-100 translate-y-0"
-        leave-active-class="transition duration-150 ease-in"
-        leave-from-class="opacity-100 translate-y-0"
-        leave-to-class="opacity-0 translate-y-2"
-        mode="out-in"
-      >
-        <div :key="currentStep" class="h-full w-full">
-          <component
-            :is="
-              currentStep === 'schedule'
-                ? WeeklyScheduleEditor
-                : currentStep === 'patterns'
-                  ? PatternEditor
-                  : ProgramEditor
-            "
-            :patterns="opsStore.patterns"
-            :programs="opsStore.programs"
-            :saving="isProgramSaving"
-            @save-pattern="handlePatternSave"
-            @delete-pattern="handlePatternDelete"
-            @save-program="handleProgramSave"
-            @dirty="isProgramDirty = $event"
-          />
-        </div>
-      </Transition>
+      <div class="h-full w-full">
+        <PatternEditor
+          v-if="currentStep === 'patterns'"
+          :patterns="opsStore.patterns"
+          @save="handlePatternSave"
+          @delete="handlePatternDelete"
+        />
+        <ProgramEditor
+          v-else-if="currentStep === 'programs'"
+          :programs="opsStore.programs"
+          :patterns="opsStore.patterns"
+          :is-saving="isProgramSaving"
+          @save="handleProgramSave"
+          @delete="handleProgramDelete"
+          @dirty-change="(v) => (isProgramDirty = v)"
+        />
+        <WeeklyScheduleEditor v-else-if="currentStep === 'schedule'" />
+        <PricingManagerPanel v-else-if="currentStep === 'pricing'" />
+      </div>
     </main>
   </div>
 </template>

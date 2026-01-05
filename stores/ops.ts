@@ -44,9 +44,9 @@ export const useOpsStore = defineStore("ops", {
     // Patterns
     async savePattern(pattern: any) {
       const { getHeaders } = useCsrf();
-      const method = pattern.slug ? "PUT" : "POST";
+      // Always use POST for upsert behavior
       const result = await $fetch("/api/admin/patterns", {
-        method,
+        method: "POST",
         body: pattern,
         headers: getHeaders(),
         credentials: "include",
@@ -77,9 +77,9 @@ export const useOpsStore = defineStore("ops", {
     // Programs
     async saveProgram(program: any) {
       const { getHeaders } = useCsrf();
-      const method = program.slug ? "PUT" : "POST";
+      // Always use POST for upsert behavior
       const result = await $fetch<any>("/api/admin/programs", {
-        method,
+        method: "POST",
         body: program,
         headers: getHeaders(),
         credentials: "include",

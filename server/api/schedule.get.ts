@@ -64,6 +64,15 @@ export default defineEventHandler(async () => {
         detail: `${g.pattern.name} • ${g.notes || ""}`,
       }));
 
+      let specials = slot.overrides || {};
+      if (typeof specials === "string") {
+        try {
+          specials = JSON.parse(specials);
+        } catch {
+          specials = {};
+        }
+      }
+
       return {
         id: slot.id,
         name: program.name,
@@ -90,7 +99,7 @@ export default defineEventHandler(async () => {
         eligibility: "All Ages",
         availableDays: [DAYS_OF_WEEK[slot.day_of_week]],
         games,
-        specials: slot.overrides || {}, // Map overrides to specials?
+        specials, // Map overrides to specials?
       };
     })
     .filter(Boolean); // Remove nulls
