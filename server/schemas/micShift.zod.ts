@@ -73,12 +73,18 @@ export const micShiftSubmissionSchema = z
     // Notes
     notes: z.string().optional(),
 
+    // Manual overrides for power users
+    cash_total_manual: z.number().min(0).optional(),
+    checks_total_manual: z.number().min(0).optional(),
+
+    // Reconciliation
+    beginning_box: z.number().min(0).optional(),
+    ending_box: z.number().min(0).optional(),
+
     // Legacy workflow fields (optional, for backward compat)
     workflow_type: z
       .enum(["NORMAL", "NEGATIVE_BINGO_BOX", "RECUPERATION_BOX_RETURN"])
       .optional(),
-    beginning_box: z.number().min(0).optional(),
-    ending_box: z.number().min(0).optional(),
     bingo_actual: z.number().optional(),
     deposit_actual: z.number().optional(),
   })
