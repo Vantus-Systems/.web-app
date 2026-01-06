@@ -29,12 +29,21 @@ export default defineEventHandler(async (event) => {
     workflow_type: data.workflow_type ?? existing.workflow_type,
     beginning_box: data.beginning_box ?? existing.beginning_box ?? undefined,
     ending_box: data.ending_box ?? existing.ending_box ?? undefined,
-    bingo_actual: data.bingo_actual ?? existing.bingo_actual ?? undefined,
     prev_shift_id: data.prev_shift_id ?? existing.prev_shift_id ?? undefined,
   };
 
-  const { prevShift, beginningBox, depositTotal, bingoTotal } =
-    await computeShiftTotals(merged as any);
+  const {
+    prevShift,
+    beginningBox,
+    depositTotal,
+    bingoTotal,
+    bingoActual,
+    depositActual,
+  } = await computeShiftTotals({
+    ...merged,
+    bingo_actual: data.bingo_actual, // Only use explicit update, otherwise recompute
+    deposit_actual: data.deposit_actual,
+  } as any);
 
   const record = await prisma.shiftRecord.update({
     where: { id },
@@ -47,9 +56,9 @@ export default defineEventHandler(async (event) => {
       players: data.players ?? existing.players,
       workflow_type: merged.workflow_type,
       beginning_box: beginningBox,
-      ending_box: data.ending_box ?? existing.ending_box,
-      bingo_actual: data.bingo_actual ?? existing.bingo_actual,
-      deposit_actual: data.deposit_actual ?? existing.deposit_actual,
+      ending_box: merged.ending_box,
+      bingo_actual: bingoActual,
+      deposit_actual: depositActual,
       notes: data.notes ?? existing.notes,
       prev_shift_id:
         data.prev_shift_id ?? prevShift?.id ?? existing.prev_shift_id,

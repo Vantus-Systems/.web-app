@@ -11,18 +11,25 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const data = shiftRecordInputSchema.parse(body);
 
-  const { prevShift, beginningBox, depositTotal, bingoTotal } =
-    await computeShiftTotals({
-      date: data.date,
-      shift: data.shift,
-      pulltabs_total: data.pulltabs_total,
-      deposit_total: data.deposit_total,
-      workflow_type: data.workflow_type,
-      beginning_box: data.beginning_box,
-      ending_box: data.ending_box,
-      bingo_actual: data.bingo_actual,
-      prev_shift_id: data.prev_shift_id,
-    });
+  const {
+    prevShift,
+    beginningBox,
+    depositTotal,
+    bingoTotal,
+    bingoActual,
+    depositActual,
+  } = await computeShiftTotals({
+    date: data.date,
+    shift: data.shift,
+    pulltabs_total: data.pulltabs_total,
+    deposit_total: data.deposit_total,
+    workflow_type: data.workflow_type,
+    beginning_box: data.beginning_box,
+    ending_box: data.ending_box,
+    bingo_actual: data.bingo_actual,
+    deposit_actual: data.deposit_actual,
+    prev_shift_id: data.prev_shift_id,
+  });
 
   const record = await prisma.shiftRecord.create({
     data: {
@@ -35,8 +42,8 @@ export default defineEventHandler(async (event) => {
       workflow_type: data.workflow_type,
       beginning_box: beginningBox,
       ending_box: data.ending_box,
-      bingo_actual: data.bingo_actual,
-      deposit_actual: data.deposit_actual,
+      bingo_actual: bingoActual,
+      deposit_actual: depositActual,
       notes: data.notes,
       prev_shift_id: data.prev_shift_id ?? prevShift?.id,
       created_by_user_id: event.context.user.id,

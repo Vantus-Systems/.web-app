@@ -38,6 +38,7 @@ export const computeShiftTotals = async (input: {
   beginning_box?: number;
   ending_box?: number;
   bingo_actual?: number;
+  deposit_actual?: number;
   prev_shift_id?: string;
 }) => {
   const payload = { ...input };
@@ -47,84 +48,64 @@ export const computeShiftTotals = async (input: {
     prevShift = await prisma.shiftRecord.findUnique({
       where: { id: payload.prev_shift_id },
     });
-    if (!prevShift) {
-      throw createError({
-        statusCode: 400,
-        message: "Previous shift not found.",
-      });
-    }
   } else {
     prevShift = await findPreviousShift(payload.date, payload.shift);
   }
 
+  // Resolution: Beginning Box
   let beginningBox = payload.beginning_box;
-  let depositTotal = payload.deposit_total ?? null;
-  let bingoTotal = 0;
-
-  if (payload.workflow_type === "NORMAL") {
-    if (depositTotal === null) {
-      throw createError({
-        statusCode: 400,
-        message: "Deposit is required for normal shifts.",
-      });
-    }
-    bingoTotal = depositTotal - payload.pulltabs_total;
-  }
-
-  if (payload.workflow_type === "NEGATIVE_BINGO_BOX") {
-    if (
-      payload.beginning_box === undefined ||
-      payload.ending_box === undefined
-    ) {
-      throw createError({
-        statusCode: 400,
-        message: "Beginning and ending box are required for negative bingo.",
-      });
-    }
-    beginningBox = payload.beginning_box;
-    depositTotal = payload.pulltabs_total;
-    bingoTotal = payload.ending_box - payload.beginning_box;
-  }
-
-  if (payload.workflow_type === "RECUPERATION_BOX_RETURN") {
-    if (!prevShift) {
-      throw createError({
-        statusCode: 400,
-        message: "Recuperation shifts must reference a previous shift.",
-      });
-    }
-    if (!beginningBox) {
-      if (
-        prevShift?.ending_box === null ||
-        prevShift?.ending_box === undefined
-      ) {
-        throw createError({
-          statusCode: 400,
-          message:
-            "Previous shift with ending box is required for recuperation.",
-        });
+  if (beginningBox === undefined || beginningBox === null) {
+    if (payload.workflow_type === "RECUPERATION_BOX_RETURN") {
+      // For recuperation, default to previous shift ending box if current start is missing
+      if (prevShift?.ending_box !== null && prevShift?.ending_box !== undefined) {
+        beginningBox = prevShift.ending_box;
       }
-      beginningBox = prevShift.ending_box;
+    } else if (payload.workflow_type === "NORMAL") {
+      beginningBox = 4000; // Default anchor
     }
-    if (payload.ending_box === undefined) {
-      throw createError({
-        statusCode: 400,
-        message: "Ending box is required for recuperation.",
-      });
-    }
-    if (payload.bingo_actual !== undefined) {
-      bingoTotal = payload.bingo_actual;
-      depositTotal = payload.pulltabs_total + payload.bingo_actual;
-    } else if (depositTotal !== null) {
-      bingoTotal = depositTotal - payload.pulltabs_total;
+  }
+  // Fallback for calculation safety
+  const startBox = beginningBox ?? 4000;
+  const endBox = payload.ending_box ?? startBox;
+
+  // Derived 1: Box Delta
+  const boxDelta = endBox - startBox;
+
+  // Resolution: Deposit Total
+  // For NEGATIVE_BINGO_BOX, if deposit is missing, it defaults to pulltabs (assuming 0 bingo deposit)
+  let depositTotalInput = payload.deposit_total;
+  if (depositTotalInput === undefined || depositTotalInput === null) {
+    if (payload.workflow_type === "NEGATIVE_BINGO_BOX") {
+      depositTotalInput = payload.pulltabs_total;
     } else {
-      throw createError({
-        statusCode: 400,
-        message: "Provide bingo actual or deposit for recuperation.",
-      });
+      // For NORMAL/RECUPERATION, ideally required, but default to pulltabs (0 bingo) if missing to avoid NaN
+      depositTotalInput = payload.pulltabs_total;
     }
   }
 
+  // Derived 2: Bingo Deposited
+  const bingoDeposited = depositTotalInput - payload.pulltabs_total;
+
+  // Derived 3: Actuals (Accounting Rules)
+  // bingo_actual = bingo_deposited + box_delta
+  // deposit_actual = deposit_total + box_delta
+  const computedBingoActual = bingoDeposited + boxDelta;
+  const computedDepositActual = depositTotalInput + boxDelta;
+
+  const bingoActual = payload.bingo_actual ?? computedBingoActual;
+  const depositActual = payload.deposit_actual ?? computedDepositActual;
+
+  // Derived 4: Bingo Total (Stored for Logs/UI)
+  // NORMAL / RECUPERATION: bingo_total = bingo_deposited
+  // NEGATIVE_BINGO_BOX: bingo_total = box_delta
+  let bingoTotal = 0;
+  if (payload.workflow_type === "NEGATIVE_BINGO_BOX") {
+    bingoTotal = boxDelta;
+  } else {
+    bingoTotal = bingoDeposited;
+  }
+
+  // Validation: Ending box cap
   if (payload.ending_box !== undefined && payload.ending_box > 4000) {
     throw createError({
       statusCode: 400,
@@ -135,7 +116,9 @@ export const computeShiftTotals = async (input: {
   return {
     prevShift,
     beginningBox,
-    depositTotal,
+    depositTotal: depositTotalInput,
     bingoTotal,
+    bingoActual,
+    depositActual,
   };
 };
