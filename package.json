@@ -11,7 +11,7 @@
     "start:server": "node ./scripts/start-server.js",
     "start:local": "NODE_ENV=development node -r dotenv/config .output/server/index.mjs",
     "postinstall": "node ./scripts/postinstall.js",
-    "lint": "eslint .",
+    "lint": "nuxt typecheck",
     "lint:fix": "eslint . --fix",
     "verify:admin": "python3 verification/verify_admin_console.py",
     "typecheck": "vue-tsc --noEmit",

@@ -7,6 +7,16 @@
     @logout="logout"
   >
     <div class="max-w-4xl mx-auto">
+      <!-- Back Button -->
+      <div class="mb-4">
+        <NuxtLink
+          to="/admin/mic/shifts"
+          class="text-slate-500 hover:text-slate-700 text-xs font-bold uppercase tracking-wider flex items-center gap-2"
+        >
+          ← Back to Shift List
+        </NuxtLink>
+      </div>
+
       <!-- Header Controls -->
       <div
         class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6"

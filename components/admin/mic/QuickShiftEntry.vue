@@ -7,20 +7,125 @@
     </div>
 
     <form class="space-y-4" @submit.prevent="handleSubmit">
-      <!-- Date -->
-      <div>
-        <label
-          class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1"
-        >
-          Date
-        </label>
-        <input
-          v-model="form.date"
-          type="date"
-          required
-          class="w-full rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none"
-        />
+      <div class="grid grid-cols-2 gap-4">
+        <!-- Shift Selection -->
+        <div>
+          <label
+            class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"
+            >Shift</label
+          >
+          <div
+            class="flex gap-2 bg-slate-50 p-1 rounded-lg border border-slate-200"
+          >
+            <label class="flex-1 relative cursor-pointer">
+              <input
+                v-model="form.shift"
+                type="radio"
+                value="AM"
+                class="peer sr-only"
+              />
+              <div
+                class="text-center text-xs font-bold py-2 rounded-md text-slate-500 peer-checked:bg-white peer-checked:text-primary-700 peer-checked:shadow-sm transition-all"
+              >
+                AM
+              </div>
+            </label>
+            <label class="flex-1 relative cursor-pointer">
+              <input
+                v-model="form.shift"
+                type="radio"
+                value="PM"
+                class="peer sr-only"
+              />
+              <div
+                class="text-center text-xs font-bold py-2 rounded-md text-slate-500 peer-checked:bg-white peer-checked:text-primary-700 peer-checked:shadow-sm transition-all"
+              >
+                PM
+              </div>
+            </label>
+          </div>
+        </div>
+        <!-- Date -->
+        <div>
+          <label
+            class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1"
+          >
+            Date
+          </label>
+          <input
+            v-model="form.date"
+            type="date"
+            required
+            class="w-full rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 outline-none h-[38px]"
+          />
+        </div>
       </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <!-- Starting Box -->
+        <div>
+          <label
+            class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1"
+            >Starting Box</label
+          >
+          <div class="relative">
+            <span
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono"
+              >$</span
+            >
+            <input
+              v-model.number="form.starting_box"
+              type="number"
+              step="0.01"
+              required
+              class="w-full pl-7 rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-sm font-mono font-bold focus:ring-2 focus:ring-primary-500 outline-none"
+            />
+          </div>
+        </div>
+        <!-- Ending Box -->
+        <div>
+          <label
+            class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1"
+            >Ending Box</label
+          >
+          <div class="relative">
+            <span
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono"
+              >$</span
+            >
+            <input
+              v-model.number="form.ending_box"
+              type="number"
+              step="0.01"
+              required
+              class="w-full pl-7 rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-sm font-mono font-bold focus:ring-2 focus:ring-primary-500 outline-none"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Player Count (Conditional) -->
+      <transition
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="opacity-0 -translate-y-2"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition duration-150 ease-in"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 -translate-y-2"
+      >
+        <div v-if="form.shift === 'PM'">
+          <label
+            class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1"
+            >Player Count</label
+          >
+          <input
+            v-model.number="form.player_count"
+            type="number"
+            min="0"
+            class="w-full rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-sm font-mono font-bold focus:ring-2 focus:ring-primary-500 outline-none"
+          />
+        </div>
+      </transition>
 
       <div class="grid grid-cols-2 gap-4">
         <!-- Pulltab Totals -->
@@ -105,6 +210,10 @@ const { getHeaders } = useCsrf();
 const isSubmitting = ref(false);
 const form = ref({
   date: new Date().toISOString().slice(0, 10),
+  shift: "AM",
+  starting_box: 4000,
+  ending_box: 4000,
+  player_count: 0,
   pulltabs_total: 0,
   deposit_total: 0,
 });
@@ -118,12 +227,12 @@ const handleSubmit = async () => {
   try {
     const payload = {
       date: form.value.date,
-      shift: "PM", // Defaulting to PM as it's the main shift usually
+      shift: form.value.shift,
       net_pulltab_income: form.value.pulltabs_total,
       cash_total_manual: form.value.deposit_total,
-      beginning_box: 0,
-      ending_box: 0,
-      headcount: 0,
+      beginning_box: form.value.starting_box,
+      ending_box: form.value.ending_box,
+      headcount: form.value.shift === "PM" ? form.value.player_count : 0,
     };
 
     await $fetch("/api/admin/mic/shifts", {
@@ -136,6 +245,10 @@ const handleSubmit = async () => {
     emit("saved");
     form.value = {
       date: new Date().toISOString().slice(0, 10),
+      shift: "AM",
+      starting_box: 4000,
+      ending_box: 4000,
+      player_count: 0,
       pulltabs_total: 0,
       deposit_total: 0,
     };
