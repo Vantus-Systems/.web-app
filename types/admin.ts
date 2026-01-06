@@ -34,6 +34,11 @@ export type ShiftRecord = {
   bingo_actual?: number | null;
   deposit_actual?: number | null;
   notes?: string | null;
+  deposit_bank_total?: number;
+  box_delta?: number | null;
+  bingo_deposited?: number;
+  actual_revenue?: number | null;
+  
   prev_shift_id?: string | null;
   created_by_user_id?: string;
   is_deleted?: boolean;

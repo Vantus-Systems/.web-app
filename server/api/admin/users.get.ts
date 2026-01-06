@@ -4,7 +4,7 @@ import { normalizeRole } from "~/utils/roles";
 import { assertRole } from "~/server/utils/roles";
 
 export default defineEventHandler(async (event) => {
-  assertRole(event.context.user?.role, ["OWNER"]);
+  assertRole(event.context.user?.role, ["OWNER", "MIC"]);
 
   const users = await prisma.user.findMany({
     select: {

@@ -10,11 +10,12 @@ export const shiftWorkflowSchema = z.enum([
 export type ShiftDesignation = z.infer<typeof shiftDesignationSchema>;
 export type ShiftWorkflowType = z.infer<typeof shiftWorkflowSchema>;
 
-export const shiftRecordInputSchema = z.object({
+const baseShiftSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   shift: shiftDesignationSchema,
   pulltabs_total: z.number().min(0),
   deposit_total: z.number().min(0).optional(),
+  deposit_bank_total: z.number().min(0).optional(),
   players: z.number().int().min(0).optional(),
   workflow_type: shiftWorkflowSchema,
   beginning_box: z.number().min(0).optional(),
@@ -25,9 +26,42 @@ export const shiftRecordInputSchema = z.object({
   prev_shift_id: z.string().optional(),
 });
 
-export const shiftRecordUpdateSchema = shiftRecordInputSchema.partial().extend({
-  id: z.string().optional(),
-});
+export const shiftRecordInputSchema = baseShiftSchema.refine(
+  (data) => {
+    if (
+      data.deposit_total !== undefined &&
+      data.deposit_bank_total !== undefined
+    ) {
+      return data.deposit_total === data.deposit_bank_total;
+    }
+    return true;
+  },
+  {
+    message: "deposit_bank_total must match deposit_total (legacy field)",
+    path: ["deposit_bank_total"],
+  },
+);
+
+export const shiftRecordUpdateSchema = baseShiftSchema
+  .partial()
+  .extend({
+    id: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (
+        data.deposit_total !== undefined &&
+        data.deposit_bank_total !== undefined
+      ) {
+        return data.deposit_total === data.deposit_bank_total;
+      }
+      return true;
+    },
+    {
+      message: "deposit_bank_total must match deposit_total (legacy field)",
+      path: ["deposit_bank_total"],
+    },
+  );
 
 export const shiftRecordQuerySchema = z.object({
   start: z
@@ -39,4 +73,6 @@ export const shiftRecordQuerySchema = z.object({
     .regex(/^\d{4}-\d{2}-\d{2}$/)
     .optional(),
   userId: z.string().optional(),
+  shift: shiftDesignationSchema.optional(),
+  workflow: shiftWorkflowSchema.optional(),
 });

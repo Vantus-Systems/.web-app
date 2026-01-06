@@ -2,6 +2,7 @@ import { defineEventHandler, getQuery } from "h3";
 import prisma from "~/server/db/client";
 import { assertRole } from "~/server/utils/roles";
 import { shiftRecordQuerySchema } from "~/server/schemas/shift-record.zod";
+import { calculateShiftDerived } from "~/utils/shiftDerivedTotals";
 
 export default defineEventHandler(async (event) => {
   assertRole(event.context.user?.role, ["OWNER", "MIC"]);
@@ -16,6 +17,12 @@ export default defineEventHandler(async (event) => {
   if (query.userId) {
     where.created_by_user_id = query.userId;
   }
+  if (query.shift) {
+    where.shift = query.shift;
+  }
+  if (query.workflow) {
+    where.workflow_type = query.workflow;
+  }
 
   const shifts = await prisma.shiftRecord.findMany({
     where,
@@ -28,5 +35,18 @@ export default defineEventHandler(async (event) => {
     },
   });
 
-  return shifts;
+  return shifts.map((shift) => {
+    const derived = calculateShiftDerived({
+      beginning_box: shift.beginning_box ?? undefined,
+      ending_box: shift.ending_box ?? undefined,
+      pulltabs_total: shift.pulltabs_total,
+      deposit_bank_total: shift.deposit_total,
+    });
+
+    return {
+      ...shift,
+      deposit_bank_total: shift.deposit_total,
+      ...derived,
+    };
+  });
 });

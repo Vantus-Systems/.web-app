@@ -31,14 +31,20 @@
        <!-- Boxes (Starting/Ending) -->
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Starting Box</label>
+          <div class="flex items-center mb-1">
+             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Starting Box</label>
+             <HelpTip text="The total cash in the drawer at the START of the shift." />
+          </div>
           <div class="relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
             <input v-model.number="form.beginning_box" type="number" step="0.01" required class="w-full pl-7 rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-sm font-mono font-bold focus:ring-2 focus:ring-primary-500 outline-none" @input="handleBoxInput" />
           </div>
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Ending Box</label>
+          <div class="flex items-center mb-1">
+             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Ending Box</label>
+             <HelpTip text="The total cash in the drawer at the END of the shift." />
+          </div>
           <div class="relative">
              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
              <input v-model.number="form.ending_box" type="number" step="0.01" required class="w-full pl-7 rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-sm font-mono font-bold focus:ring-2 focus:ring-primary-500 outline-none" @input="handleBoxInput" />
@@ -49,7 +55,10 @@
       <!-- Totals Row: Bingo (Left) | Pulltabs (Right) -->
       <div class="grid grid-cols-2 gap-4">
         <div>
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Bingo Total</label>
+            <div class="flex items-center mb-1">
+               <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Bingo (Deposited)</label>
+               <HelpTip text="The portion of the bank deposit that came from Bingo sales. Auto-calculated as Deposit - Pulltabs." />
+            </div>
             <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
                 <input 
@@ -63,7 +72,10 @@
             <p v-if="form.workflow_type === 'NEGATIVE_BINGO_BOX'" class="text-[10px] text-slate-400 mt-1">Locked to Box Delta</p>
         </div>
         <div>
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Pulltab Total</label>
+            <div class="flex items-center mb-1">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Pulltab Net</label>
+                <HelpTip text="Net pulltab income (Sales - Payouts)." />
+            </div>
             <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
                 <input 
@@ -79,7 +91,10 @@
       <!-- Deposit | Players -->
       <div class="grid grid-cols-2 gap-4">
         <div>
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Deposit Total</label>
+            <div class="flex items-center mb-1">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Deposit to Bank</label>
+                <HelpTip text="The actual amount of cash/checks physically taken to the bank. If Deposit is $5,000 and Box Change is +$1,265, Actual Revenue is $6,265." />
+            </div>
             <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
                 <input 
@@ -100,7 +115,10 @@
           leave-to-class="opacity-0 -translate-y-2"
         >
           <div v-if="form.shift === 'PM'">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Players</label>
+            <div class="flex items-center mb-1">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Players</label>
+                <HelpTip text="Headcount for the PM shift." />
+            </div>
             <input
               v-model.number="form.players"
               type="number"
@@ -111,31 +129,66 @@
         </transition>
       </div>
       
-      <!-- Actuals / Workflow Badge -->
-      <div class="flex items-center justify-between text-[10px] text-slate-400 border-t pt-2 mt-2">
-         <div class="flex flex-col">
-            <span>Workflow: <strong class="text-slate-600">{{ detectedWorkflow }}</strong></span>
-            <span>Actual: <strong>{{ formatCurrency(bingoActual) }}</strong> Bingo / <strong>{{ formatCurrency(depositActual) }}</strong> Dep</span>
+      <!-- Computed Readouts -->
+      <div class="bg-slate-50 rounded-lg p-3 border border-slate-200 space-y-2">
+         <div v-if="derived.box_delta === null" class="text-xs text-amber-600 font-bold flex items-center gap-2">
+            <span>⚠️ Missing box counts</span>
+            <HelpTip text="Please enter Starting and Ending Box amounts to calculate actual revenue." />
          </div>
-         <button 
-            type="button" 
-            class="text-primary-600 hover:text-primary-800 underline"
-            @click="showAdvanced = !showAdvanced"
-         >
-            {{ showAdvanced ? 'Hide Advanced' : 'Advanced' }}
-         </button>
+         <template v-else>
+            <div class="flex justify-between items-center text-xs">
+                <div class="flex items-center">
+                    <span class="text-slate-500 mr-1">Box Change:</span>
+                    <HelpTip text="Ending Box - Starting Box. Positive means cash was added to the drawer." />
+                </div>
+                <span :class="derived.box_delta >= 0 ? 'text-emerald-600' : 'text-red-600'" class="font-mono font-bold">
+                    {{ derived.box_delta > 0 ? '+' : '' }}{{ formatCurrency(derived.box_delta) }}
+                </span>
+            </div>
+             <div class="flex justify-between items-center text-xs">
+                <div class="flex items-center">
+                    <span class="text-slate-500 mr-1">Bingo (Actual):</span>
+                     <HelpTip text="Bingo (Deposited) + Box Change." />
+                </div>
+                <span class="font-mono font-bold text-slate-700">
+                    {{ formatCurrency(derived.bingo_actual) }}
+                </span>
+            </div>
+             <div class="flex justify-between items-center text-xs border-t border-slate-200 pt-2 mt-1">
+                <div class="flex items-center">
+                    <span class="font-bold text-slate-700 mr-1">Actual Revenue:</span>
+                     <HelpTip text="Deposit to Bank + Box Change. This is the true profit/loss for the shift." />
+                </div>
+                <span :class="(derived.actual_revenue || 0) >= 0 ? 'text-slate-900' : 'text-red-600'" class="font-mono font-black">
+                    {{ formatCurrency(derived.actual_revenue) }}
+                </span>
+            </div>
+         </template>
       </div>
 
       <!-- Advanced Override (Workflow) -->
-      <div v-if="showAdvanced" class="bg-slate-50 p-2 rounded border border-slate-200 text-xs">
-          <label class="block font-bold mb-1">Workflow Override</label>
-          <select v-model="form.workflow_type" class="w-full p-1 rounded border-slate-200">
+      <div class="text-right">
+         <button 
+            type="button" 
+            class="text-[10px] text-slate-400 hover:text-slate-600 underline"
+            @click="showAdvanced = !showAdvanced"
+         >
+            {{ showAdvanced ? 'Hide Advanced Options' : 'Show Advanced Options' }}
+         </button>
+      </div>
+
+      <div v-if="showAdvanced" class="bg-slate-50 p-2 rounded border border-slate-200 text-xs mt-2">
+          <div class="flex items-center mb-1">
+             <label class="block font-bold">Workflow Override</label>
+             <HelpTip text="Manually set the accounting workflow. 'Auto' usually works best." />
+          </div>
+          <select v-model="form.workflow_type" class="w-full p-1 rounded border-slate-200 mb-2">
              <option value="">Auto ({{ detectedWorkflow }})</option>
              <option value="NORMAL">Normal</option>
              <option value="NEGATIVE_BINGO_BOX">Negative</option>
              <option value="RECUPERATION_BOX_RETURN">Recovery</option>
           </select>
-          <label class="block font-bold mt-2 mb-1">Notes</label>
+          <label class="block font-bold mb-1">Notes</label>
           <input v-model="form.notes" class="w-full p-1 rounded border-slate-200" placeholder="Optional notes..."/>
       </div>
 
@@ -155,6 +208,8 @@ import { ref, computed } from "vue";
 import { useCsrf } from "~/composables/useCsrf";
 import { formatCurrency } from "~/utils/format";
 import { useShiftCalculations, type ShiftState } from "~/composables/useShiftCalculations";
+import { calculateShiftDerived } from "~/utils/shiftDerivedTotals";
+import HelpTip from "~/components/ui/HelpTip.vue";
 
 const emit = defineEmits(["saved"]);
 const { getHeaders } = useCsrf();
@@ -168,7 +223,6 @@ type QuickShiftState = ShiftState & {
     date: string, 
     players: number, 
     notes: string,
-    // Add raw binding field for workflow override (nullable means auto)
     workflow_override?: string 
 };
 
@@ -181,16 +235,20 @@ const form = ref<QuickShiftState>({
   pulltabs_total: 0,
   deposit_total: 0,
   bingo_total_input: 0,
-  workflow_type: "NORMAL", // We bind to this, but manage it via detection
+  workflow_type: "NORMAL",
   notes: ""
 });
 
-const { detectedWorkflow, bingoActual, depositActual, calculate } = useShiftCalculations(form, pinnedField);
+const { detectedWorkflow, calculate } = useShiftCalculations(form, pinnedField);
+
+const derived = computed(() => calculateShiftDerived({
+  beginning_box: form.value.beginning_box,
+  ending_box: form.value.ending_box,
+  pulltabs_total: form.value.pulltabs_total,
+  deposit_bank_total: form.value.deposit_total
+}));
 
 const handleBoxInput = () => {
-   // Auto-update workflow if user hasn't hard-overridden (or even if they have, we might prioritize detection unless locked)
-   // Here we'll treat workflow_type as the source of truth, but update it when boxes denote a specific state
-   // assuming default usage.
    if (detectedWorkflow.value) {
        form.value.workflow_type = detectedWorkflow.value;
    }
@@ -205,25 +263,34 @@ const handleSubmit = async () => {
     const payload = {
       date: form.value.date,
       shift: form.value.shift,
-      pulltabs_total: form.value.pulltabs_total,
-      deposit_total: form.value.deposit_total,
-      players: form.value.shift === "PM" ? form.value.players : 0,
-      workflow_type: form.value.workflow_type,
+      net_pulltab_income: form.value.pulltabs_total,
+      // API expects deposit_total, but we also send deposit_bank_total for clarity/validation
+      deposit_total: form.value.deposit_total, 
+      deposit_bank_total: form.value.deposit_total,
       beginning_box: form.value.beginning_box,
       ending_box: form.value.ending_box,
-      bingo_actual: bingoActual.value,
-      deposit_actual: depositActual.value,
+      headcount: form.value.shift === "PM" ? form.value.players : 0,
+      workflow_type: form.value.workflow_type,
       notes: form.value.notes
     };
-
-    await $fetch("/api/admin/shift-records", {
+    
+    // Check if we need to map to legacy fields expected by existing API or if we updated it?
+    // The existing POST /api/admin/mic/shifts endpoint expects specific fields.
+    // Let's check micShiftSubmissionSchema in server/schemas/micShift.zod
+    
+    // Actually, QuickShiftEntry previously called /api/admin/mic/shifts.
+    // Does that endpoint support beginning_box/ending_box?
+    // I need to check micShiftSubmissionSchema.
+    
+    await $fetch("/api/admin/mic/shifts", {
       method: "POST",
       body: payload,
       headers: getHeaders(),
-      credentials: "include", // Ensure session/csrf cookies sent
+      credentials: "include",
     });
 
     emit("saved");
+    
     // Reset form
     form.value = {
       date: new Date().toISOString().slice(0, 10),
@@ -237,7 +304,6 @@ const handleSubmit = async () => {
       workflow_type: "NORMAL",
       notes: ""
     };
-    pinnedField.value = "deposit";
     alert("Shift submitted!");
   } catch (e: any) {
     alert(e.message || "Failed to submit");

@@ -11,6 +11,8 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const data = shiftRecordInputSchema.parse(body);
 
+  const depositInput = data.deposit_bank_total ?? data.deposit_total ?? 0;
+
   const {
     prevShift,
     beginningBox,
@@ -22,7 +24,7 @@ export default defineEventHandler(async (event) => {
     date: data.date,
     shift: data.shift,
     pulltabs_total: data.pulltabs_total,
-    deposit_total: data.deposit_total,
+    deposit_total: depositInput,
     workflow_type: data.workflow_type,
     beginning_box: data.beginning_box,
     ending_box: data.ending_box,
