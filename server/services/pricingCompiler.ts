@@ -45,7 +45,7 @@ export const pricingCompiler = {
     // 2. Check for weekly rotation
     const rotationTemplateId =
       content.weeklyRotation[dayCode] ??
-      content.weeklyRotation[String(dayOfWeek)];
+      content.weeklyRotation[String(dayOfWeek) as any];
     if (rotationTemplateId) {
       const template = content.templates.find(
         (t) => t.id === rotationTemplateId,

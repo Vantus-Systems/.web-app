@@ -6,58 +6,67 @@ import { shiftRecordInputSchema } from "~/server/schemas/shift-record.zod";
 import { computeShiftTotals } from "~/server/services/shiftRecords.service";
 
 export default defineEventHandler(async (event) => {
-  assertAnyPermission(event.context.user?.role, ["mic:edit", "ops:edit"]);
+  try {
+    assertAnyPermission(event.context.user?.role, ["mic:edit", "ops:edit"]);
 
-  const body = await readBody(event);
-  const data = shiftRecordInputSchema.parse(body);
+    const body = await readBody(event);
+    const data = shiftRecordInputSchema.parse(body);
 
-  const depositInput = data.deposit_bank_total ?? data.deposit_total ?? 0;
+    const depositInput = data.deposit_bank_total ?? data.deposit_total ?? 0;
 
-  const {
-    prevShift,
-    beginningBox,
-    depositTotal,
-    bingoTotal,
-    bingoActual,
-    depositActual,
-  } = await computeShiftTotals({
-    date: data.date,
-    shift: data.shift,
-    pulltabs_total: data.pulltabs_total,
-    deposit_total: depositInput,
-    workflow_type: data.workflow_type,
-    beginning_box: data.beginning_box,
-    ending_box: data.ending_box,
-    bingo_actual: data.bingo_actual,
-    deposit_actual: data.deposit_actual,
-    prev_shift_id: data.prev_shift_id,
-  });
-
-  const record = await prisma.shiftRecord.create({
-    data: {
-      date: new Date(`${data.date}T00:00:00Z`),
+    const {
+      prevShift,
+      beginningBox,
+      depositTotal,
+      bingoTotal,
+      bingoActual,
+      depositActual,
+    } = await computeShiftTotals({
+      date: data.date,
       shift: data.shift,
       pulltabs_total: data.pulltabs_total,
-      deposit_total: depositTotal ?? 0,
-      bingo_total: bingoTotal,
-      players: data.players,
+      deposit_total: depositInput,
       workflow_type: data.workflow_type,
-      beginning_box: beginningBox,
+      beginning_box: data.beginning_box,
       ending_box: data.ending_box,
-      bingo_actual: bingoActual,
-      deposit_actual: depositActual,
-      notes: data.notes,
-      prev_shift_id: data.prev_shift_id ?? prevShift?.id,
-      created_by_user_id: event.context.user.id,
-    },
-  });
+      bingo_actual: data.bingo_actual,
+      deposit_actual: data.deposit_actual,
+      prev_shift_id: data.prev_shift_id,
+    });
 
-  await auditService.log({
-    actorUserId: event.context.user.id,
-    action: "CREATE_SHIFT",
-    entity: `shift:${record.id}`,
-    after: record,
-  });
+    const record = await prisma.shiftRecord.create({
+      data: {
+        date: new Date(`${data.date}T00:00:00Z`),
+        shift: data.shift,
+        pulltabs_total: data.pulltabs_total,
+        deposit_total: depositTotal ?? 0,
+        bingo_total: bingoTotal,
+        players: data.players,
+        workflow_type: data.workflow_type,
+        beginning_box: beginningBox,
+        ending_box: data.ending_box,
+        bingo_actual: bingoActual,
+        deposit_actual: depositActual,
+        notes: data.notes,
+        prev_shift_id: data.prev_shift_id ?? prevShift?.id,
+        created_by_user_id: event.context.user.id,
+      },
+    });
 
-  return record;
+    await auditService.log({
+      actorUserId: event.context.user.id,
+      action: "CREATE_SHIFT",
+      entity: `shift:${record.id}`,
+      after: record,
+    });
+
+    return record;
+  } catch (err: any) {
+    console.error("Create shift failed", err);
+    throw createError({
+      statusCode: err?.statusCode || 500,
+      statusMessage: err?.statusMessage || "Internal Server Error",
+      data: err?.data,
+    });
+  }
 });

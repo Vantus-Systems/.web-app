@@ -13,6 +13,7 @@ const progressiveSchema = z.object({
   backup: z.number(),
   playTime: z.string().optional(),
   isSession: z.boolean().optional(),
+  lastWonDate: z.string().optional(),
 });
 
 const jackpotSchema = z

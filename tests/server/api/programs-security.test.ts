@@ -36,7 +36,7 @@ vi.mock("~/server/utils/roles", () => ({
 }));
 
 vi.mock("h3", () => ({
-  defineEventHandler: (handler) => handler,
+  defineEventHandler: (handler: any) => handler,
   readBody: vi.fn(),
   getQuery: vi.fn(),
   createError: vi.fn((err) => err),

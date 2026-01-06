@@ -55,7 +55,7 @@ export default defineEventHandler(async (event) => {
 
   // Parse overrides if they are strings
   const parsedSlots = draft.slots.map((slot) => {
-    let overrides = slot.overrides;
+    let overrides: any = slot.overrides;
     if (typeof overrides === "string") {
       try {
         overrides = JSON.parse(overrides);

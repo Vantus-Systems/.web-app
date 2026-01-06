@@ -21,10 +21,11 @@ import { formatCurrency } from "~/utils/format";
  * - computes cash_total, checks_total, variance server-side
  */
 export default defineEventHandler(async (event) => {
-  assertRole(event.context.user?.role, ["MIC", "OWNER"]);
+  try {
+    assertRole(event.context.user?.role, ["MIC", "OWNER"]);
 
-  const body = await readBody(event);
-  const data = micShiftSubmissionSchema.parse(body);
+    const body = await readBody(event);
+    const data = micShiftSubmissionSchema.parse(body);
 
   // Calculate cashTotal: Use manual override if provided, otherwise sum denominations
   const cashTotal =
@@ -191,4 +192,12 @@ export default defineEventHandler(async (event) => {
       prev_shift: true,
     },
   });
+  } catch (err: any) {
+    console.error("/api/admin/mic/shifts POST failed", err);
+    throw createError({
+      statusCode: err?.statusCode || 500,
+      statusMessage: err?.statusMessage || "Internal Server Error",
+      data: err?.data,
+    });
+  }
 });

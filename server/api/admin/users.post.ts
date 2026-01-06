@@ -30,65 +30,74 @@ const userSchema = z.object({
 });
 
 export default defineEventHandler(async (event) => {
-  assertPermission(event.context.user?.role, "people:edit");
+  try {
+    assertPermission(event.context.user?.role, "people:edit");
 
-  const body = await readBody(event);
-  const {
-    username,
-    password,
-    role,
-    firstName,
-    lastName,
-    email,
-    phone,
-    isActive,
-  } = userSchema.parse(body);
-  const normalizedRole = normalizeRole(role);
-  if (!normalizedRole) {
-    throw createError({ statusCode: 400, message: "Invalid role" });
-  }
-
-  const existing = await authService.getUserByUsername(username);
-  if (existing) {
-    throw createError({ statusCode: 409, message: "Username already exists" });
-  }
-
-  const hash = await authService.hashPassword(password);
-
-  const user = await prisma.user.create({
-    data: {
+    const body = await readBody(event);
+    const {
       username,
-      password_hash: hash,
-      role: normalizedRole,
-      first_name: firstName || null,
-      last_name: lastName || null,
-      email: email || null,
-      phone: phone || null,
-      is_active: isActive ?? true,
-    },
-  });
+      password,
+      role,
+      firstName,
+      lastName,
+      email,
+      phone,
+      isActive,
+    } = userSchema.parse(body);
+    const normalizedRole = normalizeRole(role);
+    if (!normalizedRole) {
+      throw createError({ statusCode: 400, message: "Invalid role" });
+    }
 
-  // Audit log
-  await auditService.log({
-    actorUserId: event.context.user.id,
-    action: "CREATE_USER",
-    entity: `user:${user.id}`,
-    after: {
+    const existing = await authService.getUserByUsername(username);
+    if (existing) {
+      throw createError({ statusCode: 409, message: "Username already exists" });
+    }
+
+    const hash = await authService.hashPassword(password);
+
+    const user = await prisma.user.create({
+      data: {
+        username,
+        password_hash: hash,
+        role: normalizedRole,
+        first_name: firstName || null,
+        last_name: lastName || null,
+        email: email || null,
+        phone: phone || null,
+        is_active: isActive ?? true,
+      },
+    });
+
+    // Audit log
+    await auditService.log({
+      actorUserId: event.context.user.id,
+      action: "CREATE_USER",
+      entity: `user:${user.id}`,
+      after: {
+        username: user.username,
+        role: user.role,
+        is_active: user.is_active,
+      },
+    });
+
+    return {
+      id: user.id,
       username: user.username,
-      role: user.role,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      email: user.email,
+      phone: user.phone,
+      role: normalizeRole(user.role),
+      rawRole: user.role,
       is_active: user.is_active,
-    },
-  });
-
-  return {
-    id: user.id,
-    username: user.username,
-    first_name: user.first_name,
-    last_name: user.last_name,
-    email: user.email,
-    phone: user.phone,
-    role: normalizeRole(user.role),
-    rawRole: user.role,
-    is_active: user.is_active,
-  };
+    };
+  } catch (err: any) {
+    console.error("Create user failed", err);
+    throw createError({
+      statusCode: err?.statusCode || 500,
+      statusMessage: err?.statusMessage || "Internal Server Error",
+      data: err?.data,
+    });
+  }
 });

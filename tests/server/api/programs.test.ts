@@ -36,7 +36,7 @@ vi.mock("~/server/utils/roles", () => ({
 }));
 
 vi.mock("h3", () => ({
-  defineEventHandler: (handler) => handler,
+  defineEventHandler: (handler: any) => handler,
   readBody: vi.fn(),
   createError: vi.fn((err) => err),
 }));
@@ -80,15 +80,16 @@ describe("Admin Programs API", () => {
       (prisma.bingoProgram.findMany as any).mockResolvedValue(mockPrograms);
 
       const result = await getHandler(mockEvent as any);
+      const res: any = result;
 
       expect(assertRole).toHaveBeenCalledWith("OWNER", ["OWNER"]);
-      expect(result).toHaveLength(1);
-      expect(result[0].games[0].pricing).toEqual({
+      expect(res).toHaveLength(1);
+      expect(res[0].games[0].pricing).toEqual({
         model: "standard",
         price: 10,
       });
-      expect(result[0].games[0].payout).toEqual({ type: "fixed", amount: 100 });
-      expect(result[0].games[0].timeline).toEqual({
+      expect(res[0].games[0].payout).toEqual({ type: "fixed", amount: 100 });
+      expect(res[0].games[0].timeline).toEqual({
         estimatedDuration: 15,
         isBreak: false,
       });
@@ -116,10 +117,11 @@ describe("Admin Programs API", () => {
       (prisma.bingoProgram.findMany as any).mockResolvedValue(mockPrograms);
 
       const result = await getHandler(mockEvent as any);
+      const res2: any = result;
 
-      expect(result[0].games[0].pricing).toEqual({ model: "included" });
-      expect(result[0].games[0].payout).toEqual({ type: "fixed", amount: 0 });
-      expect(result[0].games[0].timeline).toEqual({
+      expect(res2[0].games[0].pricing).toEqual({ model: "included" });
+      expect(res2[0].games[0].payout).toEqual({ type: "fixed", amount: 0 });
+      expect(res2[0].games[0].timeline).toEqual({
         estimatedDuration: 10,
         isBreak: false,
       });
