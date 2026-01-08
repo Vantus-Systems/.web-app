@@ -147,7 +147,6 @@
             />
           </div>
         </transition>
-      </div>
       
       <!-- Computed Readouts -->
       <div class="bg-slate-50 rounded-lg p-3 border border-slate-200 space-y-2">
