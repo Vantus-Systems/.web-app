@@ -45,5 +45,6 @@
                 "openrouter/z-ai/glm-4.5-air:free"
             ]
         }
-    }
+    },
+    "git.ignoreLimitWarning": true
 }

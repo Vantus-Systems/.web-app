@@ -300,4 +300,10 @@ async function restoreVersion(version: any) {
     ensureV2Structure();
   }
 }
+
+defineExpose({
+  triggerSave: async () => {
+    await handleSaveDraft();
+  },
+});
 </script>

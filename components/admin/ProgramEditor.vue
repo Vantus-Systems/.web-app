@@ -1126,6 +1126,12 @@ const saveProgram = () => {
   emit("save", form.value);
 };
 
+defineExpose({
+  triggerSave: () => {
+    saveProgram();
+  },
+});
+
 const deleteProgram = (slug: string) => {
   emit("delete", slug);
 };

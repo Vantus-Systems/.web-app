@@ -23,30 +23,26 @@ function isProductionInstall() {
   const prod = isProductionInstall();
   const skipDb = process.env.SKIP_DB_SETUP === "1";
 
-  if (!prod && !skipDb) {
+  // Run DB setup regardless of environment unless explicitly skipped.
+  // The setup-db script is now smart enough to handle production safely.
+  if (!skipDb) {
     try {
       run("node ./scripts/setup-db.js");
     } catch (err) {
-      // Setup may fail on some developer machines (missing native binaries, permission issues,
-      // or transient npx failures). Do not break `npm install` for non-production installs.
-      log(
-        "Non-fatal: setup-db failed:",
-        err && err.message ? err.message : err,
-      );
+      log("Note: setup-db encountered an issue (non-fatal):", err.message);
     }
-  } else {
-    log(
-      prod
-        ? "Production install detected; skipping automatic DB setup."
-        : "SKIP_DB_SETUP=1; skipping automatic DB setup.",
-    );
+  }
+
+  // Try to setup python environment for verification scripts
+  try {
+    run("node ./scripts/setup-python.js");
+  } catch (err) {
+    log("Note: setup-python encountered an issue (non-fatal):", err.message);
   }
 
   try {
     run("nuxt prepare");
   } catch (err) {
-    // nuxt prepare can fail in environments without build toolchain available yet.
-    // For development installs we log and continue so `npm install` succeeds.
     if (prod) {
       // In production we want the failure to surface so the deploy fails loudly.
       throw err;
@@ -55,5 +51,12 @@ function isProductionInstall() {
       "Non-fatal: 'nuxt prepare' failed during postinstall:",
       err && err.message ? err.message : err,
     );
+  }
+
+  // Final summary and next steps
+  try {
+    run("node ./scripts/install-summary.js");
+  } catch (err) {
+    // ignore summary errors
   }
 })();

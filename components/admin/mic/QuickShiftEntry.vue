@@ -28,36 +28,72 @@
         </div>
       </div>
 
-       <!-- Boxes (Starting/Ending) -->
+      <!-- Boxes (Starting/Ending) -->
       <div class="grid grid-cols-2 gap-4">
         <div>
           <div class="flex items-center mb-1">
              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Starting Box</label>
-             <HelpTip text="The total cash in the drawer at the START of the shift." />
+             <HelpTip text="The total cash in the drawer at the START of the shift. Auto-filled from previous shift." />
           </div>
           <div class="relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
             <input v-model.number="form.beginning_box" type="number" step="0.01" required class="w-full pl-7 rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-sm font-mono font-bold focus:ring-2 focus:ring-primary-500 outline-none" @input="handleBoxInput" />
           </div>
         </div>
+        
+        <!-- NEW: Cash Count Input -->
+        <div>
+            <div class="flex items-center mb-1">
+                <label class="block text-xs font-bold text-emerald-600 uppercase tracking-wider">Cash Count (Total)</label>
+                <HelpTip text="Total cash in drawer BEFORE separating deposit. Drives the recursive calculation." />
+            </div>
+            <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
+                <input 
+                    v-model.number="form.cash_count" 
+                    type="number" step="0.01" 
+                    placeholder="Enter Total Cash"
+                    class="w-full pl-7 rounded-lg border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-mono font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-emerald-800"
+                    @input="calculate('cash_count')"
+                />
+            </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
         <div>
           <div class="flex items-center mb-1">
              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Ending Box</label>
-             <HelpTip text="The total cash in the drawer at the END of the shift." />
+             <HelpTip text="The total cash remaining in the drawer AFTER deposit. Calculated from Cash Count." />
           </div>
           <div class="relative">
              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
              <input v-model.number="form.ending_box" type="number" step="0.01" required class="w-full pl-7 rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-sm font-mono font-bold focus:ring-2 focus:ring-primary-500 outline-none" @input="handleBoxInput" />
           </div>
         </div>
+        <div>
+            <div class="flex items-center mb-1">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Pulltab Net</label>
+                <HelpTip text="Net pulltab income (Sales - Payouts)." />
+            </div>
+            <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
+                <input 
+                    v-model.number="form.pulltabs_total" 
+                    type="number" step="0.01" 
+                    class="w-full pl-7 rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-sm font-mono font-bold focus:ring-2 focus:ring-primary-500 outline-none"
+                    @input="calculate('pulltabs'); if(form.cash_count) calculate('cash_count')"
+                />
+            </div>
+        </div>
       </div>
 
-      <!-- Totals Row: Bingo (Left) | Pulltabs (Right) -->
+      <!-- Bingo (Deposited) | Deposit -->
       <div class="grid grid-cols-2 gap-4">
         <div>
             <div class="flex items-center mb-1">
-               <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Bingo (Deposited)</label>
-               <HelpTip text="The portion of the bank deposit that came from Bingo sales. Auto-calculated as Deposit - Pulltabs." />
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Bingo (Deposited)</label>
+                <HelpTip text="The portion of the bank deposit that came from Bingo sales. Auto-calculated as Deposit - Pulltabs." />
             </div>
             <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
@@ -71,29 +107,11 @@
             </div>
             <p v-if="form.workflow_type === 'NEGATIVE_BINGO_BOX'" class="text-[10px] text-slate-400 mt-1">Locked to Box Delta</p>
         </div>
-        <div>
-            <div class="flex items-center mb-1">
-                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Pulltab Net</label>
-                <HelpTip text="Net pulltab income (Sales - Payouts)." />
-            </div>
-            <div class="relative">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
-                <input 
-                    v-model.number="form.pulltabs_total" 
-                    type="number" step="0.01" 
-                    class="w-full pl-7 rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-sm font-mono font-bold focus:ring-2 focus:ring-primary-500 outline-none"
-                    @input="calculate('pulltabs')"
-                />
-            </div>
-        </div>
-      </div>
-
-      <!-- Deposit | Players -->
-      <div class="grid grid-cols-2 gap-4">
+        
         <div>
             <div class="flex items-center mb-1">
                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Deposit to Bank</label>
-                <HelpTip text="The actual amount of cash/checks physically taken to the bank. If Deposit is $5,000 and Box Change is +$1,265, Actual Revenue is $6,265." />
+                <HelpTip text="The actual amount of cash/checks physically taken to the bank." />
             </div>
             <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
@@ -105,8 +123,10 @@
                  />
             </div>
         </div>
+      </div>
 
-        <transition
+      <!-- Players (Conditional PM) -->
+      <transition
           enter-active-class="transition duration-200 ease-out"
           enter-from-class="opacity-0 -translate-y-2"
           enter-to-class="opacity-100 translate-y-0"
@@ -204,7 +224,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useCsrf } from "~/composables/useCsrf";
 import { formatCurrency } from "~/utils/format";
 import { useShiftCalculations, type ShiftState } from "~/composables/useShiftCalculations";
@@ -235,11 +255,45 @@ const form = ref<QuickShiftState>({
   pulltabs_total: 0,
   deposit_total: 0,
   bingo_total_input: 0,
+  cash_count: undefined,
   workflow_type: "NORMAL",
   notes: ""
 });
 
 const { detectedWorkflow, calculate } = useShiftCalculations(form, pinnedField);
+
+const loadPreviousShift = async () => {
+  try {
+    const today = new Date(form.value.date);
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() - 7);
+    
+    const shifts = await $fetch<any[]>("/api/admin/shift-records", {
+      params: { 
+        start: startDate.toISOString().slice(0, 10),
+        end: form.value.date 
+      },
+      headers: getHeaders(),
+      credentials: "include"
+    });
+    
+    if (shifts && shifts.length > 0) {
+      // API returns desc by date/shift.
+      // We want the most recent shift that is NOT the current one (if current one existed).
+      // Assuming this is for creating a NEW shift.
+      const prevShift = shifts[0];
+      if (prevShift && prevShift.ending_box) {
+         form.value.beginning_box = prevShift.ending_box;
+      }
+    }
+  } catch (e) {
+    console.error("Failed to load previous shift", e);
+  }
+};
+
+onMounted(() => {
+    loadPreviousShift();
+});
 
 const derived = computed(() => calculateShiftDerived({
   beginning_box: form.value.beginning_box,
@@ -301,6 +355,7 @@ const handleSubmit = async () => {
       pulltabs_total: 0,
       deposit_total: 0,
       bingo_total_input: 0,
+      cash_count: undefined,
       workflow_type: "NORMAL",
       notes: ""
     };

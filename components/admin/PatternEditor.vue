@@ -554,6 +554,12 @@ const savePattern = () => {
   emit("save", form.value);
 };
 
+defineExpose({
+  triggerSave: () => {
+    savePattern();
+  },
+});
+
 const categories = computed(() => {
   const defaults = [
     "All",

@@ -9,6 +9,8 @@ import { useOpsStore } from "~/stores/ops";
 import { useToast } from "~/composables/useToast";
 import { useAuthUser } from "~/composables/useAuthUser";
 import { normalizeRole } from "~/utils/roles";
+import { useScheduleStore } from "~/stores/schedule";
+import { usePricingStore } from "~/stores/pricing";
 
 const props = defineProps<{
   userRole?: string | null;
@@ -20,6 +22,13 @@ const { user, fetchUser } = useAuthUser();
 const currentStep = ref("patterns"); // patterns | programs | schedule | pricing
 const isProgramSaving = ref(false);
 const isProgramDirty = ref(false);
+const scheduleStore = useScheduleStore();
+const pricingStore = usePricingStore();
+
+const patternEditorRef = ref<any>(null);
+const programEditorRef = ref<any>(null);
+const scheduleEditorRef = ref<any>(null);
+const pricingPanelRef = ref<any>(null);
 
 onMounted(() => {
   opsStore.loadAll();
@@ -58,6 +67,22 @@ const confirmNavigation = (stepId: string) => {
     isProgramDirty.value = false;
   }
   currentStep.value = stepId;
+};
+
+const handleGlobalSave = async () => {
+  try {
+    if (currentStep.value === "patterns") {
+      await patternEditorRef.value?.triggerSave?.();
+    } else if (currentStep.value === "programs") {
+      await programEditorRef.value?.triggerSave?.();
+    } else if (currentStep.value === "schedule") {
+      await scheduleEditorRef.value?.triggerSave?.();
+    } else if (currentStep.value === "pricing") {
+      await pricingPanelRef.value?.triggerSave?.();
+    }
+  } catch (e: any) {
+    toast.error(e?.message || "Failed to save.", { title: "Error" });
+  }
 };
 
 const handlePatternSave = async (p: any) => {
@@ -139,6 +164,19 @@ const handleProgramSave = async (p: any) => {
           </button>
         </div>
       </div>
+      <div class="flex items-center gap-3">
+        <button
+          class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-accent-primary text-white rounded hover:bg-accent-primary/90 transition-colors disabled:opacity-60"
+          :disabled="
+            (currentStep === 'programs' && isProgramSaving) ||
+            (currentStep === 'schedule' && (scheduleStore.saving || !scheduleStore.dirty)) ||
+            (currentStep === 'pricing' && (pricingStore.saving || !pricingStore.dirty))
+          "
+          @click="handleGlobalSave"
+        >
+          Save
+        </button>
+      </div>
     </header>
 
     <!-- Main Content -->
@@ -147,6 +185,7 @@ const handleProgramSave = async (p: any) => {
         <PatternEditor
           v-if="currentStep === 'patterns'"
           :patterns="opsStore.patterns"
+          ref="patternEditorRef"
           @save="handlePatternSave"
           @delete="handlePatternDelete"
         />
@@ -155,12 +194,13 @@ const handleProgramSave = async (p: any) => {
           :programs="opsStore.programs"
           :patterns="opsStore.patterns"
           :is-saving="isProgramSaving"
+          ref="programEditorRef"
           @save="handleProgramSave"
           @delete="handleProgramDelete"
           @dirty-change="(v) => (isProgramDirty = v)"
         />
-        <WeeklyScheduleEditor v-else-if="currentStep === 'schedule'" />
-        <PricingManagerPanel v-else-if="currentStep === 'pricing'" />
+        <WeeklyScheduleEditor v-else-if="currentStep === 'schedule'" ref="scheduleEditorRef" />
+        <PricingManagerPanel v-else-if="currentStep === 'pricing'" ref="pricingPanelRef" />
       </div>
     </main>
   </div>

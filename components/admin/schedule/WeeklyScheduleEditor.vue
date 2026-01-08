@@ -157,6 +157,12 @@ const saveDraft = async () => {
   }
 };
 
+defineExpose({
+  triggerSave: async () => {
+    await saveDraft();
+  },
+});
+
 const publish = async () => {
   if (
     !confirm(
