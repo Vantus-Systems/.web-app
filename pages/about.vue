@@ -30,45 +30,57 @@
           </p>
         </div>
 
-        <!-- Charity Logos Grid (Visual representation) -->
-        <div
-          class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 items-center justify-items-center mb-20 opacity-80"
-        >
-          <div
-            v-for="(charity, index) in charities"
-            :key="index"
-            class="w-full flex justify-center grayscale hover:grayscale-0 transition-all duration-300 transform hover:scale-105"
-          >
-            <div
-              class="bg-slate-50 p-6 rounded-xl border border-slate-100 w-full h-32 flex items-center justify-center text-center shadow-sm"
-            >
-              <span
-                class="font-bold text-primary-800 leading-tight text-sm md:text-base"
-                >{{ charity.name }}</span
-              >
-            </div>
-          </div>
+        <div v-if="pending" class="text-center py-20">
+             <div class="animate-spin h-8 w-8 border-4 border-gold-500 border-t-transparent rounded-full mx-auto"></div>
         </div>
 
-        <!-- Detailed Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <BaseCard
-            v-for="(charity, index) in charities"
-            :key="index"
-            class="text-center hover:shadow-xl transition-shadow duration-300 border-t-4 border-t-gold"
-          >
+        <div v-else>
+            <!-- Charity Logos Grid (Visual representation) -->
             <div
-              class="w-20 h-20 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-6 text-primary-700"
+            class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 items-center justify-items-center mb-20 opacity-80"
             >
-              <HeartHandshake class="w-10 h-10" />
+            <div
+                v-for="(charity, index) in charities"
+                :key="index"
+                class="w-full flex justify-center grayscale hover:grayscale-0 transition-all duration-300 transform hover:scale-105"
+            >
+                <div
+                class="bg-slate-50 p-6 rounded-xl border border-slate-100 w-full h-32 flex items-center justify-center text-center shadow-sm relative overflow-hidden"
+                >
+                <img v-if="charity.logo" :src="charity.logo" :alt="charity.name" class="max-w-full max-h-full object-contain p-2" />
+                <span
+                    v-else
+                    class="font-bold text-primary-800 leading-tight text-sm md:text-base"
+                    >{{ charity.name }}</span
+                >
+                </div>
             </div>
-            <h3 class="text-xl font-bold text-primary-900 mb-3">
-              {{ charity.name }}
-            </h3>
-            <p class="text-slate-600 leading-relaxed text-sm">
-              {{ charity.description }}
-            </p>
-          </BaseCard>
+            </div>
+
+            <!-- Detailed Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <BaseCard
+                v-for="(charity, index) in charities"
+                :key="index"
+                class="text-center hover:shadow-xl transition-shadow duration-300 border-t-4 border-t-gold"
+            >
+                <div
+                class="w-20 h-20 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-6 text-primary-700 overflow-hidden"
+                >
+                 <img v-if="charity.logo" :src="charity.logo" :alt="charity.name" class="w-full h-full object-cover" />
+                 <HeartHandshake v-else class="w-10 h-10" />
+                </div>
+                <h3 class="text-xl font-bold text-primary-900 mb-3">
+                {{ charity.name }}
+                </h3>
+                <p class="text-slate-600 leading-relaxed text-sm">
+                {{ charity.description }}
+                </p>
+                <div v-if="charity.impact" class="mt-4 pt-4 border-t border-slate-100 text-xs text-emerald-600 font-bold uppercase tracking-wider">
+                    {{ charity.impact }}
+                </div>
+            </BaseCard>
+            </div>
         </div>
       </div>
     </section>
@@ -114,36 +126,10 @@ import { useBusiness } from "~/composables/useBusiness";
 const { business: BUSINESS_INFO, fetchBusiness } = useBusiness();
 await fetchBusiness();
 
+const { data: charities, pending } = await useFetch('/api/charities');
+
 useSeoMeta({
   title: "About Us | Mary Esther Bingo",
   description: `Learn about ${BUSINESS_INFO.value.name}, our mission, and the local community organizations we support.`,
 });
-
-const charities = [
-  {
-    name: "Brain Injury Connection",
-    description:
-      "Supporting individuals and families affected by brain injuries through education and community resources.",
-  },
-  {
-    name: "Mary Esther Fire Rescue",
-    description:
-      "Helping our local heroes provide emergency services and safety education to our community.",
-  },
-  {
-    name: "Emerald Coast Foundation",
-    description:
-      "Dedicated to supporting children and youth in Northwest Florida through various initiatives.",
-  },
-  {
-    name: "Okaloosa Walton Homeless Continuum",
-    description:
-      "Working to support homelessness initiatives in our region through coordinated community efforts.",
-  },
-  {
-    name: "Eleanor J. Johnson Youth Center",
-    description:
-      "Providing a supportive environment for after-school and summer programs for local youth.",
-  },
-];
 </script>

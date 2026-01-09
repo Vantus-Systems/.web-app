@@ -44,6 +44,7 @@
     "@vueuse/motion": "^3.0.3",
     "argon2": "^0.44.0",
     "clsx": "^2.1.1",
+    "ics": "^3.8.1",
     "lucide-vue-next": "^0.562.0",
     "nuxt": "^4.2.2",
     "nuxt-security": "^2.5.0",

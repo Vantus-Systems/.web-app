@@ -18,7 +18,15 @@ export default defineEventHandler(async (event) => {
     if (activeVersion && activeVersion.content) {
       try {
         const content = JSON.parse(activeVersion.content);
-        return pricingCompiler.compileForPublic(content, date);
+        const compiled = pricingCompiler.compileForPublic(content, date);
+
+        // Enhance meta with publish info
+        if (compiled.meta) {
+            compiled.meta.lastPublishedAt = activeVersion.published_at;
+            compiled.meta.lastUpdatedBy = activeVersion.published_by;
+        }
+
+        return compiled;
       } catch (e) {
         console.error("Failed to parse active pricing version content", e);
         // Fallback to legacy settings if parsing fails

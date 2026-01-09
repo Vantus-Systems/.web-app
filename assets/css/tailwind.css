@@ -2,19 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
-html {
-  scroll-behavior: smooth;
+@layer base {
+  :root {
+    /* Brand Colors */
+    --brand-primary: 6 78 59; /* emerald-900 */
+    --brand-gold: 234 179 8; /* yellow-500 */
+
+    /* Layout */
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
+
+    /* Shadows */
+    --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white text-slate-900 font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold text-slate-900;
+  }
 }
 
-body {
-  @apply bg-base text-primary font-sans antialiased;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  @apply font-bold text-primary;
+@layer components {
+    /* Premium Mobile Polish */
+    .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
 }

@@ -34,6 +34,7 @@ interface Session {
   games?: { number: number; name: string; detail?: string }[];
   bonuses?: Record<string, any>;
   specials?: Record<string, string>;
+  programSlug?: string;
 }
 
 const props = defineProps<{
@@ -102,10 +103,36 @@ const formatPricing = (pricing: any) => {
 };
 
 const addToCalendar = () => {
-  const text = encodeURIComponent(`Bingo: ${props.session.name}`);
-  const details = encodeURIComponent(props.session.description);
-  const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${text}&details=${details}`;
-  window.open(url, "_blank");
+    // Determine active date
+    // This is tricky because `ScheduleEventCard` doesn't know the exact date unless passed,
+    // it usually just knows the day of week.
+    // We should compute the "Next Occurrence" date.
+
+    // For now, let's use the current "Active Day" from parent if available or calculate next DoW.
+    // Parent passes `activeDayOfWeek` (e.g. "Monday").
+    // We can find the next Monday.
+
+    let targetDate = new Date();
+    if (props.activeDayOfWeek) {
+         const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+         const targetDayIndex = days.indexOf(props.activeDayOfWeek);
+         if (targetDayIndex !== -1) {
+             const currentDayIndex = targetDate.getDay();
+             let daysUntil = (targetDayIndex - currentDayIndex + 7) % 7;
+             // If today is the day but the time has passed?
+             // Ideally we want the *viewed* date.
+             // But simpler: just use next occurrence.
+             if (daysUntil === 0) {
+                 // Check if time passed? Assume yes for simplicity if late, or just date.
+             }
+             targetDate.setDate(targetDate.getDate() + daysUntil);
+         }
+    }
+    const dateStr = targetDate.toISOString().split('T')[0];
+
+    // Construct URL
+    const url = `/api/calendar/ics?sessionId=${props.session.id}&date=${dateStr}`;
+    window.location.href = url;
 };
 
 const startTimeParts = computed(() => {
@@ -338,6 +365,13 @@ const startTimeParts = computed(() => {
               <Calendar class="w-4 h-4" />
               Add to Calendar
             </button>
+            <NuxtLink
+              v-if="session.programSlug"
+              :to="`/programs/${session.programSlug}`"
+              class="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-slate-50 text-slate-500 font-bold text-sm transition-all"
+            >
+               View Program
+            </NuxtLink>
           </div>
 
           <div class="flex items-center gap-4">

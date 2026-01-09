@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
-import { Calendar, Filter, Clock } from "lucide-vue-next";
+import { Calendar as CalendarIcon, Filter, Clock, List, LayoutGrid, ArrowRight } from "lucide-vue-next";
 import { useBusiness } from "~/composables/useBusiness";
 import { useScheduleClock } from "~/composables/useScheduleClock";
 import { parseTime as parseTimeToMinutes } from "~/utils/time.utils";
+import TodayStrip from "~/components/public/TodayStrip.vue";
+import ScheduleEventCard from "~/components/ScheduleEventCard.vue";
 
 const {
   business: BUSINESS_INFO,
   fetchBusiness,
-  schedule: scheduleRef,
+  schedule: scheduleData,
   fetchSchedule,
 } = useBusiness();
 
@@ -18,9 +20,16 @@ const { chicagoTime, mode, customDate, customTime, initCustom, getStatus } =
 await fetchBusiness();
 await fetchSchedule();
 
-const sessions = computed(() =>
-  Array.isArray(scheduleRef.value) ? scheduleRef.value : [],
-);
+// Handle new response shape { sessions, meta } or legacy Array
+const sessions = computed(() => {
+  if (Array.isArray(scheduleData.value)) return scheduleData.value;
+  return scheduleData.value?.sessions || [];
+});
+
+const scheduleMeta = computed(() => {
+  if (Array.isArray(scheduleData.value)) return null;
+  return scheduleData.value?.meta || null;
+});
 
 type Day = {
   id: string;
@@ -30,18 +39,6 @@ type Day = {
 };
 
 const days = computed<Day[]>(() => {
-  // Use chicagoTime.dateStr (YYYY-MM-DD) as reference for "Today" if in Now mode?
-  // But typically "Today" means the user's today, or the business's today.
-  // Let's stick to the business timezone "today".
-
-  // Use a date object based on chicagoTime reference for the strip
-  // If "Time Travel", we anchor the strip around the custom date?
-  // For simplicity, let's keep "Today" as actual Today, but allow picking other days.
-  // Unless "Time Travel" is active, then we might want to shift context.
-
-  // Actually, existing code uses `new Date()` (client local).
-  // Let's respect `chicagoTime` for "Today" calculation.
-
   const refDateStr =
     mode.value === "custom" && customDate.value
       ? customDate.value
@@ -58,10 +55,6 @@ const days = computed<Day[]>(() => {
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(refDate);
     d.setDate(refDate.getDate() + i);
-
-    // If mode is custom, "Today" label might be confusing if it's not actually today.
-    // Let's just use "Day 1", "Day 2" or just dates if custom.
-    // Or keep logic: if i==0 and mode=='now', use "Today".
 
     const id = d.toISOString().slice(0, 10);
     let label = weekdayLong.format(d);
@@ -82,7 +75,7 @@ const days = computed<Day[]>(() => {
   });
 });
 
-const activeDay = ref("today"); // or the ISO string
+const activeDay = ref("today");
 
 // Initialize activeDay
 watch(
@@ -91,7 +84,6 @@ watch(
     if (mode.value === "custom" && customDate.value) {
       activeDay.value = customDate.value;
     } else if (days.value.length > 0) {
-      // If "today" is in the list, select it, otherwise first one
       const first = days.value[0];
       if (first) {
         activeDay.value = first.id;
@@ -103,7 +95,6 @@ watch(
 
 const selectDay = (dayId: string) => {
   activeDay.value = dayId;
-  // If in custom mode, maybe update customDate?
   if (mode.value === "custom") {
     customDate.value = dayId;
   }
@@ -111,21 +102,22 @@ const selectDay = (dayId: string) => {
 
 const activeFilter = ref("All");
 const filters = ["All", "Morning", "Afternoon", "Evening"];
+const viewMode = ref<'timeline' | 'compact'>('timeline');
 
 const filteredSessions = computed(() => {
   const currentDay = days.value.find((d) => d.id === activeDay.value);
   const dayOfWeek = currentDay?.dayOfWeek || "Mon";
 
-  let filtered = sessions.value.filter((s) =>
+  let filtered = sessions.value.filter((s: any) =>
     s.availableDays.includes(dayOfWeek),
   );
 
   if (activeFilter.value !== "All") {
-    filtered = filtered.filter((s) => s.category === activeFilter.value);
+    filtered = filtered.filter((s: any) => s.category === activeFilter.value);
   }
 
   // Sort by start time
-  filtered.sort((a, b) => {
+  filtered.sort((a: any, b: any) => {
     return parseTimeToMinutes(a.startTime) - parseTimeToMinutes(b.startTime);
   });
 
@@ -141,7 +133,7 @@ const activeDayOfWeek = computed(() => {
 const programCache = ref<Record<string, any>>({});
 const fetchPrograms = async () => {
   const slugs = new Set<string>();
-  filteredSessions.value.forEach((s) => {
+  filteredSessions.value.forEach((s: any) => {
     if (s.programSlug) slugs.add(s.programSlug);
   });
 
@@ -165,6 +157,20 @@ watch(
   { immediate: true },
 );
 
+// Next Up Card Logic
+const nextUpSession = computed(() => {
+    const nowMins = chicagoTime.value.minutes;
+    // Assume days[0] is Today for simplified logic if not using Time Travel heavily
+    // Only show Next Up if we are on "Today" view or very close to it.
+    if (activeDay.value !== days.value[0].id) return null;
+
+    // Find next session today
+    const upcoming = filteredSessions.value.find((s: any) => parseTimeToMinutes(s.startTime) > nowMins);
+    // Or if currently active?
+    // Let's stick to upcoming for "Next Up"
+    return upcoming || null;
+});
+
 useSeoMeta({
   title: "Schedule | Mary Esther Bingo",
   description: `View our general schedule at ${BUSINESS_INFO.value.name}. Sessions are offered daily.`,
@@ -173,6 +179,11 @@ useSeoMeta({
 
 <template>
   <div class="bg-white min-h-screen font-sans selection:bg-primary-100">
+    <!-- Today Strip -->
+    <div class="sticky top-0 z-50">
+      <TodayStrip />
+    </div>
+
     <!-- High-Fidelity Hero Section -->
     <div
       class="relative h-[45vh] min-h-[450px] flex items-center justify-center overflow-hidden bg-slate-900"
@@ -221,10 +232,37 @@ useSeoMeta({
           Experience the gold standard of bingo. Browse our curated sessions and
           plan your winning visit.
         </p>
+
+        <div v-if="scheduleMeta?.lastPublishedAt" class="mt-4 text-xs text-slate-400 font-medium">
+           Updated {{ new Date(scheduleMeta.lastPublishedAt).toLocaleDateString() }}
+        </div>
       </div>
     </div>
 
     <div class="container mx-auto px-4 -mt-20 relative z-20 pb-32">
+      <!-- Next Up Card (if active) -->
+      <div v-if="nextUpSession" class="mb-8 animate-in slide-in-from-bottom-4 duration-500">
+          <div class="bg-slate-900 rounded-2xl p-6 shadow-2xl border border-gold-500/30 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+             <div class="absolute inset-0 bg-gold-500/5"></div>
+             <div class="relative z-10 flex items-center gap-6">
+                <div class="p-3 bg-gold-500 rounded-xl text-slate-900">
+                    <Clock class="w-8 h-8" />
+                </div>
+                <div>
+                    <div class="text-gold-400 text-xs font-bold uppercase tracking-widest mb-1">Coming Up Next</div>
+                    <div class="text-2xl font-black text-white">{{ nextUpSession.name }}</div>
+                    <div class="text-slate-400 font-medium">{{ nextUpSession.startTime }} • {{ nextUpSession.category }}</div>
+                </div>
+             </div>
+             <div class="relative z-10">
+                 <!-- Just visual cue, scroll handled by finding card in list or minimal logic -->
+                  <a href="#" class="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold transition-colors flex items-center gap-2">
+                     View Details <ArrowRight class="w-4 h-4" />
+                  </a>
+             </div>
+          </div>
+      </div>
+
       <!-- Time Travel Controls -->
       <div
         class="bg-white rounded-2xl shadow-xl border border-slate-100 p-4 mb-8 max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4"
@@ -324,10 +362,11 @@ useSeoMeta({
         </div>
       </div>
 
-      <!-- Smart Filtering -->
+      <!-- Smart Filtering & View Mode -->
       <div
         class="flex flex-col md:flex-row items-center justify-between gap-8 mb-12 max-w-5xl mx-auto"
       >
+        <!-- Filter Pills -->
         <div
           class="flex items-center gap-3 overflow-x-auto no-scrollbar pb-2 md:pb-0"
         >
@@ -346,41 +385,73 @@ useSeoMeta({
           </button>
         </div>
 
-        <div
-          class="hidden md:flex items-center gap-2 text-slate-400 text-sm font-bold"
-        >
-          <Filter class="w-4 h-4" />
-          <span
-            >Showing {{ filteredSessions.length }} sessions for
-            {{ days.find((d) => d.id === activeDay)?.label }}</span
-          >
+        <!-- View Switcher -->
+        <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-lg">
+            <button
+                class="p-2 rounded-md transition-colors"
+                :class="viewMode === 'timeline' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'"
+                @click="viewMode = 'timeline'"
+                title="Timeline View"
+            >
+                <LayoutGrid class="w-4 h-4" />
+            </button>
+            <button
+                class="p-2 rounded-md transition-colors"
+                :class="viewMode === 'compact' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'"
+                @click="viewMode = 'compact'"
+                title="Compact List"
+            >
+                <List class="w-4 h-4" />
+            </button>
         </div>
       </div>
 
       <!-- Event Cards Grid -->
       <div class="max-w-5xl mx-auto space-y-8">
-        <TransitionGroup name="list" tag="div" class="space-y-8">
-          <ScheduleEventCard
-            v-for="(session, idx) in filteredSessions"
-            :key="session.id"
-            :session="session"
-            :index="idx"
-            :active-day-of-week="activeDayOfWeek"
-            :program="
-              session.programSlug
-                ? programCache[session.programSlug]
-                : undefined
-            "
-            :status="getStatus(session)"
-          />
-        </TransitionGroup>
+        <div v-if="viewMode === 'timeline'">
+            <TransitionGroup name="list" tag="div" class="space-y-8">
+            <ScheduleEventCard
+                v-for="(session, idx) in filteredSessions"
+                :key="session.id"
+                :session="session"
+                :index="idx"
+                :active-day-of-week="activeDayOfWeek"
+                :program="
+                session.programSlug
+                    ? programCache[session.programSlug]
+                    : undefined
+                "
+                :status="getStatus(session)"
+            />
+            </TransitionGroup>
+        </div>
+
+        <div v-else class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+            <div v-for="(session, idx) in filteredSessions" :key="session.id" class="border-b border-slate-100 last:border-0 p-4 hover:bg-slate-50 transition-colors flex items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                     <div class="text-center w-20 shrink-0">
+                         <div class="text-lg font-black text-slate-900">{{ session.startTime }}</div>
+                         <div class="text-xs font-bold text-slate-400 uppercase">{{ session.category }}</div>
+                     </div>
+                     <div>
+                         <h3 class="font-bold text-slate-900">{{ session.name }}</h3>
+                         <div class="text-sm text-slate-500 line-clamp-1">{{ session.description }}</div>
+                     </div>
+                </div>
+                <div class="shrink-0">
+                     <div class="px-3 py-1 bg-slate-100 rounded-full text-xs font-bold text-slate-600 uppercase tracking-wider">
+                         {{ getStatus(session).label }}
+                     </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Empty State -->
         <div
           v-if="filteredSessions.length === 0"
           class="text-center py-20 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200"
         >
-          <Calendar class="w-12 h-12 text-slate-300 mx-auto mb-4" />
+          <CalendarIcon class="w-12 h-12 text-slate-300 mx-auto mb-4" />
           <h3 class="text-xl font-black text-slate-900 mb-2">
             No sessions found
           </h3>
