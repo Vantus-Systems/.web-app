@@ -1,5 +1,6 @@
 <template>
   <div>
+    <TodayStrip />
     <!-- Hero Section -->
     <section
       class="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-primary-900"
@@ -167,11 +168,13 @@ import { useJackpotStore } from "~/stores/jackpot";
 import BaseButton from "~/components/ui/BaseButton.vue";
 import BaseCard from "~/components/ui/BaseCard.vue";
 import DailySpecials from "~/components/DailySpecials.vue";
+import TodayStrip from "~/components/public/TodayStrip.vue";
 import { useBusiness } from "~/composables/useBusiness";
 
 const jackpotStore = useJackpotStore();
-const { business: BUSINESS_INFO, fetchBusiness } = useBusiness();
+const { business: BUSINESS_INFO, fetchBusiness, fetchSchedule } = useBusiness();
 await fetchBusiness();
+await fetchSchedule(); // Ensure schedule is loaded for TodayStrip
 
 useSeoMeta({
   title: "Mary Esther Bingo | Premier Charity Bingo Hall in FL",

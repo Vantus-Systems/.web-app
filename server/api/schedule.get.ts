@@ -6,6 +6,7 @@ import { DAYS_OF_WEEK } from "~/types/schedule";
 const prisma = new PrismaClient();
 
 const getCategory = (time: string): string => {
+  if (!time) return "Evening";
   const hour = parseInt(time.split(":")[0], 10);
   if (hour < 12) return "Morning";
   if (hour < 17) return "Afternoon";
@@ -20,11 +21,20 @@ export default defineEventHandler(async () => {
     include: { slots: true },
   });
 
+  // Default meta
+  const meta = {
+    effectiveDate: new Date().toISOString(),
+    lastPublishedAt: activeVersion?.published_at?.toISOString() || null,
+    lastUpdatedBy: activeVersion?.published_by || null,
+    timezone: "America/Chicago",
+  };
+
   if (!activeVersion) {
-    // Fallback to legacy settings if no active version found
-    // This ensures backward compatibility until the first publish
     const legacySchedule = await settingsService.get("schedule");
-    return legacySchedule || [];
+    return {
+      sessions: legacySchedule || [],
+      meta
+    };
   }
 
   // 2. Fetch all Programs to enrich the slots
@@ -42,12 +52,13 @@ export default defineEventHandler(async () => {
   const sessions = activeVersion.slots
     .map((slot) => {
       const program = programsBySlug.get(slot.program_slug);
-      if (!program) return null; // Skip if program not found
+      if (!program) return null;
 
       // Calculate end time
+      // slot.start_time is required String in schema
       const [startH, startM] = slot.start_time.split(":").map(Number);
       const startDate = new Date();
-      startDate.setHours(startH, startM, 0, 0);
+      startDate.setHours(startH || 0, startM || 0, 0, 0);
       const endDate = new Date(
         startDate.getTime() + slot.duration_minutes * 60000,
       );
@@ -59,9 +70,23 @@ export default defineEventHandler(async () => {
 
       // Map games
       const games = program.games.map((g) => ({
-        number: g.sort_order,
-        name: g.title,
-        detail: `${g.pattern.name} • ${g.notes || ""}`,
+        sortOrder: g.sort_order,
+        title: g.title,
+        paperColor: g.paperColor,
+        notes: g.notes,
+        pattern: {
+            slug: g.pattern.slug,
+            name: g.pattern.name,
+            description: g.pattern.description,
+            isAnimated: g.pattern.isAnimated,
+            definition: typeof g.pattern.definition === 'string' ? JSON.parse(g.pattern.definition) : g.pattern.definition
+        },
+      }));
+
+      const gamesLegacy = program.games.map(g => ({
+         number: g.sort_order,
+         name: g.title,
+         detail: `${g.pattern.name} • ${g.notes || ""}`
       }));
 
       let specials = slot.overrides || {};
@@ -77,32 +102,27 @@ export default defineEventHandler(async () => {
         id: slot.id,
         name: program.name,
         category: getCategory(slot.start_time),
-        startTime: slot.start_time, // Keep 24h for internal logic or transform? Frontend usually expects 24h or 12h?
-        // Looking at ScheduleEventCard usage, it seems to take string.
-        // Existing data likely had 24h or 12h. Let's check formatHHMM usage.
-        // But typically standardized API returns 24h.
-        // Wait, let's verify if `startTime` should be formatted.
-        endTime, // Formatted 12h string?
-        // Existing `server/services/opsSchemaCompiler.ts` returned `startTime: event.time_start` (HH:MM 24h likely).
-
-        gameType: "Regular", // Default
+        startTime: slot.start_time,
+        endTime,
+        gameType: "Regular",
         description: program.description || "",
-        vibe: [], // Programs don't have tags yet, maybe add later?
+        vibe: [],
         pricing: {
           type: "Standard",
-          // Flatten pricing from first game or program metadata?
-          // Programs don't have global pricing, games do.
-          // For now leave empty or derive from first game?
         },
-        jackpot: "", // Program doesn't have jackpot field.
+        jackpot: "",
         status: "Upcoming",
         eligibility: "All Ages",
         availableDays: [DAYS_OF_WEEK[slot.day_of_week]],
-        games,
-        specials, // Map overrides to specials?
+        games: gamesLegacy,
+        programSlug: program.slug,
+        specials,
       };
     })
-    .filter(Boolean); // Remove nulls
+    .filter(Boolean);
 
-  return sessions;
+  return {
+    sessions,
+    meta
+  };
 });

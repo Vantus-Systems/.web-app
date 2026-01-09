@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import ProgramTable from "~/components/bingo/ProgramTable.vue";
-import BaseModal from "~/components/ui/BaseModal.vue";
 
 const programs = ref<any[]>([]);
-const selectedProgram = ref<any>(null);
 const isLoading = ref(true);
 
 onMounted(async () => {
@@ -16,15 +13,6 @@ onMounted(async () => {
     isLoading.value = false;
   }
 });
-
-const openProgram = async (slug: string) => {
-  try {
-    const prog = await $fetch(`/api/programs/${slug}`);
-    selectedProgram.value = prog;
-  } catch (e) {
-    console.error(e);
-  }
-};
 
 useSeoMeta({
   title: "Programs | Mary Esther Bingo",
@@ -53,11 +41,11 @@ useSeoMeta({
       </div>
 
       <div v-else class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div
+        <NuxtLink
           v-for="prog in programs"
           :key="prog.slug"
-          class="bg-white rounded-2xl p-8 shadow-xl border border-slate-100 hover:-translate-y-1 transition-transform cursor-pointer group"
-          @click="openProgram(prog.slug)"
+          :to="`/programs/${prog.slug}`"
+          class="bg-white rounded-2xl p-8 shadow-xl border border-slate-100 hover:-translate-y-1 transition-transform cursor-pointer group block"
         >
           <div class="flex items-center justify-between mb-4">
             <h3
@@ -71,7 +59,7 @@ useSeoMeta({
               {{ prog.gameCount }} Games
             </span>
           </div>
-          <p class="text-slate-500 mb-6">
+          <p class="text-slate-500 mb-6 line-clamp-2">
             {{ prog.description || "No description available." }}
           </p>
           <div
@@ -93,19 +81,8 @@ useSeoMeta({
               <path d="m12 5 7 7-7 7" />
             </svg>
           </div>
-        </div>
+        </NuxtLink>
       </div>
     </div>
-
-    <BaseModal
-      :model-value="!!selectedProgram"
-      :title="selectedProgram?.name"
-      @update:model-value="(val) => !val && (selectedProgram = null)"
-    >
-      <div v-if="selectedProgram" class="min-w-[600px] max-w-full">
-        <p class="text-slate-500 mb-6">{{ selectedProgram.description }}</p>
-        <ProgramTable :program="selectedProgram" />
-      </div>
-    </BaseModal>
   </div>
 </template>
