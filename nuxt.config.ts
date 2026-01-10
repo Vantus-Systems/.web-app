@@ -20,7 +20,7 @@ export default defineNuxtConfig({
           content:
             "Premier bingo hall in Mary Esther, FL. Join us for daily high-stakes games, progressive jackpots, and community fun. Volunteer-run charity support.",
         },
-        { name: "theme-color", content: "#39AD48" },
+        { name: "theme-color", content: "#4edd61ff" },
         // OpenGraph
         { property: "og:site_name", content: "Mary Esther Bingo" },
         { property: "og:type", content: "website" },

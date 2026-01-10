@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, nextTick, watch } from "vue";
+import { X } from "lucide-vue-next";
 
 const props = defineProps<{
   modelValue: boolean;
@@ -90,68 +91,63 @@ onUnmounted(() => {
 <template>
   <Teleport to="body">
     <Transition
-      enter-active-class="transition duration-200 ease-out"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      leave-active-class="transition duration-150 ease-in"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
+      enter-active-class="transition duration-300 ease-out"
+      enter-from-class="opacity-0 scale-95"
+      enter-to-class="opacity-100 scale-100"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="opacity-100 scale-100"
+      leave-to-class="opacity-0 scale-95"
     >
       <div
         v-if="modelValue"
         ref="modalRef"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-xl"
         role="dialog"
         aria-modal="true"
         :aria-labelledby="title ? 'modal-title' : undefined"
         @click="handleBackdropClick"
       >
         <div
-          class="relative w-full max-w-lg overflow-hidden rounded-lg bg-white shadow-xl ring-1 ring-emerald-900/5"
+          class="relative w-full max-w-xl overflow-hidden rounded-[2.5rem] bg-charcoal border-2 border-zinc-800 shadow-[0_50px_100px_rgba(0,0,0,0.9)] ring-1 ring-white/10"
           @click.stop
         >
+          <!-- Background Texture -->
+          <div class="absolute inset-0 z-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+
           <!-- Header -->
           <div
             v-if="title || $slots.header"
-            class="flex items-center justify-between border-b border-neutral-100 px-6 py-4"
+            class="relative z-10 flex items-center justify-between border-b border-zinc-800/50 px-8 py-6 bg-black/20"
           >
-            <h3
-              v-if="title"
-              id="modal-title"
-              class="text-lg font-semibold text-emerald-900"
-            >
-              {{ title }}
-            </h3>
+            <div class="flex items-center gap-3">
+              <div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(78,221,97,0.8)]"></div>
+              <h3
+                v-if="title"
+                id="modal-title"
+                class="text-xl font-black text-white uppercase tracking-tighter"
+              >
+                {{ title }}
+              </h3>
+            </div>
+            
             <slot name="header" />
+            
             <button
-              class="ml-auto rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-500"
+              class="ml-auto rounded-xl p-2 text-zinc-500 hover:bg-white/5 hover:text-white transition-all border border-transparent hover:border-zinc-800"
               aria-label="Close"
               @click="close"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
+              <X class="w-6 h-6" />
             </button>
           </div>
 
           <!-- Body -->
-          <div class="px-6 py-6">
+          <div class="relative z-10 px-8 py-10 max-h-[80vh] overflow-y-auto custom-scrollbar">
             <slot />
           </div>
 
           <!-- Footer -->
-          <div v-if="$slots.footer" class="bg-neutral-50 px-6 py-4">
+          <div v-if="$slots.footer" class="relative z-10 bg-black/40 border-t border-zinc-800/50 px-8 py-6">
             <slot name="footer" />
           </div>
         </div>
@@ -159,3 +155,19 @@ onUnmounted(() => {
     </Transition>
   </Teleport>
 </template>
+
+<style scoped>
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: theme('colors.zinc.800');
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.primary.500');
+}
+</style>

@@ -8,6 +8,7 @@ import {
   Moon,
   Sun,
   ChevronRight,
+  ArrowRight
 } from "lucide-vue-next";
 import ProgramTable from "~/components/bingo/ProgramTable.vue";
 import { formatHHMM } from "~/utils/time.utils";
@@ -55,36 +56,36 @@ const currentSpecial = computed(() => {
 
 const categoryStyles = {
   Morning: {
-    gradient: "from-orange-500 via-amber-500 to-orange-600",
-    bg: "bg-orange-50/50",
-    border: "border-orange-100",
-    text: "text-orange-600",
+    gradient: "from-amber-500/20 via-orange-500/20 to-transparent",
+    bg: "bg-charcoal",
+    border: "border-amber-500/30",
+    text: "text-amber-500",
     icon: Sun,
-    accent: "bg-orange-100 text-orange-700",
+    accent: "bg-amber-500/10 text-amber-500",
   },
   Afternoon: {
-    gradient: "from-blue-500 via-indigo-500 to-blue-600",
-    bg: "bg-blue-50/50",
-    border: "border-blue-100",
-    text: "text-blue-600",
+    gradient: "from-blue-500/20 via-cyan-500/20 to-transparent",
+    bg: "bg-charcoal",
+    border: "border-blue-500/30",
+    text: "text-blue-500",
     icon: Zap,
-    accent: "bg-blue-100 text-blue-700",
+    accent: "bg-blue-500/10 text-blue-500",
   },
   Evening: {
-    gradient: "from-purple-600 via-fuchsia-600 to-purple-700",
-    bg: "bg-purple-50/50",
-    border: "border-purple-100",
-    text: "text-purple-600",
+    gradient: "from-primary/20 via-primary/10 to-transparent",
+    bg: "bg-charcoal",
+    border: "border-primary/30",
+    text: "text-primary",
     icon: Star,
-    accent: "bg-purple-100 text-purple-700",
+    accent: "bg-primary/10 text-primary",
   },
   "Late Night": {
-    gradient: "from-slate-800 via-slate-900 to-black",
-    bg: "bg-slate-50/50",
-    border: "border-slate-200",
-    text: "text-slate-800",
+    gradient: "from-purple-500/20 via-fuchsia-500/20 to-transparent",
+    bg: "bg-charcoal",
+    border: "border-purple-500/30",
+    text: "text-purple-500",
     icon: Moon,
-    accent: "bg-slate-200 text-slate-800",
+    accent: "bg-purple-500/10 text-purple-500",
   },
 };
 
@@ -103,15 +104,6 @@ const formatPricing = (pricing: any) => {
 };
 
 const addToCalendar = () => {
-  // Determine active date
-  // This is tricky because `ScheduleEventCard` doesn't know the exact date unless passed,
-  // it usually just knows the day of week.
-  // We should compute the "Next Occurrence" date.
-
-  // For now, let's use the current "Active Day" from parent if available or calculate next DoW.
-  // Parent passes `activeDayOfWeek` (e.g. "Monday").
-  // We can find the next Monday.
-
   let targetDate = new Date();
   if (props.activeDayOfWeek) {
     const days = [
@@ -127,18 +119,10 @@ const addToCalendar = () => {
     if (targetDayIndex !== -1) {
       const currentDayIndex = targetDate.getDay();
       let daysUntil = (targetDayIndex - currentDayIndex + 7) % 7;
-      // If today is the day but the time has passed?
-      // Ideally we want the *viewed* date.
-      // But simpler: just use next occurrence.
-      if (daysUntil === 0) {
-        // Check if time passed? Assume yes for simplicity if late, or just date.
-      }
       targetDate.setDate(targetDate.getDate() + daysUntil);
     }
   }
   const dateStr = targetDate.toISOString().split("T")[0];
-
-  // Construct URL
   const url = `/api/calendar/ics?sessionId=${props.session.id}&date=${dateStr}`;
   window.location.href = url;
 };
@@ -152,165 +136,156 @@ const startTimeParts = computed(() => {
 
 <template>
   <div
-    class="group relative bg-white border rounded-[2rem] overflow-hidden transition-all duration-500 hover:shadow-[0_32px_64px_-12px_rgba(0,0,0,0.1)] hover:-translate-y-2"
-    :class="[style.border]"
+    class="group relative bg-charcoal border-2 rounded-[2.5rem] overflow-hidden transition-all duration-700 hover:scale-[1.01]"
+    :class="[status === 'live' ? 'border-primary ring-4 ring-primary/10 shadow-[0_50px_100px_rgba(0,0,0,0.8)]' : 'border-zinc-900']"
   >
-    <!-- Category Glow -->
-    <div
-      class="absolute -inset-2 opacity-0 group-hover:opacity-10 transition-opacity duration-700 blur-3xl"
-      :class="[style.gradient.replace('from-', 'bg-')]"
-    ></div>
+    <!-- Background Texture -->
+    <div class="absolute inset-0 z-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+    <div class="absolute inset-0 z-0">
+        <div class="absolute inset-0 bg-gradient-to-br transition-opacity duration-700 opacity-20" :class="[style.gradient]"></div>
+    </div>
 
     <div class="flex flex-col lg:flex-row relative z-10">
       <!-- Time & Category Sidebar -->
       <div
-        :class="[
-          style.gradient,
-          'lg:w-64 flex flex-col items-center justify-center p-10 text-white bg-gradient-to-br relative overflow-hidden',
-        ]"
+        class="lg:w-72 flex flex-col items-center justify-center p-12 text-white relative overflow-hidden shrink-0"
       >
-        <div
-          class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"
-        ></div>
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm border-r border-zinc-900"></div>
 
-        <component :is="style.icon" class="w-8 h-8 mb-4 opacity-80" />
+        <div class="relative z-10 text-center">
+          <div
+            v-if="status === 'live'"
+            class="mb-6 flex items-center justify-center gap-2 px-4 py-1.5 bg-primary/20 border border-primary/30 rounded-full animate-pulse"
+          >
+            <span class="w-1.5 h-1.5 bg-primary rounded-full"></span>
+            <span class="text-[10px] font-black uppercase tracking-widest text-primary">Live Now</span>
+          </div>
 
-        <div class="text-center">
-          <div class="text-4xl font-black tracking-tighter mb-1">
+          <div class="text-7xl font-black tracking-tighter leading-none mb-2">
             {{ startTimeParts.time }}
           </div>
-          <div class="text-sm font-black opacity-80 uppercase tracking-[0.2em]">
+          <div class="text-xs font-black text-primary uppercase tracking-[0.4em] mb-6">
             {{ startTimeParts.period }}
           </div>
-          <div class="mt-4 h-px w-8 bg-white/30 mx-auto"></div>
-          <div class="mt-4 text-[10px] font-black uppercase tracking-[0.3em]">
-            {{ session.category }}
+          
+          <div class="h-px w-10 bg-zinc-800 mx-auto mb-6"></div>
+          
+          <div class="inline-flex items-center gap-2 px-5 py-2 rounded-2xl bg-black border border-zinc-800">
+             <component :is="style.icon" class="w-4 h-4" :class="[style.text]" />
+             <span class="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+               {{ session.category }}
+             </span>
           </div>
         </div>
       </div>
 
       <!-- Main Content Area -->
-      <div class="flex-1 p-8 lg:p-12 flex flex-col justify-between bg-white">
+      <div class="flex-1 p-10 lg:p-16 flex flex-col justify-between">
         <div>
-          <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <div class="flex flex-wrap items-center justify-between gap-6 mb-8">
             <div class="flex flex-wrap gap-2">
               <span
                 v-for="tag in session.vibe"
                 :key="tag"
-                class="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border transition-colors"
-                :class="[style.accent, style.border]"
+                class="text-[10px] font-black uppercase tracking-[0.2em] px-5 py-2 rounded-xl bg-black/50 border border-zinc-800 text-zinc-500 hover:text-white transition-colors"
+                :class="[style.text]"
               >
                 {{ tag }}
               </span>
             </div>
 
-            <div
-              v-if="status === 'live'"
-              class="flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-full border border-green-100"
-            >
-              <span class="relative flex h-2 w-2">
-                <span
-                  class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
-                ></span>
-                <span
-                  class="relative inline-flex rounded-full h-2 w-2 bg-green-500"
-                ></span>
-              </span>
-              <span
-                class="text-[10px] font-black uppercase tracking-widest text-green-700"
-                >Live Now</span
-              >
+            <div v-if="session.status" class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_rgba(78,221,97,0.8)]"></div>
+                <span class="text-[10px] font-black uppercase tracking-[0.3em] text-white">Verified Manifest</span>
             </div>
           </div>
 
           <h3
-            class="text-3xl lg:text-4xl font-black text-slate-900 mb-4 tracking-tight group-hover:text-primary-600 transition-colors"
+            class="text-4xl lg:text-5xl font-black text-white mb-4 tracking-tighter uppercase leading-none group-hover:text-primary transition-colors"
           >
             {{ session.name }}
           </h3>
 
-          <p class="text-slate-500 text-lg leading-relaxed mb-8 font-medium">
+          <p class="text-zinc-400 text-xl leading-relaxed mb-10 font-bold max-w-2xl">
             {{ session.description }}
           </p>
 
           <!-- Daily Special Highlight -->
           <div
             v-if="currentSpecial"
-            class="mb-8 p-6 rounded-2xl border-2 border-dashed flex items-start gap-4 transition-all duration-300 group-hover:border-solid"
-            :class="[style.bg, style.border]"
+            class="mb-10 p-8 rounded-[2rem] border-2 border-primary shadow-[0_20px_40px_rgba(78,221,97,0.1)] flex items-start gap-6 transition-all duration-700 bg-black/40 group/special overflow-hidden relative"
           >
+            <div class="absolute inset-0 bg-primary opacity-5 group-hover/special:opacity-10 transition-opacity"></div>
             <div
-              class="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0"
+              class="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shrink-0 shadow-lg text-black"
             >
-              <Star class="w-6 h-6 text-gold-500 animate-pulse" />
+              <Star class="w-7 h-7" />
             </div>
             <div>
               <div
-                class="text-[10px] font-black uppercase tracking-[0.2em] text-gold-600 mb-1"
+                class="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-2"
               >
-                Today's Special Promotion
+                Synchronized Daily Special
               </div>
-              <div class="text-slate-900 font-black text-lg leading-tight">
+              <div class="text-white font-black text-2xl uppercase tracking-tighter leading-tight">
                 {{ currentSpecial }}
               </div>
             </div>
           </div>
 
           <!-- Session Details Grid -->
-          <div class="grid md:grid-cols-2 gap-8 mb-10">
-            <div class="space-y-4">
-              <div class="flex items-center gap-4">
-                <div
-                  class="w-10 h-10 rounded-xl flex items-center justify-center"
-                  :class="[style.bg]"
-                >
-                  <TrendingUp class="w-5 h-5" :class="[style.text]" />
-                </div>
-                <div>
+          <div class="grid md:grid-cols-2 gap-8 mb-12">
+            <div class="space-y-6">
+              <div class="p-6 rounded-3xl bg-black border border-zinc-900 group/feature">
+                <div class="flex items-center gap-4 mb-4">
                   <div
-                    class="text-[10px] font-black uppercase tracking-widest text-slate-400"
+                    class="w-10 h-10 rounded-xl flex items-center justify-center text-primary bg-primary/10 group-hover/feature:bg-primary group-hover/feature:text-black transition-all"
                   >
-                    Estimated Jackpot
+                    <TrendingUp class="w-5 h-5" />
                   </div>
-                  <div class="text-lg font-black text-slate-900">
-                    {{ session.jackpot }}
+                  <div
+                    class="text-[10px] font-black uppercase tracking-widest text-zinc-500"
+                  >
+                    Peak Live Jackpot
                   </div>
+                </div>
+                <div class="text-3xl font-black text-white tabular-nums tracking-widest">
+                  {{ session.jackpot }}
                 </div>
               </div>
 
-              <div class="flex items-center gap-4">
-                <div
-                  class="w-10 h-10 rounded-xl flex items-center justify-center"
-                  :class="[style.bg]"
-                >
-                  <Info class="w-5 h-5" :class="[style.text]" />
-                </div>
-                <div>
+              <div class="p-6 rounded-3xl bg-black border border-zinc-900 group/feature">
+                <div class="flex items-center gap-4 mb-4">
                   <div
-                    class="text-[10px] font-black uppercase tracking-widest text-slate-400"
+                    class="w-10 h-10 rounded-xl flex items-center justify-center text-primary bg-primary/10 group-hover/feature:bg-primary group-hover/feature:text-black transition-all"
                   >
-                    Pricing Model
+                    <Info class="w-5 h-5" />
                   </div>
-                  <div class="text-lg font-black text-slate-900">
-                    {{ formatPricing(session.pricing) }}
+                  <div
+                    class="text-[10px] font-black uppercase tracking-widest text-zinc-500"
+                  >
+                    Manifest Tier / Intake
                   </div>
+                </div>
+                <div class="text-2xl font-black text-white uppercase tracking-tighter">
+                  {{ formatPricing(session.pricing) }}
                 </div>
               </div>
 
               <!-- Sunday Bonuses -->
-              <div v-if="session.bonuses" class="pt-4 space-y-3">
+              <div v-if="session.bonuses" class="pt-2 space-y-4">
                 <div
                   v-if="session.bonuses.freeDinner"
-                  class="flex items-center gap-2 text-emerald-600 font-bold text-sm"
+                  class="flex items-center gap-4 text-primary font-black uppercase text-[10px] tracking-[0.2em] bg-primary/5 p-4 rounded-2xl border border-primary/10"
                 >
-                  <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
-                  Complimentary Dinner Included
+                  <div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_rgba(78,221,97,1)]"></div>
+                  Complimentary Operational Rations Included
                 </div>
                 <div
                   v-if="session.bonuses.multipleJackpots"
-                  class="flex items-center gap-2 text-gold-600 font-bold text-sm"
+                  class="flex items-center gap-4 text-white font-black uppercase text-[10px] tracking-[0.2em] bg-white/5 p-4 rounded-2xl border border-white/10"
                 >
-                  <div class="w-2 h-2 rounded-full bg-gold-500"></div>
+                  <div class="w-2 h-2 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,1)]"></div>
                   {{ session.bonuses.multipleJackpots }}
                 </div>
               </div>
@@ -319,42 +294,43 @@ const startTimeParts = computed(() => {
             <!-- Program Table or Legacy Game Stack -->
             <div
               v-if="program"
-              class="md:col-span-2 bg-slate-50 rounded-2xl p-4 border border-slate-100"
+              class="md:col-span-1 bg-black/50 rounded-[2rem] p-8 border border-zinc-900 group/table overflow-hidden relative"
             >
+              <div class="absolute inset-0 bg-primary opacity-0 group-hover/table:opacity-[0.02] transition-opacity duration-1000"></div>
               <div
-                class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4"
+                class="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600 mb-6"
               >
-                Full Program
+                Operational Manifest
               </div>
-              <ProgramTable :program="program" />
+              <ProgramTable :program="program" condensed />
             </div>
             <div
               v-else-if="session.games"
-              class="bg-slate-50 rounded-2xl p-6 border border-slate-100"
+              class="bg-black/50 rounded-[2rem] p-8 border border-zinc-900"
             >
               <div
-                class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4"
+                class="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600 mb-6"
               >
-                Featured Game Stack
+                Featured Game Manifest
               </div>
-              <div class="space-y-2">
+              <div class="space-y-4">
                 <div
-                  v-for="game in session.games.slice(0, 3)"
+                  v-for="game in session.games.slice(0, 4)"
                   :key="game.number"
                   class="flex items-center justify-between text-sm"
                 >
-                  <span class="font-bold text-slate-700"
+                  <span class="font-bold text-zinc-300 uppercase tracking-widest"
                     >{{ game.number }}. {{ game.name }}</span
-                  >
-                  <span v-if="game.detail" class="text-xs text-slate-400">{{
+>
+                  <span v-if="game.detail" class="text-[10px] font-black text-primary uppercase tracking-widest">{{
                     game.detail
                   }}</span>
                 </div>
                 <div
-                  v-if="session.games.length > 3"
-                  class="text-[10px] font-black text-primary-600 uppercase tracking-widest pt-2"
+                  v-if="session.games.length > 4"
+                  class="text-[10px] font-black text-zinc-600 uppercase tracking-[0.4em] pt-4 border-t border-zinc-900"
                 >
-                  + {{ session.games.length - 3 }} More Games
+                  + {{ session.games.length - 4 }} System Modules
                 </div>
               </div>
             </div>
@@ -363,36 +339,32 @@ const startTimeParts = computed(() => {
 
         <!-- Action Bar -->
         <div
-          class="pt-8 border-t border-slate-100 flex flex-wrap items-center justify-between gap-6"
+          class="pt-10 border-t border-zinc-900 flex flex-wrap items-center justify-between gap-8"
         >
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-8">
             <button
-              class="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-slate-50 text-slate-500 font-bold text-sm transition-all"
+              class="flex items-center gap-3 px-6 py-3 rounded-2xl bg-black border border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-700 font-black text-[10px] uppercase tracking-[0.3em] transition-all"
               @click="addToCalendar"
             >
-              <Calendar class="w-4 h-4" />
-              Add to Calendar
+              <Calendar class="w-5 h-5" />
+              Sync to Deck
             </button>
             <NuxtLink
               v-if="session.programSlug"
-              :to="`/programs/${session.programSlug}`"
-              class="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-slate-50 text-slate-500 font-bold text-sm transition-all"
+              :to="`/programs#${session.programSlug}`"
+              class="flex items-center gap-3 px-6 py-3 rounded-2xl bg-black border border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-700 font-black text-[10px] uppercase tracking-[0.3em] transition-all"
             >
-              View Program
+              Analysis
+              <ChevronRight class="w-5 h-5" />
             </NuxtLink>
           </div>
 
-          <div class="flex items-center gap-4">
-            <NuxtLink
-              to="/contact"
-              class="px-8 py-4 rounded-2xl bg-slate-900 text-white font-black text-sm hover:bg-primary-900 transition-all shadow-xl shadow-slate-900/10 flex items-center gap-3 group/btn"
+          <NuxtLink
+              to="/pricing"
+              class="w-full sm:w-auto px-10 py-5 rounded-full bg-primary text-black font-black uppercase tracking-widest text-[10px] hover:bg-white transition-all shadow-[0_20px_40px_rgba(78,221,97,0.2)] flex items-center justify-center gap-3 group/link"
             >
-              Contact Us
-              <ChevronRight
-                class="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform"
-              />
+              Acquire Entry <ArrowRight class="w-5 h-5 group-hover/link:translate-x-1 transition-transform" />
             </NuxtLink>
-          </div>
         </div>
       </div>
     </div>

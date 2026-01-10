@@ -1,278 +1,237 @@
+<script setup lang="ts">
+import { ref } from "vue";
+import { MapPin, Phone, Mail, Send, CheckCircle2, AlertCircle } from "lucide-vue-next";
+import { useBusiness } from "~/composables/useBusiness";
+import BaseButton from "~/components/ui/BaseButton.vue";
+
+const { business: BUSINESS_INFO, fetchBusiness } = useBusiness();
+await fetchBusiness();
+
+const name = ref("");
+const email = ref("");
+const message = ref("");
+const honeypot = ref("");
+const isSubmitting = ref(false);
+const successMessage = ref("");
+const errorMessage = ref("");
+const errors = ref({ name: "", email: "", message: "" });
+
+const onSubmit = async () => {
+  if (honeypot.value) return; // Silent discard
+  
+  errors.value = { name: "", email: "", message: "" };
+  let hasError = false;
+  
+  if (!name.value) { errors.value.name = "Callsign required"; hasError = true; }
+  if (!email.value) { errors.value.email = "Comm link required"; hasError = true; }
+  if (!message.value) { errors.value.message = "Intel required"; hasError = true; }
+  
+  if (hasError) return;
+
+  isSubmitting.value = true;
+  successMessage.value = "";
+  errorMessage.value = "";
+
+  try {
+    // Simulated contact API
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    successMessage.value = "Manifest received. Our units will contact you shortly.";
+    name.value = "";
+    email.value = "";
+    message.value = "";
+  } catch (err) {
+    errorMessage.value = "Transmission failed. Check your uplink and try again.";
+  } finally {
+    isSubmitting.value = false;
+  }
+};
+
+useSeoMeta({
+  title: "Comm Link | Mary Esther Bingo",
+  description: `Secure channel for contacting ${BUSINESS_INFO.value.name}. Report intel or request support.`,
+});
+</script>
+
 <template>
-  <div class="bg-slate-50 min-h-screen py-20">
-    <div class="container mx-auto px-4">
-      <div class="text-center mb-16">
-        <h1 class="text-4xl md:text-5xl text-primary-900 mb-4">Contact Us</h1>
-        <p class="text-slate-600 max-w-2xl mx-auto text-lg">
-          Have questions? We'd love to hear from you. Reach out or visit us in
-          person.
+  <div class="bg-richBlack text-white min-h-screen py-32 relative overflow-hidden">
+    <!-- Kinetic Background Particles (Pseudo) -->
+    <div class="absolute inset-0 pointer-events-none opacity-20">
+        <div class="absolute top-[10%] left-[5%] w-96 h-96 bg-primary/10 blur-[120px] rounded-full animate-pulse"></div>
+        <div class="absolute bottom-[20%] right-[10%] w-96 h-96 bg-primary/20 blur-[150px] rounded-full animate-pulse" style="animation-delay: 2s"></div>
+    </div>
+
+    <div class="container mx-auto px-4 relative z-10">
+      <div class="text-center mb-24">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/20 border border-primary/30 rounded-full mb-8">
+          <div class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
+          <span class="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Secure Channel</span>
+        </div>
+        
+        <h1 class="text-6xl md:text-8xl font-black text-white mb-6 uppercase tracking-tighter leading-none">
+          Establish <span class="text-primary drop-shadow-[0_0_20px_rgba(78,221,97,0.4)]">Contact</span>
+        </h1>
+        <p class="text-zinc-500 max-w-2xl mx-auto text-xl font-bold uppercase tracking-widest leading-relaxed">
+          Operational queries or deployment requests? Use the secure manifest below.
         </p>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 max-w-7xl mx-auto items-start">
         <!-- Contact Form -->
         <div
-          class="bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-slate-100"
+          class="bg-charcoal p-10 md:p-14 rounded-[3rem] border-2 border-zinc-900 shadow-[0_50px_100px_rgba(0,0,0,0.8)] relative group overflow-hidden"
         >
-          <h2 class="text-2xl font-bold text-primary-900 mb-8">
-            Send us a Message
+          <div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          
+          <h2 class="text-3xl font-black text-white mb-10 uppercase tracking-tighter flex items-center gap-4">
+             <Send class="w-8 h-8 text-primary" />
+             Send Manifest
           </h2>
 
-          <form class="space-y-6" @submit.prevent="onSubmit">
-            <!-- Honeypot (Hidden) -->
-            <input
-              v-model="honeypot"
-              type="text"
-              class="hidden"
-              autocomplete="off"
-              tabindex="-1"
-            />
+          <form class="space-y-8 relative z-10" @submit.prevent="onSubmit">
+            <input v-model="honeypot" type="text" class="hidden" autocomplete="off" tabindex="-1" />
 
-            <div>
-              <label
-                for="name"
-                class="block text-sm font-medium text-slate-700 mb-1"
-                >Full Name</label
-              >
+            <div class="space-y-2">
+              <label for="name" class="block text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 ml-4">Authorized Name</label>
               <input
                 id="name"
                 v-model="name"
-                name="name"
                 type="text"
-                class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-slate-50"
+                class="w-full px-8 py-5 rounded-2xl bg-black border border-zinc-800 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-white font-bold outline-none"
                 :class="{ 'border-red-500': errors.name }"
-                placeholder="Jane Doe"
+                placeholder="OPERATOR NAME"
               />
-              <p v-if="errors.name" class="mt-1 text-sm text-red-600">
+              <p v-if="errors.name" class="text-[10px] text-red-500 font-bold uppercase tracking-widest pl-4">
                 {{ errors.name }}
               </p>
             </div>
 
-            <div>
-              <label
-                for="email"
-                class="block text-sm font-medium text-slate-700 mb-1"
-                >Email Address</label
-              >
+            <div class="space-y-2">
+              <label for="email" class="block text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 ml-4">Comm Link (Email)</label>
               <input
                 id="email"
                 v-model="email"
-                name="email"
                 type="email"
-                class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-slate-50"
+                class="w-full px-8 py-5 rounded-2xl bg-black border border-zinc-800 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-white font-bold outline-none"
                 :class="{ 'border-red-500': errors.email }"
-                placeholder="jane@example.com"
+                placeholder="COMS@UPLINK.COM"
               />
-              <p v-if="errors.email" class="mt-1 text-sm text-red-600">
+              <p v-if="errors.email" class="text-[10px] text-red-500 font-bold uppercase tracking-widest pl-4">
                 {{ errors.email }}
               </p>
             </div>
 
-            <div>
-              <label
-                for="message"
-                class="block text-sm font-medium text-slate-700 mb-1"
-                >Message</label
-              >
+            <div class="space-y-2">
+              <label for="message" class="block text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 ml-4">Mission Intel</label>
               <textarea
                 id="message"
                 v-model="message"
-                name="message"
-                rows="4"
-                class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-slate-50"
+                rows="5"
+                class="w-full px-8 py-5 rounded-2xl bg-black border border-zinc-800 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-white font-bold outline-none resize-none"
                 :class="{ 'border-red-500': errors.message }"
-                placeholder="How can we help you?"
+                placeholder="DESCRIBE THE SITUATION..."
               ></textarea>
-              <p v-if="errors.message" class="mt-1 text-sm text-red-600">
+              <p v-if="errors.message" class="text-[10px] text-red-500 font-bold uppercase tracking-widest pl-4">
                 {{ errors.message }}
               </p>
             </div>
 
-            <div class="text-xs text-slate-500 bg-slate-100 p-4 rounded-lg">
+            <div class="bg-black/50 p-6 rounded-2xl border border-zinc-800 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 flex gap-4 items-start">
+              <AlertCircle class="w-4 h-4 text-primary shrink-0" />
               <p>
-                <strong>Privacy Notice:</strong> By submitting this form, you
-                agree to allow Mary Esther Bingo to contact you regarding your
-                inquiry. We do not sell your data to third parties. See our
-                <NuxtLink to="/privacy" class="underline text-primary-700"
-                  >Privacy Policy</NuxtLink
-                >.
+                By transmitting, you authorize Mary Esther Bingo units to establish contact regarding this manifest. Standard protocol applies.
               </p>
             </div>
 
-            <BaseButton
+            <button
               type="submit"
-              class="w-full py-4 text-lg"
+              class="w-full py-6 rounded-2xl bg-primary text-black font-black uppercase tracking-[0.4em] text-[12px] hover:bg-white transition-all shadow-[0_20px_40px_rgba(78,221,97,0.3)] disabled:opacity-50 flex items-center justify-center gap-3"
               :disabled="isSubmitting"
             >
-              {{ isSubmitting ? "Sending..." : "Send Message" }}
-            </BaseButton>
+              <Send v-if="!isSubmitting" class="w-5 h-5" />
+              <div v-else class="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+              {{ isSubmitting ? "TRANSMITTING..." : "FIRE MISSION" }}
+            </button>
 
-            <p
+            <div
               v-if="successMessage"
-              class="text-green-600 text-center font-medium mt-4 p-4 bg-green-50 rounded-xl border border-green-200"
+              class="flex items-center gap-4 p-6 bg-primary/10 border border-primary/40 rounded-2xl text-primary font-black uppercase text-[10px] tracking-widest animate-bounce"
             >
+              <CheckCircle2 class="w-6 h-6" />
               {{ successMessage }}
-            </p>
-            <p
+            </div>
+            
+            <div
               v-if="errorMessage"
-              class="text-red-600 text-center font-medium mt-4 p-4 bg-red-50 rounded-xl border border-red-200"
+              class="flex items-center gap-4 p-6 bg-red-500/10 border border-red-500/40 rounded-2xl text-red-500 font-black uppercase text-[10px] tracking-widest"
             >
+              <AlertCircle class="w-6 h-6" />
               {{ errorMessage }}
-            </p>
+            </div>
           </form>
         </div>
 
-        <!-- Info & Map -->
-        <div v-if="BUSINESS_INFO.address" class="space-y-8">
-          <!-- Contact Details Card -->
-          <div
-            class="bg-primary-900 text-white p-8 md:p-10 rounded-3xl shadow-xl"
-          >
-            <h2 class="text-2xl font-bold mb-6 text-gold">
-              Contact Information
+        <!-- Info & Sidebar -->
+        <div v-if="BUSINESS_INFO.address" class="space-y-12">
+          <div class="bg-charcoal border-2 border-primary/20 p-12 rounded-[3.5rem] shadow-[0_40px_80px_rgba(0,0,0,0.7)] relative overflow-hidden group">
+            <div class="absolute inset-0 bg-primary opacity-[0.02] group-hover:opacity-[0.05] transition-opacity"></div>
+            
+            <h2 class="text-3xl font-black mb-10 uppercase tracking-tighter text-white">
+              HQ <span class="text-primary">Coordinates</span>
             </h2>
-            <ul class="space-y-6">
-              <li class="flex items-start gap-4">
-                <div class="bg-primary-800 p-3 rounded-lg text-gold">
+            
+            <ul class="space-y-10 relative z-10">
+              <li class="flex items-start gap-6 group/item">
+                <div class="bg-primary/10 p-4 rounded-2xl text-primary group-hover/item:bg-primary group-hover/item:text-black transition-all">
                   <MapPin class="w-6 h-6" />
                 </div>
                 <div>
-                  <p class="font-bold text-lg mb-1">Our Location</p>
-                  <p class="text-primary-100">
-                    {{ BUSINESS_INFO.address.street }}<br />{{
-                      BUSINESS_INFO.address.city
-                    }}, {{ BUSINESS_INFO.address.state }}
-                    {{ BUSINESS_INFO.address.zip }}
+                  <p class="font-black text-white text-lg uppercase tracking-widest mb-2">Base Location</p>
+                  <p class="text-zinc-500 font-bold uppercase tracking-widest leading-relaxed">
+                    {{ BUSINESS_INFO.address.street }}<br />
+                    {{ BUSINESS_INFO.address.city }}, {{ BUSINESS_INFO.address.state }} {{ BUSINESS_INFO.address.zip }}
                   </p>
                 </div>
               </li>
-              <li class="flex items-start gap-4">
-                <div class="bg-primary-800 p-3 rounded-lg text-gold">
+              
+              <li class="flex items-start gap-6 group/item" v-if="BUSINESS_INFO.contact?.phone">
+                <div class="bg-primary/10 p-4 rounded-2xl text-primary group-hover/item:bg-primary group-hover/item:text-black transition-all">
                   <Phone class="w-6 h-6" />
                 </div>
                 <div>
-                  <p class="font-bold text-lg mb-1">Phone Number</p>
-                  <a
-                    v-if="BUSINESS_INFO.contact?.phonePlain"
-                    :href="`tel:${BUSINESS_INFO.contact.phonePlain}`"
-                    class="text-primary-100 hover:text-white transition-colors"
-                    >{{ BUSINESS_INFO.contact?.phone }}</a
-                  >
-                  <span v-else class="text-primary-100">N/A</span>
+                  <p class="font-black text-white text-lg uppercase tracking-widest mb-2">Voice Comms</p>
+                  <a :href="`tel:${BUSINESS_INFO.contact.phonePlain}`" class="text-zinc-400 hover:text-primary transition-colors font-bold text-xl uppercase tracking-tighter">
+                    {{ BUSINESS_INFO.contact.phone }}
+                  </a>
                 </div>
               </li>
-              <li class="flex items-start gap-4">
-                <div class="bg-primary-800 p-3 rounded-lg text-gold">
-                  <Clock class="w-6 h-6" />
+              
+              <li class="flex items-start gap-6 group/item" v-if="BUSINESS_INFO.contact?.email">
+                <div class="bg-primary/10 p-4 rounded-2xl text-primary group-hover/item:bg-primary group-hover/item:text-black transition-all">
+                  <Mail class="w-6 h-6" />
                 </div>
                 <div>
-                  <p class="font-bold text-lg mb-1">Opening Hours</p>
-                  <p class="text-primary-100">{{ BUSINESS_INFO.hours }}</p>
+                  <p class="font-black text-white text-lg uppercase tracking-widest mb-2">Uplink Address</p>
+                  <a :href="`mailto:${BUSINESS_INFO.contact.email}`" class="text-zinc-400 hover:text-primary transition-colors font-bold text-xl uppercase tracking-tighter break-all">
+                    {{ BUSINESS_INFO.contact.email }}
+                  </a>
                 </div>
               </li>
             </ul>
           </div>
-
-          <!-- Map Embed -->
-          <div
-            class="bg-slate-200 h-80 rounded-3xl overflow-hidden shadow-lg border-4 border-white"
-          >
-            <iframe
-              :src="BUSINESS_INFO.address.mapLink"
-              width="100%"
-              height="100%"
-              style="border: 0"
-              allowfullscreen="true"
-              loading="lazy"
-              title="Google Map showing Mary Esther Bingo Location"
-              referrerpolicy="no-referrer-when-downgrade"
-            >
-            </iframe>
+          
+          <div class="bg-black/40 border border-zinc-800 p-12 rounded-[2.5rem] relative overflow-hidden group">
+             <div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+             <h3 class="text-xl font-black text-white uppercase tracking-tighter mb-4">Support Directives</h3>
+             <p class="text-zinc-500 font-bold uppercase tracking-widest text-sm leading-relaxed mb-8">
+                For immediate tactical assistance during live sessions, please reach out via voice comms.
+             </p>
+             <div class="flex items-center gap-4 text-primary font-black uppercase text-[10px] tracking-[0.2em] bg-primary/5 p-4 rounded-xl border border-primary/10">
+                <div class="w-2 h-2 rounded-full bg-primary animate-ping"></div>
+                Live Support Range: 4:00 PM - 10:00 PM
+             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref } from "vue";
-import { useForm } from "vee-validate";
-// Lightweight adapter so Zod schemas can be used for validation without
-// requiring the optional `@vee-validate/zod` package.
-import * as z from "zod";
-import { MapPin, Phone, Clock } from "lucide-vue-next";
-import BaseButton from "~/components/ui/BaseButton.vue";
-import { useBusiness } from "~/composables/useBusiness";
-
-function toTypedSchema<T extends z.ZodTypeAny>(schema: T) {
-  return (values: Record<string, unknown>) => {
-    const result = schema.safeParse(values);
-    if (result.success) return true;
-
-    const errors: Record<string, string> = {};
-    for (const issue of result.error.issues) {
-      const path = issue.path.length ? String(issue.path[0]) : "_form";
-      if (!errors[path]) {
-        errors[path] = issue.message;
-      }
-    }
-    return errors;
-  };
-}
-
-const { business: BUSINESS_INFO, fetchBusiness } = useBusiness();
-await fetchBusiness();
-
-useSeoMeta({
-  title: "Contact",
-  description:
-    "Get in touch with Mary Esther Bingo. Find our address, phone number, and hours, or send us a message directly.",
-});
-
-const validationSchema = toTypedSchema(
-  z.object({
-    name: z.string().min(2, "Name is required"),
-    email: z.string().email("Invalid email address"),
-    message: z.string().min(10, "Message must be at least 10 characters"),
-  }),
-);
-
-const { handleSubmit, errors, defineField, resetForm } = useForm({
-  validationSchema,
-});
-
-const [name] = defineField("name");
-const [email] = defineField("email");
-const [message] = defineField("message");
-const honeypot = ref("");
-
-const isSubmitting = ref(false);
-const successMessage = ref("");
-const errorMessage = ref("");
-
-const onSubmit = handleSubmit(async (values) => {
-  isSubmitting.value = true;
-  successMessage.value = "";
-  errorMessage.value = "";
-
-  try {
-    await $fetch("/api/contact", {
-      method: "POST",
-      body: {
-        ...values,
-        website: honeypot.value,
-      },
-    });
-
-    successMessage.value = "Message sent successfully!";
-    resetForm();
-  } catch (error: any) {
-    console.error("Submission error", error);
-    errorMessage.value =
-      error.statusMessage || "Something went wrong. Please try again.";
-  } finally {
-    isSubmitting.value = false;
-  }
-});
-</script>

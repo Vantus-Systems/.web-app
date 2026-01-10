@@ -1,8 +1,8 @@
 <template>
-  <div class="bg-slate-900 text-white font-sans overflow-x-hidden">
+  <div class="bg-richBlack text-white font-sans overflow-x-hidden">
     <!-- 1. HERO SECTION -->
     <section
-      class="relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden"
+      class="relative h-screen min-h-[650px] flex items-center justify-center overflow-hidden bg-gradient-to-b from-black/50 via-richBlack/50 to-richBlack"
     >
       <!-- Video Background -->
       <div class="absolute inset-0 z-0">
@@ -14,7 +14,6 @@
           playsinline
           class="w-full h-full object-cover"
         >
-          <!-- Placeholder video URL -->
           <source
             src="https://assets.mixkit.co/videos/preview/mixkit-abstract-video-of-a-man-with-neon-lights-1282-large.mp4"
             type="video/mp4"
@@ -25,99 +24,91 @@
 
       <!-- Ticker -->
       <div
-        class="absolute top-0 left-0 w-full bg-black/80 z-30 py-2 overflow-hidden border-b border-white/10"
+        class="absolute top-0 left-0 w-full bg-black/80 z-30 py-2 overflow-hidden border-b border-primary/20"
       >
         <div class="ticker-wrap">
           <div class="ticker">
             <div
-              class="ticker-item text-primary font-bold tracking-wider uppercase text-sm md:text-base"
+              class="ticker-item text-primary font-bold tracking-[0.25em] uppercase text-xs md:text-sm"
             >
-              TOTAL PRIZES AWARDED LAST MONTH: $4,250,000+ • YESTERDAY’S TOP
-              WINNER: $10,000 (SARAH M.) • CURRENT PROGRESSIVE: GROWING NOW
+              TOTAL PAYOUTS: $4.2M • LAST WINNER: $10K • PROGRESSIVE JACKPOT IS
+              LIVE • NEXT DRAW IN MINUTES
             </div>
-            <!-- Duplicate for seamless loop -->
             <div
-              class="ticker-item text-primary font-bold tracking-wider uppercase text-sm md:text-base"
+              class="ticker-item text-primary font-bold tracking-[0.25em] uppercase text-xs md:text-sm"
             >
-              • TOTAL PRIZES AWARDED LAST MONTH: $4,250,000+ • YESTERDAY’S TOP
-              WINNER: $10,000 (SARAH M.) • CURRENT PROGRESSIVE: GROWING NOW
+              • TOTAL PAYOUTS: $4.2M • LAST WINNER: $10K • PROGRESSIVE JACKPOT
+              IS LIVE • NEXT DRAW IN MINUTES
             </div>
           </div>
         </div>
       </div>
 
       <!-- Hero Content -->
-      <div class="relative z-20 container mx-auto px-4 text-center mt-12">
+      <div class="relative z-20 container mx-auto px-4 text-center mt-16">
         <h1
-          class="text-5xl md:text-7xl lg:text-8xl font-black uppercase tracking-tighter mb-6 leading-tight"
+          v-motion-fade-visible-once
+          class="text-6xl md:text-[7rem] lg:text-[10rem] font-black uppercase tracking-tighter mb-8 leading-[0.85] text-white drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
         >
-          <span class="text-white">Florida's Premier</span><br />
-          <span
-            class="text-primary text-transparent bg-clip-text bg-gradient-to-r from-primary to-green-400"
-            >High-Stakes</span
-          ><br />
-          <span class="text-white">Bingo Destination</span>
+          <span class="block">Florida’s</span>
+          <span class="block text-primary drop-shadow-[0_0_30px_rgba(78,221,97,0.6)]">High-Stakes</span>
+          <span class="block text-white">Legend</span>
         </h1>
         <p
-          class="text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto mb-10 font-medium"
+          v-motion-fade-visible-once
+          class="text-xl md:text-3xl text-gray-200 max-w-4xl mx-auto mb-14 font-black uppercase tracking-widest bg-black/40 backdrop-blur-md py-4 rounded-2xl border border-white/5"
         >
-          Experience the thrill of the region’s largest payouts. Millions
-          awarded monthly in a state-of-the-art facility. Your winning moment is
-          waiting.
+          Millions awarded monthly. Neon energy. <span class="text-primary italic">Absolute thrill.</span>
         </p>
         <div
-          class="flex flex-col md:flex-row items-center justify-center gap-4"
+          v-motion-slide-visible-once-bottom
+          class="flex flex-col md:flex-row items-center justify-center gap-6"
         >
           <NuxtLink
             to="/schedule"
-            class="bg-primary hover:bg-green-600 text-white text-lg font-bold py-4 px-10 rounded-full transition-transform transform hover:scale-105 shadow-lg shadow-primary/30 uppercase tracking-widest"
+            class="group relative bg-primary hover:bg-white text-black text-xl font-black py-5 px-14 rounded-full transition-all duration-300 transform hover:scale-110 shadow-[0_20px_60px_rgba(78,221,97,0.5)] uppercase tracking-[0.2em] overflow-hidden"
           >
-            Plan Your Visit
+            <span class="relative z-10">Plan Your Visit</span>
+            <div class="absolute inset-0 bg-white translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300"></div>
           </NuxtLink>
           <NuxtLink
             to="/pricing"
-            class="bg-transparent border-2 border-white/30 hover:border-white hover:bg-white/10 text-white text-lg font-bold py-4 px-10 rounded-full transition-all uppercase tracking-widest backdrop-blur-sm"
+            class="bg-transparent border-4 border-primary hover:bg-primary/20 text-primary text-xl font-black py-5 px-14 rounded-full transition-all uppercase tracking-[0.2em] backdrop-blur-md shadow-[0_0_30px_rgba(78,221,97,0.2)]"
           >
-            View VIP Packages & Pricing
+            Session Packs
           </NuxtLink>
         </div>
       </div>
     </section>
 
     <!-- 2. THE NUMBERS (Stat Bar) -->
-    <section class="bg-primary py-12 relative z-20 -mt-2 shadow-2xl">
+    <section class="bg-primary py-16 relative z-30 -mt-2 shadow-[0_0_50px_rgba(78,221,97,0.4)]">
       <div class="container mx-auto px-4">
         <div
-          class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-white/20"
+          class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center"
         >
-          <div class="py-4 md:py-0">
-            <div class="text-4xl md:text-5xl font-black text-white mb-2">
-              $25,000+
+          <div v-motion-pop-visible-once class="space-y-2">
+            <div class="text-5xl md:text-7xl font-black text-richBlack mb-1 tracking-tighter">
+              $25K+
             </div>
-            <div
-              class="text-green-900 font-bold uppercase tracking-wider text-sm"
-            >
-              Tonight's Total Prize Pool (Est. Aggregate)
+            <div class="text-richBlack/70 font-black uppercase tracking-[0.3em] text-xs">
+              TONIGHT'S PRIZE POOL
             </div>
           </div>
-          <div class="py-4 md:py-0">
-            <div class="text-4xl md:text-5xl font-black text-white mb-2">
-              $5 MILLION
+          <div v-motion-pop-visible-once class="space-y-2 border-y md:border-y-0 md:border-x border-richBlack/10 py-8 md:py-0">
+            <div class="text-5xl md:text-7xl font-black text-richBlack mb-1 tracking-tighter">
+              $5,000,000
             </div>
-            <div
-              class="text-green-900 font-bold uppercase tracking-wider text-sm"
-            >
-              Awarded Year-To-Date
+            <div class="text-richBlack/70 font-black uppercase tracking-[0.3em] text-xs">
+              AWARDED YEAR-TO-DATE
             </div>
           </div>
-          <div class="py-4 md:py-0">
-            <div class="text-4xl md:text-5xl font-black text-white mb-2">
-              EVERY DAY
+          <div v-motion-pop-visible-once class="space-y-2">
+            <div class="text-5xl md:text-7xl font-black text-richBlack mb-1 tracking-tighter">
+              24/7
             </div>
-            <div
-              class="text-green-900 font-bold uppercase tracking-wider text-sm"
-            >
-              We Play 7 Days A Week
+            <div class="text-richBlack/70 font-black uppercase tracking-[0.3em] text-xs">
+              OPEN 7 DAYS A WEEK
             </div>
           </div>
         </div>
@@ -125,93 +116,93 @@
     </section>
 
     <!-- 3. UP NEXT (Countdown) -->
-    <section class="py-20 bg-zinc-900 relative overflow-hidden">
-      <!-- Decorative background elements -->
+    <section class="py-20 bg-charcoal relative overflow-hidden">
       <div
-        class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-zinc-800/50 to-transparent pointer-events-none"
+        class="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_20%_20%,rgba(78,221,97,0.12),transparent_35%),radial-gradient(circle_at_80%_10%,rgba(78,221,97,0.08),transparent_30%),radial-gradient(circle_at_50%_90%,rgba(78,221,97,0.12),transparent_35%)]"
       ></div>
 
       <div class="container mx-auto px-4 relative z-10">
         <div
-          class="max-w-4xl mx-auto bg-zinc-800 rounded-3xl border border-zinc-700 shadow-2xl overflow-hidden"
+          class="max-w-5xl mx-auto bg-card rounded-3xl border border-primary/70 shadow-[0_0_45px_rgba(78,221,97,0.3)] overflow-hidden"
         >
           <div class="flex flex-col md:flex-row">
             <!-- Event Info -->
-            <div class="p-8 md:p-12 md:w-2/3">
-              <div class="flex items-center gap-2 mb-4">
-                <span
-                  class="animate-pulse w-3 h-3 bg-red-500 rounded-full"
-                ></span>
-                <span
-                  class="text-red-500 font-bold uppercase tracking-widest text-sm"
-                  >Selling Now</span
-                >
+            <div class="p-8 md:p-12 md:w-2/3 space-y-6">
+              <div 
+                v-motion
+                :initial="{ opacity: 0, scale: 0.9 }"
+                :visible="{ opacity: 1, scale: 1 }"
+                class="inline-flex items-center gap-3 px-6 py-2 bg-red-500/10 border border-red-500/40 rounded-full uppercase tracking-[0.3em] text-sm font-black text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.2)]"
+              >
+                <div class="w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
+                Selling Now
               </div>
               <h2
-                class="text-3xl md:text-4xl font-black text-white mb-4 uppercase leading-tight"
+                class="text-4xl md:text-6xl font-black text-white uppercase leading-none tracking-tighter"
               >
-                Up Next: The Evening Gala Session
+                Gala Session <span class="text-primary block md:inline md:ml-4 drop-shadow-[0_0_20px_rgba(78,221,97,0.4)]">Up Next</span>
               </h2>
               <div
-                class="flex flex-wrap gap-6 mb-6 text-gray-400 font-mono text-sm"
+                class="flex flex-wrap gap-8 text-gray-200 font-mono text-base font-bold"
               >
-                <div class="flex items-center gap-2">
-                  <Clock class="w-5 h-5 text-primary" />
-                  <span>DOORS OPEN: 4:00 PM</span>
+                <div class="flex items-center gap-2 group">
+                  <Clock class="w-6 h-6 text-primary group-hover:rotate-12 transition-transform" />
+                  <span>DOORS: 4:00 PM</span>
                 </div>
-                <div class="flex items-center gap-2">
-                  <Play class="w-5 h-5 text-primary" />
-                  <span>FIRST BALL: 7:30 PM</span>
+                <div class="flex items-center gap-2 group">
+                  <Play class="w-6 h-6 text-primary group-hover:scale-125 transition-transform" />
+                  <span>START: 7:30 PM</span>
                 </div>
               </div>
-              <p class="text-gray-300 mb-8 text-lg">
-                Our signature nightly event. High-stakes patterns, progressive
-                jackpots, and the massive 'Super 6' payout.
+              <p class="text-gray-300 text-xl leading-relaxed font-medium">
+                Doors open early. High-stakes patterns and jackpots 
+                that dominate. First come, first served.
               </p>
-              <button
-                class="bg-white text-zinc-900 hover:bg-gray-200 font-bold py-3 px-8 rounded-xl transition-colors uppercase tracking-wider inline-flex items-center gap-2 group"
+              <NuxtLink
+                to="/pricing"
+                class="bg-white text-black hover:bg-primary hover:text-black font-black py-5 px-12 rounded-2xl transition-all duration-300 uppercase tracking-[0.2em] inline-flex items-center gap-3 group shadow-[0_20px_50px_rgba(0,0,0,0.5)] active:scale-95"
               >
-                Reserve Your Seat
+                View Pricing
                 <ArrowRight
-                  class="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                  class="w-6 h-6 group-hover:translate-x-2 transition-transform"
                 />
-              </button>
+              </NuxtLink>
             </div>
 
             <!-- Countdown Timer -->
             <div
-              class="bg-zinc-950 p-8 md:p-12 md:w-1/3 flex flex-col justify-center items-center text-center border-t md:border-t-0 md:border-l border-zinc-700"
+              class="bg-[#0e0e0e] p-8 md:p-12 md:w-1/3 flex flex-col justify-center items-center text-center border-t md:border-t-0 md:border-l border-primary/30"
             >
               <div
-                class="text-primary font-bold uppercase tracking-widest text-xs mb-6"
+                class="text-primary font-bold uppercase tracking-[0.3em] text-xs mb-6"
               >
                 Time Until First Ball
               </div>
-              <div class="grid grid-cols-3 gap-2 w-full">
+              <div class="grid grid-cols-3 gap-3 w-full">
                 <div class="flex flex-col">
                   <span
-                    class="text-3xl md:text-4xl font-black text-white font-mono bg-zinc-900 rounded-lg py-2"
+                    class="text-4xl md:text-5xl font-black text-white font-mono bg-charcoal rounded-lg py-3 shadow-inner shadow-black/40"
                     >{{ pad(countdown.hours) }}</span
                   >
-                  <span class="text-[10px] text-gray-500 mt-1 uppercase"
+                  <span class="text-[10px] text-gray-500 mt-2 uppercase"
                     >Hrs</span
                   >
                 </div>
                 <div class="flex flex-col">
                   <span
-                    class="text-3xl md:text-4xl font-black text-white font-mono bg-zinc-900 rounded-lg py-2"
+                    class="text-4xl md:text-5xl font-black text-white font-mono bg-charcoal rounded-lg py-3 shadow-inner shadow-black/40"
                     >{{ pad(countdown.minutes) }}</span
                   >
-                  <span class="text-[10px] text-gray-500 mt-1 uppercase"
+                  <span class="text-[10px] text-gray-500 mt-2 uppercase"
                     >Mins</span
                   >
                 </div>
                 <div class="flex flex-col">
                   <span
-                    class="text-3xl md:text-4xl font-black text-white font-mono bg-zinc-900 rounded-lg py-2"
+                    class="text-4xl md:text-5xl font-black text-white font-mono bg-charcoal rounded-lg py-3 shadow-inner shadow-black/40"
                     >{{ pad(countdown.seconds) }}</span
                   >
-                  <span class="text-[10px] text-gray-500 mt-1 uppercase"
+                  <span class="text-[10px] text-gray-500 mt-2 uppercase"
                     >Secs</span
                   >
                 </div>
@@ -223,62 +214,63 @@
     </section>
 
     <!-- 4. FEATURE GRID -->
-    <section class="py-24 bg-black text-white">
+    <section class="py-24 bg-richBlack text-white">
       <div class="container mx-auto px-4">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
           <!-- Card 1 -->
           <div
-            class="bg-zinc-900/50 p-8 rounded-2xl border border-zinc-800 hover:border-primary/50 transition-colors group"
+            v-motion-slide-visible-once-bottom
+            class="bg-charcoal p-10 rounded-[2.5rem] border border-zinc-800/70 hover:border-primary/70 transition-all duration-500 group shadow-[0_20px_50px_rgba(0,0,0,0.5)] hover:translate-y-[-10px]"
           >
             <div
-              class="w-16 h-16 bg-zinc-800 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors text-primary"
+              class="w-20 h-20 bg-[#0f0f0f] rounded-3xl flex items-center justify-center mb-8 group-hover:bg-primary group-hover:text-black transition-all duration-500 text-primary shadow-inner"
             >
-              <Monitor class="w-8 h-8" />
+              <Monitor class="w-10 h-10 group-hover:scale-110 transition-transform" />
             </div>
-            <h3 class="text-2xl font-bold mb-4 uppercase">
-              State-of-the-Art Electronic Gaming
+            <h3 class="text-3xl font-black mb-4 uppercase tracking-tighter leading-none text-white">
+              Electronic <span class="text-primary block">Power</span>
             </h3>
-            <p class="text-gray-400 leading-relaxed">
-              Forget the daubers and maximize your odds. Our modern electronic
-              terminals allow you to play dozens of cards simultaneously with
-              automated tracking.
+            <p class="text-gray-400 text-lg leading-relaxed font-medium">
+              Play dozens of cards at once with precision terminals 
+              that track every win automatically. Maximize your edge.
             </p>
           </div>
 
           <!-- Card 2 -->
           <div
-            class="bg-zinc-900/50 p-8 rounded-2xl border border-zinc-800 hover:border-primary/50 transition-colors group"
+            v-motion-slide-visible-once-bottom
+            class="bg-charcoal p-10 rounded-[2.5rem] border border-zinc-800/70 hover:border-primary/70 transition-all duration-500 group shadow-[0_20px_50px_rgba(0,0,0,0.5)] hover:translate-y-[-10px]"
           >
             <div
-              class="w-16 h-16 bg-zinc-800 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors text-primary"
+              class="w-20 h-20 bg-[#0f0f0f] rounded-3xl flex items-center justify-center mb-8 group-hover:bg-primary group-hover:text-black transition-all duration-500 text-primary shadow-inner"
             >
-              <Armchair class="w-8 h-8" />
+              <Armchair class="w-10 h-10 group-hover:scale-110 transition-transform" />
             </div>
-            <h3 class="text-2xl font-bold mb-4 uppercase">
-              First-Class Hospitality
+            <h3 class="text-3xl font-black mb-4 uppercase tracking-tighter leading-none text-white">
+              Luxe <span class="text-primary block">Comfort</span>
             </h3>
-            <p class="text-gray-400 leading-relaxed">
-              Relax in our climate-controlled hall featuring premium seating,
-              tableside service, and a secure environment.
+            <p class="text-gray-400 text-lg leading-relaxed font-medium">
+              Premium seating, climate control, and tableside 
+              service. Experience bingo in a state-of-the-art lounge.
             </p>
           </div>
 
           <!-- Card 3 -->
           <div
-            class="bg-zinc-900/50 p-8 rounded-2xl border border-zinc-800 hover:border-primary/50 transition-colors group"
+            v-motion-slide-visible-once-bottom
+            class="bg-charcoal p-10 rounded-[2.5rem] border border-zinc-800/70 hover:border-primary/70 transition-all duration-500 group shadow-[0_20px_50px_rgba(0,0,0,0.5)] hover:translate-y-[-10px]"
           >
             <div
-              class="w-16 h-16 bg-zinc-800 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors text-primary"
+              class="w-20 h-20 bg-[#0f0f0f] rounded-3xl flex items-center justify-center mb-8 group-hover:bg-primary group-hover:text-black transition-all duration-500 text-primary shadow-inner"
             >
-              <DollarSign class="w-8 h-8" />
+              <DollarSign class="w-10 h-10 group-hover:scale-110 transition-transform" />
             </div>
-            <h3 class="text-2xl font-bold mb-4 uppercase">
-              Massive Daily Payouts
+            <h3 class="text-3xl font-black mb-4 uppercase tracking-tighter leading-none text-white">
+              Daily <span class="text-primary block">Jackpots</span>
             </h3>
-            <p class="text-gray-400 leading-relaxed">
-              We don’t just play for fun—we play for keeps. With daily payouts
-              exceeding the competition and verified winners taking home
-              thousands every week.
+            <p class="text-gray-400 text-lg leading-relaxed font-medium">
+              Massive daily payouts and progressive totals 
+              that climb every session. This is where legends are made.
             </p>
           </div>
         </div>
@@ -286,102 +278,62 @@
     </section>
 
     <!-- 5. SOCIAL PROOF (Winner's Circle) -->
-    <section class="py-24 bg-zinc-900 relative">
-      <div class="container mx-auto px-4">
-        <div class="flex flex-col lg:flex-row items-center gap-16">
-          <div class="lg:w-1/2">
-            <div
-              class="inline-block px-4 py-1 rounded-full bg-primary/10 text-primary font-bold text-sm mb-6 uppercase tracking-widest border border-primary/20"
-            >
-              Verified Winners
-            </div>
-            <h2
-              class="text-4xl md:text-5xl font-black text-white mb-6 uppercase leading-tight"
-            >
-              Welcome to the Winner's Circle
+    <section class="py-32 bg-[#050505] overflow-hidden">
+      <div class="container mx-auto px-4 md:px-8">
+        <div class="flex flex-col md:flex-row items-end justify-between mb-20 gap-8">
+          <div class="max-w-3xl">
+            <h2 v-motion-slide-visible-once-left class="text-6xl md:text-9xl font-black uppercase mb-6 tracking-tighter text-white leading-[0.85]">
+              Real Players<span class="text-primary">.</span><br />
+              Real <span class="italic text-primary text-[1.1em]">Cash.</span>
             </h2>
-            <p class="text-xl text-gray-400 mb-8">
-              Join the thousands of players who have turned a night out into a
-              major payday.
+            <p v-motion-slide-visible-once-left :delay="200" class="text-zinc-500 text-xl md:text-2xl font-medium tracking-tight">
+              Join the thousands who win big every week at Mary Esther Bingo. 
+              Your seat is waiting in the winner's circle.
             </p>
-
-            <div
-              class="bg-black/40 p-8 rounded-2xl border border-zinc-800 mb-8 relative"
-            >
-              <Quote
-                class="absolute top-8 left-8 text-zinc-700 w-12 h-12 opacity-50"
-              />
-              <p
-                class="text-lg md:text-xl text-white italic relative z-10 mb-6 pl-6"
-              >
-                "I never thought I'd hit the big one until I came to Mary
-                Esther. The energy here is unlike anywhere else!"
-              </p>
-              <div class="flex items-center gap-4 pl-6">
-                <div
-                  class="w-10 h-10 rounded-full bg-primary flex items-center justify-center font-bold text-white"
-                >
-                  J
-                </div>
-                <div>
-                  <div class="font-bold text-white">James T.</div>
-                  <div class="text-primary text-sm font-bold">
-                    $5,000 Winner
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <button
-              class="text-white font-bold uppercase tracking-widest hover:text-primary transition-colors flex items-center gap-2"
-            >
-              See Recent Winners <ArrowRight class="w-4 h-4" />
-            </button>
           </div>
+          <div v-motion-pop-visible-once class="bg-primary px-8 py-4 rounded-full text-black font-black uppercase tracking-widest text-sm hover:scale-105 transition-transform cursor-default shadow-[0_0_30px_rgba(78,221,97,0.4)]">
+            Every Night is Jackpot Night
+          </div>
+        </div>
 
-          <div class="lg:w-1/2 relative">
-            <div class="grid grid-cols-2 gap-4">
-              <div class="space-y-4 translate-y-8">
-                <div
-                  class="aspect-[4/3] rounded-2xl overflow-hidden bg-zinc-800 shadow-xl border border-zinc-700/50"
-                >
-                  <!-- Placeholder -->
-                  <div
-                    class="w-full h-full bg-zinc-800 flex items-center justify-center text-zinc-600 font-bold"
-                  >
-                    Winner 1
-                  </div>
-                </div>
-                <div
-                  class="aspect-[4/3] rounded-2xl overflow-hidden bg-zinc-800 shadow-xl border border-zinc-700/50"
-                >
-                  <div
-                    class="w-full h-full bg-zinc-800 flex items-center justify-center text-zinc-600 font-bold"
-                  >
-                    Winner 2
-                  </div>
-                </div>
-              </div>
-              <div class="space-y-4">
-                <div
-                  class="aspect-[4/3] rounded-2xl overflow-hidden bg-zinc-800 shadow-xl border border-zinc-700/50"
-                >
-                  <div
-                    class="w-full h-full bg-zinc-800 flex items-center justify-center text-zinc-600 font-bold"
-                  >
-                    Winner 3
-                  </div>
-                </div>
-                <div
-                  class="aspect-[4/3] rounded-2xl overflow-hidden bg-zinc-800 shadow-xl border border-zinc-700/50"
-                >
-                  <div
-                    class="w-full h-full bg-zinc-800 flex items-center justify-center text-zinc-600 font-bold"
-                  >
-                    Winner 4
-                  </div>
-                </div>
-              </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <!-- Winner 1 -->
+          <div v-motion-slide-visible-once-bottom class="relative group aspect-[4/5] overflow-hidden rounded-[3rem] border border-zinc-900 shadow-2xl">
+            <img
+              src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=80"
+              alt="Recent Winner"
+              class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity"></div>
+            <div class="absolute bottom-10 left-10 p-2">
+              <div class="text-primary text-xs font-black uppercase tracking-[0.3em] mb-2 opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0">Winner Spotlight</div>
+              <div class="text-white text-4xl font-black uppercase tracking-tighter">Big Win<br/><span class="text-primary">$2,500+</span></div>
+            </div>
+          </div>
+          <!-- Winner 2 -->
+          <div v-motion-slide-visible-once-bottom :delay="100" class="relative group aspect-[4/5] overflow-hidden rounded-[3rem] border border-zinc-900 shadow-2xl">
+            <img
+              src="https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?auto=format&fit=crop&w=800&q=80"
+              alt="Recent Winner"
+              class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity"></div>
+            <div class="absolute bottom-10 left-10 p-2">
+              <div class="text-primary text-xs font-black uppercase tracking-[0.3em] mb-2 opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0">Tonight's Payout</div>
+              <div class="text-white text-4xl font-black uppercase tracking-tighter">Jackpot<br/><span class="text-primary">Verified</span></div>
+            </div>
+          </div>
+          <!-- Winner 3 -->
+          <div v-motion-slide-visible-once-bottom :delay="200" class="relative group aspect-[4/5] overflow-hidden rounded-[3rem] border border-zinc-900 shadow-2xl lg:translate-y-12">
+            <img
+              src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
+              alt="Recent Winner"
+              class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity"></div>
+            <div class="absolute bottom-10 left-10 p-2">
+              <div class="text-primary text-xs font-black uppercase tracking-[0.3em] mb-2 opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0">Daily Legends</div>
+              <div class="text-white text-4xl font-black uppercase tracking-tighter">Local<br/><span class="text-primary">Celebrity</span></div>
             </div>
           </div>
         </div>
@@ -389,24 +341,44 @@
     </section>
 
     <!-- 6. MISSION SECTION -->
-    <section class="py-20 bg-primary text-white text-center">
-      <div class="container mx-auto px-4 max-w-4xl">
-        <Heart class="w-12 h-12 mx-auto mb-6 text-white/90" />
-        <h2 class="text-3xl md:text-5xl font-black uppercase mb-6">
-          Play With Purpose
+    <section class="py-48 bg-richBlack text-white text-center relative overflow-hidden">
+      <!-- Background Flair -->
+      <div class="absolute inset-0 opacity-20 pointer-events-none">
+        <div class="absolute top-[-50%] left-[-10%] w-[120%] h-[120%] bg-[radial-gradient(circle_at_center,rgba(78,221,97,0.15),transparent_70%)]"></div>
+      </div>
+
+      <div class="container mx-auto px-4 max-w-5xl relative z-10">
+        <div v-motion-pop-visible-once>
+          <Heart class="w-24 h-24 mx-auto mb-12 text-primary drop-shadow-[0_0_40px_rgba(78,221,97,0.8)] animate-pulse" />
+        </div>
+        <h2 
+          v-motion-fade-visible-once
+          class="text-6xl md:text-[8rem] font-black uppercase mb-12 tracking-tighter text-white leading-none"
+        >
+          Play <span class="text-primary italic">With</span> Purpose
         </h2>
-        <p class="text-xl md:text-2xl text-green-50 leading-relaxed mb-10">
-          At Mary Esther Bingo, your entertainment drives our community. As a
-          volunteer-supported organization, a portion of every dollar played
-          goes directly to supporting local charities.
+        <p class="text-2xl md:text-4xl text-zinc-400 leading-tight mb-20 font-bold tracking-tight">
+          When you chase the thrill at Mary Esther Bingo, you chase it for something 
+          bigger. We’ve turned high-stakes gaming into <span class="text-white border-b-4 border-primary">life-changing</span> local impact.
         </p>
         <div
-          class="text-2xl md:text-4xl font-black font-serif italic text-white/90"
+          v-motion-slide-visible-once-bottom
+          class="text-5xl md:text-8xl font-black font-serif italic text-primary tracking-tighter"
         >
           "Win Big. Do Good."
         </div>
       </div>
     </section>
+
+    <footer class="bg-charcoal text-gray-300 py-20 text-center border-t border-zinc-900">
+      <div class="container mx-auto px-4">
+        <div class="text-primary text-xs font-black uppercase tracking-[0.5em] mb-6">Designed for Winners</div>
+        <div class="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter mb-10">Always Bet On <span class="text-primary italic">Green.</span></div>
+        <p class="text-zinc-500 uppercase tracking-widest text-xs font-bold">
+           &copy; {{ new Date().getFullYear() }} Mary Esther Bingo. High-Stakes Hospitality.
+        </p>
+      </div>
+    </footer>
   </div>
 </template>
 

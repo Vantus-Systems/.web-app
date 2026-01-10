@@ -1,10 +1,13 @@
-# GitHub Copilot — Unified Fortune-5000 Instructions (Mary Esther Bingo)
-
-These repository instructions apply to Copilot Chat and Copilot coding agent when working in this repo. Keep suggestions aligned to this file and the codebase.
-
 ---
+description: Comprehensive engineering guidelines and agent instructions for working within the Mary Esther Bingo (Nuxt 4 + Prisma) repository.
+applyTo: **
+---
+# Mary Esther Bingo - GitHub Copilot Instructions
 
-## 0) Prime Directive (non-negotiable)
+Please review the details.md in addition to this file for more context. .github/details.md
+Please deploy the skills located here to sub-agents to run concurrent tasks for us: .agent/skills
+
+0) Prime Directive (non-negotiable)
 - Read relevant files before proposing changes.
 - Keep changes minimal, safe, and consistent with existing patterns.
 - Never modify or depend on vendored/generated/third-party artifacts: `node_modules/`, `.output/`, `dist/`, `build/`, `.next/`, `.nuxt/`, `.svelte-kit/`, `coverage/`, `*.min.*`.

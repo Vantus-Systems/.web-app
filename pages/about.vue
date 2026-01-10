@@ -1,140 +1,5 @@
-<template>
-  <div>
-    <!-- Hero/Intro -->
-    <section class="bg-primary-900 text-white py-20 relative overflow-hidden">
-      <div
-        class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=2940&auto=format&fit=crop')] opacity-10 bg-cover bg-center"
-      ></div>
-      <div class="container mx-auto px-4 relative z-10 text-center">
-        <h1 class="text-4xl md:text-6xl font-heading font-bold mb-6">
-          Our Community Mission
-        </h1>
-        <p
-          class="text-xl md:text-2xl text-primary-100 max-w-3xl mx-auto font-light leading-relaxed"
-        >
-          {{ BUSINESS_INFO.name }} is a volunteer-supported organization
-          dedicated to assisting local community partners.
-        </p>
-      </div>
-    </section>
-
-    <section class="py-24 bg-white">
-      <div class="container mx-auto px-4">
-        <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-5xl text-primary-900 mb-4">
-            Supporting Our Community
-          </h2>
-          <p class="text-slate-600 max-w-2xl mx-auto text-lg">
-            We are community-focused. Participation supports local organizations
-            and initiatives in our area.
-          </p>
-        </div>
-
-        <div v-if="pending" class="text-center py-20">
-          <div
-            class="animate-spin h-8 w-8 border-4 border-gold-500 border-t-transparent rounded-full mx-auto"
-          ></div>
-        </div>
-
-        <div v-else>
-          <!-- Charity Logos Grid (Visual representation) -->
-          <div
-            class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 items-center justify-items-center mb-20 opacity-80"
-          >
-            <div
-              v-for="(charity, index) in charities"
-              :key="index"
-              class="w-full flex justify-center grayscale hover:grayscale-0 transition-all duration-300 transform hover:scale-105"
-            >
-              <div
-                class="bg-slate-50 p-6 rounded-xl border border-slate-100 w-full h-32 flex items-center justify-center text-center shadow-sm relative overflow-hidden"
-              >
-                <img
-                  v-if="charity.logo"
-                  :src="charity.logo"
-                  :alt="charity.name"
-                  class="max-w-full max-h-full object-contain p-2"
-                />
-                <span
-                  v-else
-                  class="font-bold text-primary-800 leading-tight text-sm md:text-base"
-                  >{{ charity.name }}</span
-                >
-              </div>
-            </div>
-          </div>
-
-          <!-- Detailed Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <BaseCard
-              v-for="(charity, index) in charities"
-              :key="index"
-              class="text-center hover:shadow-xl transition-shadow duration-300 border-t-4 border-t-gold"
-            >
-              <div
-                class="w-20 h-20 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-6 text-primary-700 overflow-hidden"
-              >
-                <img
-                  v-if="charity.logo"
-                  :src="charity.logo"
-                  :alt="charity.name"
-                  class="w-full h-full object-cover"
-                />
-                <HeartHandshake v-else class="w-10 h-10" />
-              </div>
-              <h3 class="text-xl font-bold text-primary-900 mb-3">
-                {{ charity.name }}
-              </h3>
-              <p class="text-slate-600 leading-relaxed text-sm">
-                {{ charity.description }}
-              </p>
-              <div
-                v-if="charity.impact"
-                class="mt-4 pt-4 border-t border-slate-100 text-xs text-emerald-600 font-bold uppercase tracking-wider"
-              >
-                {{ charity.impact }}
-              </div>
-            </BaseCard>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Volunteer Section -->
-    <section class="py-20 bg-slate-50 border-t border-slate-200">
-      <div
-        class="container mx-auto px-4 flex flex-col md:flex-row items-center gap-12"
-      >
-        <div class="md:w-1/2">
-          <NuxtImg
-            src="https://images.unsplash.com/photo-1559027615-cd4628902d4a?q=80&w=2000&auto=format&fit=crop"
-            alt="Volunteers working together"
-            class="rounded-3xl shadow-xl w-full"
-          />
-        </div>
-        <div class="md:w-1/2">
-          <h2 class="text-3xl font-bold text-primary-900 mb-6">
-            Powered by Volunteers
-          </h2>
-          <p class="text-slate-600 text-lg mb-8 leading-relaxed">
-            Our friendly team is comprised largely of volunteers who are
-            passionate about their community. Their dedication allows us to
-            effectively support our partner organizations.
-          </p>
-          <div class="bg-white p-6 rounded-xl border-l-4 border-gold shadow-sm">
-            <p class="text-primary-800 font-medium italic">
-              "Community involvement helps build a safer, healthier, and more
-              vibrant Mary Esther."
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { HeartHandshake } from "lucide-vue-next";
+import { HeartHandshake, Star, Users, ShieldCheck } from "lucide-vue-next";
 import BaseCard from "~/components/ui/BaseCard.vue";
 import { useBusiness } from "~/composables/useBusiness";
 
@@ -144,7 +9,178 @@ await fetchBusiness();
 const { data: charities, pending } = await useFetch("/api/charities");
 
 useSeoMeta({
-  title: "About Us | Mary Esther Bingo",
-  description: `Learn about ${BUSINESS_INFO.value.name}, our mission, and the local community organizations we support.`,
+  title: "Community Intelligence | Mary Esther Bingo",
+  description: `Operational data for ${BUSINESS_INFO.value.name}. Community mission and partner manifests.`,
 });
 </script>
+
+<template>
+  <div class="bg-richBlack text-white min-h-screen">
+    <!-- Hero/Intro -->
+    <section class="relative py-32 overflow-hidden border-b border-zinc-900">
+      <div class="absolute inset-0 z-0">
+        <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-richBlack to-richBlack z-10"></div>
+        <img
+          src="https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=2940&auto=format&fit=crop"
+          class="w-full h-full object-cover opacity-20 scale-105"
+        />
+      </div>
+      
+      <div class="container mx-auto px-4 relative z-10 text-center">
+        <div 
+          v-motion-fade-visible-once
+          class="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/20 border border-primary/30 rounded-full mb-8"
+        >
+          <div class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
+          <span class="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Operational Mission</span>
+        </div>
+        
+        <h1 
+          v-motion-fade-visible-once
+          class="text-6xl md:text-8xl font-black uppercase tracking-tighter mb-8 leading-none"
+        >
+          Community <span class="text-primary drop-shadow-[0_0_20px_rgba(78,221,97,0.4)]">Impact</span>
+        </h1>
+        <p
+          v-motion-fade-visible-once
+          class="text-xl md:text-2xl text-zinc-400 max-w-3xl mx-auto font-bold uppercase tracking-widest leading-relaxed"
+        >
+          {{ BUSINESS_INFO.name }} is a volunteer-driven force
+          dedicated to accelerating local community manifests.
+        </p>
+      </div>
+    </section>
+
+    <!-- Support Section -->
+    <section class="py-32 relative bg-charcoal">
+      <div class="absolute inset-0 z-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+      
+      <div class="container mx-auto px-4 relative z-10">
+        <div class="text-center mb-24">
+            <h2 class="text-4xl md:text-6xl font-black text-white mb-6 uppercase tracking-tighter">
+              Partner <span class="text-primary">Intelligence</span>
+            </h2>
+            <p class="text-zinc-500 max-w-2xl mx-auto text-xl font-bold uppercase tracking-widest leading-relaxed">
+              Every deployment supports localized operational units and charitable initiatives.
+            </p>
+        </div>
+
+        <div v-if="pending" class="text-center py-20">
+          <div
+            class="animate-spin h-10 w-10 border-4 border-primary border-t-transparent rounded-full mx-auto"
+          ></div>
+        </div>
+
+        <div v-else>
+          <!-- Charity Logos Grid -->
+          <div
+            class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 items-center justify-items-center mb-32"
+          >
+            <div
+              v-for="(charity, index) in charities"
+              :key="index"
+              class="w-full group"
+            >
+              <div
+                class="bg-black/50 p-8 rounded-3xl border border-zinc-800 w-full h-40 flex items-center justify-center text-center shadow-2xl relative overflow-hidden group-hover:border-primary/50 transition-all duration-500"
+              >
+                <div class="absolute inset-0 bg-primary opacity-0 group-hover:opacity-[0.03] transition-opacity"></div>
+                <img
+                  v-if="charity.logo"
+                  :src="charity.logo"
+                  :alt="charity.name"
+                  class="max-w-full max-h-full object-contain p-2 grayscale group-hover:grayscale-0 transition-all duration-500"
+                />
+                <span
+                  v-else
+                  class="font-black text-zinc-500 uppercase tracking-tighter group-hover:text-white transition-colors"
+                  >{{ charity.name }}</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Detailed Manifests -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            <div
+              v-for="(charity, index) in charities"
+              :key="index"
+              class="group bg-black/40 p-10 rounded-[2.5rem] border border-zinc-800 hover:border-primary/30 transition-all duration-500 hover:scale-[1.02] shadow-2xl relative overflow-hidden"
+            >
+              <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              
+              <div
+                class="w-20 h-20 bg-zinc-900 rounded-2xl flex items-center justify-center mb-8 relative z-10 overflow-hidden"
+              >
+                <img
+                  v-if="charity.logo"
+                  :src="charity.logo"
+                  :alt="charity.name"
+                  class="w-full h-full object-cover p-2"
+                />
+                <HeartHandshake v-else class="w-10 h-10 text-primary" />
+              </div>
+              
+              <h3 class="text-2xl font-black text-white mb-4 uppercase tracking-tighter group-hover:text-primary transition-colors">
+                {{ charity.name }}
+              </h3>
+              <p class="text-zinc-500 font-bold text-sm leading-relaxed mb-8">
+                {{ charity.description }}
+              </p>
+              
+              <div
+                v-if="charity.impact"
+                class="pt-6 border-t border-zinc-800 text-[10px] font-black text-primary uppercase tracking-[0.3em]"
+              >
+                 <div class="flex items-center gap-2">
+                    <Star class="w-3 h-3" />
+                    {{ charity.impact }}
+                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Volunteer Section -->
+    <section class="py-32 bg-richBlack border-t border-zinc-900">
+      <div
+        class="container mx-auto px-4 flex flex-col lg:flex-row items-center gap-20"
+      >
+        <div class="lg:w-1/2 relative group">
+          <div class="absolute -inset-4 bg-primary/20 rounded-[3rem] blur-2xl group-hover:bg-primary/30 transition-all"></div>
+          <img
+            src="https://images.unsplash.com/photo-1559027615-cd4628902d4a?q=80&w=2000&auto=format&fit=crop"
+            alt="Volunteers"
+            class="rounded-[2.5rem] shadow-2xl w-full relative z-10 border-2 border-zinc-800"
+          />
+        </div>
+        <div class="lg:w-1/2">
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full mb-8">
+             <Users class="w-4 h-4 text-primary" />
+             <span class="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Core Personnel</span>
+          </div>
+          
+          <h2 class="text-5xl font-black text-white mb-8 uppercase tracking-tighter">
+            Operational <span class="text-primary">Legacy</span>
+          </h2>
+          <p class="text-zinc-500 text-xl font-bold uppercase tracking-widest mb-10 leading-relaxed">
+            Our specialized team consists of dedicated volunteers driving high-impact community results.
+          </p>
+          
+          <div class="bg-black/40 p-10 rounded-[2.5rem] border border-zinc-800 shadow-2xl group relative overflow-hidden">
+            <div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <p class="text-white text-xl font-black italic tracking-tight relative z-10">
+              "Community involvement is the engine that drives a safer, healthier, and more vibrant Mary Esther."
+            </p>
+            <div class="mt-6 flex items-center gap-2 relative z-10">
+                <ShieldCheck class="w-5 h-5 text-primary" />
+                <span class="text-[10px] font-black uppercase tracking-widest text-primary">Operational Standard</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</template>

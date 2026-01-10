@@ -186,7 +186,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="bg-white min-h-screen font-sans selection:bg-primary-100">
+  <div class="bg-richBlack min-h-screen font-sans selection:bg-primary/20 text-white">
     <!-- Today Strip -->
     <div class="sticky top-0 z-50">
       <TodayStrip />
@@ -194,98 +194,92 @@ useSeoMeta({
 
     <!-- High-Fidelity Hero Section -->
     <div
-      class="relative h-[45vh] min-h-[450px] flex items-center justify-center overflow-hidden bg-slate-900"
+      class="relative h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden bg-black border-b border-primary/10"
     >
       <div class="absolute inset-0 z-0">
-        <img
-          src="https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&q=80&w=2000"
-          class="w-full h-full object-cover opacity-40 scale-105 animate-slow-zoom"
-          alt="Luxury Bingo Hall"
-        />
-        <div
-          class="absolute inset-0 bg-gradient-to-b from-slate-900/60 via-slate-900/40 to-white"
-        ></div>
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(78,221,97,0.15),transparent_70%)]"></div>
+        <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
       </div>
 
       <div class="container mx-auto px-4 relative z-10 text-center">
         <div
-          class="inline-flex items-center gap-2 bg-gold-500/20 backdrop-blur-md border border-gold-500/30 px-4 py-2 rounded-full mb-6"
+          v-motion-pop-visible-once
+          class="inline-flex items-center gap-3 bg-primary/10 backdrop-blur-md border border-primary/20 px-6 py-2 rounded-full mb-10"
         >
-          <span class="relative flex h-2 w-2">
+          <span class="relative flex h-3 w-3">
             <span
-              class="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold-400 opacity-75"
+              class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"
             ></span>
             <span
-              class="relative inline-flex rounded-full h-2 w-2 bg-gold-500"
+              class="relative inline-flex rounded-full h-3 w-3 bg-primary"
             ></span>
           </span>
           <span
-            class="text-xs font-black uppercase tracking-widest text-gold-100"
-            >Live Schedule</span
+            class="text-[10px] font-black uppercase tracking-[0.4em] text-primary"
+            >Live Intelligence</span
           >
         </div>
         <h1
-          class="text-5xl md:text-8xl font-black text-white mb-6 tracking-tighter"
+          v-motion-fade-visible-once
+          class="text-6xl md:text-[10rem] font-black text-white mb-8 tracking-tighter uppercase leading-none"
         >
           Plan Your
           <span
-            class="text-transparent bg-clip-text bg-gradient-to-r from-gold-300 to-gold-500"
-            >Winning</span
+            class="text-primary italic drop-shadow-[0_0_30px_rgba(78,221,97,0.4)]"
+            >Assault</span
           >
-          Visit
         </h1>
         <p
-          class="text-slate-200 max-w-2xl mx-auto text-lg md:text-xl font-medium opacity-90"
+          v-motion-fade-visible-once
+          class="text-zinc-400 max-w-3xl mx-auto text-xl md:text-3xl font-bold uppercase tracking-widest leading-tight"
         >
-          Experience the gold standard of bingo. Browse our curated sessions and
-          plan your winning visit.
+          Strategic sessions. <span class="text-white">High-stakes manifests.</span>
         </p>
 
         <div
           v-if="scheduleMeta?.lastPublishedAt"
-          class="mt-4 text-xs text-slate-400 font-medium"
+          class="mt-12 text-[10px] text-zinc-600 font-black uppercase tracking-[0.5em]"
         >
-          Updated
+          SYNCED:
           {{ new Date(scheduleMeta.lastPublishedAt).toLocaleDateString() }}
         </div>
       </div>
     </div>
 
-    <div class="container mx-auto px-4 -mt-20 relative z-20 pb-32">
+    <div class="container mx-auto px-4 -mt-32 relative z-20 pb-40">
       <!-- Next Up Card (if active) -->
       <div
         v-if="nextUpSession"
-        class="mb-8 animate-in slide-in-from-bottom-4 duration-500"
+        class="mb-12"
       >
         <div
-          class="bg-slate-900 rounded-2xl p-6 shadow-2xl border border-gold-500/30 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden"
+          class="bg-charcoal border-4 border-primary rounded-[3rem] p-10 md:p-16 shadow-[0_40px_100px_rgba(0,0,0,0.8)] flex flex-col md:flex-row items-center justify-between gap-12 relative overflow-hidden group"
         >
-          <div class="absolute inset-0 bg-gold-500/5"></div>
-          <div class="relative z-10 flex items-center gap-6">
-            <div class="p-3 bg-gold-500 rounded-xl text-slate-900">
-              <Clock class="w-8 h-8" />
+          <div class="absolute inset-0 bg-primary opacity-0 group-hover:opacity-[0.02] transition-opacity duration-1000"></div>
+          <div class="relative z-10 flex items-center gap-10">
+            <div class="w-20 h-20 bg-primary rounded-3xl flex items-center justify-center text-black shadow-[0_0_30px_rgba(78,221,97,0.3)]">
+              <Clock class="w-10 h-10" />
             </div>
             <div>
               <div
-                class="text-gold-400 text-xs font-bold uppercase tracking-widest mb-1"
+                class="text-primary text-[10px] font-black uppercase tracking-[0.4em] mb-4"
               >
-                Coming Up Next
+                In Bound: Next Session
               </div>
-              <div class="text-2xl font-black text-white">
+              <div class="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter mb-2">
                 {{ nextUpSession.name }}
               </div>
-              <div class="text-slate-400 font-medium">
-                {{ nextUpSession.startTime }} • {{ nextUpSession.category }}
+              <div class="text-zinc-500 font-bold uppercase tracking-widest text-sm">
+                {{ nextUpSession.startTime }} Launch • {{ nextUpSession.category }} Tier
               </div>
             </div>
           </div>
           <div class="relative z-10">
-            <!-- Just visual cue, scroll handled by finding card in list or minimal logic -->
             <a
-              href="#"
-              class="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold transition-colors flex items-center gap-2"
+              href="#session-list"
+              class="px-12 py-6 bg-primary hover:bg-white text-black rounded-full font-black uppercase tracking-widest text-sm transition-all duration-300 flex items-center gap-3 shadow-[0_20px_50px_rgba(78,221,97,0.25)]"
             >
-              View Details <ArrowRight class="w-4 h-4" />
+              Analyze Manifest <ArrowRight class="w-5 h-5" />
             </a>
           </div>
         </div>
@@ -293,21 +287,21 @@ useSeoMeta({
 
       <!-- Time Travel Controls -->
       <div
-        class="bg-white rounded-2xl shadow-xl border border-slate-100 p-4 mb-8 max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4"
+        class="bg-charcoal border border-zinc-900 rounded-[2.5rem] p-6 mb-12 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8 max-w-5xl mx-auto"
       >
-        <div class="flex items-center gap-3">
-          <div class="p-2 bg-emerald-50 rounded-lg text-emerald-600">
-            <Clock class="w-5 h-5" />
+        <div class="flex items-center gap-6">
+          <div class="w-12 h-12 bg-black rounded-2xl flex items-center justify-center text-primary border border-zinc-800">
+            <Clock class="w-6 h-6" />
           </div>
           <div>
             <div
-              class="text-xs font-bold uppercase tracking-widest text-slate-400"
+              class="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 mb-1"
             >
-              Current Time (Chicago)
+              Market Time (Chicago)
             </div>
-            <div class="text-lg font-black text-slate-900">
+            <div class="text-xl font-black text-white">
               {{ chicagoTime.dayOfWeek }} {{ chicagoTime.dateStr }}
-              <span class="text-emerald-600"
+              <span class="text-primary"
                 >{{
                   Math.floor(chicagoTime.minutes / 60)
                     .toString()
@@ -320,24 +314,24 @@ useSeoMeta({
           </div>
         </div>
 
-        <div class="flex items-center gap-2 bg-slate-50 p-1 rounded-xl">
+        <div class="flex items-center gap-2 bg-black p-1.5 rounded-2xl border border-zinc-900">
           <button
-            class="px-4 py-2 rounded-lg text-sm font-bold transition-all"
+            class="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
             :class="
               mode === 'now'
-                ? 'bg-white text-emerald-900 shadow-sm ring-1 ring-black/5'
-                : 'text-slate-500 hover:text-slate-700'
+                ? 'bg-primary text-black shadow-lg shadow-primary/20'
+                : 'text-zinc-500 hover:text-white'
             "
             @click="mode = 'now'"
           >
-            Live Now
+            Live Feed
           </button>
           <button
-            class="px-4 py-2 rounded-lg text-sm font-bold transition-all"
+            class="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
             :class="
               mode === 'custom'
-                ? 'bg-white text-emerald-900 shadow-sm ring-1 ring-black/5'
-                : 'text-slate-500 hover:text-slate-700'
+                ? 'bg-primary text-black shadow-lg shadow-primary/20'
+                : 'text-zinc-500 hover:text-white'
             "
             @click="
               initCustom();
@@ -355,44 +349,45 @@ useSeoMeta({
           <input
             v-model="customDate"
             type="date"
-            class="px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+            class="px-4 py-2.5 rounded-xl bg-black border border-zinc-800 text-xs font-black uppercase tracking-widest text-white focus:ring-2 focus:ring-primary focus:border-primary outline-none"
           />
           <input
             v-model="customTime"
             type="time"
-            class="px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+            class="px-4 py-2.5 rounded-xl bg-black border border-zinc-800 text-xs font-black uppercase tracking-widest text-white focus:ring-2 focus:ring-primary focus:border-primary outline-none"
           />
         </div>
       </div>
 
       <!-- Smart Calendar Ribbon -->
       <div
-        class="bg-white rounded-3xl shadow-2xl border border-slate-100 p-2 mb-12 max-w-4xl mx-auto"
+        class="bg-charcoal border border-zinc-900 rounded-[3rem] p-3 mb-16 max-w-5xl mx-auto shadow-2xl overflow-hidden"
       >
-        <div class="flex items-center overflow-x-auto no-scrollbar gap-2">
+        <div class="flex items-center overflow-x-auto no-scrollbar gap-2 px-2 py-1">
           <button
             v-for="day in days"
             :key="day.id"
             :class="[
-              'flex-1 min-w-[120px] py-4 px-6 rounded-2xl transition-all duration-300 flex flex-col items-center gap-1',
+              'flex-1 min-w-[140px] py-6 px-10 rounded-[2rem] transition-all duration-500 flex flex-col items-center gap-2',
               activeDay === day.id
-                ? 'bg-primary-900 text-white shadow-xl shadow-primary-900/20 scale-105 z-10'
-                : 'hover:bg-slate-50 text-slate-500',
+                ? 'bg-primary text-black shadow-[0_15px_40px_rgba(78,221,97,0.3)] scale-[1.02] z-10'
+                : 'hover:bg-black/40 text-zinc-500 hover:text-white',
             ]"
             @click="selectDay(day.id)"
           >
             <span
-              class="text-xs font-black uppercase tracking-widest opacity-60"
+              class="text-[10px] font-black uppercase tracking-[0.3em]"
+              :class="activeDay === day.id ? 'opacity-70' : 'opacity-40'"
               >{{ day.label }}</span
             >
-            <span class="text-lg font-black">{{ day.date }}</span>
+            <span class="text-2xl font-black uppercase tracking-tighter">{{ day.date }}</span>
           </button>
         </div>
       </div>
 
       <!-- Smart Filtering & View Mode -->
       <div
-        class="flex flex-col md:flex-row items-center justify-between gap-8 mb-12 max-w-5xl mx-auto"
+        class="flex flex-col md:flex-row items-center justify-between gap-8 mb-20 max-w-5xl mx-auto border-b border-zinc-900 pb-12"
       >
         <!-- Filter Pills -->
         <div
@@ -402,10 +397,10 @@ useSeoMeta({
             v-for="filter in filters"
             :key="filter"
             :class="[
-              'px-6 py-2 rounded-full text-sm font-black transition-all border',
+              'px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 border-2',
               activeFilter === filter
-                ? 'bg-slate-900 text-white border-slate-900 shadow-lg'
-                : 'bg-white text-slate-500 border-slate-200 hover:border-slate-400',
+                ? 'bg-primary text-black border-primary shadow-[0_0_20px_rgba(78,221,97,0.2)]'
+                : 'bg-transparent text-zinc-500 border-zinc-900 hover:border-zinc-700 hover:text-white',
             ]"
             @click="activeFilter = filter"
           >
@@ -414,38 +409,38 @@ useSeoMeta({
         </div>
 
         <!-- View Switcher -->
-        <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-lg">
+        <div class="flex items-center gap-2 bg-black p-1.5 rounded-xl border border-zinc-900">
           <button
-            class="p-2 rounded-md transition-colors"
+            class="p-3 rounded-lg transition-all duration-300"
             :class="
               viewMode === 'timeline'
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-400 hover:text-slate-600'
+                ? 'bg-primary text-black shadow-lg shadow-primary/20'
+                : 'text-zinc-600 hover:text-zinc-300'
             "
-            title="Timeline View"
+            title="Timeline Matrix"
             @click="viewMode = 'timeline'"
           >
-            <LayoutGrid class="w-4 h-4" />
+            <LayoutGrid class="w-5 h-5" />
           </button>
           <button
-            class="p-2 rounded-md transition-colors"
+            class="p-3 rounded-lg transition-all duration-300"
             :class="
               viewMode === 'compact'
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-400 hover:text-slate-600'
+                ? 'bg-primary text-black shadow-lg shadow-primary/20'
+                : 'text-zinc-600 hover:text-zinc-300'
             "
-            title="Compact List"
+            title="Compact Stream"
             @click="viewMode = 'compact'"
           >
-            <List class="w-4 h-4" />
+            <List class="w-5 h-5" />
           </button>
         </div>
       </div>
 
       <!-- Event Cards Grid -->
-      <div class="max-w-5xl mx-auto space-y-8">
+      <div class="max-w-5xl mx-auto space-y-12">
         <div v-if="viewMode === 'timeline'">
-          <TransitionGroup name="list" tag="div" class="space-y-8">
+          <TransitionGroup name="list" tag="div" class="space-y-10">
             <ScheduleEventCard
               v-for="(session, idx) in filteredSessions"
               :key="session.id"
@@ -464,32 +459,32 @@ useSeoMeta({
 
         <div
           v-else
-          class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm"
+          class="bg-charcoal rounded-[3rem] border border-zinc-900 overflow-hidden shadow-2xl"
         >
           <div
             v-for="session in filteredSessions"
             :key="session.id"
-            class="border-b border-slate-100 last:border-0 p-4 hover:bg-slate-50 transition-colors flex items-center justify-between gap-4"
+            class="border-b border-zinc-900 last:border-0 p-8 md:p-12 hover:bg-black/40 transition-all duration-500 flex items-center justify-between gap-8 group"
           >
-            <div class="flex items-center gap-4">
-              <div class="text-center w-20 shrink-0">
-                <div class="text-lg font-black text-slate-900">
+            <div class="flex items-center gap-10">
+              <div class="text-center w-24 shrink-0">
+                <div class="text-3xl font-black text-white uppercase tracking-tighter group-hover:text-primary transition-colors">
                   {{ session.startTime }}
                 </div>
-                <div class="text-xs font-bold text-slate-400 uppercase">
+                <div class="text-[10px] font-black text-zinc-600 uppercase tracking-widest mt-1">
                   {{ session.category }}
                 </div>
               </div>
               <div>
-                <h3 class="font-bold text-slate-900">{{ session.name }}</h3>
-                <div class="text-sm text-slate-500 line-clamp-1">
+                <h3 class="font-black text-2xl text-white uppercase tracking-tighter mb-2">{{ session.name }}</h3>
+                <div class="text-sm font-bold text-zinc-500 line-clamp-1">
                   {{ session.description }}
                 </div>
               </div>
             </div>
             <div class="shrink-0">
               <div
-                class="px-3 py-1 bg-slate-100 rounded-full text-xs font-bold text-slate-600 uppercase tracking-wider"
+                class="px-6 py-2 bg-black border border-zinc-800 rounded-full text-[10px] font-black text-primary uppercase tracking-[0.2em] group-hover:border-primary/40 transition-all"
               >
                 {{ getStatus(session).label }}
               </div>
@@ -500,66 +495,61 @@ useSeoMeta({
         <!-- Empty State -->
         <div
           v-if="filteredSessions.length === 0"
-          class="text-center py-20 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200"
+          v-motion-fade-visible-once
+          class="text-center py-48 bg-charcoal rounded-[4rem] border-2 border-dashed border-zinc-900"
         >
-          <CalendarIcon class="w-12 h-12 text-slate-300 mx-auto mb-4" />
-          <h3 class="text-xl font-black text-slate-900 mb-2">
-            No sessions found
-          </h3>
-          <p class="text-slate-500">
-            Try adjusting your filters or selecting another day.
+          <div class="w-20 h-20 bg-black rounded-full flex items-center justify-center mx-auto mb-8 border border-zinc-800">
+             <CalendarIcon class="w-10 h-10 text-zinc-700" />
+          </div>
+          <h3 class="text-4xl font-black text-white uppercase tracking-tighter mb-4">No Sessions Active</h3>
+          <p class="text-zinc-500 font-bold max-w-md mx-auto text-lg">
+            Operational silence for this configuration. Select another date or tier.
           </p>
-          <button
-            class="mt-6 text-primary-600 font-black hover:underline"
-            @click="activeFilter = 'All'"
-          >
-            Clear all filters
-          </button>
         </div>
       </div>
     </div>
 
     <!-- Conversion Footer -->
-    <div class="bg-slate-900 py-24 relative overflow-hidden">
-      <div
-        class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"
-      ></div>
+    <div class="bg-black py-40 border-t border-primary/10 relative overflow-hidden">
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(78,221,97,0.05),transparent_50%)]"></div>
       <div class="container mx-auto px-4 relative z-10 text-center">
         <h2
-          class="text-4xl md:text-6xl font-black text-white mb-8 tracking-tighter"
+          v-motion-slide-bottom
+          class="text-6xl md:text-8xl font-black text-white mb-8 tracking-tighter uppercase"
         >
-          Ready to Join the <span class="text-gold-400">Action?</span>
+          Ready to <span class="text-primary italic">Deploy?</span>
         </h2>
-        <p class="text-slate-400 max-w-2xl mx-auto text-xl mb-12 font-medium">
-          Our premium sessions fill up fast. Secure your preferred seat today
-          and experience the ultimate bingo atmosphere.
+        <p class="text-zinc-400 max-w-3xl mx-auto text-xl md:text-2xl mb-16 font-bold uppercase tracking-widest leading-relaxed">
+          The arena is set. The prize pools are surging. <br/>
+          <span class="text-white">Secure your position now.</span>
         </p>
         <div
-          class="flex flex-col sm:flex-row items-center justify-center gap-6"
+          class="flex flex-col sm:flex-row items-center justify-center gap-8"
         >
           <NuxtLink
             to="/contact"
-            class="w-full sm:w-auto px-10 py-5 rounded-2xl bg-gold-500 text-primary-900 font-black text-lg hover:bg-gold-400 transition-all shadow-2xl shadow-gold-500/20"
+            class="group w-full sm:w-auto px-12 py-6 rounded-full bg-primary text-black font-black text-sm uppercase tracking-[0.2em] hover:bg-white transition-all shadow-[0_20px_50px_rgba(78,221,97,0.3)] flex items-center justify-center gap-3"
           >
-            Book a Group Reservation
+            Operational Support <ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </NuxtLink>
           <NuxtLink
             to="/pricing"
-            class="w-full sm:w-auto px-10 py-5 rounded-2xl bg-white/10 text-white font-black text-lg hover:bg-white/20 transition-all backdrop-blur-md border border-white/10"
+            class="w-full sm:w-auto px-12 py-6 rounded-full bg-charcoal text-white font-black text-sm uppercase tracking-[0.2em] hover:bg-zinc-800 transition-all border border-zinc-800 flex items-center justify-center"
           >
-            View Pricing & Bundles
+            Manifest Intel
           </NuxtLink>
         </div>
       </div>
     </div>
 
     <!-- Fine print -->
-    <p
-      class="text-center text-sm text-slate-400 italic py-12 max-w-3xl mx-auto"
-    >
-      *Family-friendly — 18+. Valid photo ID may be required for entry and prize
-      claims. Closing time depends on daily activities.
-    </p>
+    <div class="bg-richBlack py-12 border-t border-zinc-900">
+        <p
+          class="text-center text-[10px] text-zinc-600 font-black uppercase tracking-[0.5em] max-w-3xl mx-auto px-4"
+        >
+          Operational Intelligence System // Valid ID Required // 18+ Only // The house maintains absolute discretion on all prize claims and scheduling.
+        </p>
+    </div>
   </div>
 </template>
 
@@ -574,23 +564,11 @@ useSeoMeta({
 
 .list-enter-active,
 .list-leave-active {
-  transition: all 0.5s ease;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .list-enter-from,
 .list-leave-to {
   opacity: 0;
-  transform: translateY(30px);
-}
-
-@keyframes slow-zoom {
-  0% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1.15);
-  }
-}
-.animate-slow-zoom {
-  animation: slow-zoom 20s infinite alternate ease-in-out;
+  transform: translateY(40px) scale(0.98);
 }
 </style>

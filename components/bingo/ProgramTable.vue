@@ -26,6 +26,7 @@ interface Program {
 
 defineProps<{
   program: Program;
+  condensed?: boolean;
 }>();
 
 const selectedGame = ref<ProgramGame | null>(null);
@@ -37,48 +38,48 @@ const openGame = (game: ProgramGame) => {
 
 <template>
   <div
-    class="overflow-hidden rounded-lg border border-emerald-900/10 bg-white shadow-sm"
+    class="overflow-hidden rounded-3xl border border-zinc-900 bg-black/40 backdrop-blur-md transition-all duration-500"
+    :class="[condensed ? 'p-0 shadow-none border-none bg-transparent' : 'shadow-2xl shadow-black/50']"
   >
     <div class="overflow-x-auto">
-      <table class="w-full text-left text-sm">
-        <thead class="bg-emerald-50/50 text-emerald-900">
+      <table class="w-full text-left text-[10px] uppercase font-black tracking-widest">
+        <thead class="bg-zinc-900/50 text-zinc-500 border-b border-zinc-800">
           <tr>
-            <th class="px-4 py-3 font-semibold">Game</th>
-            <th class="px-4 py-3 font-semibold">Paper</th>
-            <th class="px-4 py-3 font-semibold">Pattern</th>
-            <th class="px-4 py-3 font-semibold text-right">View</th>
+            <th class="px-6 py-4">Manifest Item</th>
+            <th class="px-6 py-4">Module</th>
+            <th class="px-6 py-4">Configuration</th>
+            <th class="px-6 py-4 text-right">Preview</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-emerald-900/5">
+        <tbody class="divide-y divide-zinc-900">
           <tr
             v-for="game in program.games"
             :key="game.sortOrder"
-            class="group cursor-pointer hover:bg-emerald-50/30 transition-colors"
+            class="group cursor-pointer hover:bg-white/5 transition-all duration-300"
             @click="openGame(game)"
           >
-            <td class="px-4 py-3 align-middle">
-              <div class="font-medium text-emerald-950">{{ game.title }}</div>
-              <div v-if="game.notes" class="text-xs text-neutral-500">
+            <td class="px-6 py-4 align-middle">
+              <div class="font-black text-white group-hover:text-primary transition-colors">{{ game.title }}</div>
+              <div v-if="game.notes" class="text-[9px] text-zinc-600 mt-1 font-bold">
                 {{ game.notes }}
               </div>
             </td>
-            <td class="px-4 py-3 align-middle">
-              <div class="flex items-center gap-2">
+            <td class="px-6 py-4 align-middle">
+              <div class="flex items-center gap-3">
                 <div
-                  class="h-4 w-4 rounded-full border border-black/10 shadow-sm"
+                  class="h-4 w-4 rounded-full border border-black/20 shadow-[0_0_10px_rgba(0,0,0,0.5)]"
                   :style="{ backgroundColor: game.paperColor }"
                 ></div>
-                <span class="text-xs text-neutral-600 hidden sm:inline-block">
-                  <!-- Optional: display color hex or name if we had it, for now just swatch is good -->
+                <span class="text-zinc-500 hidden sm:inline-block">
                   {{ game.paperColor }}
                 </span>
               </div>
             </td>
-            <td class="px-4 py-3 align-middle">
-              <span class="text-emerald-900">{{ game.pattern.name }}</span>
+            <td class="px-6 py-4 align-middle">
+              <span class="text-zinc-400 font-bold">{{ game.pattern.name }}</span>
             </td>
-            <td class="px-4 py-3 align-middle text-right">
-              <div class="inline-block">
+            <td class="px-6 py-4 align-middle text-right">
+              <div class="inline-block opacity-80 group-hover:opacity-100 transition-opacity">
                 <BingoPatternGrid
                   :name="game.pattern.name"
                   :definition="game.pattern.definition"
@@ -93,35 +94,38 @@ const openGame = (game: ProgramGame) => {
       </table>
     </div>
 
+    <!-- Details Modal -->
     <BaseModal
       :model-value="!!selectedGame"
-      :title="selectedGame?.title || 'Game Details'"
+      :title="selectedGame?.title || 'Operational Intel'"
       @update:model-value="(val) => !val && (selectedGame = null)"
     >
-      <div v-if="selectedGame" class="flex flex-col items-center gap-6">
-        <div class="flex items-center gap-2 text-sm text-neutral-600">
+      <div v-if="selectedGame" class="flex flex-col items-center gap-8 py-4">
+        <div class="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 bg-black/50 px-6 py-3 rounded-2xl border border-zinc-800">
           <div
-            class="h-4 w-4 rounded-full border border-black/10"
+            class="h-3 w-3 rounded-full shadow-[0_0_8px_rgba(0,0,0,1)]"
             :style="{ backgroundColor: selectedGame.paperColor }"
           ></div>
-          <span>{{ selectedGame.paperColor }} Paper</span>
+          <span>Ref: {{ selectedGame.paperColor }} Module</span>
         </div>
 
-        <BingoPatternGrid
-          :name="selectedGame.pattern.name"
-          :definition="selectedGame.pattern.definition"
-          :fill-color="selectedGame.paperColor"
-          size="md"
-          :animate="true"
-        />
+        <div class="p-8 bg-black/40 rounded-[2.5rem] border border-zinc-800 shadow-2xl">
+            <BingoPatternGrid
+              :name="selectedGame.pattern.name"
+              :definition="selectedGame.pattern.definition"
+              :fill-color="selectedGame.paperColor"
+              size="md"
+              :animate="true"
+            />
+        </div>
 
         <div class="text-center">
-          <h4 class="font-semibold text-emerald-900">
+          <h4 class="text-3xl font-black text-white uppercase tracking-tighter mb-2">
             {{ selectedGame.pattern.name }}
           </h4>
           <p
             v-if="selectedGame.pattern.description"
-            class="mt-1 text-sm text-neutral-500"
+            class="text-zinc-400 text-sm font-bold uppercase tracking-widest leading-relaxed max-w-xs mx-auto"
           >
             {{ selectedGame.pattern.description }}
           </p>
@@ -129,9 +133,9 @@ const openGame = (game: ProgramGame) => {
 
         <div
           v-if="selectedGame.notes"
-          class="w-full rounded bg-emerald-50 p-3 text-center text-sm text-emerald-800"
+          class="w-full rounded-2xl bg-primary/5 border border-primary/20 p-6 text-center text-[10px] font-black uppercase tracking-[0.2em] text-primary"
         >
-          {{ selectedGame.notes }}
+          Note: {{ selectedGame.notes }}
         </div>
       </div>
     </BaseModal>
