@@ -39,10 +39,10 @@ useSeoMeta({
           v-motion-fade-visible-once
           class="text-6xl md:text-9xl font-black text-white mb-8 tracking-tighter uppercase leading-none"
         >
-          Session <span class="text-primary italic drop-shadow-[0_0_20px_rgba(78,221,97,0.5)]">Programs</span>
+          Game <span class="text-primary italic drop-shadow-[0_0_20px_rgba(78,221,97,0.5)]">Programs</span>
         </h1>
         <p class="text-zinc-400 text-xl md:text-2xl max-w-2xl mx-auto font-bold uppercase tracking-widest">
-          The roadmap to every win.
+          Your Guide to Big Wins & Cash Prizes.
         </p>
       </div>
     </div>

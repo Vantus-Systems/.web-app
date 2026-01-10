@@ -29,39 +29,41 @@ useSeoMeta({
       <div class="container mx-auto px-4 relative z-10 text-center">
         <div 
           v-motion-fade-visible-once
-          class="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/20 border border-primary/30 rounded-full mb-8"
+          class="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/20 border border-primary/30 rounded-full mb-8 shadow-[0_0_20px_rgba(78,221,97,0.3)]"
         >
           <div class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
-          <span class="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Operational Mission</span>
+          <span class="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Our Community</span>
         </div>
         
         <h1 
           v-motion-fade-visible-once
-          class="text-6xl md:text-8xl font-black uppercase tracking-tighter mb-8 leading-none"
+          class="text-6xl md:text-8xl font-black uppercase tracking-tighter mb-8 leading-none drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]"
         >
-          Community <span class="text-primary drop-shadow-[0_0_40px_rgba(78,221,97,0.6)]">Impact</span>
+          Community <span class="text-primary drop-shadow-[0_0_60px_rgba(78,221,97,0.8)]">Impact</span>
         </h1>
         <p
           v-motion-fade-visible-once
           class="text-xl md:text-2xl text-zinc-400 max-w-3xl mx-auto font-bold uppercase tracking-widest leading-relaxed"
         >
-          {{ BUSINESS_INFO.name }} is a volunteer-driven force
-          dedicated to accelerating our local community.
+          High-stakes gaming meets serious community giving. Every jackpot won helps support our amazing local partners.
         </p>
       </div>
     </section>
 
     <!-- Support Section -->
-    <section class="py-32 relative bg-charcoal">
-      <div class="absolute inset-0 z-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+    <section class="py-32 relative bg-charcoal border-t border-primary/10">
+      <!-- Kinetic BG -->
+      <div class="absolute inset-0 z-0">
+         <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(78,221,97,0.05),transparent_70%)]"></div>
+      </div>
       
       <div class="container mx-auto px-4 relative z-10">
         <div class="text-center mb-24">
-            <h2 class="text-4xl md:text-6xl font-black text-white mb-6 uppercase tracking-tighter drop-shadow-[0_0_15px_rgba(78,221,97,0.2)]">
-              Partner <span class="text-primary">Organizations</span>
+            <h2 class="text-4xl md:text-6xl font-black text-white mb-6 uppercase tracking-tighter drop-shadow-[0_0_35px_rgba(78,221,97,0.4)]">
+              Charity <span class="text-primary">Partners</span>
             </h2>
             <p class="text-zinc-500 max-w-2xl mx-auto text-xl font-bold uppercase tracking-widest leading-relaxed">
-              Every session supports localized operational units and charitable initiatives.
+              Play big, win big, and give back. A portion of every buy-in directly supports these amazing local causes.
             </p>
         </div>
 
@@ -157,16 +159,16 @@ useSeoMeta({
           />
         </div>
         <div class="lg:w-1/2">
-          <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full mb-8">
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full mb-8 shadow-[0_0_15px_rgba(78,221,97,0.2)]">
              <Users class="w-4 h-4 text-primary" />
-             <span class="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Core Personnel</span>
+             <span class="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Our Team</span>
           </div>
           
-          <h2 class="text-5xl font-black text-white mb-8 uppercase tracking-tighter">
-            Operational <span class="text-primary">Legacy</span>
+          <h2 class="text-5xl font-black text-white mb-8 uppercase tracking-tighter drop-shadow-[0_0_20px_rgba(78,221,97,0.3)]">
+            Community <span class="text-primary">Heroes</span>
           </h2>
           <p class="text-zinc-500 text-xl font-bold uppercase tracking-widest mb-10 leading-relaxed">
-            Our specialized team consists of dedicated volunteers driving high-impact community results.
+            The friendly faces that make the magic happen. Our dedicated volunteers run the show so you can enjoy the thrill.
           </p>
           
           <div class="bg-black/40 p-10 rounded-[2.5rem] border border-zinc-800 shadow-2xl group relative overflow-hidden">
@@ -176,7 +178,7 @@ useSeoMeta({
             </p>
             <div class="mt-6 flex items-center gap-2 relative z-10">
                 <ShieldCheck class="w-5 h-5 text-primary" />
-                <span class="text-[10px] font-black uppercase tracking-widest text-primary">Operational Standard</span>
+                <span class="text-[10px] font-black uppercase tracking-widest text-primary">Our Promise</span>
             </div>
           </div>
         </div>

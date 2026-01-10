@@ -35,14 +35,14 @@ const nextSession = computed(() => {
 });
 
 const doorsOpenText = computed(() => {
-  if (!nextSession.value) return "MANIFEST: CHECK SCHEDULE";
+  if (!nextSession.value) return "CHECK SCHEDULE";
   const startMins = parseTime(nextSession.value.startTime);
   const doorsMins = startMins - 60;
-  return `DOORS: ${formatTime(doorsMins)}`;
+  return `DOORS OPEN: ${formatTime(doorsMins)}`;
 });
 
 const specialText = computed(() => {
-  return "TACTICAL SPECIALS DEPLOYED";
+  return "DAILY SPECIALS AVAILABLE";
 });
 
 const addToCalendar = () => {
@@ -77,9 +77,9 @@ const phoneLink = computed(
             <Activity class="w-3 h-3 text-primary animate-pulse" />
             <span class="text-primary tracking-[0.3em]">
                <span v-if="nextSession">
-                  INBOUND: {{ nextSession.name }} // {{ nextSession.startTime }}
+                  UP NEXT: {{ nextSession.name }} // {{ nextSession.startTime }}
                </span>
-               <span v-else>LIVE OPERATIONS</span>
+               <span v-else>LIVE BINGO ACTION</span>
             </span>
           </div>
           
@@ -104,7 +104,7 @@ const phoneLink = computed(
             class="group flex items-center gap-2.5 text-zinc-500 hover:text-white transition-all"
           >
             <MapPin class="w-3.5 h-3.5 text-zinc-700 group-hover:text-primary transition-colors" />
-            <span class="font-black">{{ BUSINESS_INFO?.address?.city || 'BASE OPS' }}</span>
+            <span class="font-black">{{ BUSINESS_INFO?.address?.city || 'DIRECTIONS' }}</span>
           </a>
           
           <a
@@ -112,7 +112,7 @@ const phoneLink = computed(
             class="group flex items-center gap-2.5 text-zinc-500 hover:text-white transition-all"
           >
             <Phone class="w-3.5 h-3.5 text-zinc-700 group-hover:text-primary transition-colors" />
-            <span class="font-black lowercase tracking-widest">{{ BUSINESS_INFO?.contact?.phone || 'COMMS' }}</span>
+            <span class="font-black lowercase tracking-widest">{{ BUSINESS_INFO?.contact?.phone || 'CALL US' }}</span>
           </a>
 
           <button
