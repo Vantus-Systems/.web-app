@@ -92,15 +92,15 @@
               $25K+
             </div>
             <div class="text-richBlack/70 font-black uppercase tracking-[0.3em] text-xs">
-              TONIGHT'S PRIZE POOL
+              DAILY PAYOUTS
             </div>
           </div>
           <div v-motion-pop-visible-once class="space-y-2 border-y md:border-y-0 md:border-x border-richBlack/10 py-8 md:py-0">
             <div class="text-5xl md:text-7xl font-black text-richBlack mb-1 tracking-tighter">
-              $5,000,000
+              $10,000,000+
             </div>
             <div class="text-richBlack/70 font-black uppercase tracking-[0.3em] text-xs">
-              AWARDED YEAR-TO-DATE
+              ANNUAL PAYOUTS
             </div>
           </div>
           <div v-motion-pop-visible-once class="space-y-2">
@@ -156,7 +156,7 @@
               </div>
               <p class="text-gray-300 text-xl leading-relaxed font-medium">
                 Doors open early. High-stakes patterns and jackpots 
-                that dominate. First come, first served.
+                that deliver. First come, first served.
               </p>
               <NuxtLink
                 to="/pricing"

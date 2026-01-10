@@ -75,3 +75,31 @@ export const useBusiness = () => {
     fetchSpecials,
   };
 };
+
+export const useAutoRefresh = (intervalSeconds = 30) => {
+  const { fetchBusiness, fetchPricing, fetchSchedule, fetchJackpot, fetchSpecials } = useBusiness();
+  let intervalId: any = null;
+
+  const refreshAll = () => {
+    fetchBusiness();
+    fetchPricing();
+    fetchSchedule();
+    fetchJackpot();
+    fetchSpecials();
+  };
+
+  const startPolling = (immediate = true) => {
+    if (intervalId) return;
+    if (immediate) refreshAll();
+    intervalId = setInterval(refreshAll, intervalSeconds * 1000);
+  };
+
+  const stopPolling = () => {
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+  };
+
+  return { startPolling, stopPolling, refreshAll };
+};

@@ -19,9 +19,20 @@ const {
   schedule: scheduleData,
   fetchSchedule,
 } = useBusiness();
+import { useAutoRefresh } from "~/composables/useBusiness";
 
 const { chicagoTime, mode, customDate, customTime, initCustom, getStatus } =
   useScheduleClock();
+
+const { startPolling, stopPolling } = useAutoRefresh(30);
+
+onMounted(() => {
+  startPolling(false);
+});
+
+onUnmounted(() => {
+  stopPolling();
+});
 
 await fetchBusiness();
 await fetchSchedule();
@@ -216,7 +227,7 @@ useSeoMeta({
           </span>
           <span
             class="text-[10px] font-black uppercase tracking-[0.4em] text-primary"
-            >Live Intelligence</span
+            >Live Schedule</span
           >
         </div>
         <h1
@@ -226,14 +237,14 @@ useSeoMeta({
           Plan Your
           <span
             class="text-primary italic drop-shadow-[0_0_30px_rgba(78,221,97,0.4)]"
-            >Assault</span
+            >Visit</span
           >
         </h1>
         <p
           v-motion-fade-visible-once
           class="text-zinc-400 max-w-3xl mx-auto text-xl md:text-3xl font-bold uppercase tracking-widest leading-tight"
         >
-          Strategic sessions. <span class="text-white">High-stakes manifests.</span>
+          Strategic sessions. <span class="text-white">High-stakes games.</span>
         </p>
 
         <div
@@ -264,13 +275,13 @@ useSeoMeta({
               <div
                 class="text-primary text-[10px] font-black uppercase tracking-[0.4em] mb-4"
               >
-                In Bound: Next Session
+                Up Next: Next Session
               </div>
               <div class="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter mb-2">
                 {{ nextUpSession.name }}
               </div>
               <div class="text-zinc-500 font-bold uppercase tracking-widest text-sm">
-                {{ nextUpSession.startTime }} Launch • {{ nextUpSession.category }} Tier
+                {{ nextUpSession.startTime }} Start • {{ nextUpSession.category }} Tier
               </div>
             </div>
           </div>
@@ -279,7 +290,7 @@ useSeoMeta({
               href="#session-list"
               class="px-12 py-6 bg-primary hover:bg-white text-black rounded-full font-black uppercase tracking-widest text-sm transition-all duration-300 flex items-center gap-3 shadow-[0_20px_50px_rgba(78,221,97,0.25)]"
             >
-              Analyze Manifest <ArrowRight class="w-5 h-5" />
+              View Program <ArrowRight class="w-5 h-5" />
             </a>
           </div>
         </div>
@@ -517,11 +528,11 @@ useSeoMeta({
           v-motion-slide-bottom
           class="text-6xl md:text-8xl font-black text-white mb-8 tracking-tighter uppercase"
         >
-          Ready to <span class="text-primary italic">Deploy?</span>
+          Ready to <span class="text-primary italic">Win?</span>
         </h2>
         <p class="text-zinc-400 max-w-3xl mx-auto text-xl md:text-2xl mb-16 font-bold uppercase tracking-widest leading-relaxed">
           The arena is set. The prize pools are surging. <br/>
-          <span class="text-white">Secure your position now.</span>
+          <span class="text-white">Claim your seat now.</span>
         </p>
         <div
           class="flex flex-col sm:flex-row items-center justify-center gap-8"
@@ -530,13 +541,13 @@ useSeoMeta({
             to="/contact"
             class="group w-full sm:w-auto px-12 py-6 rounded-full bg-primary text-black font-black text-sm uppercase tracking-[0.2em] hover:bg-white transition-all shadow-[0_20px_50px_rgba(78,221,97,0.3)] flex items-center justify-center gap-3"
           >
-            Operational Support <ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            Contact Us <ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </NuxtLink>
           <NuxtLink
             to="/pricing"
             class="w-full sm:w-auto px-12 py-6 rounded-full bg-charcoal text-white font-black text-sm uppercase tracking-[0.2em] hover:bg-zinc-800 transition-all border border-zinc-800 flex items-center justify-center"
           >
-            Manifest Intel
+            Session Info
           </NuxtLink>
         </div>
       </div>
@@ -547,7 +558,7 @@ useSeoMeta({
         <p
           class="text-center text-[10px] text-zinc-600 font-black uppercase tracking-[0.5em] max-w-3xl mx-auto px-4"
         >
-          Operational Intelligence System // Valid ID Required // 18+ Only // The house maintains absolute discretion on all prize claims and scheduling.
+          Official Schedule // Valid ID Required // 18+ Only // The house maintains absolute discretion on all prize claims and scheduling.
         </p>
     </div>
   </div>
