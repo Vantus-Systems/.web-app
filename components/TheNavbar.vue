@@ -46,16 +46,16 @@ const formatCurrency = (value: number) => {
               Mary Esther <span class="hidden sm:inline">Bingo</span>
             </span>
             <span class="text-[9px] font-black text-zinc-600 uppercase tracking-[0.4em] leading-none mt-1">
-              Live Operations
+              Live Bingo Action
             </span>
           </div>
           <span class="sr-only">Home Hub</span>
         </NuxtLink>
 
-        <!-- Tactical Navigation -->
+        <!-- Main Navigation -->
         <nav
           class="hidden lg:flex items-center space-x-2"
-          aria-label="Primary Uplink"
+          aria-label="Main Navigation"
         >
           <NuxtLink
             v-for="link in links"
