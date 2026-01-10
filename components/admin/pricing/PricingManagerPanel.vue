@@ -6,15 +6,15 @@
     >
       <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-lg font-bold text-primary">Pricing Manager V2</h2>
-          <p class="text-xs text-secondary">
+          <h2 class="text-lg font-bold text-slate-900">Pricing Manager V2</h2>
+          <p class="text-xs text-slate-500">
             Manage templates, calendar, and promotions.
           </p>
         </div>
         <div class="flex items-center gap-3">
           <div
             v-if="store.saving"
-            class="text-xs font-bold text-secondary uppercase tracking-wider animate-pulse"
+            class="text-xs font-bold text-slate-500 uppercase tracking-wider animate-pulse"
           >
             Saving Draft...
           </div>
@@ -65,7 +65,7 @@
             'pb-3 px-1 text-sm font-bold border-b-2 transition-colors',
             currentTab === tab.id
               ? 'border-accent-primary text-accent-primary'
-              : 'border-transparent text-secondary hover:text-primary hover:border-divider',
+              : 'border-transparent text-slate-500 hover:text-slate-900 hover:border-divider',
           ]"
           @click="currentTab = tab.id"
         >
@@ -184,7 +184,7 @@
                         >
                           {{ version.status }}
                         </span>
-                        <p class="text-xs text-secondary mt-1">
+                        <p class="text-xs text-slate-500 mt-1">
                           {{ new Date(version.created_at).toLocaleString() }}
                         </p>
                       </div>
@@ -196,7 +196,7 @@
                         Restore
                       </button>
                     </div>
-                    <p class="text-xs text-secondary truncate">
+                    <p class="text-xs text-slate-500 truncate">
                       ID: {{ version.id }}
                     </p>
                   </li>

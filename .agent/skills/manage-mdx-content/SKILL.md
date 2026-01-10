@@ -5,7 +5,7 @@ description: Instructions for authoring "Work" (Case Studies) and "Insight" (Art
 
 # Manage MDX Content
 
-This skill covers the creation and management of content in the `content/` directory. The system uses MDX to render rich content for the "Project SENTINEL" portfolio.
+This skill covers the creation and management of content in the `content/` directory, ensuring high-quality standards for Project SENTINEL's portfolio.
 
 ## Directory Structure
 *   **Work (Case Studies):** `content/work/*.mdx`
@@ -14,15 +14,18 @@ This skill covers the creation and management of content in the `content/` direc
 ## Content Types & Distinction
 
 ### 1. Work (Case Studies)
-Detailed breakdowns of engineering projects.
+Detailed breakdowns of engineering projects, including:
 *   **Focus:** Problem, Solution, Architecture, Outcome.
 *   **Tone:** Technical, precise, authoritative.
 *   **Specifics:** Must include `kpis` in frontmatter.
 
 ### 2. Insights (Articles)
-Thought leadership and technical deep dives.
-*   **Focus:** Methodology, Industry Trends, Tutorials.
-*   **Tone:** Educational, visionary.
+Articles providing insights into industry trends and project outcomes.
+*   **Focus:** Analysis, Commentary, Future Directions.
+*   **Tone:** Informative, engaging, thought-provoking.
+
+### 3. Documentation Review
+Ensure all documentation in the `docs/` directory is updated to reflect content management practices.
 
 ## Frontmatter Rules
 

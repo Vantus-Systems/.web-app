@@ -30,7 +30,7 @@ useSeoMeta({
           Operational <span class="text-primary drop-shadow-[0_0_20px_rgba(78,221,97,0.4)]">Directives</span>
         </h1>
         <p class="text-xl text-zinc-400 max-w-2xl mx-auto font-bold uppercase tracking-widest leading-relaxed">
-          To maintain mission integrity, please adhere to our standardized house manifests.
+          To maintain mission integrity, please adhere to our standardized house rules.
         </p>
       </div>
     </section>
@@ -42,7 +42,7 @@ useSeoMeta({
         <div class="mb-24 group">
           <div class="flex items-center gap-6 mb-10 transition-transform group-hover:translate-x-2 duration-500">
             <div class="w-2 h-10 bg-primary shadow-[0_0_15px_rgba(78,221,97,0.8)]"></div>
-            <h2 class="text-4xl font-black text-white uppercase tracking-tighter">I. Conduct Manifest</h2>
+            <h2 class="text-4xl font-black text-white uppercase tracking-tighter">I. Conduct Rules</h2>
           </div>
           
           <div class="grid gap-8">
@@ -96,7 +96,7 @@ useSeoMeta({
                    <div>
                      <span class="block text-white font-black uppercase tracking-widest mb-2">Asset Verification</span>
                      <p class="text-zinc-500 font-bold text-sm leading-relaxed uppercase tracking-wider">
-                       All valid manifests are subject to master-board synchronization. Decisions by Command are final.
+                       All valid schedules are subject to master-board synchronization. Decisions by Command are final.
                      </p>
                    </div>
                 </li>
@@ -105,7 +105,7 @@ useSeoMeta({
                    <div>
                      <span class="block text-white font-black uppercase tracking-widest mb-2">Resource Allocation</span>
                      <p class="text-zinc-500 font-bold text-sm leading-relaxed uppercase tracking-wider">
-                       In cases of simultaneous manifest validation, prize allocation will be divided equally among successful units.
+                       In cases of simultaneous schedule validation, prize allocation will be divided equally among successful units.
                      </p>
                    </div>
                 </li>

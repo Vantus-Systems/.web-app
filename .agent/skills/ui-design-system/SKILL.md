@@ -5,7 +5,7 @@ description: Guidelines for the "Engineered Hardware" design aesthetic and compo
 
 # UI Design System
 
-Project SENTINEL follows the "Engineered Hardware" aesthetic: precise, industrial, and highly functional.
+Project SENTINEL follows the "Engineered Hardware" aesthetic: precise, industrial, and highly functional, adhering to Fortune-500 standards.
 
 ## Design Philosophy
 *   **Aesthetic:** "Engineered Hardware". Think cockpit instruments, terminal interfaces, and technical diagrams.
@@ -29,3 +29,6 @@ Animations must be "subtle and purposeful".
 *   **Standard:** WCAG 2.2 AA.
 *   **Keyboard:** All "Engineered" components must be fully navigable via keyboard.
 *   **Focus:** Focus rings must be high-contrast and sharp (no soft glows).
+
+### 3. Documentation Review
+Ensure all documentation in the `docs/` directory is updated to reflect design system guidelines.

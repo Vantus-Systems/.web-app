@@ -35,12 +35,12 @@ const onSubmit = async () => {
   try {
     // Simulated contact API
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    successMessage.value = "Manifest received. Our units will contact you shortly.";
+    successMessage.value = "Message received. Our volunteers will contact you shortly.";
     name.value = "";
     email.value = "";
     message.value = "";
   } catch (err) {
-    errorMessage.value = "Transmission failed. Check your uplink and try again.";
+    errorMessage.value = "Message final delivery failed. Please try again later.";
   } finally {
     isSubmitting.value = false;
   }

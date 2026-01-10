@@ -8,7 +8,7 @@ await fetchBusiness();
 useSeoMeta({
   title: "Data Protection | Mary Esther Bingo",
   description:
-    "Data protection manifest for Mary Esther Bingo. Secure handling of operator information.",
+    "Data protection Guide for Mary Esther Bingo. Secure handling of operator information.",
   robots: "noindex, follow",
 });
 </script>
@@ -27,10 +27,10 @@ useSeoMeta({
           <span class="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Data Integrity</span>
         </div>
         <h1 class="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-none mb-6">
-          Privacy <span class="text-primary drop-shadow-[0_0_20px_rgba(78,221,97,0.4)]">Manifest</span>
+          Privacy <span class="text-primary drop-shadow-[0_0_20px_rgba(78,221,97,0.4)]">Guide</span>
         </h1>
         <p class="text-zinc-500 font-bold uppercase tracking-widest leading-relaxed">
-          Standardized procedures for handling mission-sensitive operator information.
+          Standardized procedures for handling sensitive player information.
         </p>
       </div>
 
@@ -46,7 +46,7 @@ useSeoMeta({
             </h2>
             <div class="text-zinc-400 font-bold text-sm leading-relaxed uppercase tracking-wider space-y-6">
               <p>
-                At Mary Esther Bingo, we respect mission confidentiality. The only information we collect is what you voluntarily provide via secure manifest forms.
+                At Mary Esther Bingo, we respect player confidentiality. The only information we collect is what you voluntarily provide via secure intake forms.
               </p>
               <p>
                 We do not deploy cookies for behavioral tracking across external networks. Basic analytics may be utilized for traffic coordination.
@@ -67,7 +67,7 @@ useSeoMeta({
                 </li>
                 <li class="flex items-center gap-4">
                   <div class="w-1.5 h-1.5 bg-primary rounded-full"></div>
-                  Coordinating schedule, jackpot, or charity manifests.
+                  Coordinating schedule, jackpot, or charity lists.
                 </li>
                 <li class="flex items-center gap-4">
                   <div class="w-1.5 h-1.5 bg-primary rounded-full"></div>

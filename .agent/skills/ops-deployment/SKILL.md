@@ -5,7 +5,7 @@ description: Procedures for building, verifying, and deploying the application u
 
 # Ops & Deployment
 
-Project SENTINEL uses a custom build pipeline to ensure integrity and security.
+Project SENTINEL uses a custom build pipeline to ensure integrity and security, adhering to Fortune-500 standards.
 
 ## Build & Verification
 
@@ -40,3 +40,4 @@ Validates and encrypts environment secrets.
 2.  **Config:** Run `setup-env.js` to populate secrets.
 3.  **Build:** Run `npm run build` (and verify proof).
 4.  **Routing:** Run `generate-nginx-config.mjs` and reload Nginx.
+5.  **Documentation Review:** Ensure all documentation in the `docs/` directory is updated to reflect deployment procedures.

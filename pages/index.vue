@@ -58,7 +58,7 @@
           v-motion-fade-visible-once
           class="text-xl md:text-3xl text-gray-200 max-w-4xl mx-auto mb-14 font-black uppercase tracking-widest bg-black/40 backdrop-blur-md py-4 rounded-2xl border border-white/5"
         >
-          Millions awarded monthly. Neon energy. <span class="text-primary italic">Absolute thrill.</span>
+          Millions awarded monthly. Winning energy. <span class="text-primary italic">Absolute thrill.</span>
         </p>
         <div
           v-motion-slide-visible-once-bottom

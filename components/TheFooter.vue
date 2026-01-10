@@ -7,7 +7,7 @@ await fetchBusiness();
 
 const links = [
   { name: "Hub", path: "/" },
-  { name: "Manifest", path: "/schedule" },
+  { name: "Schedule", path: "/schedule" },
   { name: "Pricing", path: "/pricing" },
   { name: "Intelligence", path: "/about" },
   { name: "Contact", path: "/contact" },

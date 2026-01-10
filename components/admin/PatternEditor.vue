@@ -8,11 +8,11 @@
         <div class="flex items-center justify-between">
           <div>
             <p
-              class="text-[10px] uppercase tracking-widest text-secondary font-bold"
+              class="text-[10px] uppercase tracking-widest text-slate-500 font-bold"
             >
               Library
             </p>
-            <h3 class="text-lg font-bold text-primary">Patterns</h3>
+            <h3 class="text-lg font-bold text-slate-900">Patterns</h3>
           </div>
           <button
             class="text-xs font-bold text-accent-primary border border-divider bg-surface hover:bg-base rounded-lg px-3 py-1.5 transition-colors"
@@ -56,7 +56,7 @@
         >
           <div class="flex justify-between items-start">
             <div
-              class="text-sm font-bold text-primary group-hover:text-accent-primary transition-colors"
+              class="text-sm font-bold text-slate-900 group-hover:text-accent-primary transition-colors"
             >
               {{ p.name }}
             </div>
@@ -68,7 +68,7 @@
             </div>
           </div>
           <div
-            class="text-[10px] uppercase tracking-widest text-secondary mt-1"
+            class="text-[10px] uppercase tracking-widest text-slate-500 mt-1"
           >
             {{ p.category || "Uncategorized" }}
           </div>
@@ -81,17 +81,17 @@
       <div class="flex items-center justify-between shrink-0">
         <div>
           <p
-            class="text-[10px] uppercase tracking-widest text-secondary font-bold"
+            class="text-[10px] uppercase tracking-widest text-slate-500 font-bold"
           >
             Pattern Studio
           </p>
-          <h3 class="text-xl font-bold text-primary">
+          <h3 class="text-xl font-bold text-slate-900">
             {{ form.name || "Select a Pattern" }}
           </h3>
         </div>
         <div class="flex gap-2">
           <button
-            class="text-xs font-bold uppercase tracking-wider border border-divider bg-surface hover:bg-base text-secondary hover:text-primary rounded-lg px-3 py-2 transition-colors"
+            class="text-xs font-bold uppercase tracking-wider border border-divider bg-surface hover:bg-base text-slate-500 hover:text-slate-900 rounded-lg px-3 py-2 transition-colors"
             :disabled="!editingPattern"
             @click="duplicatePattern"
           >
@@ -114,13 +114,13 @@
           class="absolute top-4 left-4 right-4 flex items-center justify-between"
         >
           <div
-            class="text-xs font-bold uppercase tracking-widest text-secondary"
+            class="text-xs font-bold uppercase tracking-widest text-slate-500"
           >
             Canvas
           </div>
           <div class="flex items-center gap-2 bg-base rounded-lg p-1">
             <button
-              class="p-1 hover:bg-white rounded text-secondary hover:text-primary transition-colors"
+              class="p-1 hover:bg-white rounded text-slate-500 hover:text-slate-900 transition-colors"
               @click="prevFrame"
             >
               <svg
@@ -138,12 +138,12 @@
               </svg>
             </button>
             <span
-              class="text-xs font-mono font-bold text-primary w-16 text-center"
+              class="text-xs font-mono font-bold text-slate-900 w-16 text-center"
             >
               {{ currentFrameIndex + 1 }} / {{ form.definition.frames.length }}
             </span>
             <button
-              class="p-1 hover:bg-white rounded text-secondary hover:text-primary transition-colors"
+              class="p-1 hover:bg-white rounded text-slate-500 hover:text-slate-900 transition-colors"
               @click="nextFrame"
             >
               <svg
@@ -177,7 +177,7 @@
             ]"
             @click="toggleCell(idx)"
           >
-            <span v-if="idx === 12" class="text-[10px] font-bold text-secondary"
+            <span v-if="idx === 12" class="text-[10px] font-bold text-slate-500"
               >FREE</span
             >
           </div>
@@ -196,7 +196,7 @@
               :class="
                 currentFrameIndex === idx
                   ? 'bg-accent-primary text-white shadow-md scale-110'
-                  : 'bg-surface text-secondary hover:bg-white'
+                  : 'bg-surface text-slate-500 hover:bg-white'
               "
               @click="currentFrameIndex = idx"
             >
@@ -230,18 +230,18 @@
     >
       <div class="p-4 border-b border-divider bg-base/30">
         <p
-          class="text-[10px] uppercase tracking-widest text-secondary font-bold"
+          class="text-[10px] uppercase tracking-widest text-slate-500 font-bold"
         >
           Inspector
         </p>
-        <h3 class="text-lg font-bold text-primary">Details</h3>
+        <h3 class="text-lg font-bold text-slate-900">Details</h3>
       </div>
 
       <div class="p-4 space-y-6 overflow-y-auto flex-1">
         <div class="space-y-4">
           <label class="block">
             <span
-              class="text-xs font-bold text-secondary uppercase tracking-wider"
+              class="text-xs font-bold text-slate-500 uppercase tracking-wider"
               >Name</span
             >
             <input
@@ -251,7 +251,7 @@
           </label>
           <label class="block">
             <span
-              class="text-xs font-bold text-secondary uppercase tracking-wider"
+              class="text-xs font-bold text-slate-500 uppercase tracking-wider"
               >Slug</span
             >
             <input
@@ -262,7 +262,7 @@
           </label>
           <label class="block">
             <span
-              class="text-xs font-bold text-secondary uppercase tracking-wider"
+              class="text-xs font-bold text-slate-500 uppercase tracking-wider"
               >Category</span
             >
             <input
@@ -272,7 +272,7 @@
           </label>
           <label class="block">
             <span
-              class="text-xs font-bold text-secondary uppercase tracking-wider"
+              class="text-xs font-bold text-slate-500 uppercase tracking-wider"
               >Tags</span
             >
             <input
@@ -290,7 +290,7 @@
               class="rounded text-accent-primary focus:ring-accent-primary"
             />
             <span
-              class="text-xs font-bold text-primary uppercase tracking-wider"
+              class="text-xs font-bold text-slate-900 uppercase tracking-wider"
               >Animated Pattern</span
             >
           </label>
@@ -298,14 +298,14 @@
 
         <div class="border-t border-divider pt-6 space-y-4">
           <div
-            class="text-xs font-bold uppercase tracking-widest text-secondary"
+            class="text-xs font-bold uppercase tracking-widest text-slate-500"
           >
             Generators
           </div>
 
           <div class="space-y-2">
             <label
-              class="text-xs font-bold text-secondary uppercase tracking-wider"
+              class="text-xs font-bold text-slate-500 uppercase tracking-wider"
               >Type</label
             >
             <select
@@ -329,7 +329,7 @@
                 max="12"
                 class="w-20 rounded-lg border-divider bg-base text-sm px-3 py-2 focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary outline-none"
               />
-              <span class="text-xs text-secondary">Lines Required</span>
+              <span class="text-xs text-slate-500">Lines Required</span>
             </div>
             <label class="flex items-center gap-3">
               <input
@@ -338,7 +338,7 @@
                 class="rounded text-accent-primary focus:ring-accent-primary"
               />
               <span
-                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                class="text-xs font-bold text-slate-500 uppercase tracking-wider"
                 >Rotational Symmetry</span
               >
             </label>
@@ -352,7 +352,7 @@
                 class="rounded text-accent-primary focus:ring-accent-primary"
               />
               <span
-                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                class="text-xs font-bold text-slate-500 uppercase tracking-wider"
                 >Include Corner Stamps</span
               >
             </label>
@@ -363,7 +363,7 @@
                 class="rounded text-accent-primary focus:ring-accent-primary"
               />
               <span
-                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                class="text-xs font-bold text-slate-500 uppercase tracking-wider"
                 >Include 4 Corners</span
               >
             </label>
@@ -374,7 +374,7 @@
                 class="rounded text-accent-primary focus:ring-accent-primary"
               />
               <span
-                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                class="text-xs font-bold text-slate-500 uppercase tracking-wider"
                 >Rotational Symmetry</span
               >
             </label>
@@ -396,13 +396,13 @@
 
         <div class="border-t border-divider pt-6 space-y-4">
           <div
-            class="text-xs font-bold uppercase tracking-widest text-secondary"
+            class="text-xs font-bold uppercase tracking-widest text-slate-500"
           >
             Preview
           </div>
           <div class="flex items-center gap-2 bg-base p-1 rounded-lg">
             <button
-              class="flex-1 py-1.5 text-xs font-bold text-secondary hover:text-primary hover:bg-white rounded transition-colors"
+              class="flex-1 py-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 hover:bg-white rounded transition-colors"
               @click="togglePlay"
             >
               {{ isPlaying ? "Pause" : "Play Animation" }}

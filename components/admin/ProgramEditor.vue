@@ -13,11 +13,11 @@
         <div class="flex items-center justify-between">
           <div>
             <p
-              class="text-[10px] uppercase tracking-widest text-secondary font-bold"
+              class="text-[10px] uppercase tracking-widest text-slate-500 font-bold"
             >
               Library
             </p>
-            <h3 class="text-lg font-bold text-primary">Programs</h3>
+            <h3 class="text-lg font-bold text-slate-900">Programs</h3>
           </div>
           <button
             class="text-xs font-bold text-accent-primary border border-divider bg-surface hover:bg-base rounded-lg px-3 py-1.5 transition-colors"
@@ -69,7 +69,7 @@
         >
           <div class="flex justify-between items-start">
             <div
-              class="text-sm font-bold text-primary group-hover:text-accent-primary transition-colors"
+              class="text-sm font-bold text-slate-900 group-hover:text-accent-primary transition-colors"
             >
               {{ p.name }}
             </div>
@@ -81,7 +81,7 @@
             </button>
           </div>
           <div
-            class="text-[10px] uppercase tracking-widest text-secondary mt-1"
+            class="text-[10px] uppercase tracking-widest text-slate-500 mt-1"
           >
             {{ p.games.length }} games
           </div>
@@ -100,11 +100,11 @@
       <div class="flex items-center justify-between shrink-0">
         <div>
           <p
-            class="text-[10px] uppercase tracking-widest text-secondary font-bold"
+            class="text-[10px] uppercase tracking-widest text-slate-500 font-bold"
           >
             Program Orchestrator
           </p>
-          <h3 class="text-xl font-bold text-primary flex items-center gap-2">
+          <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
             {{ form.name || "Select a Program" }}
             <span
               v-if="isDirty"
@@ -116,12 +116,12 @@
         </div>
         <div class="flex gap-2">
           <div
-            class="text-xs text-secondary font-bold bg-surface px-3 py-1.5 rounded-lg border border-divider"
+            class="text-xs text-slate-500 font-bold bg-surface px-3 py-1.5 rounded-lg border border-divider"
           >
             Total Payout: ${{ totalPayout }}
           </div>
           <div
-            class="text-xs text-secondary font-bold bg-surface px-3 py-1.5 rounded-lg border border-divider"
+            class="text-xs text-slate-500 font-bold bg-surface px-3 py-1.5 rounded-lg border border-divider"
           >
             Duration: {{ totalDuration }}m
           </div>
@@ -133,7 +133,7 @@
       >
         <label class="block">
           <span
-            class="text-xs font-bold text-secondary uppercase tracking-wider"
+            class="text-xs font-bold text-slate-500 uppercase tracking-wider"
             >Name</span
           >
           <input
@@ -153,7 +153,7 @@
         </label>
         <label class="block">
           <span
-            class="text-xs font-bold text-secondary uppercase tracking-wider"
+            class="text-xs font-bold text-slate-500 uppercase tracking-wider"
             >Slug</span
           >
           <input
@@ -174,7 +174,7 @@
         </label>
         <label class="block">
           <span
-            class="text-xs font-bold text-secondary uppercase tracking-wider"
+            class="text-xs font-bold text-slate-500 uppercase tracking-wider"
             >Description</span
           >
           <input
@@ -212,19 +212,19 @@
           class="p-4 border-b border-divider flex items-center justify-between bg-base/30"
         >
           <div
-            class="text-xs font-bold uppercase tracking-widest text-secondary"
+            class="text-xs font-bold uppercase tracking-widest text-slate-500"
           >
             Setlist
           </div>
           <div class="flex gap-2">
             <button
-              class="text-xs font-bold border border-divider bg-surface hover:bg-base text-primary rounded-lg px-3 py-1.5 transition-colors flex items-center gap-1"
+              class="text-xs font-bold border border-divider bg-surface hover:bg-base text-slate-900 rounded-lg px-3 py-1.5 transition-colors flex items-center gap-1"
               @click="addGame"
             >
               <span>+ Game</span>
             </button>
             <button
-              class="text-xs font-bold border border-dashed border-divider hover:border-secondary text-secondary hover:text-primary rounded-lg px-3 py-1.5 transition-colors flex items-center gap-1"
+              class="text-xs font-bold border border-dashed border-divider hover:border-slate-500 text-slate-500 hover:text-slate-900 rounded-lg px-3 py-1.5 transition-colors flex items-center gap-1"
               @click="addBreak"
             >
               <span>+ Break</span>
@@ -253,16 +253,16 @@
             @contextmenu.prevent="showContextMenu($event, idx)"
           >
             <div
-              class="text-xs font-bold text-secondary w-6 text-center select-none cursor-grab active:cursor-grabbing"
+              class="text-xs font-bold text-slate-500 w-6 text-center select-none cursor-grab active:cursor-grabbing"
             >
               {{ idx + 1 }}
             </div>
             <div class="flex-1">
-              <div class="text-sm font-bold text-primary">
+              <div class="text-sm font-bold text-slate-900">
                 {{ game.title }}
               </div>
               <div
-                class="text-[10px] uppercase tracking-widest text-secondary mt-0.5"
+                class="text-[10px] uppercase tracking-widest text-slate-500 mt-0.5"
               >
                 {{ game.patternSlug || "No Pattern" }}
               </div>
@@ -277,7 +277,7 @@
 
           <div
             v-if="form.games.length === 0"
-            class="flex flex-col items-center justify-center h-40 text-secondary border-2 border-dashed border-divider rounded-xl bg-base/30"
+            class="flex flex-col items-center justify-center h-40 text-slate-500 border-2 border-dashed border-divider rounded-xl bg-base/30"
           >
             <p class="text-sm font-medium">No games yet</p>
             <p class="text-xs mt-1">
@@ -303,18 +303,18 @@
       >
         <div>
           <p
-            class="text-[10px] uppercase tracking-widest text-secondary font-bold"
+            class="text-[10px] uppercase tracking-widest text-slate-500 font-bold"
           >
             Inspector
           </p>
-          <h3 class="text-lg font-bold text-primary truncate max-w-[200px]">
+          <h3 class="text-lg font-bold text-slate-900 truncate max-w-[200px]">
             {{ selectedGame ? selectedGame.title : "No Selection" }}
           </h3>
         </div>
         <div class="flex gap-1">
           <button
             v-if="selectedGame"
-            class="p-1 hover:bg-base rounded text-secondary hover:text-primary transition-colors"
+            class="p-1 hover:bg-base rounded text-slate-500 hover:text-slate-900 transition-colors"
             title="Toggle JSON Inspector"
             @click="showInspector = !showInspector"
           >
@@ -350,8 +350,8 @@
             class="flex-1 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors border-b-2"
             :class="
               activeTab === tab
-                ? 'border-accent-primary text-primary bg-surface'
-                : 'border-transparent text-secondary hover:text-primary hover:bg-surface/50'
+                ? 'border-accent-primary text-slate-900 bg-surface'
+                : 'border-transparent text-slate-500 hover:text-slate-900 hover:bg-surface/50'
             "
             @click="activeTab = tab"
           >
@@ -367,7 +367,7 @@
           >
             <label class="block">
               <span
-                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                class="text-xs font-bold text-slate-500 uppercase tracking-wider"
                 >Title</span
               >
               <input
@@ -377,7 +377,7 @@
             </label>
             <label class="block">
               <span
-                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                class="text-xs font-bold text-slate-500 uppercase tracking-wider"
                 >Paper Color</span
               >
               <div class="flex items-center gap-2 mt-1.5">
@@ -391,14 +391,14 @@
                     ).value
                   "
                 />
-                <span class="text-xs font-mono text-secondary">{{
+                <span class="text-xs font-mono text-slate-500">{{
                   selectedGame.paperColor || "#ffffff"
                 }}</span>
               </div>
             </label>
             <label class="block">
               <span
-                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                class="text-xs font-bold text-slate-500 uppercase tracking-wider"
                 >Notes</span
               >
               <textarea
@@ -410,7 +410,7 @@
 
             <div class="border-t border-divider pt-6 space-y-4">
               <div
-                class="text-xs font-bold uppercase tracking-widest text-secondary"
+                class="text-xs font-bold uppercase tracking-widest text-slate-500"
               >
                 Pattern Picker
               </div>
@@ -445,11 +445,11 @@
                   :class="
                     pattern.slug === selectedGame.patternSlug
                       ? 'border-accent-primary bg-accent-primary/5 ring-1 ring-accent-primary'
-                      : 'border-divider bg-surface hover:border-secondary/50'
+                      : 'border-divider bg-surface hover:border-slate-500/50'
                   "
                   @click="selectedGame.patternSlug = pattern.slug"
                 >
-                  <div class="text-xs font-bold text-primary mb-2 truncate">
+                  <div class="text-xs font-bold text-slate-900 mb-2 truncate">
                     {{ pattern.name }}
                   </div>
                   <div
@@ -474,7 +474,7 @@
           >
             <label class="block">
               <span
-                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                class="text-xs font-bold text-slate-500 uppercase tracking-wider"
                 >Payout Type</span
               >
               <select
@@ -496,7 +496,7 @@
               class="block"
             >
               <span
-                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                class="text-xs font-bold text-slate-500 uppercase tracking-wider"
                 >Amount ($)</span
               >
               <input
@@ -510,7 +510,7 @@
 
             <div v-if="selectedGame.payout.type === 'percentage'" class="block">
               <span
-                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                class="text-xs font-bold text-slate-500 uppercase tracking-wider"
                 >Percentage (%)</span
               >
               <input
@@ -524,7 +524,7 @@
 
             <label class="block">
               <span
-                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                class="text-xs font-bold text-slate-500 uppercase tracking-wider"
                 >Description / Notes</span
               >
               <textarea
@@ -543,7 +543,7 @@
           >
             <label class="block">
               <span
-                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                class="text-xs font-bold text-slate-500 uppercase tracking-wider"
                 >Pricing Model</span
               >
               <select
@@ -558,7 +558,7 @@
 
             <div v-if="selectedGame.pricing.model !== 'included'" class="block">
               <span
-                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                class="text-xs font-bold text-slate-500 uppercase tracking-wider"
                 >Price ($)</span
               >
               <input
@@ -588,7 +588,7 @@
           >
             <label class="block">
               <span
-                class="text-xs font-bold text-secondary uppercase tracking-wider"
+                class="text-xs font-bold text-slate-500 uppercase tracking-wider"
                 >Estimated Duration (Minutes)</span
               >
               <input
@@ -607,7 +607,7 @@
                 type="checkbox"
                 class="w-5 h-5 rounded border-gray-300 text-accent-primary focus:ring-accent-primary"
               />
-              <span class="text-sm font-bold text-primary"
+              <span class="text-sm font-bold text-slate-900"
                 >Is this a Break / Intermission?</span
               >
             </label>
@@ -625,7 +625,7 @@
                 v-if="selectedPattern"
                 class="flex flex-col items-center gap-4"
               >
-                <div class="text-sm font-bold text-primary">
+                <div class="text-sm font-bold text-slate-900">
                   {{ selectedPattern.name }}
                 </div>
                 <BingoPatternGrid
@@ -638,11 +638,11 @@
                   :fill-color="selectedGame.paperColor"
                   size="md"
                 />
-                <div class="text-xs text-secondary font-mono">
+                <div class="text-xs text-slate-500 font-mono">
                   Frame {{ currentFrame + 1 }} / {{ maxFrames }}
                 </div>
               </div>
-              <div v-else class="text-secondary text-sm">
+              <div v-else class="text-slate-500 text-sm">
                 No Pattern Selected
               </div>
             </div>
@@ -683,7 +683,7 @@
 
               <div class="space-y-1">
                 <div
-                  class="flex justify-between text-[10px] uppercase tracking-wider text-secondary font-bold"
+                  class="flex justify-between text-[10px] uppercase tracking-wider text-slate-500 font-bold"
                 >
                   <span>Speed</span>
                   <span>{{ playbackSpeed }}ms</span>
@@ -702,40 +702,40 @@
             <!-- Metrics & Inspection -->
             <div class="space-y-2">
               <div
-                class="text-[10px] uppercase tracking-widest text-secondary font-bold"
+                class="text-[10px] uppercase tracking-widest text-slate-500 font-bold"
               >
                 Performance Metrics
               </div>
               <div class="grid grid-cols-2 gap-2">
                 <div class="bg-base/50 p-2 rounded border border-divider">
-                  <div class="text-[10px] text-secondary uppercase">
+                  <div class="text-[10px] text-slate-500 uppercase">
                     Est. Duration
                   </div>
-                  <div class="text-sm font-mono font-bold text-primary">
+                  <div class="text-sm font-mono font-bold text-slate-900">
                     {{ selectedGame.timeline?.estimatedDuration || 0 }} min
                   </div>
                 </div>
                 <div class="bg-base/50 p-2 rounded border border-divider">
-                  <div class="text-[10px] text-secondary uppercase">
+                  <div class="text-[10px] text-slate-500 uppercase">
                     Payout Density
                   </div>
-                  <div class="text-sm font-mono font-bold text-primary">
+                  <div class="text-sm font-mono font-bold text-slate-900">
                     ${{ payoutDensity }}/min
                   </div>
                 </div>
                 <div class="bg-base/50 p-2 rounded border border-divider">
-                  <div class="text-[10px] text-secondary uppercase">
+                  <div class="text-[10px] text-slate-500 uppercase">
                     Active Cells
                   </div>
-                  <div class="text-sm font-mono font-bold text-primary">
+                  <div class="text-sm font-mono font-bold text-slate-900">
                     {{ currentActiveCells }} / 25
                   </div>
                 </div>
                 <div class="bg-base/50 p-2 rounded border border-divider">
-                  <div class="text-[10px] text-secondary uppercase">
+                  <div class="text-[10px] text-slate-500 uppercase">
                     Saturation
                   </div>
-                  <div class="text-sm font-mono font-bold text-primary">
+                  <div class="text-sm font-mono font-bold text-slate-900">
                     {{ saturationPercentage }}%
                   </div>
                 </div>
@@ -745,7 +745,7 @@
             <!-- Variable Inspector -->
             <div class="space-y-2">
               <button
-                class="flex items-center gap-2 text-[10px] uppercase tracking-widest text-secondary font-bold hover:text-primary transition-colors w-full text-left"
+                class="flex items-center gap-2 text-[10px] uppercase tracking-widest text-slate-500 font-bold hover:text-slate-900 transition-colors w-full text-left"
                 @click="showInspector = !showInspector"
               >
                 <span
@@ -792,7 +792,7 @@
 
       <div
         v-else
-        class="flex-1 flex items-center justify-center text-secondary p-8 text-center"
+        class="flex-1 flex items-center justify-center text-slate-500 p-8 text-center"
       >
         <div>
           <p class="text-sm font-medium">No Game Selected</p>
@@ -826,14 +826,14 @@
       >
         <div class="flex items-center gap-3 text-amber-500 mb-4">
           <AlertCircle class="w-6 h-6" />
-          <h3 class="text-lg font-bold text-primary">Unsaved Changes</h3>
+          <h3 class="text-lg font-bold text-slate-900">Unsaved Changes</h3>
         </div>
-        <p class="text-sm text-secondary mb-6">
+        <p class="text-sm text-slate-500 mb-6">
           You have unsaved changes. Are you sure you want to discard them?
         </p>
         <div class="flex justify-end gap-3">
           <button
-            class="px-4 py-2 text-sm font-bold text-secondary hover:bg-base rounded-lg transition-colors"
+            class="px-4 py-2 text-sm font-bold text-slate-500 hover:bg-base rounded-lg transition-colors"
             @click="cancelAction"
           >
             Cancel
@@ -857,7 +857,7 @@
       :style="{ left: `${contextMenu.x}px`, top: `${contextMenu.y}px` }"
     >
       <button
-        class="w-full text-left px-4 py-2 text-sm text-primary hover:bg-base flex items-center gap-2"
+        class="w-full text-left px-4 py-2 text-sm text-slate-900 hover:bg-base flex items-center gap-2"
         @click="duplicateGame"
       >
         <Copy class="w-4 h-4" />
