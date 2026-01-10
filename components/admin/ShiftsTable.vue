@@ -13,13 +13,17 @@
             <th class="px-4 py-3 text-right whitespace-nowrap">
               <div class="flex items-center justify-end gap-1">
                 Deposit to Bank
-                <HelpTip text="The amount physically deposited to the bank (legacy: Deposit Total)." />
+                <HelpTip
+                  text="The amount physically deposited to the bank (legacy: Deposit Total)."
+                />
               </div>
             </th>
             <th class="px-4 py-3 text-right whitespace-nowrap">
               <div class="flex items-center justify-end gap-1">
                 Actual Revenue
-                <HelpTip text="Deposit to Bank + Box Change. The true profit/loss." />
+                <HelpTip
+                  text="Deposit to Bank + Box Change. The true profit/loss."
+                />
               </div>
             </th>
             <th class="px-4 py-3 text-right whitespace-nowrap">
@@ -109,48 +113,111 @@
             </td>
 
             <!-- Deposit to Bank -->
-            <td class="px-4 py-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
-              {{ formatCurrency(shift.deposit_bank_total ?? shift.deposit_total) }}
+            <td
+              class="px-4 py-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap"
+            >
+              {{
+                formatCurrency(shift.deposit_bank_total ?? shift.deposit_total)
+              }}
             </td>
 
             <!-- Actual Revenue -->
-            <td class="px-4 py-4 text-right font-mono font-bold whitespace-nowrap" :class="(shift.actual_revenue || 0) >= 0 ? 'text-green-600' : 'text-red-600'">
-              {{ shift.actual_revenue !== null && shift.actual_revenue !== undefined ? formatCurrency(shift.actual_revenue) : '-' }}
+            <td
+              class="px-4 py-4 text-right font-mono font-bold whitespace-nowrap"
+              :class="
+                (shift.actual_revenue || 0) >= 0
+                  ? 'text-green-600'
+                  : 'text-red-600'
+              "
+            >
+              {{
+                shift.actual_revenue !== null &&
+                shift.actual_revenue !== undefined
+                  ? formatCurrency(shift.actual_revenue)
+                  : "-"
+              }}
             </td>
 
             <!-- Pulltabs Net -->
-            <td class="px-4 py-4 text-right font-mono text-slate-600 whitespace-nowrap">
+            <td
+              class="px-4 py-4 text-right font-mono text-slate-600 whitespace-nowrap"
+            >
               {{ formatCurrency(shift.pulltabs_total) }}
             </td>
 
             <!-- Bingo (Deposited) -->
-            <td class="px-4 py-4 text-right font-mono text-slate-600 whitespace-nowrap">
-              {{ formatCurrency(shift.bingo_deposited ?? (shift.deposit_total - shift.pulltabs_total)) }}
+            <td
+              class="px-4 py-4 text-right font-mono text-slate-600 whitespace-nowrap"
+            >
+              {{
+                formatCurrency(
+                  shift.bingo_deposited ??
+                    shift.deposit_total - shift.pulltabs_total,
+                )
+              }}
             </td>
 
             <!-- Bingo (Actual) -->
-            <td class="px-4 py-4 text-right font-mono whitespace-nowrap" :class="(shift.bingo_actual || 0) >= 0 ? 'text-slate-600' : 'text-red-600'">
-              {{ shift.bingo_actual !== null && shift.bingo_actual !== undefined ? formatCurrency(shift.bingo_actual) : '-' }}
+            <td
+              class="px-4 py-4 text-right font-mono whitespace-nowrap"
+              :class="
+                (shift.bingo_actual || 0) >= 0
+                  ? 'text-slate-600'
+                  : 'text-red-600'
+              "
+            >
+              {{
+                shift.bingo_actual !== null && shift.bingo_actual !== undefined
+                  ? formatCurrency(shift.bingo_actual)
+                  : "-"
+              }}
             </td>
 
             <!-- Box Start -->
-            <td class="px-4 py-4 text-right font-mono text-slate-500 whitespace-nowrap">
-              {{ shift.beginning_box !== null ? formatCurrency(shift.beginning_box) : '-' }}
+            <td
+              class="px-4 py-4 text-right font-mono text-slate-500 whitespace-nowrap"
+            >
+              {{
+                shift.beginning_box !== null
+                  ? formatCurrency(shift.beginning_box)
+                  : "-"
+              }}
             </td>
 
             <!-- Box End -->
-            <td class="px-4 py-4 text-right font-mono text-slate-500 whitespace-nowrap">
-              {{ shift.ending_box !== null ? formatCurrency(shift.ending_box) : '-' }}
+            <td
+              class="px-4 py-4 text-right font-mono text-slate-500 whitespace-nowrap"
+            >
+              {{
+                shift.ending_box !== null
+                  ? formatCurrency(shift.ending_box)
+                  : "-"
+              }}
             </td>
 
             <!-- Box Change -->
-            <td class="px-4 py-4 text-right font-mono whitespace-nowrap" :class="(shift.box_delta || 0) >= 0 ? 'text-slate-600' : 'text-red-600'">
-              {{ shift.box_delta !== null && shift.box_delta !== undefined ? formatCurrency(shift.box_delta) : '-' }}
+            <td
+              class="px-4 py-4 text-right font-mono whitespace-nowrap"
+              :class="
+                (shift.box_delta || 0) >= 0 ? 'text-slate-600' : 'text-red-600'
+              "
+            >
+              {{
+                shift.box_delta !== null && shift.box_delta !== undefined
+                  ? formatCurrency(shift.box_delta)
+                  : "-"
+              }}
             </td>
 
             <!-- Players -->
-            <td class="px-4 py-4 text-center font-mono text-slate-600 whitespace-nowrap">
-              {{ shift.shift === 'PM' && shift.players !== null ? shift.players : '-' }}
+            <td
+              class="px-4 py-4 text-center font-mono text-slate-600 whitespace-nowrap"
+            >
+              {{
+                shift.shift === "PM" && shift.players !== null
+                  ? shift.players
+                  : "-"
+              }}
             </td>
 
             <!-- Workflow -->
@@ -214,7 +281,7 @@ import type { ShiftRecord } from "~/types/admin";
 import { formatCurrency } from "~/utils/format";
 import HelpTip from "~/components/ui/HelpTip.vue";
 
-const props = defineProps<{
+defineProps<{
   shifts: ShiftRecord[];
 }>();
 

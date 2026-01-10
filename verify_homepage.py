@@ -20,7 +20,7 @@ async def run():
         print("Starting verification...")
 
         for route, filename in routes:
-            url = f"http://localhost:3000{route}"
+            url = f"http://localhost:3001{route}"
             print(f"Navigating to {url}...")
             try:
                 await page.goto(url, timeout=30000)

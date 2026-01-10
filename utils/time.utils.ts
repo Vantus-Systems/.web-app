@@ -65,37 +65,16 @@ export const formatHHMM = (t: string): string => {
  * e.g. 1350 -> "10:30 PM"
  */
 export const formatTime = (totalMinutes: number): string => {
-    let m = Math.floor(totalMinutes);
-    if (m < 0) m += 24 * 60; // handle wrap around negative
-    m = m % (24 * 60);
+  let m = Math.floor(totalMinutes);
+  if (m < 0) m += 24 * 60; // handle wrap around negative
+  m = m % (24 * 60);
 
-    let hours = Math.floor(m / 60);
-    const minutes = m % 60;
+  let hours = Math.floor(m / 60);
+  const minutes = m % 60;
 
-    const period = hours >= 12 ? "PM" : "AM";
-    hours = hours % 12;
-    if (hours === 0) hours = 12;
+  const period = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12;
+  if (hours === 0) hours = 12;
 
-    return `${hours}:${String(minutes).padStart(2, "0")} ${period}`;
-};
-
-/**
- * Normalizes day names to 3-letter short code.
- * e.g. "Tuesday" -> "Tue"
- */
-export const normalizeDay = (day: string): string => {
-  const map: Record<string, string> = {
-    Monday: "Mon",
-    Tuesday: "Tue",
-    Wednesday: "Wed",
-    Thursday: "Thu",
-    Friday: "Fri",
-    Saturday: "Sat",
-    Sunday: "Sun",
-  };
-  // Also handle already short names or mis-cased
-  const cap = day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
-  if (Object.values(map).includes(cap)) return cap; // Already short
-  if (map[cap]) return map[cap];
-  return day.substring(0, 3); // Fallback
+  return `${hours}:${String(minutes).padStart(2, "0")} ${period}`;
 };

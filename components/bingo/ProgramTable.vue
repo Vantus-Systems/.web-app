@@ -24,7 +24,7 @@ interface Program {
   games: ProgramGame[];
 }
 
-const props = defineProps<{
+defineProps<{
   program: Program;
 }>();
 

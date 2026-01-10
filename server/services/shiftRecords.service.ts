@@ -57,7 +57,10 @@ export const computeShiftTotals = async (input: {
   if (beginningBox === undefined || beginningBox === null) {
     if (payload.workflow_type === "RECUPERATION_BOX_RETURN") {
       // For recuperation, default to previous shift ending box if current start is missing
-      if (prevShift?.ending_box !== null && prevShift?.ending_box !== undefined) {
+      if (
+        prevShift?.ending_box !== null &&
+        prevShift?.ending_box !== undefined
+      ) {
         beginningBox = prevShift.ending_box;
       }
     } else if (payload.workflow_type === "NORMAL") {

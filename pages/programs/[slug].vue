@@ -8,7 +8,9 @@ import BingoPatternGrid from "~/components/bingo/BingoPatternGrid.vue";
 const route = useRoute();
 const router = useRouter();
 
-const { data: program, pending, error } = await useFetch<any>(`/api/programs/${route.params.slug}`);
+const { data: program, pending } = await useFetch<any>(
+  `/api/programs/${route.params.slug}`,
+);
 
 const selectedGame = ref<any>(null);
 
@@ -21,7 +23,7 @@ const updateSelectedGameFromQuery = () => {
     const game = program.value.games.find(
       (g: any) =>
         String(g.sortOrder) === String(gameQuery) ||
-        g.pattern.slug === gameQuery
+        g.pattern.slug === gameQuery,
     );
     if (game) {
       selectedGame.value = game;
@@ -37,9 +39,12 @@ onMounted(() => {
 });
 
 // Watch query changes
-watch(() => route.query.game, () => {
-  updateSelectedGameFromQuery();
-});
+watch(
+  () => route.query.game,
+  () => {
+    updateSelectedGameFromQuery();
+  },
+);
 
 const openGame = (game: any) => {
   router.push({ query: { ...route.query, game: game.sortOrder } });
@@ -52,8 +57,12 @@ const closeGame = () => {
 };
 
 useSeoMeta({
-  title: computed(() => program.value ? `${program.value.name} | Programs` : 'Program Details'),
-  description: computed(() => program.value?.description || 'View game details.'),
+  title: computed(() =>
+    program.value ? `${program.value.name} | Programs` : "Program Details",
+  ),
+  description: computed(
+    () => program.value?.description || "View game details.",
+  ),
 });
 </script>
 
@@ -70,19 +79,31 @@ useSeoMeta({
           to="/programs"
           class="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition-colors text-sm font-medium"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m15 18-6-6 6-6" />
+          </svg>
           Back to Programs
         </NuxtLink>
-        <h1 class="text-3xl md:text-5xl font-black text-white mb-4 tracking-tighter">
+        <h1
+          class="text-3xl md:text-5xl font-black text-white mb-4 tracking-tighter"
+        >
           {{ program.name }}
         </h1>
         <p class="text-slate-400 text-lg max-w-2xl mx-auto">
           {{ program.description }}
         </p>
       </div>
-      <div v-else class="text-white">
-        Program not found.
-      </div>
+      <div v-else class="text-white">Program not found.</div>
     </div>
 
     <!-- Content -->
@@ -100,8 +121,10 @@ useSeoMeta({
     >
       <div v-if="selectedGame" class="flex flex-col gap-6 items-center pt-2">
         <!-- Paper Info -->
-        <div class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-full text-sm font-medium text-slate-600">
-           <div
+        <div
+          class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-full text-sm font-medium text-slate-600"
+        >
+          <div
             class="h-4 w-4 rounded-full border border-black/10 shadow-sm"
             :style="{ backgroundColor: selectedGame.paperColor }"
           ></div>
@@ -109,7 +132,9 @@ useSeoMeta({
         </div>
 
         <!-- Pattern Visual -->
-        <div class="p-6 bg-slate-50 rounded-xl border border-slate-100 shadow-inner">
+        <div
+          class="p-6 bg-slate-50 rounded-xl border border-slate-100 shadow-inner"
+        >
           <BingoPatternGrid
             :name="selectedGame.pattern.name"
             :definition="selectedGame.pattern.definition"
@@ -124,7 +149,10 @@ useSeoMeta({
           <h4 class="text-xl font-black text-slate-900 mb-2">
             {{ selectedGame.pattern.name }}
           </h4>
-          <p class="text-slate-500 leading-relaxed" v-if="selectedGame.pattern.description">
+          <p
+            v-if="selectedGame.pattern.description"
+            class="text-slate-500 leading-relaxed"
+          >
             {{ selectedGame.pattern.description }}
           </p>
         </div>
@@ -134,7 +162,10 @@ useSeoMeta({
           v-if="selectedGame.notes"
           class="w-full bg-emerald-50 text-emerald-900 p-4 rounded-xl text-center text-sm font-medium border border-emerald-100"
         >
-          <span class="block text-emerald-600 text-xs font-bold uppercase tracking-wider mb-1">Game Notes</span>
+          <span
+            class="block text-emerald-600 text-xs font-bold uppercase tracking-wider mb-1"
+            >Game Notes</span
+          >
           {{ selectedGame.notes }}
         </div>
       </div>

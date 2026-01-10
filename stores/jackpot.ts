@@ -76,6 +76,7 @@ export const useJackpotStore = defineStore("jackpot", () => {
     activeLabel,
     babesValue,
     hornetValue,
+    items,
     fetchJackpot: fetch,
   };
 });

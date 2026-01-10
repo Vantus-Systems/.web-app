@@ -256,6 +256,8 @@ const props = withDefaults(
   {
     title: "",
     subtitle: "",
+    userRole: null,
+    userName: null,
     breadcrumbs: () => [{ label: "Admin", path: "/admin" }],
     helpTitle: "Help & Quick Tips",
     environment: "development",

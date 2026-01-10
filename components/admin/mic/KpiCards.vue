@@ -36,19 +36,19 @@ import { computed } from "vue";
 import { formatCurrency } from "~/utils/format";
 
 const props = defineProps<{
-  deposit_total: number;
+  depositTotal: number;
   variance: number;
   headcount: number;
   headcountTrend: string;
 }>();
 
 const formattedDeposit = computed(() => {
-  return `$${formatCurrency(props.deposit_total, 2)}`;
+  return `$${formatCurrency(props.depositTotal, 2)}`;
 });
 
 const spendPerHead = computed(() => {
   if (props.headcount === 0) return 0;
-  return props.deposit_total / props.headcount;
+  return props.depositTotal / props.headcount;
 });
 
 const depositBalanceClass = computed(() => {

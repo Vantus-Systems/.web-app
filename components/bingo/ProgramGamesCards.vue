@@ -17,7 +17,9 @@ const emit = defineEmits(["select-game"]);
       @click="emit('select-game', game)"
     >
       <!-- Number Badge -->
-      <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-50 font-bold text-slate-500 border border-slate-100">
+      <div
+        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-50 font-bold text-slate-500 border border-slate-100"
+      >
         {{ game.sortOrder }}
       </div>
 
@@ -29,7 +31,9 @@ const emit = defineEmits(["select-game"]);
             class="h-3 w-3 rounded-full border border-black/10"
             :style="{ backgroundColor: game.paperColor }"
           ></div>
-          <span class="text-xs text-slate-500 truncate">{{ game.pattern.name }}</span>
+          <span class="text-xs text-slate-500 truncate">{{
+            game.pattern.name
+          }}</span>
         </div>
       </div>
 
@@ -45,7 +49,9 @@ const emit = defineEmits(["select-game"]);
       </div>
 
       <!-- Chevron -->
-      <div class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 opacity-0">
+      <div
+        class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 opacity-0"
+      >
         <!-- Hidden but implied tappability -->
       </div>
     </div>

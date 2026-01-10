@@ -31,24 +31,79 @@ async function ensureEnv() {
     }
   }
 
+  const { randomBytes } = await import("crypto");
+  const updates = [];
+
+  // DATABASE_URL
   if (!content.includes("DATABASE_URL") && !process.env.DATABASE_URL) {
     const dbUrl = pathToFileURL(DB_PATH).href;
-    const line = `DATABASE_URL="${dbUrl}"\n# Production Environment\nNODE_ENV="production"\nSEED_ADMIN_PASSWORD="admin123"\n`;
-    await fs.appendFile(ENV_PATH, line);
-    log("Added default DATABASE_URL and SEED_ADMIN_PASSWORD to .env", dbUrl);
+    updates.push(`DATABASE_URL="${dbUrl}"`);
+    log("Adding DATABASE_URL to .env");
     process.env.DATABASE_URL = dbUrl;
-    process.env.SEED_ADMIN_PASSWORD = "admin123";
   } else if (!process.env.DATABASE_URL) {
-    // Extract existing DATABASE_URL for the current process
     const match = content.match(/DATABASE_URL=["']?([^"'\n]+)["']?/);
     if (match) {
       process.env.DATABASE_URL = match[1];
     }
   }
 
+  // APP_SECRET (required for production CSRF)
+  if (!content.includes("APP_SECRET") && !process.env.APP_SECRET) {
+    const secret = randomBytes(32).toString("hex");
+    updates.push(`APP_SECRET="${secret}"`);
+    log(
+      "Generated and added APP_SECRET to .env (required for production CSRF protection)",
+    );
+    process.env.APP_SECRET = secret;
+  } else if (!process.env.APP_SECRET) {
+    const match = content.match(/APP_SECRET=["']?([^"'\n]+)["']?/);
+    if (match) {
+      process.env.APP_SECRET = match[1];
+    }
+  }
+
+  // NODE_ENV
+  if (!content.includes("NODE_ENV")) {
+    updates.push(`NODE_ENV="production"`);
+  }
+
+  // SEED_ADMIN_PASSWORD
+  if (
+    !content.includes("SEED_ADMIN_PASSWORD") &&
+    !process.env.SEED_ADMIN_PASSWORD
+  ) {
+    updates.push(`SEED_ADMIN_PASSWORD="admin123"`);
+    log("Added SEED_ADMIN_PASSWORD to .env (default: admin123)");
+    process.env.SEED_ADMIN_PASSWORD = "admin123";
+  } else if (!process.env.SEED_ADMIN_PASSWORD) {
+    const match = content.match(/SEED_ADMIN_PASSWORD=["']?([^"'\n]+)["']?/);
+    if (match) {
+      process.env.SEED_ADMIN_PASSWORD = match[1];
+    }
+  }
+
+  // SEED_ADMIN_USERNAME
+  if (
+    !content.includes("SEED_ADMIN_USERNAME") &&
+    !process.env.SEED_ADMIN_USERNAME
+  ) {
+    updates.push(`SEED_ADMIN_USERNAME="admin"`);
+    process.env.SEED_ADMIN_USERNAME = "admin";
+  } else if (!process.env.SEED_ADMIN_USERNAME) {
+    const match = content.match(/SEED_ADMIN_USERNAME=["']?([^"'\n]+)["']?/);
+    if (match) {
+      process.env.SEED_ADMIN_USERNAME = match[1];
+    }
+  }
+
+  // Write all updates at once
+  if (updates.length > 0) {
+    await fs.appendFile(ENV_PATH, "\n" + updates.join("\n") + "\n");
+  }
+
+  // Normalize DATABASE_URL paths
   if (process.env.DATABASE_URL) {
     const current = process.env.DATABASE_URL;
-    // Normalize relative file: URLs to absolute paths to avoid ambiguous resolution in build/runtime
     if (current.startsWith("file:") && !current.startsWith("file:/")) {
       const rel = current.replace("file:", "");
       const abs = pathToFileURL(path.resolve(ROOT, rel)).href;
@@ -59,11 +114,6 @@ async function ensureEnv() {
       log("Normalized DATABASE_URL to absolute path:", abs);
       process.env.DATABASE_URL = abs;
     }
-  }
-
-  // Ensure NODE_ENV is set if not present
-  if (!content.includes("NODE_ENV") && IS_PROD) {
-    await fs.appendFile(ENV_PATH, "NODE_ENV=\"production\"\n");
   }
 }
 

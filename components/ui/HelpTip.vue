@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from "vue";
 import BaseModal from "~/components/ui/BaseModal.vue";
 
-const props = defineProps<{
+defineProps<{
   title?: string;
   text: string;
 }>();
@@ -90,8 +90,8 @@ const showModal = computed({
       <template #footer>
         <div class="flex justify-end">
           <button
-            @click="showModal = false"
             class="px-4 py-2 bg-slate-100 text-slate-700 font-bold rounded-lg text-sm"
+            @click="showModal = false"
           >
             Close
           </button>

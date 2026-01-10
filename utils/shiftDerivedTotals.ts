@@ -14,12 +14,17 @@ export interface ShiftDerived {
 }
 
 export const calculateShiftDerived = (input: ShiftInput): ShiftDerived => {
-  const { beginning_box, ending_box, pulltabs_total, deposit_bank_total } = input;
+  const { beginning_box, ending_box, pulltabs_total, deposit_bank_total } =
+    input;
 
-  // Ensure safe numbers for calculations (treat null/undefined as 0 for non-box fields if needed, 
+  // Ensure safe numbers for calculations (treat null/undefined as 0 for non-box fields if needed,
   // but for boxes we need strict null checks)
-  const safePulltabs = Number.isNaN(Number(pulltabs_total)) ? 0 : Number(pulltabs_total) || 0;
-  const safeDeposit = Number.isNaN(Number(deposit_bank_total)) ? 0 : Number(deposit_bank_total) || 0;
+  const safePulltabs = Number.isNaN(Number(pulltabs_total))
+    ? 0
+    : Number(pulltabs_total) || 0;
+  const safeDeposit = Number.isNaN(Number(deposit_bank_total))
+    ? 0
+    : Number(deposit_bank_total) || 0;
 
   const warnings: string[] = [];
 

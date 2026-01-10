@@ -84,6 +84,7 @@ const navItems = computed(() => {
   if (role === "OWNER") {
     return [
       { label: "Admin Home", to: "/admin" },
+      { label: "Homepage", to: "/admin/homepage" },
       { label: "Progressives", to: "/admin/progressives" },
       { label: "People & Shifts", to: "/admin/people" },
       { label: "MIC Dashboard", to: "/admin/mic" },

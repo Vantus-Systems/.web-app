@@ -45,6 +45,8 @@ export function useScheduleClock() {
       return {
         dateStr: customDate.value, // YYYY-MM-DD
         minutes: hr * 60 + min,
+        seconds: 0,
+        totalSeconds: hr * 3600 + min * 60,
         dayOfWeek: new Date(y, m - 1, d).toLocaleDateString("en-US", {
           weekday: "short",
         }),

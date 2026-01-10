@@ -16,12 +16,18 @@ const games = computed(() => props.program?.games || []);
   <div>
     <!-- Desktop View -->
     <div class="hidden md:block">
-      <ProgramGamesTable :games="games" @select-game="g => emit('select-game', g)" />
+      <ProgramGamesTable
+        :games="games"
+        @select-game="(g) => emit('select-game', g)"
+      />
     </div>
 
     <!-- Mobile View -->
     <div class="md:hidden">
-      <ProgramGamesCards :games="games" @select-game="g => emit('select-game', g)" />
+      <ProgramGamesCards
+        :games="games"
+        @select-game="(g) => emit('select-game', g)"
+      />
     </div>
   </div>
 </template>

@@ -875,7 +875,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useMagicKeys, whenever } from "@vueuse/core";
 import BingoPatternGrid from "~/components/bingo/BingoPatternGrid.vue";
 import {
@@ -883,7 +883,6 @@ import {
   Pause,
   SkipBack,
   SkipForward,
-  MoreVertical,
   Trash2,
   Copy,
   Save as SaveIcon,
@@ -1283,13 +1282,13 @@ const rightPanelWidth = ref(320);
 const isResizingLeft = ref(false);
 const isResizingRight = ref(false);
 
-const startResizeLeft = (e: MouseEvent) => {
+const startResizeLeft = () => {
   isResizingLeft.value = true;
   document.addEventListener("mousemove", resizeLeft);
   document.addEventListener("mouseup", stopResize);
 };
 
-const startResizeRight = (e: MouseEvent) => {
+const startResizeRight = () => {
   isResizingRight.value = true;
   document.addEventListener("mousemove", resizeRight);
   document.addEventListener("mouseup", stopResize);

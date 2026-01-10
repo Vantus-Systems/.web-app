@@ -16,7 +16,6 @@ const props = withDefaults(
 
 const emit = defineEmits(["update:modelValue", "close"]);
 
-const containerRef = ref<HTMLElement | null>(null);
 const panelRef = ref<HTMLElement | null>(null);
 const previousActiveElement = ref<HTMLElement | null>(null);
 
@@ -100,12 +99,7 @@ onUnmounted(() => {
         <div
           v-if="modelValue"
           ref="panelRef"
-          class="relative w-full bg-white shadow-xl pointer-events-auto
-                 rounded-t-2xl sm:rounded-2xl
-                 max-h-[85vh] sm:max-h-[85vh]
-                 max-w-2xl
-                 flex flex-col
-                 focus:outline-none"
+          class="relative w-full bg-white shadow-xl pointer-events-auto rounded-t-2xl sm:rounded-2xl max-h-[85vh] sm:max-h-[85vh] max-w-2xl flex flex-col focus:outline-none"
           tabindex="-1"
           role="dialog"
           :aria-modal="true"
@@ -154,7 +148,9 @@ onUnmounted(() => {
           </div>
 
           <!-- Body (Scrollable) -->
-          <div class="flex-1 overflow-y-auto min-h-0 px-6 py-4 overscroll-contain">
+          <div
+            class="flex-1 overflow-y-auto min-h-0 px-6 py-4 overscroll-contain"
+          >
             <slot />
           </div>
 

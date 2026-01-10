@@ -33,7 +33,7 @@ export default defineEventHandler(async () => {
     const legacySchedule = await settingsService.get("schedule");
     return {
       sessions: legacySchedule || [],
-      meta
+      meta,
     };
   }
 
@@ -69,24 +69,10 @@ export default defineEventHandler(async () => {
       });
 
       // Map games
-      const games = program.games.map((g) => ({
-        sortOrder: g.sort_order,
-        title: g.title,
-        paperColor: g.paperColor,
-        notes: g.notes,
-        pattern: {
-            slug: g.pattern.slug,
-            name: g.pattern.name,
-            description: g.pattern.description,
-            isAnimated: g.pattern.isAnimated,
-            definition: typeof g.pattern.definition === 'string' ? JSON.parse(g.pattern.definition) : g.pattern.definition
-        },
-      }));
-
-      const gamesLegacy = program.games.map(g => ({
-         number: g.sort_order,
-         name: g.title,
-         detail: `${g.pattern.name} • ${g.notes || ""}`
+      const gamesLegacy = program.games.map((g) => ({
+        number: g.sort_order,
+        name: g.title,
+        detail: `${g.pattern.name} • ${g.notes || ""}`,
       }));
 
       let specials = slot.overrides || {};
@@ -123,6 +109,6 @@ export default defineEventHandler(async () => {
 
   return {
     sessions,
-    meta
+    meta,
   };
 });

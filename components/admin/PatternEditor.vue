@@ -468,7 +468,6 @@ const form = ref({
 
 const currentFrameIndex = ref(0);
 const rotationEnabled = ref(false);
-const cyclePositions = ref(false);
 const permutationLines = ref(3);
 const generatorType = ref<"lines" | "triple" | "snake">("lines");
 const includeStamps = ref(true);

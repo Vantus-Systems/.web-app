@@ -51,7 +51,10 @@ export default defineEventHandler(async (event) => {
 
     const existing = await authService.getUserByUsername(username);
     if (existing) {
-      throw createError({ statusCode: 409, message: "Username already exists" });
+      throw createError({
+        statusCode: 409,
+        message: "Username already exists",
+      });
     }
 
     const hash = await authService.hashPassword(password);

@@ -41,6 +41,8 @@ const props = withDefaults(defineProps<Props>(), {
   disabled: false,
   fullWidth: false,
   className: "",
+  label: "",
+  icon: "",
 });
 
 const emit = defineEmits<{

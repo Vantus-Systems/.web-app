@@ -148,6 +148,17 @@ const props = withDefaults(defineProps<Props>(), {
   loading: false,
   valid: false,
   invalid: false,
+  placeholder: "",
+  helperText: "",
+  tooltip: "",
+  validationMessage: "",
+  successMessage: "",
+  status: undefined,
+  min: undefined,
+  max: undefined,
+  step: undefined,
+  options: () => [],
+  className: "",
 });
 
 const emit = defineEmits<{

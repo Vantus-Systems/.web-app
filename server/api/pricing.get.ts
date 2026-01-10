@@ -22,8 +22,8 @@ export default defineEventHandler(async (event) => {
 
         // Enhance meta with publish info
         if (compiled.meta) {
-            compiled.meta.lastPublishedAt = activeVersion.published_at;
-            compiled.meta.lastUpdatedBy = activeVersion.published_by;
+          compiled.meta.lastPublishedAt = activeVersion.published_at;
+          compiled.meta.lastUpdatedBy = activeVersion.published_by;
         }
 
         return compiled;

@@ -38,7 +38,7 @@
       <div v-else class="relative" v-bind="wrapperProps">
         <!-- Virtual List -->
         <div
-          v-for="{ data: week, index: wIdx } in list"
+          v-for="{ data: week } in list"
           :key="week.startDate"
           class="grid grid-cols-7 border-b border-divider bg-surface min-h-[140px] h-[140px]"
         >
@@ -95,11 +95,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from "vue";
-import {
-  useInfiniteScroll,
-  useKeyModifier,
-  useVirtualList,
-} from "@vueuse/core";
+import { useVirtualList } from "@vueuse/core";
 import ScheduleDayCard from "./ScheduleDayCard.vue";
 import {
   dateKey,
@@ -230,7 +226,6 @@ const { list, containerProps, wrapperProps } = useVirtualList(weeks, {
 // --- Interactions ---
 const isPainting = ref(false);
 const paintStartKey = ref<string | null>(null);
-const shiftPressed = useKeyModifier("Shift");
 const anchorDate = ref<string | null>(null);
 const activeHoverDate = ref<string | null>(null);
 

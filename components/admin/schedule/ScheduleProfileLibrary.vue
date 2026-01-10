@@ -78,7 +78,7 @@ const props = defineProps<{
   selectedProfileId: string | null;
 }>();
 
-const emit = defineEmits(["select", "clear"]);
+defineEmits(["select", "clear"]);
 
 const search = ref("");
 

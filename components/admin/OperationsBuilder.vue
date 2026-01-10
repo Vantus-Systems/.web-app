@@ -169,8 +169,10 @@ const handleProgramSave = async (p: any) => {
           class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-accent-primary text-white rounded hover:bg-accent-primary/90 transition-colors disabled:opacity-60"
           :disabled="
             (currentStep === 'programs' && isProgramSaving) ||
-            (currentStep === 'schedule' && (scheduleStore.saving || !scheduleStore.dirty)) ||
-            (currentStep === 'pricing' && (pricingStore.saving || !pricingStore.dirty))
+            (currentStep === 'schedule' &&
+              (scheduleStore.saving || !scheduleStore.dirty)) ||
+            (currentStep === 'pricing' &&
+              (pricingStore.saving || !pricingStore.dirty))
           "
           @click="handleGlobalSave"
         >
@@ -184,23 +186,29 @@ const handleProgramSave = async (p: any) => {
       <div class="h-full w-full">
         <PatternEditor
           v-if="currentStep === 'patterns'"
-          :patterns="opsStore.patterns"
           ref="patternEditorRef"
+          :patterns="opsStore.patterns"
           @save="handlePatternSave"
           @delete="handlePatternDelete"
         />
         <ProgramEditor
           v-else-if="currentStep === 'programs'"
+          ref="programEditorRef"
           :programs="opsStore.programs"
           :patterns="opsStore.patterns"
           :is-saving="isProgramSaving"
-          ref="programEditorRef"
           @save="handleProgramSave"
           @delete="handleProgramDelete"
           @dirty-change="(v) => (isProgramDirty = v)"
         />
-        <WeeklyScheduleEditor v-else-if="currentStep === 'schedule'" ref="scheduleEditorRef" />
-        <PricingManagerPanel v-else-if="currentStep === 'pricing'" ref="pricingPanelRef" />
+        <WeeklyScheduleEditor
+          v-else-if="currentStep === 'schedule'"
+          ref="scheduleEditorRef"
+        />
+        <PricingManagerPanel
+          v-else-if="currentStep === 'pricing'"
+          ref="pricingPanelRef"
+        />
       </div>
     </main>
   </div>

@@ -26,9 +26,7 @@ export default defineEventHandler(async (event) => {
     shift: data.shift ?? existing.shift,
     pulltabs_total: data.pulltabs_total ?? existing.pulltabs_total,
     deposit_total:
-      data.deposit_bank_total ??
-      data.deposit_total ??
-      existing.deposit_total,
+      data.deposit_bank_total ?? data.deposit_total ?? existing.deposit_total,
     workflow_type: data.workflow_type ?? existing.workflow_type,
     beginning_box: data.beginning_box ?? existing.beginning_box ?? undefined,
     ending_box: data.ending_box ?? existing.ending_box ?? undefined,

@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
-import { Calendar as CalendarIcon, Filter, Clock, List, LayoutGrid, ArrowRight } from "lucide-vue-next";
+import {
+  Calendar as CalendarIcon,
+  Clock,
+  List,
+  LayoutGrid,
+  ArrowRight,
+} from "lucide-vue-next";
 import { useBusiness } from "~/composables/useBusiness";
 import { useScheduleClock } from "~/composables/useScheduleClock";
 import { parseTime as parseTimeToMinutes } from "~/utils/time.utils";
@@ -102,7 +108,7 @@ const selectDay = (dayId: string) => {
 
 const activeFilter = ref("All");
 const filters = ["All", "Morning", "Afternoon", "Evening"];
-const viewMode = ref<'timeline' | 'compact'>('timeline');
+const viewMode = ref<"timeline" | "compact">("timeline");
 
 const filteredSessions = computed(() => {
   const currentDay = days.value.find((d) => d.id === activeDay.value);
@@ -159,16 +165,18 @@ watch(
 
 // Next Up Card Logic
 const nextUpSession = computed(() => {
-    const nowMins = chicagoTime.value.minutes;
-    // Assume days[0] is Today for simplified logic if not using Time Travel heavily
-    // Only show Next Up if we are on "Today" view or very close to it.
-    if (activeDay.value !== days.value[0].id) return null;
+  const nowMins = chicagoTime.value.minutes;
+  // Assume days[0] is Today for simplified logic if not using Time Travel heavily
+  // Only show Next Up if we are on "Today" view or very close to it.
+  if (activeDay.value !== days.value[0].id) return null;
 
-    // Find next session today
-    const upcoming = filteredSessions.value.find((s: any) => parseTimeToMinutes(s.startTime) > nowMins);
-    // Or if currently active?
-    // Let's stick to upcoming for "Next Up"
-    return upcoming || null;
+  // Find next session today
+  const upcoming = filteredSessions.value.find(
+    (s: any) => parseTimeToMinutes(s.startTime) > nowMins,
+  );
+  // Or if currently active?
+  // Let's stick to upcoming for "Next Up"
+  return upcoming || null;
 });
 
 useSeoMeta({
@@ -233,34 +241,54 @@ useSeoMeta({
           plan your winning visit.
         </p>
 
-        <div v-if="scheduleMeta?.lastPublishedAt" class="mt-4 text-xs text-slate-400 font-medium">
-           Updated {{ new Date(scheduleMeta.lastPublishedAt).toLocaleDateString() }}
+        <div
+          v-if="scheduleMeta?.lastPublishedAt"
+          class="mt-4 text-xs text-slate-400 font-medium"
+        >
+          Updated
+          {{ new Date(scheduleMeta.lastPublishedAt).toLocaleDateString() }}
         </div>
       </div>
     </div>
 
     <div class="container mx-auto px-4 -mt-20 relative z-20 pb-32">
       <!-- Next Up Card (if active) -->
-      <div v-if="nextUpSession" class="mb-8 animate-in slide-in-from-bottom-4 duration-500">
-          <div class="bg-slate-900 rounded-2xl p-6 shadow-2xl border border-gold-500/30 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-             <div class="absolute inset-0 bg-gold-500/5"></div>
-             <div class="relative z-10 flex items-center gap-6">
-                <div class="p-3 bg-gold-500 rounded-xl text-slate-900">
-                    <Clock class="w-8 h-8" />
-                </div>
-                <div>
-                    <div class="text-gold-400 text-xs font-bold uppercase tracking-widest mb-1">Coming Up Next</div>
-                    <div class="text-2xl font-black text-white">{{ nextUpSession.name }}</div>
-                    <div class="text-slate-400 font-medium">{{ nextUpSession.startTime }} • {{ nextUpSession.category }}</div>
-                </div>
-             </div>
-             <div class="relative z-10">
-                 <!-- Just visual cue, scroll handled by finding card in list or minimal logic -->
-                  <a href="#" class="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold transition-colors flex items-center gap-2">
-                     View Details <ArrowRight class="w-4 h-4" />
-                  </a>
-             </div>
+      <div
+        v-if="nextUpSession"
+        class="mb-8 animate-in slide-in-from-bottom-4 duration-500"
+      >
+        <div
+          class="bg-slate-900 rounded-2xl p-6 shadow-2xl border border-gold-500/30 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden"
+        >
+          <div class="absolute inset-0 bg-gold-500/5"></div>
+          <div class="relative z-10 flex items-center gap-6">
+            <div class="p-3 bg-gold-500 rounded-xl text-slate-900">
+              <Clock class="w-8 h-8" />
+            </div>
+            <div>
+              <div
+                class="text-gold-400 text-xs font-bold uppercase tracking-widest mb-1"
+              >
+                Coming Up Next
+              </div>
+              <div class="text-2xl font-black text-white">
+                {{ nextUpSession.name }}
+              </div>
+              <div class="text-slate-400 font-medium">
+                {{ nextUpSession.startTime }} • {{ nextUpSession.category }}
+              </div>
+            </div>
           </div>
+          <div class="relative z-10">
+            <!-- Just visual cue, scroll handled by finding card in list or minimal logic -->
+            <a
+              href="#"
+              class="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold transition-colors flex items-center gap-2"
+            >
+              View Details <ArrowRight class="w-4 h-4" />
+            </a>
+          </div>
+        </div>
       </div>
 
       <!-- Time Travel Controls -->
@@ -387,63 +415,86 @@ useSeoMeta({
 
         <!-- View Switcher -->
         <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-lg">
-            <button
-                class="p-2 rounded-md transition-colors"
-                :class="viewMode === 'timeline' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'"
-                @click="viewMode = 'timeline'"
-                title="Timeline View"
-            >
-                <LayoutGrid class="w-4 h-4" />
-            </button>
-            <button
-                class="p-2 rounded-md transition-colors"
-                :class="viewMode === 'compact' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'"
-                @click="viewMode = 'compact'"
-                title="Compact List"
-            >
-                <List class="w-4 h-4" />
-            </button>
+          <button
+            class="p-2 rounded-md transition-colors"
+            :class="
+              viewMode === 'timeline'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-400 hover:text-slate-600'
+            "
+            title="Timeline View"
+            @click="viewMode = 'timeline'"
+          >
+            <LayoutGrid class="w-4 h-4" />
+          </button>
+          <button
+            class="p-2 rounded-md transition-colors"
+            :class="
+              viewMode === 'compact'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-400 hover:text-slate-600'
+            "
+            title="Compact List"
+            @click="viewMode = 'compact'"
+          >
+            <List class="w-4 h-4" />
+          </button>
         </div>
       </div>
 
       <!-- Event Cards Grid -->
       <div class="max-w-5xl mx-auto space-y-8">
         <div v-if="viewMode === 'timeline'">
-            <TransitionGroup name="list" tag="div" class="space-y-8">
+          <TransitionGroup name="list" tag="div" class="space-y-8">
             <ScheduleEventCard
-                v-for="(session, idx) in filteredSessions"
-                :key="session.id"
-                :session="session"
-                :index="idx"
-                :active-day-of-week="activeDayOfWeek"
-                :program="
+              v-for="(session, idx) in filteredSessions"
+              :key="session.id"
+              :session="session"
+              :index="idx"
+              :active-day-of-week="activeDayOfWeek"
+              :program="
                 session.programSlug
-                    ? programCache[session.programSlug]
-                    : undefined
-                "
-                :status="getStatus(session)"
+                  ? programCache[session.programSlug]
+                  : undefined
+              "
+              :status="getStatus(session)"
             />
-            </TransitionGroup>
+          </TransitionGroup>
         </div>
 
-        <div v-else class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-            <div v-for="(session, idx) in filteredSessions" :key="session.id" class="border-b border-slate-100 last:border-0 p-4 hover:bg-slate-50 transition-colors flex items-center justify-between gap-4">
-                <div class="flex items-center gap-4">
-                     <div class="text-center w-20 shrink-0">
-                         <div class="text-lg font-black text-slate-900">{{ session.startTime }}</div>
-                         <div class="text-xs font-bold text-slate-400 uppercase">{{ session.category }}</div>
-                     </div>
-                     <div>
-                         <h3 class="font-bold text-slate-900">{{ session.name }}</h3>
-                         <div class="text-sm text-slate-500 line-clamp-1">{{ session.description }}</div>
-                     </div>
+        <div
+          v-else
+          class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm"
+        >
+          <div
+            v-for="session in filteredSessions"
+            :key="session.id"
+            class="border-b border-slate-100 last:border-0 p-4 hover:bg-slate-50 transition-colors flex items-center justify-between gap-4"
+          >
+            <div class="flex items-center gap-4">
+              <div class="text-center w-20 shrink-0">
+                <div class="text-lg font-black text-slate-900">
+                  {{ session.startTime }}
                 </div>
-                <div class="shrink-0">
-                     <div class="px-3 py-1 bg-slate-100 rounded-full text-xs font-bold text-slate-600 uppercase tracking-wider">
-                         {{ getStatus(session).label }}
-                     </div>
+                <div class="text-xs font-bold text-slate-400 uppercase">
+                  {{ session.category }}
                 </div>
+              </div>
+              <div>
+                <h3 class="font-bold text-slate-900">{{ session.name }}</h3>
+                <div class="text-sm text-slate-500 line-clamp-1">
+                  {{ session.description }}
+                </div>
+              </div>
             </div>
+            <div class="shrink-0">
+              <div
+                class="px-3 py-1 bg-slate-100 rounded-full text-xs font-bold text-slate-600 uppercase tracking-wider"
+              >
+                {{ getStatus(session).label }}
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Empty State -->

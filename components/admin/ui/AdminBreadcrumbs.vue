@@ -31,14 +31,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-
 interface Breadcrumb {
   label: string;
   path: string;
 }
 
-const props = defineProps<{
+defineProps<{
   breadcrumbs: Breadcrumb[];
 }>();
 </script>

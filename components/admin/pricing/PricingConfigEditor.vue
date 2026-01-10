@@ -498,12 +498,7 @@
 
 <script setup lang="ts">
 import { ref, watch, toRaw, nextTick } from "vue";
-import type {
-  PricingConfig,
-  PricingSession,
-  PricingMachine,
-  PricingJackpot,
-} from "~/types/pricing";
+import type { PricingConfig, PricingSession } from "~/types/pricing";
 import { Trash2 } from "lucide-vue-next";
 
 const props = defineProps<{

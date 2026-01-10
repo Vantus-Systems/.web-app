@@ -30,12 +30,6 @@ const activeFrame = computed<number[]>(() => {
   return frame as number[];
 });
 
-// helper array for rendering 25 cells without an unused "cell" variable
-const cells = computed(() => Array.from({ length: 25 }));
-
-// avoid using the reserved/deprecated "name" identifier in templates
-const displayName = computed(() => props.name);
-
 const startAnimation = () => {
   stopAnimation();
   if (props.animate && frames.value.length > 1) {

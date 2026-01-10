@@ -299,11 +299,7 @@ import type {
   OpsSchemaDayProfile,
   OpsSchemaCalendarOverride,
 } from "~/types/ops-schema";
-import {
-  resolveEffectiveAssignment,
-  addDays,
-  parseDateKey,
-} from "~/utils/schedule-calendar";
+import { resolveEffectiveAssignment, addDays } from "~/utils/schedule-calendar";
 import ScheduleMiniTimeline from "./ScheduleMiniTimeline.vue";
 
 const props = defineProps<{

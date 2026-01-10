@@ -1,17 +1,13 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useScheduleStore } from "~/stores/schedule";
 import { useOpsStore } from "~/stores/ops";
 import { useToast } from "~/composables/useToast";
 import {
-  Calendar as CalendarIcon,
-  Clock,
   Trash2,
   AlertCircle,
   Save,
   UploadCloud,
-  RotateCcw,
-  Plus,
   Search,
   GripVertical,
 } from "lucide-vue-next";

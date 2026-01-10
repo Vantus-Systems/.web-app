@@ -9,14 +9,26 @@ const emit = defineEmits(["select-game"]);
 </script>
 
 <template>
-  <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+  <div
+    class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+  >
     <table class="w-full text-left text-sm">
       <thead class="bg-slate-50 text-slate-700">
         <tr>
-          <th class="px-6 py-4 font-bold uppercase tracking-wider text-xs">Game</th>
-          <th class="px-6 py-4 font-bold uppercase tracking-wider text-xs">Pattern</th>
-          <th class="px-6 py-4 font-bold uppercase tracking-wider text-xs">Paper</th>
-          <th class="px-6 py-4 font-bold uppercase tracking-wider text-xs text-right">Preview</th>
+          <th class="px-6 py-4 font-bold uppercase tracking-wider text-xs">
+            Game
+          </th>
+          <th class="px-6 py-4 font-bold uppercase tracking-wider text-xs">
+            Pattern
+          </th>
+          <th class="px-6 py-4 font-bold uppercase tracking-wider text-xs">
+            Paper
+          </th>
+          <th
+            class="px-6 py-4 font-bold uppercase tracking-wider text-xs text-right"
+          >
+            Preview
+          </th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100">
@@ -28,11 +40,15 @@ const emit = defineEmits(["select-game"]);
         >
           <td class="px-6 py-4 align-middle">
             <div class="flex items-center gap-3">
-              <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-500">
+              <div
+                class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-500"
+              >
                 {{ game.sortOrder }}
               </div>
               <div>
-                <div class="font-bold text-slate-900 text-base">{{ game.title }}</div>
+                <div class="font-bold text-slate-900 text-base">
+                  {{ game.title }}
+                </div>
                 <div v-if="game.notes" class="text-xs text-slate-500 mt-0.5">
                   {{ game.notes }}
                 </div>
@@ -40,8 +56,13 @@ const emit = defineEmits(["select-game"]);
             </div>
           </td>
           <td class="px-6 py-4 align-middle">
-            <span class="font-medium text-slate-700">{{ game.pattern.name }}</span>
-            <div v-if="game.prize_override" class="text-xs font-bold text-emerald-600 mt-0.5">
+            <span class="font-medium text-slate-700">{{
+              game.pattern.name
+            }}</span>
+            <div
+              v-if="game.prize_override"
+              class="text-xs font-bold text-emerald-600 mt-0.5"
+            >
               {{ game.prize_override }}
             </div>
           </td>
@@ -52,11 +73,15 @@ const emit = defineEmits(["select-game"]);
                 :style="{ backgroundColor: game.paperColor }"
                 :title="game.paperColor"
               ></div>
-              <span class="text-slate-600 font-medium">{{ game.paperColor }}</span>
+              <span class="text-slate-600 font-medium">{{
+                game.paperColor
+              }}</span>
             </div>
           </td>
           <td class="px-6 py-4 align-middle text-right">
-            <div class="inline-block opacity-80 group-hover:opacity-100 transition-opacity">
+            <div
+              class="inline-block opacity-80 group-hover:opacity-100 transition-opacity"
+            >
               <BingoPatternGrid
                 :name="game.pattern.name"
                 :definition="game.pattern.definition"

@@ -13,3 +13,11 @@ export function formatCurrencyWithDollar(
 ): string {
   return `$${formatCurrency(value, decimals)}`;
 }
+
+export function formatUSD(val: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(val);
+}

@@ -26,20 +26,20 @@ export default {
           dark: "#2C2C2E", // Dark mode divider
         },
         primary: {
-          DEFAULT: "#111111", // Light mode text
+          DEFAULT: "#39AD48", // Brand Green
           dark: "rgba(255,255,255,0.87)", // Dark mode text
-          // Legacy support
-          50: "#f0f9ff",
-          100: "#e0f2fe",
-          200: "#bae6fd",
-          300: "#7dd3fc",
-          400: "#38bdf8",
-          500: "#0ea5e9",
-          600: "#0284c7",
-          700: "#0369a1",
-          800: "#075985",
-          900: "#0c4a6e",
-          950: "#082f49",
+          // Brand Green Palette (#39AD48)
+          50: "#f1f9f2",
+          100: "#dcf1de",
+          200: "#bbe2c0",
+          300: "#8ecb97",
+          400: "#5cb068",
+          500: "#39AD48",
+          600: "#2b8b38",
+          700: "#246e2e",
+          800: "#1f5827",
+          900: "#1b4922",
+          950: "#0e2812",
         },
         // Legacy colors
         slate: {
