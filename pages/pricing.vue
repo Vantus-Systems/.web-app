@@ -7,15 +7,25 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { useBusiness } from "~/composables/useBusiness";
+import { onMounted, onUnmounted } from "vue";
+import { useBusiness, useAutoRefresh } from "~/composables/useBusiness";
 import PricingPageContent from "~/components/pricing/PricingPageContent.vue";
 import TodayStrip from "~/components/public/TodayStrip.vue";
 
 const { fetchSchedule, schedule, fetchPricing, pricing } = useBusiness();
+const { startPolling, stopPolling } = useAutoRefresh(30);
 
 // Fetch data on load
 await fetchSchedule();
 await fetchPricing();
+
+onMounted(() => {
+  startPolling(false);
+});
+
+onUnmounted(() => {
+  stopPolling();
+});
 
 // Handle { sessions, meta } vs Session[]
 const sessions = computed(() => {

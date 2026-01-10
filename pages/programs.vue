@@ -1,18 +1,22 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { ArrowRight, Box } from "lucide-vue-next";
 
-const programs = ref<any[]>([]);
-const isLoading = ref(true);
+const { data: programs, refresh, pending } = await useFetch<any[]>("/api/programs", {
+  lazy: true,
+  default: () => []
+});
 
-onMounted(async () => {
-  try {
-    programs.value = await $fetch("/api/programs");
-  } catch (e) {
-    console.error(e);
-  } finally {
-    isLoading.value = false;
-  }
+let pollInterval: any = null;
+
+onMounted(() => {
+  pollInterval = setInterval(() => {
+    refresh();
+  }, 30000);
+});
+
+onUnmounted(() => {
+  if (pollInterval) clearInterval(pollInterval);
 });
 
 useSeoMeta({
@@ -30,21 +34,21 @@ useSeoMeta({
       </div>
 
       <div class="container mx-auto relative z-10 text-center">
-        <span class="text-primary font-black uppercase tracking-[0.5em] text-xs mb-8 block">Combat Intel</span>
+        <span class="text-primary font-black uppercase tracking-[0.5em] text-xs mb-8 block">Game Info</span>
         <h1
           v-motion-fade-visible-once
           class="text-6xl md:text-9xl font-black text-white mb-8 tracking-tighter uppercase leading-none"
         >
-          Session <span class="text-primary italic drop-shadow-[0_0_20px_rgba(78,221,97,0.5)]">Manifests</span>
+          Session <span class="text-primary italic drop-shadow-[0_0_20px_rgba(78,221,97,0.5)]">Programs</span>
         </h1>
         <p class="text-zinc-400 text-xl md:text-2xl max-w-2xl mx-auto font-bold uppercase tracking-widest">
-          The tactical blueprint of every win.
+          The roadmap to every win.
         </p>
       </div>
     </div>
 
     <div class="container mx-auto px-4 -mt-16 relative z-10">
-      <div v-if="isLoading" class="flex items-center justify-center py-40">
+      <div v-if="pending && programs.length === 0" class="flex items-center justify-center py-40">
         <div
           class="animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full"
         ></div>
@@ -86,7 +90,7 @@ useSeoMeta({
             <div
               class="text-primary font-black uppercase tracking-[0.3em] text-[10px] flex items-center gap-3 group-hover:translate-x-2 transition-transform duration-500"
             >
-              Examine manifest
+              View Program
               <ArrowRight class="w-4 h-4" />
             </div>
           </div>

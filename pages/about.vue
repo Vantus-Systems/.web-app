@@ -39,14 +39,14 @@ useSeoMeta({
           v-motion-fade-visible-once
           class="text-6xl md:text-8xl font-black uppercase tracking-tighter mb-8 leading-none"
         >
-          Community <span class="text-primary drop-shadow-[0_0_20px_rgba(78,221,97,0.4)]">Impact</span>
+          Community <span class="text-primary drop-shadow-[0_0_40px_rgba(78,221,97,0.6)]">Impact</span>
         </h1>
         <p
           v-motion-fade-visible-once
           class="text-xl md:text-2xl text-zinc-400 max-w-3xl mx-auto font-bold uppercase tracking-widest leading-relaxed"
         >
           {{ BUSINESS_INFO.name }} is a volunteer-driven force
-          dedicated to accelerating local community manifests.
+          dedicated to accelerating our local community.
         </p>
       </div>
     </section>
@@ -57,11 +57,11 @@ useSeoMeta({
       
       <div class="container mx-auto px-4 relative z-10">
         <div class="text-center mb-24">
-            <h2 class="text-4xl md:text-6xl font-black text-white mb-6 uppercase tracking-tighter">
-              Partner <span class="text-primary">Intelligence</span>
+            <h2 class="text-4xl md:text-6xl font-black text-white mb-6 uppercase tracking-tighter drop-shadow-[0_0_15px_rgba(78,221,97,0.2)]">
+              Partner <span class="text-primary">Organizations</span>
             </h2>
             <p class="text-zinc-500 max-w-2xl mx-auto text-xl font-bold uppercase tracking-widest leading-relaxed">
-              Every deployment supports localized operational units and charitable initiatives.
+              Every session supports localized operational units and charitable initiatives.
             </p>
         </div>
 
@@ -82,9 +82,9 @@ useSeoMeta({
               class="w-full group"
             >
               <div
-                class="bg-black/50 p-8 rounded-3xl border border-zinc-800 w-full h-40 flex items-center justify-center text-center shadow-2xl relative overflow-hidden group-hover:border-primary/50 transition-all duration-500"
+                class="bg-black/50 p-8 rounded-3xl border border-zinc-800 w-full h-40 flex items-center justify-center text-center shadow-2xl relative overflow-hidden group-hover:border-primary/50 group-hover:shadow-[0_0_30px_rgba(78,221,97,0.15)] transition-all duration-500"
               >
-                <div class="absolute inset-0 bg-primary opacity-0 group-hover:opacity-[0.03] transition-opacity"></div>
+                <div class="absolute inset-0 bg-primary opacity-0 group-hover:opacity-[0.05] transition-opacity"></div>
                 <img
                   v-if="charity.logo"
                   :src="charity.logo"
@@ -105,12 +105,12 @@ useSeoMeta({
             <div
               v-for="(charity, index) in charities"
               :key="index"
-              class="group bg-black/40 p-10 rounded-[2.5rem] border border-zinc-800 hover:border-primary/30 transition-all duration-500 hover:scale-[1.02] shadow-2xl relative overflow-hidden"
+              class="group bg-black/40 p-10 rounded-[2.5rem] border border-zinc-800 hover:border-primary/60 transition-all duration-500 hover:scale-[1.02] shadow-[0_20px_50px_rgba(0,0,0,0.5)] hover:shadow-[0_20px_60px_rgba(78,221,97,0.15)] relative overflow-hidden"
             >
-              <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               
               <div
-                class="w-20 h-20 bg-zinc-900 rounded-2xl flex items-center justify-center mb-8 relative z-10 overflow-hidden"
+                class="w-20 h-20 bg-zinc-900 rounded-2xl flex items-center justify-center mb-8 relative z-10 overflow-hidden group-hover:shadow-[0_0_20px_rgba(78,221,97,0.3)] transition-shadow duration-500"
               >
                 <img
                   v-if="charity.logo"
