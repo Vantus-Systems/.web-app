@@ -1,47 +1,29 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { 
-  Ticket, 
-  Monitor, 
-  Zap, 
-  Check, 
-  Trophy, 
-  Info 
-} from "lucide-vue-next";
-
-// Use shared composable for pricing and schedule
+import { Ticket, Monitor, Zap, Trophy, Info } from "lucide-vue-next";
 import { useBingoData } from '../useBingoData';
+
 const { pricing, currentPricing, allPricing, loading, refresh } = useBingoData();
 
-// Currency formatter
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2
-  }).format(amount);
-};
-
-// Active Category State
-const activeCategory = ref('machines');
+const activeCategory = ref("machines");
 const categories = [
-  { id: 'machines', label: 'Electronic', icon: Monitor },
-  { id: 'paper', label: 'Paper Packs', icon: Ticket },
-  { id: 'extras', label: 'Extras', icon: Zap },
+  { id: "machines", label: "Electronic", icon: Monitor },
+  { id: "paper", label: "Paper Packs", icon: Ticket },
+  { id: "extras", label: "Extras", icon: Zap }
 ];
 
-// Filtered Data
-const filteredItems = computed(() => {
-  if (!pricing.value) return [];
-  if (pricing.value[activeCategory.value]) return pricing.value[activeCategory.value];
-  if (Array.isArray(allPricing.value)) return allPricing.value;
-  return [];
+const activeCategoryLabel = computed(() => {
+  return categories.find((cat) => cat.id === activeCategory.value)?.label ?? categories[0].label;
 });
 
-// Error state derived from composable results
+const filteredItems = computed(() => {
+  const dataset = pricing.value?.[activeCategory.value];
+  if (!Array.isArray(dataset)) return [];
+  return dataset.map((item) => ({ ...item, category: activeCategory.value }));
+});
+
 const hasError = computed(() => {
-  return !loading.value && (!pricing.value || (Array.isArray(allPricing.value) && allPricing.value.length === 0));
+  return !loading.value && (!pricing.value || allPricing.value.length === 0);
 });
 
 useSeoMeta({
@@ -112,22 +94,32 @@ useSeoMeta({
 
       <!-- Pricing Grid / Composable Driven -->
       <div v-else class="space-y-12">
-        <!-- Highlight Today's Pricing -->
-        <div v-if="currentPricing" class="mb-12">
-          <h2 class="text-2xl font-bold mb-4">Today's Pricing</h2>
+        <div v-if="currentPricing" class="grid gap-6 lg:grid-cols-[1fr_1.5fr] items-start">
+          <div class="space-y-2">
+            <p class="text-xs uppercase tracking-[0.4em] text-primary">Featured</p>
+            <h2 class="text-3xl font-black uppercase tracking-tight">Package Spotlight</h2>
+            <p class="text-sm text-zinc-400">The most sought-after package powered by today’s rates.</p>
+          </div>
           <PricingCard :data="currentPricing" />
         </div>
 
-        <!-- Browse All Pricing -->
         <div>
-          <h2 class="text-2xl font-bold mb-4">All Sessions</h2>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <PricingCard 
-              v-for="program in allPricing" 
-              :key="program.slug || program.id || program.name" 
-              :data="program" 
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-2xl font-bold uppercase tracking-tight">{{ activeCategoryLabel }} Packages</h2>
+            <span class="text-xs uppercase tracking-[0.4em] text-zinc-400">
+              {{ filteredItems.length }} option<span v-if="filteredItems.length !== 1">s</span>
+            </span>
+          </div>
+          <div v-if="filteredItems.length" class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <PricingCard
+              v-for="(item, idx) in filteredItems"
+              :key="item.id ?? item.slug ?? `${activeCategory}-${idx}`"
+              :data="item"
             />
           </div>
+          <p v-else class="text-zinc-500 text-sm uppercase tracking-[0.4em] text-center mt-6">
+            No packages available for this category yet.
+          </p>
         </div>
       </div>
 

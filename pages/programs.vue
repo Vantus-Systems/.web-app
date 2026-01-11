@@ -1,24 +1,27 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted } from "vue";
 import { ArrowRight, Box } from "lucide-vue-next";
 import BaseButtonUpdated from "~/components/ui/BaseButtonUpdated.vue";
 import { NuxtLink } from "#components";
 
 const { data: programs, refresh, pending } = await useFetch<any[]>("/api/programs", {
-  lazy: true,
   default: () => []
 });
 
-let pollInterval: any = null;
+let pollInterval: ReturnType<typeof setInterval> | null = null;
 
 onMounted(() => {
+  refresh();
   pollInterval = setInterval(() => {
     refresh();
   }, 30000);
 });
 
 onUnmounted(() => {
-  if (pollInterval) clearInterval(pollInterval);
+  if (pollInterval) {
+    clearInterval(pollInterval);
+    pollInterval = null;
+  }
 });
 
 useSeoMeta({
@@ -92,25 +95,27 @@ useSeoMeta({
             <div class="mt-auto">
               <NuxtLink
                 :to="{ name: 'programs-slug', params: { slug: prog.slug } }"
-                class="block"
-                @click.prevent=""
+                custom
                 aria-label="View program details"
               >
-                <BaseButtonUpdated
-                  variant="primary"
-                  size="medium"
-                  label="View Program"
-                  class="w-full justify-center"
-                  aria-label="View program details"
-                  role="link"
-                >
-                  <template #default>
-                    <span class="inline-flex items-center gap-2">
-                      View Program
-                      <ArrowRight class="w-4 h-4" />
-                    </span>
-                  </template>
-                </BaseButtonUpdated>
+                <template #default="{ navigate }">
+                  <BaseButtonUpdated
+                    variant="primary"
+                    size="medium"
+                    label="View Program"
+                    class="w-full justify-center"
+                    aria-label="View program details"
+                    role="link"
+                    @click="navigate"
+                  >
+                    <template #default>
+                      <span class="inline-flex items-center gap-2">
+                        View Program
+                        <ArrowRight class="w-4 h-4" />
+                      </span>
+                    </template>
+                  </BaseButtonUpdated>
+                </template>
               </NuxtLink>
             </div>
           </div>
