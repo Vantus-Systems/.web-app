@@ -1,9 +1,29 @@
 import { defineEventHandler } from "h3";
+import prisma from "~/server/db/client";
+import { settingsService } from "@server/services/settings.service";
 
 export default defineEventHandler(async (event) => {
-  // Returning structured data for the new Vegas-style UI
-  // TODO: Re-integrate with Prisma/DB when the schema supports these specific categories
-  
+  // 1. Try to fetch active pricing version from database
+  const activePricingVersion = await prisma.pricingVersion.findFirst({
+    where: { status: "ACTIVE" },
+  });
+
+  if (activePricingVersion) {
+    try {
+      const pricingContent = JSON.parse(activePricingVersion.content);
+      return pricingContent;
+    } catch (e) {
+      console.error("Failed to parse active pricing version content:", e);
+    }
+  }
+
+  // 2. Fallback to legacy settings service
+  const legacyPricing = await settingsService.get("pricing");
+  if (legacyPricing) {
+    return legacyPricing;
+  }
+
+  // 3. Return default pricing structure
   return {
     machines: [
       {
