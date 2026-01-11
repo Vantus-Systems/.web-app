@@ -3,11 +3,12 @@ import { z } from "zod";
 import prisma from "~/server/db/client";
 import { auditService } from "~/server/services/audit.service";
 import { assertRole } from "~/server/utils/roles";
+import { slugify } from "~/server/utils/slug";
 
 const frameSchema = z.array(z.number().int().min(0).max(1)).length(25);
 
 const patternSchema = z.object({
-  slug: z.string().min(1),
+  slug: z.string().optional(),
   name: z.string().min(1),
   description: z.string().optional(),
   isAnimated: z.boolean().default(false),
@@ -25,6 +26,10 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event);
   const data = patternSchema.parse(body);
+
+  if (!data.slug || data.slug.trim() === "") {
+    data.slug = slugify(data.name);
+  }
 
   const before = await prisma.bingoPattern.findUnique({
     where: { slug: data.slug },
@@ -44,7 +49,7 @@ export default defineEventHandler(async (event) => {
         : null,
     },
     create: {
-      slug: data.slug,
+      slug: data.slug!,
       name: data.name,
       description: data.description,
       isAnimated: data.isAnimated,
