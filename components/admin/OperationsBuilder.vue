@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import { Grid, Layers, Calendar, DollarSign } from "lucide-vue-next";
+import { Grid, Layers, Calendar, DollarSign, Megaphone, Save, CheckCircle2, AlertCircle } from "lucide-vue-next";
 import WeeklyScheduleEditor from "./schedule/WeeklyScheduleEditor.vue";
 import PatternEditor from "./PatternEditor.vue";
 import ProgramEditor from "./ProgramEditor.vue";
 import PricingManagerPanel from "./pricing/PricingManagerPanel.vue";
+import SpecialsEditor from "./SpecialsEditor.vue";
 import { useOpsStore } from "~/stores/ops";
 import { useToast } from "~/composables/useToast";
 import { useAuthUser } from "~/composables/useAuthUser";
@@ -24,11 +25,13 @@ const isProgramSaving = ref(false);
 const isProgramDirty = ref(false);
 const scheduleStore = useScheduleStore();
 const pricingStore = usePricingStore();
+const isSpecialsSaving = ref(false);
 
 const patternEditorRef = ref<any>(null);
 const programEditorRef = ref<any>(null);
 const scheduleEditorRef = ref<any>(null);
 const pricingPanelRef = ref<any>(null);
+const specialsEditorRef = ref<any>(null);
 
 onMounted(() => {
   opsStore.loadAll();
@@ -48,6 +51,7 @@ const steps = computed(() => {
     { id: "patterns", label: "Patterns", icon: Grid },
     { id: "programs", label: "Programs", icon: Layers },
     { id: "schedule", label: "Schedule", icon: Calendar },
+    { id: "specials", label: "Specials", icon: Megaphone },
   ];
 
   if (isOwner.value) {
@@ -69,6 +73,23 @@ const confirmNavigation = (stepId: string) => {
   currentStep.value = stepId;
 };
 
+const isSaving = computed(() => {
+  if (currentStep.value === "programs") return isProgramSaving.value;
+  if (currentStep.value === "schedule") return scheduleStore.saving;
+  if (currentStep.value === "pricing") return pricingStore.saving;
+  if (currentStep.value === "specials") return isSpecialsSaving.value;
+  return false;
+});
+
+const isSaveDisabled = computed(() => {
+  if (currentStep.value === "programs") return isProgramSaving.value;
+  if (currentStep.value === "schedule") return scheduleStore.saving || !scheduleStore.dirty;
+  if (currentStep.value === "pricing") return pricingStore.saving || !pricingStore.dirty;
+  if (currentStep.value === "specials") return isSpecialsSaving.value;
+  // Patterns are always save-able (or handle their own state)
+  return false;
+});
+
 const handleGlobalSave = async () => {
   try {
     if (currentStep.value === "patterns") {
@@ -79,6 +100,8 @@ const handleGlobalSave = async () => {
       await scheduleEditorRef.value?.triggerSave?.();
     } else if (currentStep.value === "pricing") {
       await pricingPanelRef.value?.triggerSave?.();
+    } else if (currentStep.value === "specials") {
+      await specialsEditorRef.value?.triggerSave?.();
     }
   } catch (e: any) {
     toast.error(e?.message || "Failed to save.", { title: "Error" });
@@ -137,53 +160,97 @@ const handleProgramSave = async (p: any) => {
 </script>
 
 <template>
-  <div class="h-[calc(100vh-64px)] flex flex-col bg-base text-primary">
-    <!-- Top Bar -->
+  <div class="h-[calc(100dvh-64px)] flex flex-col bg-base text-slate-900">
+    <!-- Responsive Header -->
     <header
-      class="h-16 flex items-center justify-between px-6 border-b border-divider bg-surface shrink-0 z-20"
+      class="flex flex-col md:flex-row md:items-center justify-between px-4 md:px-6 py-3 md:h-16 border-b border-divider bg-surface shrink-0 z-20 gap-3 md:gap-0"
     >
-      <div class="flex items-center gap-4">
-        <h1 class="text-xl font-black text-primary tracking-tight">
-          Operations Builder
-        </h1>
-        <div class="h-6 w-px bg-divider"></div>
-        <div class="flex bg-base rounded-lg p-1 border border-divider">
-          <button
-            v-for="step in steps"
-            :key="step.id"
-            class="px-3 py-1.5 rounded-md text-sm font-medium transition-all flex items-center gap-2"
-            :class="
-              currentStep === step.id
-                ? 'bg-surface text-primary shadow-sm ring-1 ring-black/5'
-                : 'text-secondary hover:text-primary hover:bg-surface/50'
-            "
-            @click="confirmNavigation(step.id)"
-          >
-            <component :is="step.icon" class="w-4 h-4" />
-            {{ step.label }}
-          </button>
+      <!-- Title & Mobile Actions -->
+      <div class="flex items-center justify-between w-full md:w-auto">
+        <div class="flex items-center gap-3">
+          <div class="p-2 bg-slate-100 rounded-lg hidden md:block">
+            <Layers class="w-5 h-5 text-slate-900" />
+          </div>
+          <div>
+            <h1 class="text-lg md:text-xl font-black text-slate-900 tracking-tight leading-tight">
+              Operations Builder
+            </h1>
+            <p class="text-[10px] md:text-xs text-slate-500 font-medium hidden md:block">
+              Configure patterns, programs, and schedules
+            </p>
+          </div>
         </div>
-      </div>
-      <div class="flex items-center gap-3">
+
+        <!-- Mobile Save Button -->
         <button
-          class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-accent-primary text-white rounded hover:bg-accent-primary/90 transition-colors disabled:opacity-60"
-          :disabled="
-            (currentStep === 'programs' && isProgramSaving) ||
-            (currentStep === 'schedule' &&
-              (scheduleStore.saving || !scheduleStore.dirty)) ||
-            (currentStep === 'pricing' &&
-              (pricingStore.saving || !pricingStore.dirty))
-          "
+          class="md:hidden flex items-center gap-2 px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-accent-primary text-white rounded-lg shadow-sm active:scale-95 transition-all disabled:opacity-60 disabled:active:scale-100"
+          :disabled="isSaveDisabled"
           @click="handleGlobalSave"
         >
-          Save
+          <div v-if="isSaving" class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+          <Save v-else class="w-3 h-3" />
+          {{ isSaving ? 'Saving' : 'Save' }}
+        </button>
+      </div>
+
+      <!-- Desktop Navigation (Segmented Control) -->
+      <div class="hidden md:flex bg-base rounded-lg p-1 border border-divider">
+        <button
+          v-for="step in steps"
+          :key="step.id"
+          class="px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2"
+          :class="
+            currentStep === step.id
+              ? 'bg-surface text-slate-900 shadow-sm ring-1 ring-black/5'
+              : 'text-slate-500 hover:text-slate-900 hover:bg-surface/50'
+          "
+          @click="confirmNavigation(step.id)"
+        >
+          <component :is="step.icon" class="w-4 h-4" />
+          {{ step.label }}
+        </button>
+      </div>
+
+      <!-- Desktop Save Button -->
+      <div class="hidden md:flex items-center gap-3">
+        <div class="h-8 w-px bg-divider mx-2"></div>
+        <button
+          class="px-4 py-2 text-xs font-bold uppercase tracking-wider bg-accent-primary text-white rounded-lg hover:bg-accent-primary/90 shadow-sm hover:shadow transition-all disabled:opacity-60 flex items-center gap-2"
+          :disabled="isSaveDisabled"
+          @click="handleGlobalSave"
+        >
+          <div v-if="isSaving" class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+          <Save v-else class="w-3 h-3" />
+          {{ isSaving ? 'Saving Changes...' : 'Save Changes' }}
         </button>
       </div>
     </header>
 
+    <!-- Mobile Navigation (Scrollable Tabs) -->
+    <div class="md:hidden border-b border-divider bg-surface overflow-x-auto scrollbar-hide">
+      <div class="flex px-4 gap-6 min-w-max">
+        <button
+          v-for="step in steps"
+          :key="step.id"
+          class="py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-colors flex items-center gap-2"
+          :class="
+            currentStep === step.id
+              ? 'border-accent-primary text-accent-primary'
+              : 'border-transparent text-slate-500'
+          "
+          @click="confirmNavigation(step.id)"
+        >
+          <component :is="step.icon" class="w-4 h-4" />
+          {{ step.label }}
+        </button>
+      </div>
+    </div>
+
     <!-- Main Content -->
-    <main class="flex-1 overflow-hidden relative">
-      <div class="h-full w-full">
+    <main class="flex-1 overflow-hidden relative bg-base">
+      <div class="h-full w-full overflow-auto md:overflow-hidden">
+        <Transition name="fade" mode="out-in">
+          <div :key="currentStep" class="h-full">
         <PatternEditor
           v-if="currentStep === 'patterns'"
           ref="patternEditorRef"
@@ -209,7 +276,19 @@ const handleProgramSave = async (p: any) => {
           v-else-if="currentStep === 'pricing'"
           ref="pricingPanelRef"
         />
+        <SpecialsEditor
+          v-else-if="currentStep === 'specials'"
+          ref="specialsEditorRef"
+          @saving="(v) => isSpecialsSaving = v"
+        />
+          </div>
+        </Transition>
       </div>
     </main>
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.15s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+</style>

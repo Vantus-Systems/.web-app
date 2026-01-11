@@ -209,7 +209,7 @@ const onGridClick = (dayIndex: number, timeVal: number) => {
     <div class="w-64 bg-surface border-r border-divider flex flex-col shrink-0">
       <div class="p-4 border-b border-divider">
         <h3
-          class="font-bold text-sm text-secondary uppercase tracking-wider mb-2"
+          class="font-bold text-sm text-slate-500 uppercase tracking-wider mb-2"
         >
           Programs
         </h3>
@@ -235,10 +235,10 @@ const onGridClick = (dayIndex: number, timeVal: number) => {
           @dragstart="handleDragStart($event, program.slug)"
         >
           <div class="flex items-center gap-2">
-            <GripVertical class="w-4 h-4 text-muted group-hover:text-primary" />
+            <GripVertical class="w-4 h-4 text-slate-400 group-hover:text-slate-900" />
             <div class="flex-1 min-w-0">
               <div class="font-medium text-sm truncate">{{ program.name }}</div>
-              <div class="text-xs text-secondary truncate">
+              <div class="text-xs text-slate-500 truncate">
                 {{ program.slug }}
               </div>
             </div>
@@ -261,7 +261,7 @@ const onGridClick = (dayIndex: number, timeVal: number) => {
         class="h-14 border-b border-divider flex items-center justify-between px-4 bg-surface shrink-0"
       >
         <div class="flex items-center gap-4">
-          <h2 class="font-bold text-primary">Weekly Schedule</h2>
+          <h2 class="font-bold text-slate-900">Weekly Schedule</h2>
           <div
             v-if="scheduleStore.dirty"
             class="flex items-center gap-2 text-amber-600 text-xs font-bold uppercase"
@@ -273,7 +273,7 @@ const onGridClick = (dayIndex: number, timeVal: number) => {
 
         <div class="flex items-center gap-2">
           <button
-            class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-secondary hover:text-primary bg-base border border-divider rounded-lg hover:bg-surface transition-colors"
+            class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 bg-base border border-divider rounded-lg hover:bg-surface transition-colors"
             :disabled="scheduleStore.saving"
             @click="saveDraft"
           >
@@ -325,7 +325,7 @@ const onGridClick = (dayIndex: number, timeVal: number) => {
             >
               <!-- Day Header -->
               <div
-                class="h-10 border-b border-divider bg-surface sticky top-0 z-10 flex items-center justify-center font-medium text-sm text-secondary"
+                class="h-10 border-b border-divider bg-surface sticky top-0 z-10 flex items-center justify-center font-medium text-sm text-slate-500"
               >
                 {{ day }}
               </div>
@@ -349,7 +349,7 @@ const onGridClick = (dayIndex: number, timeVal: number) => {
                   :class="
                     selectedSlotId === slot.id
                       ? 'bg-accent-primary text-white border-accent-primary z-20 ring-2 ring-accent-primary/30'
-                      : 'bg-surface text-primary border-input hover:border-primary z-10'
+                      : 'bg-surface text-slate-900 border-input hover:border-slate-900 z-10'
                   "
                   :style="getSlotStyle(slot)"
                   @click.stop="selectedSlotId = slot.id"
@@ -378,7 +378,7 @@ const onGridClick = (dayIndex: number, timeVal: number) => {
       <div
         class="p-4 border-b border-divider flex items-center justify-between"
       >
-        <h3 class="font-bold text-sm text-secondary uppercase tracking-wider">
+        <h3 class="font-bold text-sm text-slate-500 uppercase tracking-wider">
           Slot Details
         </h3>
         <button
@@ -392,7 +392,7 @@ const onGridClick = (dayIndex: number, timeVal: number) => {
 
       <div class="p-4 space-y-4 overflow-y-auto flex-1">
         <div class="space-y-1">
-          <label class="text-xs font-medium text-secondary">Program</label>
+          <label class="text-xs font-medium text-slate-500">Program</label>
           <select
             :value="selectedSlot.program_slug"
             class="w-full bg-base border border-input rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
@@ -410,7 +410,7 @@ const onGridClick = (dayIndex: number, timeVal: number) => {
 
         <div class="grid grid-cols-2 gap-4">
           <div class="space-y-1">
-            <label class="text-xs font-medium text-secondary">Start Time</label>
+            <label class="text-xs font-medium text-slate-500">Start Time</label>
             <input
               type="time"
               :value="selectedSlot.start_time"
@@ -423,7 +423,7 @@ const onGridClick = (dayIndex: number, timeVal: number) => {
             />
           </div>
           <div class="space-y-1">
-            <label class="text-xs font-medium text-secondary"
+            <label class="text-xs font-medium text-slate-500"
               >Duration (min)</label
             >
             <input
@@ -444,7 +444,7 @@ const onGridClick = (dayIndex: number, timeVal: number) => {
         </div>
 
         <div class="space-y-1">
-          <label class="text-xs font-medium text-secondary">Day</label>
+          <label class="text-xs font-medium text-slate-500">Day</label>
           <select
             :value="selectedSlot.day_of_week"
             class="w-full bg-base border border-input rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
@@ -465,7 +465,7 @@ const onGridClick = (dayIndex: number, timeVal: number) => {
     </div>
     <div
       v-else
-      class="w-80 bg-surface border-l border-divider flex items-center justify-center text-secondary text-sm p-8 text-center"
+      class="w-80 bg-surface border-l border-divider flex items-center justify-center text-slate-500 text-sm p-8 text-center"
     >
       Select a slot to edit or drag a program from the left to add one.
     </div>

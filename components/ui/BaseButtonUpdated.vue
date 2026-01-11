@@ -73,9 +73,9 @@ const computedClass = computed(() => {
   // Variant classes (Aurora tokens)
   const variantClasses = {
     primary: [
-      "bg-accent-primary text-white",
-      "hover:bg-blue-600", // Slightly darker for hover
-      "focus:ring-accent-primary",
+      "bg-primary text-black",
+      "hover:bg-primary/80",
+      "focus:ring-primary",
       "disabled:opacity-50 disabled:cursor-not-allowed",
     ],
     secondary: [

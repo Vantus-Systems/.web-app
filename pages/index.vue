@@ -58,7 +58,7 @@
           v-motion-fade-visible-once
           class="text-xl md:text-3xl text-gray-200 max-w-4xl mx-auto mb-14 font-black uppercase tracking-widest bg-black/40 backdrop-blur-md py-4 rounded-2xl border border-white/5"
         >
-          Millions awarded monthly. Neon energy. <span class="text-primary italic">Absolute thrill.</span>
+          Millions awarded monthly. Winning energy. <span class="text-primary italic">Absolute thrill.</span>
         </p>
         <div
           v-motion-slide-visible-once-bottom
@@ -105,7 +105,7 @@
           </div>
           <div v-motion-pop-visible-once class="space-y-2">
             <div class="text-5xl md:text-7xl font-black text-richBlack mb-1 tracking-tighter">
-              24/7
+              Every Day
             </div>
             <div class="text-richBlack/70 font-black uppercase tracking-[0.3em] text-xs">
               OPEN 7 DAYS A WEEK
@@ -140,7 +140,7 @@
               <h2
                 class="text-4xl md:text-6xl font-black text-white uppercase leading-none tracking-tighter"
               >
-                Gala Session <span class="text-primary block md:inline md:ml-4 drop-shadow-[0_0_20px_rgba(78,221,97,0.4)]">Up Next</span>
+                Evening Session <span class="text-primary block md:inline md:ml-4 drop-shadow-[0_0_20px_rgba(78,221,97,0.4)]">Up Next</span>
               </h2>
               <div
                 class="flex flex-wrap gap-8 text-gray-200 font-mono text-base font-bold"

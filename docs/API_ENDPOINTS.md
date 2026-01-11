@@ -62,9 +62,9 @@ Conventions:
 
 | Method | Path | Auth | Purpose | Handler | Caller(s) |
 |---|---|---|---|---|---|
-| GET | `/api/admin/patterns` | (verify) | List bingo patterns | `server/api/admin/patterns.get.ts` | `stores/ops.ts` |
-| POST | `/api/admin/patterns` | (verify) | Create/update bingo pattern | `server/api/admin/patterns.post.ts` | `stores/ops.ts` |
-| DELETE | `/api/admin/patterns` | (verify) | Delete bingo pattern (query `?slug=`) | `server/api/admin/patterns.delete.ts` | `stores/ops.ts` |
+| GET | `/api/admin/patterns` | OWNER | List bingo patterns with parsed JSON fields | `server/api/admin/patterns.get.ts` | `stores/ops.ts` |
+| POST | `/api/admin/patterns` | OWNER + CSRF | Create/update bingo pattern with validation | `server/api/admin/patterns.post.ts` | `stores/ops.ts` |
+| DELETE | `/api/admin/patterns` | OWNER + CSRF | Delete bingo pattern (query `?slug=`), prevents deletion if used in programs | `server/api/admin/patterns.delete.ts` | `stores/ops.ts` |
 | GET | `/api/admin/programs` | (verify) | List programs | `server/api/admin/programs.get.ts` | `stores/ops.ts` |
 | POST | `/api/admin/programs` | (verify) | Create/update program | `server/api/admin/programs.post.ts` | `stores/ops.ts` |
 | DELETE | `/api/admin/programs` | (verify) | Delete program (query `?slug=`) | `server/api/admin/programs.delete.ts` | (not found via `$fetch`/`useFetch`) |

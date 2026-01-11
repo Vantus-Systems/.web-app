@@ -196,7 +196,7 @@ const startTimeParts = computed(() => {
 
             <div v-if="session.status" class="flex items-center gap-2">
                 <div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_rgba(78,221,97,0.8)]"></div>
-                <span class="text-[10px] font-black uppercase tracking-[0.3em] text-white">Verified Manifest</span>
+                <span class="text-[10px] font-black uppercase tracking-[0.3em] text-white">Verified Schedule</span>
             </div>
           </div>
 
@@ -264,7 +264,7 @@ const startTimeParts = computed(() => {
                   <div
                     class="text-[10px] font-black uppercase tracking-widest text-zinc-500"
                   >
-                    Manifest Tier / Intake
+                    Game Tier / Intake
                   </div>
                 </div>
                 <div class="text-2xl font-black text-white uppercase tracking-tighter">
@@ -300,7 +300,7 @@ const startTimeParts = computed(() => {
               <div
                 class="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600 mb-6"
               >
-                Operational Manifest
+                Operational Program
               </div>
               <ProgramTable :program="program" condensed />
             </div>
@@ -311,7 +311,7 @@ const startTimeParts = computed(() => {
               <div
                 class="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600 mb-6"
               >
-                Featured Game Manifest
+                Featured Game List
               </div>
               <div class="space-y-4">
                 <div

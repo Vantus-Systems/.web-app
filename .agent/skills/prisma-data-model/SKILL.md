@@ -5,7 +5,7 @@ description: Overview of the Project SENTINEL database schema and core entities.
 
 # Prisma Data Model
 
-This skill outlines the core entities and relationships in the `prisma/schema.prisma` file, designed for the multi-tenant operations suite.
+This skill outlines the core entities and relationships in the `prisma/schema.prisma` file, designed for the multi-tenant operations suite, ensuring Fortune-500 level standards.
 
 ## Core Entities
 
@@ -50,3 +50,6 @@ The system uses a "Soft Delete" pattern for critical records (`Tenant`, `Project
     *   *When to use:* After modifying `schema.prisma` to update the type definitions.
 *   **Migrate:** `npx prisma migrate dev`
     *   *When to use:* To apply schema changes to the local database and create a migration file.
+
+### Documentation Review
+Ensure all documentation in the `docs/` directory is updated to reflect data model changes.
