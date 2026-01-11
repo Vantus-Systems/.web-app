@@ -13,9 +13,18 @@ const { data: program, pending, error, refresh } = await useAsyncData(
   () => $fetch(`/api/programs/${route.params.slug}`),
 );
 
-let pollInterval: ReturnType<typeof setInterval> | null = null;
-
 const selectedGame = ref<any>(null);
+const showSuccessToast = ref(false);
+
+// Show success toast when program loads successfully
+watch(program, (newProgram) => {
+  if (newProgram) {
+    showSuccessToast.value = true;
+    setTimeout(() => {
+      showSuccessToast.value = false;
+    }, 3000);
+  }
+}, { immediate: true });
 
 // Sync URL query to modal state
 const updateSelectedGameFromQuery = () => {
@@ -44,17 +53,6 @@ onMounted(() => {
   console.log('[DEBUG] Pending:', pending.value);
   console.log('[DEBUG] Error:', error.value);
   updateSelectedGameFromQuery();
-  // Periodically refresh to ensure the latest admin updates are reflected
-  pollInterval = setInterval(() => {
-    refresh();
-  }, 30000);
-});
-
-onUnmounted(() => {
-  if (pollInterval) {
-    clearInterval(pollInterval);
-    pollInterval = null;
-  }
 });
 
 // Watch query changes
@@ -75,6 +73,10 @@ const closeGame = () => {
   router.push({ query });
 };
 
+const handleRetry = () => {
+  refresh();
+};
+
 useSeoMeta({
   title: computed(() =>
     program.value ? `${program.value.name} | Programs` : "Program Details",
@@ -87,6 +89,32 @@ useSeoMeta({
 
 <template>
   <div class="min-h-screen bg-slate-50 pb-20">
+    <!-- Success Toast -->
+    <transition
+      enter-active-class="transition-all duration-300 ease-out"
+      leave-active-class="transition-all duration-300 ease-in"
+      enter-from-class="translate-y-4 opacity-0"
+      leave-to-class="translate-y-4 opacity-0"
+    >
+      <div
+        v-if="showSuccessToast && program"
+        class="fixed top-20 right-4 z-50"
+      >
+        <div class="bg-emerald-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 max-w-sm">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+          <span class="text-sm font-medium">Program loaded successfully!</span>
+        </div>
+      </div>
+    </transition>
+
     <!-- Header -->
     <div class="bg-slate-900 pt-32 pb-16 px-4 text-center">
       <div v-if="pending" class="animate-pulse">
@@ -96,6 +124,12 @@ useSeoMeta({
       <div v-else-if="error" class="text-center py-20">
         <h1 class="text-3xl font-bold text-red-500 mb-4">Error Loading Program</h1>
         <p class="text-zinc-400">{{ error.message }}</p>
+        <button
+          @click="handleRetry"
+          class="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg text-sm font-medium transition-colors"
+        >
+          Retry
+        </button>
       </div>
       <div v-else-if="program">
         <NuxtLink
@@ -133,6 +167,9 @@ useSeoMeta({
     <div class="container mx-auto px-4 -mt-10 relative z-10">
       <div v-if="program">
         <ProgramViewer :program="program" @select-game="openGame" />
+      </div>
+      <div v-else-if="!pending && !error" class="text-center py-20">
+        <p class="text-zinc-500">Program not found</p>
       </div>
     </div>
 
