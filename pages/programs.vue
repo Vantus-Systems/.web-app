@@ -6,21 +6,12 @@ const { data: programs, refresh, pending, error } = await useFetch<any[]>("/api/
   default: () => []
 });
 
-let pollInterval: ReturnType<typeof setInterval> | null = null;
+// Remove polling as it's not necessary for this static data
+// Programs don't change frequently enough to warrant 30-second polling
 
-onMounted(() => {
+const handleRetry = () => {
   refresh();
-  pollInterval = setInterval(() => {
-    refresh();
-  }, 30000);
-});
-
-onUnmounted(() => {
-  if (pollInterval) {
-    clearInterval(pollInterval);
-    pollInterval = null;
-  }
-});
+};
 
 useSeoMeta({
   title: "Programs | Mary Esther Bingo",
@@ -59,10 +50,16 @@ useSeoMeta({
         ></div>
       </div>
 
-      <!-- Error state -->
+      <!-- Error state with retry -->
       <div v-else-if="error" class="rounded-2xl border border-red-500/30 bg-red-950/20 p-6 text-red-300">
         <p class="font-bold">Unable to load programs.</p>
         <p class="text-sm opacity-80">Please try again. If the problem persists, contact support.</p>
+        <button
+          @click="handleRetry"
+          class="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg text-sm font-medium transition-colors"
+        >
+          Retry
+        </button>
       </div>
 
       <!-- Program grid -->
