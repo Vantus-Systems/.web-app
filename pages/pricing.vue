@@ -1,9 +1,22 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { Ticket, Monitor, Zap, Trophy, Info } from "lucide-vue-next";
+import { Ticket, Monitor, Zap, Trophy, Info, Clock } from "lucide-vue-next";
 import { useBingoData } from '../useBingoData';
 
 const { pricing, currentPricing, allPricing, loading, refresh } = useBingoData();
+
+// Fetch schedule-based pricing context
+const { data: pricingContext, pending: contextLoading } = await useFetch("/api/pricing/context", {
+  default: () => ({
+    currentTime: new Date().toISOString(),
+    dayOfWeek: new Date().getDay(),
+    dayName: "Today",
+    sessionType: "Evening",
+    currentSessionProgram: null,
+    pricingContext: { isDaytime: false, isEvening: true },
+    pricing: {},
+  }),
+});
 
 const activeCategory = ref("machines");
 const categories = [
@@ -26,6 +39,23 @@ const hasError = computed(() => {
   return !loading.value && (!pricing.value || allPricing.value.length === 0);
 });
 
+// Session type badge
+const sessionBadgeColor = computed(() => {
+  const sessionType = pricingContext.value?.sessionType || "Evening";
+  switch (sessionType) {
+    case "Morning":
+      return "bg-yellow-500/20 border-yellow-500/50 text-yellow-400";
+    case "Afternoon":
+      return "bg-orange-500/20 border-orange-500/50 text-orange-400";
+    case "Evening":
+      return "bg-primary/20 border-primary/50 text-primary";
+    case "Late Night":
+      return "bg-purple-500/20 border-purple-500/50 text-purple-400";
+    default:
+      return "bg-primary/20 border-primary/50 text-primary";
+  }
+});
+
 useSeoMeta({
   title: "Buy-Ins & Pricing | Mary Esther Bingo",
   description: "View our electronic and paper bingo packages. High stakes, big payouts.",
@@ -43,9 +73,24 @@ useSeoMeta({
       </div>
 
       <div class="container mx-auto px-4 relative z-10 text-center">
-        <div v-motion-pop-visible-once class="inline-flex items-center gap-3 bg-primary/10 backdrop-blur-md border border-primary/20 px-6 py-2 rounded-full mb-8">
-          <Trophy class="w-4 h-4 text-primary" />
-          <span class="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Official Rates</span>
+        <div class="flex flex-col md:flex-row gap-4 items-center justify-center mb-8">
+          <div v-motion-pop-visible-once class="inline-flex items-center gap-3 bg-primary/10 backdrop-blur-md border border-primary/20 px-6 py-2 rounded-full">
+            <Trophy class="w-4 h-4 text-primary" />
+            <span class="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Official Rates</span>
+          </div>
+          
+          <!-- Schedule Context Badge -->
+          <div 
+            v-motion-pop-visible-once 
+            :key="pricingContext.dayName"
+            class="inline-flex items-center gap-3 backdrop-blur-md border px-6 py-2 rounded-full transition-all duration-300"
+            :class="sessionBadgeColor"
+          >
+            <Clock class="w-4 h-4" />
+            <span class="text-[10px] font-black uppercase tracking-[0.4em]">
+              {{ pricingContext.dayName }} • {{ pricingContext.sessionType }}
+            </span>
+          </div>
         </div>
         
         <h1 v-motion-fade-visible-once class="text-6xl md:text-9xl font-black text-white mb-6 tracking-tighter uppercase leading-none">
@@ -54,6 +99,11 @@ useSeoMeta({
         
         <p v-motion-fade-visible-once class="text-zinc-400 max-w-2xl mx-auto text-xl md:text-2xl font-bold uppercase tracking-widest">
           Choose your weapon. <span class="text-white">Play to win.</span>
+        </p>
+
+        <!-- Current Session Info -->
+        <p v-if="pricingContext.currentSessionProgram" v-motion-fade-visible-once :delay="200" class="text-sm text-primary mt-6 font-mono uppercase tracking-wider">
+          Current Program: <span class="font-black">{{ pricingContext.currentSessionProgram }}</span>
         </p>
       </div>
     </div>
@@ -79,15 +129,19 @@ useSeoMeta({
 
       <!-- Loading State -->
       <div v-if="loading" class="flex flex-col items-center justify-center py-20">
-        <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-        <p class="mt-6 text-primary font-mono animate-pulse tracking-widest uppercase text-sm">Loading Rates...</p>
+        <div 
+          class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"
+          role="status"
+          aria-label="Loading pricing..."
+        ></div>
+        <p class="mt-6 text-primary font-mono animate-pulse tracking-widest uppercase text-sm font-black">Loading Rates...</p>
       </div>
 
       <!-- Error State -->
-      <div v-else-if="hasError" class="text-center py-20 bg-red-950/20 rounded-[3rem] border border-red-900/50 backdrop-blur-sm">
-        <h3 class="text-2xl text-red-500 font-black uppercase tracking-widest mb-2">System Offline</h3>
-        <p class="text-red-200/60 font-bold">Unable to retrieve pricing data.</p>
-        <button @click="refresh" class="mt-8 px-8 py-3 bg-red-900/30 hover:bg-red-900/50 text-white rounded-full border border-red-800 uppercase text-xs font-black tracking-widest transition-all">
+      <div v-else-if="hasError" role="alert" class="text-center py-20 bg-red-950/20 rounded-[3rem] border border-red-900/50 backdrop-blur-sm">
+        <h3 class="text-2xl text-red-400 font-black uppercase tracking-widest mb-2">System Offline</h3>
+        <p class="text-red-200/60 font-bold uppercase tracking-widest">Unable to retrieve pricing data.</p>
+        <button @click="refresh" class="mt-8 px-8 py-3 bg-red-900/30 hover:bg-red-900/50 text-red-300 rounded-full border border-red-800 uppercase text-xs font-black tracking-widest transition-all">
           Retry Connection
         </button>
       </div>

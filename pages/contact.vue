@@ -148,12 +148,14 @@ useSeoMeta({
               :disabled="isSubmitting"
             >
               <Send v-if="!isSubmitting" class="w-5 h-5" />
-              <div v-else class="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+              <div v-else class="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" role="status" aria-label="Sending message..."></div>
               {{ isSubmitting ? "SENDING..." : "SEND MESSAGE" }}
             </button>
 
             <div
               v-if="successMessage"
+              role="status"
+              aria-live="polite"
               class="flex items-center gap-4 p-6 bg-primary/10 border border-primary/40 rounded-2xl text-primary font-black uppercase text-[10px] tracking-widest animate-bounce"
             >
               <CheckCircle2 class="w-6 h-6" />
@@ -162,7 +164,9 @@ useSeoMeta({
             
             <div
               v-if="errorMessage"
-              class="flex items-center gap-4 p-6 bg-red-500/10 border border-red-500/40 rounded-2xl text-red-500 font-black uppercase text-[10px] tracking-widest"
+              role="alert"
+              aria-live="assertive"
+              class="flex items-center gap-4 p-6 bg-red-500/10 border border-red-500/40 rounded-2xl text-red-400 font-black uppercase text-[10px] tracking-widest"
             >
               <AlertCircle class="w-6 h-6" />
               {{ errorMessage }}

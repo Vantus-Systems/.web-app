@@ -88,7 +88,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 pb-20">
+  <div class="min-h-screen bg-richBlack pb-20">
     <!-- Success Toast -->
     <transition
       enter-active-class="transition-all duration-300 ease-out"
@@ -100,7 +100,7 @@ useSeoMeta({
         v-if="showSuccessToast && program"
         class="fixed top-20 right-4 z-50"
       >
-        <div class="bg-emerald-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 max-w-sm">
+        <div class="bg-primary text-black px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 max-w-sm shadow-[0_0_30px_rgba(78,221,97,0.4)]">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
@@ -116,25 +116,28 @@ useSeoMeta({
     </transition>
 
     <!-- Header -->
-    <div class="bg-slate-900 pt-32 pb-16 px-4 text-center">
-      <div v-if="pending" class="animate-pulse">
-        <div class="h-12 w-64 bg-slate-800 rounded mx-auto mb-4"></div>
-        <div class="h-6 w-96 bg-slate-800 rounded mx-auto"></div>
+    <div class="bg-black pt-32 pb-16 px-4 text-center border-b border-primary/10 relative overflow-hidden">
+      <div class="absolute inset-0 z-0">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(78,221,97,0.1),transparent_70%)]"></div>
       </div>
-      <div v-else-if="error" class="text-center py-20">
-        <h1 class="text-3xl font-bold text-red-500 mb-4">Error Loading Program</h1>
+      <div v-if="pending" class="animate-pulse relative z-10">
+        <div class="h-12 w-64 bg-zinc-800 rounded mx-auto mb-4"></div>
+        <div class="h-6 w-96 bg-zinc-800 rounded mx-auto"></div>
+      </div>
+      <div v-else-if="error" class="text-center py-20 relative z-10">
+        <h1 class="text-3xl font-bold text-red-400 mb-4">Error Loading Program</h1>
         <p class="text-zinc-400">{{ error.message }}</p>
         <button
           @click="handleRetry"
-          class="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg text-sm font-medium transition-colors"
+          class="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 rounded-lg text-sm font-medium transition-colors text-red-300"
         >
           Retry
         </button>
       </div>
-      <div v-else-if="program">
+      <div v-else-if="program" class="relative z-10">
         <NuxtLink
           to="/programs"
-          class="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition-colors text-sm font-medium"
+          class="inline-flex items-center gap-2 text-zinc-400 hover:text-primary mb-6 transition-colors text-sm font-medium uppercase tracking-widest"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -152,15 +155,15 @@ useSeoMeta({
           Back to Programs
         </NuxtLink>
         <h1
-          class="text-3xl md:text-5xl font-black text-white mb-4 tracking-tighter"
+          class="text-5xl md:text-8xl font-black text-white mb-4 tracking-tighter leading-none"
         >
           {{ program.name }}
         </h1>
-        <p class="text-slate-400 text-lg max-w-2xl mx-auto">
+        <p class="text-zinc-400 text-lg max-w-2xl mx-auto font-bold uppercase tracking-widest">
           {{ program.description }}
         </p>
       </div>
-      <div v-else class="text-white">Program not found.</div>
+      <div v-else class="text-white relative z-10">Program not found.</div>
     </div>
 
     <!-- Content -->
@@ -182,10 +185,10 @@ useSeoMeta({
       <div v-if="selectedGame" class="flex flex-col gap-6 items-center pt-2">
         <!-- Paper Info -->
         <div
-          class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-full text-sm font-medium text-slate-600"
+          class="flex items-center gap-2 px-3 py-1.5 bg-primary/20 border border-primary/50 rounded-full text-sm font-medium text-primary uppercase tracking-widest"
         >
           <div
-            class="h-4 w-4 rounded-full border border-black/10 shadow-sm"
+            class="h-4 w-4 rounded-full border border-primary/30 shadow-sm"
             :style="{ backgroundColor: selectedGame.paperColor }"
           ></div>
           {{ selectedGame.paperColor }} Paper
@@ -193,7 +196,7 @@ useSeoMeta({
 
         <!-- Pattern Visual -->
         <div
-          class="p-6 bg-slate-50 rounded-xl border border-slate-100 shadow-inner"
+          class="p-6 bg-charcoal rounded-xl border border-zinc-800 shadow-inner"
         >
           <BingoPatternGrid
             :name="selectedGame.pattern.name"
@@ -206,12 +209,12 @@ useSeoMeta({
 
         <!-- Details -->
         <div class="text-center max-w-sm">
-          <h4 class="text-xl font-black text-slate-900 mb-2">
+          <h4 class="text-xl font-black text-white mb-2">
             {{ selectedGame.pattern.name }}
           </h4>
           <p
             v-if="selectedGame.pattern.description"
-            class="text-slate-500 leading-relaxed"
+            class="text-zinc-400 leading-relaxed font-bold uppercase tracking-widest"
           >
             {{ selectedGame.pattern.description }}
           </p>
@@ -220,10 +223,10 @@ useSeoMeta({
         <!-- Notes / Special Rules -->
         <div
           v-if="selectedGame.notes"
-          class="w-full bg-emerald-50 text-emerald-900 p-4 rounded-xl text-center text-sm font-medium border border-emerald-100"
+          class="w-full bg-primary/20 text-primary p-4 rounded-xl text-center text-sm font-medium border border-primary/50 shadow-[0_0_20px_rgba(78,221,97,0.2)]"
         >
           <span
-            class="block text-emerald-600 text-xs font-bold uppercase tracking-wider mb-1"
+            class="block text-primary text-xs font-black uppercase tracking-widest mb-1"
             >Game Notes</span
           >
           {{ selectedGame.notes }}

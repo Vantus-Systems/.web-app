@@ -46,17 +46,18 @@ useSeoMeta({
       <div v-if="pending && programs.length === 0" class="flex items-center justify-center py-40">
         <div
           class="animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full"
-          aria-label="Loading programs"
+          role="status"
+          aria-label="Loading programs..."
         ></div>
       </div>
 
       <!-- Error state with retry -->
-      <div v-else-if="error" class="rounded-2xl border border-red-500/30 bg-red-950/20 p-6 text-red-300">
-        <p class="font-bold">Unable to load programs.</p>
-        <p class="text-sm opacity-80">Please try again. If the problem persists, contact support.</p>
+      <div v-else-if="error" role="alert" class="rounded-2xl border border-red-500/30 bg-red-950/20 p-6 text-red-300">
+        <p class="font-bold uppercase tracking-widest">Unable to load programs.</p>
+        <p class="text-sm opacity-80 font-medium">Please try again. If the problem persists, contact support.</p>
         <button
           @click="handleRetry"
-          class="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg text-sm font-medium transition-colors"
+          class="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg text-sm font-medium transition-colors text-red-200 border border-red-500/50"
         >
           Retry
         </button>

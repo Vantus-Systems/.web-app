@@ -76,6 +76,8 @@ useSeoMeta({
         <div v-if="pending" class="text-center py-20">
           <div
             class="animate-spin h-10 w-10 border-4 border-primary border-t-transparent rounded-full mx-auto"
+            role="status"
+            aria-label="Loading charities..."
           ></div>
         </div>
 

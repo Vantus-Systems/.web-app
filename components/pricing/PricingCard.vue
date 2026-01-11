@@ -50,32 +50,32 @@ const features = computed(() => {
 </script>
 
 <template>
-  <div class="bg-charcoal border rounded-[2rem] p-6 overflow-hidden transition-shadow hover:shadow-xl relative">
-    <div v-if="props.data?.featured" class="absolute top-0 right-0 bg-primary text-black px-4 py-2 rounded-bl-xl text-xs font-black uppercase tracking-wider">
+  <div class="bg-charcoal border border-zinc-800 rounded-[2rem] p-6 overflow-hidden transition-all hover:border-primary hover:shadow-[0_0_30px_rgba(78,221,97,0.3)] relative group">
+    <div v-if="props.data?.featured" class="absolute top-0 right-0 bg-primary text-black px-4 py-2 rounded-bl-xl text-xs font-black uppercase tracking-wider shadow-[0_0_15px_rgba(78,221,97,0.4)]">
       Best Value
     </div>
 
     <div class="mb-4">
-      <h3 class="text-xl font-black uppercase tracking-tight">
+      <h3 class="text-xl font-black uppercase tracking-tight text-white group-hover:text-primary transition-colors">
         {{ props.data?.name || props.data?.title || props.data?.slug }}
       </h3>
-      <p class="text-sm text-zinc-400 mt-1">{{ props.data?.description }}</p>
+      <p class="text-sm text-zinc-400 mt-1 font-bold uppercase tracking-widest">{{ props.data?.description }}</p>
     </div>
 
     <div class="flex items-baseline gap-3 mb-4">
       <div class="text-3xl font-black text-primary">{{ priceDisplay }}</div>
-      <div v-if="props.data?.unit" class="text-xs uppercase text-zinc-500">/ {{ props.data.unit }}</div>
+      <div v-if="props.data?.unit" class="text-xs uppercase text-zinc-500 font-black tracking-widest">/ {{ props.data.unit }}</div>
     </div>
 
     <ul class="space-y-2 text-sm text-zinc-400 mb-6">
       <li v-for="(f, idx) in features" :key="idx" class="flex items-start gap-2">
-        <div class="w-3 h-3 rounded-full bg-zinc-800 mt-1"></div>
-        <div>{{ f }}</div>
+        <div class="w-3 h-3 rounded-full bg-primary/20 mt-1"></div>
+        <div class="font-medium">{{ f }}</div>
       </li>
     </ul>
 
     <div class="mt-auto">
-      <button class="w-full py-3 rounded-xl font-black uppercase tracking-[0.2em] text-xs bg-primary text-black hover:bg-white transition-all">
+      <button class="w-full py-3 rounded-xl font-black uppercase tracking-[0.2em] text-xs bg-primary text-black hover:bg-white transition-all shadow-[0_20px_40px_rgba(78,221,97,0.3)] hover:shadow-[0_20px_50px_rgba(78,221,97,0.5)]">
         Select Package
       </button>
     </div>
