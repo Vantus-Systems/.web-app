@@ -12,6 +12,7 @@ import { useScheduleClock } from "~/composables/useScheduleClock";
 import { parseTime as parseTimeToMinutes } from "~/utils/time.utils";
 import TodayStrip from "~/components/public/TodayStrip.vue";
 import ScheduleEventCard from "~/components/ScheduleEventCard.vue";
+import LiveScheduleBoard from "~/components/public/LiveScheduleBoard.vue";
 
 const {
   business: BUSINESS_INFO,
@@ -146,6 +147,14 @@ const activeDayOfWeek = computed(() => {
   return found ? found.dayOfWeek : "Mon";
 });
 
+// Status label mapping
+const statusLabel = (key: string) => {
+  if (key === "live") return "Live Now";
+  if (key === "upcoming") return "Upcoming";
+  if (key === "past") return "Ended";
+  return "Not Today";
+};
+
 // Program Fetching
 const programCache = ref<Record<string, any>>({});
 const fetchPrograms = async () => {
@@ -190,6 +199,25 @@ const nextUpSession = computed(() => {
   return upcoming || null;
 });
 
+// Smooth scroll function
+const scrollToSession = (id: string) => {
+  if (!process.client) return;
+  document.getElementById(`session-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+};
+
+// Real-time updates polling
+let refreshTimer: number | undefined;
+onMounted(() => {
+  const tick = async () => {
+    if (mode.value !== "now") return;
+    const isToday = activeDay.value === days.value[0]?.id;
+    if (!isToday || document.visibilityState !== "visible") return;
+    await fetchSchedule();
+  };
+  refreshTimer = window.setInterval(tick, 60_000);
+});
+onUnmounted(() => { if (refreshTimer) clearInterval(refreshTimer); });
+
 useSeoMeta({
   title: "Schedule | Mary Esther Bingo",
   description: `View our general schedule at ${BUSINESS_INFO.value.name}. Sessions are offered daily.`,
@@ -205,7 +233,7 @@ useSeoMeta({
 
     <!-- High-Fidelity Hero Section -->
     <div
-      class="relative h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden bg-black border-b border-primary/10"
+      class="relative h-[60vh] min-h-[600px] flex items-center justify-center overflow-hidden bg-black border-b border-primary/10 pb-12 md:pb-32"
     >
       <div class="absolute inset-0 z-0">
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(78,221,97,0.15),transparent_70%)]"></div>
@@ -227,7 +255,7 @@ useSeoMeta({
           </span>
           <span
             class="text-[10px] font-black uppercase tracking-[0.4em] text-primary"
-            >Live Schedule</span
+          >Live Schedule</span
           >
         </div>
         <h1
@@ -257,7 +285,18 @@ useSeoMeta({
       </div>
     </div>
 
-    <div class="container mx-auto px-4 -mt-32 relative z-20 pb-40">
+    <div class="container mx-auto px-4 -mt-12 md:-mt-32 relative z-20 pb-40">
+      <!-- Live Schedule Board -->
+      <div class="mb-12">
+        <LiveScheduleBoard
+          :sessions="filteredSessions"
+          :now-minutes="chicagoTime.minutes"
+          :mode="mode"
+          :get-status="getStatus"
+          @select="scrollToSession"
+        />
+      </div>
+
       <!-- Next Up Card (if active) -->
       <div
         v-if="nextUpSession"
@@ -452,19 +491,19 @@ useSeoMeta({
       <div class="max-w-5xl mx-auto space-y-12">
         <div v-if="viewMode === 'timeline'">
           <TransitionGroup name="list" tag="div" class="space-y-10">
-            <ScheduleEventCard
-              v-for="(session, idx) in filteredSessions"
-              :key="session.id"
-              :session="session"
-              :index="idx"
-              :active-day-of-week="activeDayOfWeek"
-              :program="
-                session.programSlug
-                  ? programCache[session.programSlug]
-                  : undefined
-              "
-              :status="getStatus(session)"
-            />
+            <div v-for="session in filteredSessions" :key="session.id" :id="`session-${session.id}`">
+              <ScheduleEventCard
+                :session="session"
+                :index="filteredSessions.indexOf(session)"
+                :active-day-of-week="activeDayOfWeek"
+                :program="
+                  session.programSlug
+                    ? programCache[session.programSlug]
+                    : undefined
+                "
+                :status="getStatus(session)"
+              />
+            </div>
           </TransitionGroup>
         </div>
 
@@ -475,6 +514,7 @@ useSeoMeta({
           <div
             v-for="session in filteredSessions"
             :key="session.id"
+            :id="`session-${session.id}`"
             class="border-b border-zinc-900 last:border-0 p-8 md:p-12 hover:bg-black/40 transition-all duration-500 flex items-center justify-between gap-8 group"
           >
             <div class="flex items-center gap-10">
@@ -497,7 +537,7 @@ useSeoMeta({
               <div
                 class="px-6 py-2 bg-black border border-zinc-800 rounded-full text-[10px] font-black text-primary uppercase tracking-[0.2em] group-hover:border-primary/40 transition-all"
               >
-                {{ getStatus(session).label }}
+                {{ statusLabel(getStatus(session)) }}
               </div>
             </div>
           </div>

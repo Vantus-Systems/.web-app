@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
 import { ArrowRight, Box } from "lucide-vue-next";
+import BaseButtonUpdated from "~/components/ui/BaseButtonUpdated.vue";
+import { NuxtLink } from "#components";
 
 const { data: programs, refresh, pending } = await useFetch<any[]>("/api/programs", {
   lazy: true,
@@ -55,12 +57,11 @@ useSeoMeta({
       </div>
 
       <div v-else class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <NuxtLink
+        <div
           v-for="prog in programs"
           :key="prog.slug"
-          :to="`/programs/${prog.slug}`"
           v-motion-slide-visible-once-bottom
-          class="group relative bg-charcoal border border-zinc-900 rounded-[2.5rem] p-10 shadow-2xl transition-all duration-500 hover:border-primary/50 overflow-hidden block"
+          class="group relative bg-charcoal border border-zinc-900 rounded-[2.5rem] p-10 shadow-2xl transition-all duration-500 hover:border-primary/50 overflow-hidden"
         >
           <!-- Hover Glow -->
           <div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -87,14 +88,33 @@ useSeoMeta({
               {{ prog.description || "Full session breakdown and prize structure." }}
             </p>
 
-            <div
-              class="text-primary font-black uppercase tracking-[0.3em] text-[10px] flex items-center gap-3 group-hover:translate-x-2 transition-transform duration-500"
-            >
-              View Program
-              <ArrowRight class="w-4 h-4" />
+            <!-- View Program Button -->
+            <div class="mt-auto">
+              <NuxtLink
+                :to="{ name: 'programs-slug', params: { slug: prog.slug } }"
+                class="block"
+                @click.prevent=""
+                aria-label="View program details"
+              >
+                <BaseButtonUpdated
+                  variant="primary"
+                  size="medium"
+                  label="View Program"
+                  class="w-full justify-center"
+                  aria-label="View program details"
+                  role="link"
+                >
+                  <template #default>
+                    <span class="inline-flex items-center gap-2">
+                      View Program
+                      <ArrowRight class="w-4 h-4" />
+                    </span>
+                  </template>
+                </BaseButtonUpdated>
+              </NuxtLink>
             </div>
           </div>
-        </NuxtLink>
+        </div>
       </div>
     </div>
   </div>
