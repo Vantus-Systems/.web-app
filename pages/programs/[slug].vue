@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import ProgramViewer from "~/components/bingo/ProgramViewer.vue";
 import BaseBottomSheet from "~/components/ui/BaseBottomSheet.vue";
@@ -8,9 +8,12 @@ import BingoPatternGrid from "~/components/bingo/BingoPatternGrid.vue";
 const route = useRoute();
 const router = useRouter();
 
-const { data: program, pending } = await useFetch<any>(
-  `/api/programs/${route.params.slug}`,
+const { data: program, pending, error, refresh } = await useAsyncData(
+  `program-${route.params.slug}`,
+  () => $fetch(`/api/programs/${route.params.slug}`),
 );
+
+let pollInterval: ReturnType<typeof setInterval> | null = null;
 
 const selectedGame = ref<any>(null);
 
@@ -35,7 +38,23 @@ const updateSelectedGameFromQuery = () => {
 
 // Initial load
 onMounted(() => {
+  console.log('[DEBUG] Program page mounted, slug:', route.params.slug);
+  console.log('[DEBUG] Route name:', route.name);
+  console.log('[DEBUG] Program data:', program.value);
+  console.log('[DEBUG] Pending:', pending.value);
+  console.log('[DEBUG] Error:', error.value);
   updateSelectedGameFromQuery();
+  // Periodically refresh to ensure the latest admin updates are reflected
+  pollInterval = setInterval(() => {
+    refresh();
+  }, 30000);
+});
+
+onUnmounted(() => {
+  if (pollInterval) {
+    clearInterval(pollInterval);
+    pollInterval = null;
+  }
 });
 
 // Watch query changes
@@ -73,6 +92,10 @@ useSeoMeta({
       <div v-if="pending" class="animate-pulse">
         <div class="h-12 w-64 bg-slate-800 rounded mx-auto mb-4"></div>
         <div class="h-6 w-96 bg-slate-800 rounded mx-auto"></div>
+      </div>
+      <div v-else-if="error" class="text-center py-20">
+        <h1 class="text-3xl font-bold text-red-500 mb-4">Error Loading Program</h1>
+        <p class="text-zinc-400">{{ error.message }}</p>
       </div>
       <div v-else-if="program">
         <NuxtLink

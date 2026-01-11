@@ -1,39 +1,29 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { 
-  Ticket, 
-  Monitor, 
-  Zap, 
-  Check, 
-  Trophy, 
-  Info 
-} from "lucide-vue-next";
+import { Ticket, Monitor, Zap, Trophy, Info } from "lucide-vue-next";
+import { useBingoData } from '../useBingoData';
 
-// Fetch pricing data
-const { data: pricingData, pending, error, refresh } = await useFetch('/api/pricing');
+const { pricing, currentPricing, allPricing, loading, refresh } = useBingoData();
 
-// Currency formatter
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2
-  }).format(amount);
-};
-
-// Active Category State
-const activeCategory = ref('machines');
+const activeCategory = ref("machines");
 const categories = [
-  { id: 'machines', label: 'Electronic', icon: Monitor },
-  { id: 'paper', label: 'Paper Packs', icon: Ticket },
-  { id: 'extras', label: 'Extras', icon: Zap },
+  { id: "machines", label: "Electronic", icon: Monitor },
+  { id: "paper", label: "Paper Packs", icon: Ticket },
+  { id: "extras", label: "Extras", icon: Zap }
 ];
 
-// Filtered Data
+const activeCategoryLabel = computed(() => {
+  return categories.find((cat) => cat.id === activeCategory.value)?.label ?? categories[0].label;
+});
+
 const filteredItems = computed(() => {
-  if (!pricingData.value) return [];
-  return pricingData.value[activeCategory.value] || [];
+  const dataset = pricing.value?.[activeCategory.value];
+  if (!Array.isArray(dataset)) return [];
+  return dataset.map((item) => ({ ...item, category: activeCategory.value }));
+});
+
+const hasError = computed(() => {
+  return !loading.value && (!pricing.value || allPricing.value.length === 0);
 });
 
 useSeoMeta({
@@ -88,13 +78,13 @@ useSeoMeta({
       </div>
 
       <!-- Loading State -->
-      <div v-if="pending" class="flex flex-col items-center justify-center py-20">
+      <div v-if="loading" class="flex flex-col items-center justify-center py-20">
         <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
         <p class="mt-6 text-primary font-mono animate-pulse tracking-widest uppercase text-sm">Loading Rates...</p>
       </div>
 
       <!-- Error State -->
-      <div v-else-if="error" class="text-center py-20 bg-red-950/20 rounded-[3rem] border border-red-900/50 backdrop-blur-sm">
+      <div v-else-if="hasError" class="text-center py-20 bg-red-950/20 rounded-[3rem] border border-red-900/50 backdrop-blur-sm">
         <h3 class="text-2xl text-red-500 font-black uppercase tracking-widest mb-2">System Offline</h3>
         <p class="text-red-200/60 font-bold">Unable to retrieve pricing data.</p>
         <button @click="refresh" class="mt-8 px-8 py-3 bg-red-900/30 hover:bg-red-900/50 text-white rounded-full border border-red-800 uppercase text-xs font-black tracking-widest transition-all">
@@ -102,64 +92,34 @@ useSeoMeta({
         </button>
       </div>
 
-      <!-- Pricing Grid -->
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div 
-          v-for="(item, index) in filteredItems" 
-          :key="index"
-          v-motion-slide-visible-once-bottom
-          :delay="index * 100"
-          class="group relative bg-charcoal border rounded-[2.5rem] p-10 overflow-hidden transition-all duration-500 hover:-translate-y-2"
-          :class="item.featured ? 'border-primary shadow-[0_0_50px_rgba(78,221,97,0.15)]' : 'border-zinc-900 hover:border-zinc-700'"
-        >
-          <!-- Featured Badge -->
-          <div v-if="item.featured" class="absolute top-0 right-0 bg-primary text-black text-[10px] font-black uppercase tracking-[0.2em] px-6 py-2 rounded-bl-2xl">
-            Best Value
+      <!-- Pricing Grid / Composable Driven -->
+      <div v-else class="space-y-12">
+        <div v-if="currentPricing" class="grid gap-6 lg:grid-cols-[1fr_1.5fr] items-start">
+          <div class="space-y-2">
+            <p class="text-xs uppercase tracking-[0.4em] text-primary">Featured</p>
+            <h2 class="text-3xl font-black uppercase tracking-tight">Package Spotlight</h2>
+            <p class="text-sm text-zinc-400">The most sought-after package powered by today’s rates.</p>
           </div>
+          <PricingCard :data="currentPricing" />
+        </div>
 
-          <!-- Hover Glow -->
-          <div class="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-
-          <!-- Header -->
-          <div class="relative z-10 mb-8">
-            <h3 class="text-2xl font-black text-white uppercase tracking-tight mb-2 group-hover:text-primary transition-colors">
-              {{ item.name }}
-            </h3>
-            <p class="text-zinc-500 text-sm font-bold uppercase tracking-wider">
-              {{ item.description }}
-            </p>
-          </div>
-
-          <!-- Price -->
-          <div class="relative z-10 mb-8 flex items-baseline gap-2">
-            <span class="text-5xl font-black text-white tracking-tighter">
-              {{ formatCurrency(item.price) }}
-            </span>
-            <span v-if="item.unit" class="text-zinc-600 font-bold uppercase text-xs tracking-widest">
-              / {{ item.unit }}
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-2xl font-bold uppercase tracking-tight">{{ activeCategoryLabel }} Packages</h2>
+            <span class="text-xs uppercase tracking-[0.4em] text-zinc-400">
+              {{ filteredItems.length }} option<span v-if="filteredItems.length !== 1">s</span>
             </span>
           </div>
-
-          <!-- Features List -->
-          <ul class="relative z-10 space-y-4 mb-10">
-            <li v-for="(feature, fIndex) in item.features" :key="fIndex" class="flex items-start gap-3">
-              <div class="mt-1 w-4 h-4 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center group-hover:border-primary/50 transition-colors">
-                <Check class="w-2.5 h-2.5 text-primary" />
-              </div>
-              <span class="text-zinc-400 text-sm font-medium leading-tight group-hover:text-zinc-300 transition-colors">
-                {{ feature }}
-              </span>
-            </li>
-          </ul>
-
-          <!-- Action -->
-          <div class="relative z-10 mt-auto">
-            <button class="w-full py-4 rounded-xl font-black uppercase tracking-[0.2em] text-xs transition-all duration-300 flex items-center justify-center gap-2"
-              :class="item.featured ? 'bg-primary text-black hover:bg-white shadow-lg shadow-primary/20' : 'bg-zinc-900 text-white hover:bg-zinc-800 border border-zinc-800'"
-            >
-              Select Package
-            </button>
+          <div v-if="filteredItems.length" class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <PricingCard
+              v-for="(item, idx) in filteredItems"
+              :key="item.id ?? item.slug ?? `${activeCategory}-${idx}`"
+              :data="item"
+            />
           </div>
+          <p v-else class="text-zinc-500 text-sm uppercase tracking-[0.4em] text-center mt-6">
+            No packages available for this category yet.
+          </p>
         </div>
       </div>
 
