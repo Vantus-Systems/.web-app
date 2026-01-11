@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import ProgramViewer from "~/components/bingo/ProgramViewer.vue";
 import BaseBottomSheet from "~/components/ui/BaseBottomSheet.vue";
@@ -8,7 +8,12 @@ import BingoPatternGrid from "~/components/bingo/BingoPatternGrid.vue";
 const route = useRoute();
 const router = useRouter();
 
-const { data: program, pending, error } = await useAsyncData(`program-${route.params.slug}`, () => $fetch(`/api/programs/${route.params.slug}`));
+const { data: program, pending, error, refresh } = await useAsyncData(
+  `program-${route.params.slug}`,
+  () => $fetch(`/api/programs/${route.params.slug}`),
+);
+
+let pollInterval: ReturnType<typeof setInterval> | null = null;
 
 const selectedGame = ref<any>(null);
 
@@ -39,6 +44,17 @@ onMounted(() => {
   console.log('[DEBUG] Pending:', pending.value);
   console.log('[DEBUG] Error:', error.value);
   updateSelectedGameFromQuery();
+  // Periodically refresh to ensure the latest admin updates are reflected
+  pollInterval = setInterval(() => {
+    refresh();
+  }, 30000);
+});
+
+onUnmounted(() => {
+  if (pollInterval) {
+    clearInterval(pollInterval);
+    pollInterval = null;
+  }
 });
 
 // Watch query changes

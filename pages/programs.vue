@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue";
-import { ArrowRight, Box } from "lucide-vue-next";
-import BaseButtonUpdated from "~/components/ui/BaseButtonUpdated.vue";
-import { NuxtLink } from "#components";
+import ProgramCard from "~/components/bingo/ProgramCard.vue";
 
-const { data: programs, refresh, pending } = await useFetch<any[]>("/api/programs", {
+const { data: programs, refresh, pending, error } = await useFetch<any[]>("/api/programs", {
   default: () => []
 });
 
@@ -53,73 +51,28 @@ useSeoMeta({
     </div>
 
     <div class="container mx-auto px-4 -mt-16 relative z-10">
+      <!-- Loading spinner (initial load) -->
       <div v-if="pending && programs.length === 0" class="flex items-center justify-center py-40">
         <div
           class="animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full"
+          aria-label="Loading programs"
         ></div>
       </div>
 
-      <div v-else class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div
+      <!-- Error state -->
+      <div v-else-if="error" class="rounded-2xl border border-red-500/30 bg-red-950/20 p-6 text-red-300">
+        <p class="font-bold">Unable to load programs.</p>
+        <p class="text-sm opacity-80">Please try again. If the problem persists, contact support.</p>
+      </div>
+
+      <!-- Program grid -->
+      <div v-else class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <ProgramCard
           v-for="prog in programs"
           :key="prog.slug"
           v-motion-slide-visible-once-bottom
-          class="group relative bg-charcoal border border-zinc-900 rounded-[2.5rem] p-10 shadow-2xl transition-all duration-500 hover:border-primary/50 overflow-hidden"
-        >
-          <!-- Hover Glow -->
-          <div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-          <div class="relative z-10">
-            <div class="flex items-center justify-between mb-8">
-              <div class="w-12 h-12 bg-black rounded-xl border border-zinc-800 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-all duration-500">
-                <Box class="w-6 h-6" />
-              </div>
-              <span
-                class="bg-black text-primary px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-primary/20"
-              >
-                {{ prog.gameCount }} Patterns
-              </span>
-            </div>
-            
-            <h3
-              class="text-4xl font-black text-white group-hover:text-primary transition-colors uppercase tracking-tighter mb-4"
-            >
-              {{ prog.name }}
-            </h3>
-            
-            <p class="text-zinc-500 mb-10 font-bold leading-tight line-clamp-2">
-              {{ prog.description || "Full session breakdown and prize structure." }}
-            </p>
-
-            <!-- View Program Button -->
-            <div class="mt-auto">
-              <NuxtLink
-                :to="{ name: 'programs-slug', params: { slug: prog.slug } }"
-                custom
-                aria-label="View program details"
-              >
-                <template #default="{ navigate }">
-                  <BaseButtonUpdated
-                    variant="primary"
-                    size="medium"
-                    label="View Program"
-                    class="w-full justify-center"
-                    aria-label="View program details"
-                    role="link"
-                    @click="navigate"
-                  >
-                    <template #default>
-                      <span class="inline-flex items-center gap-2">
-                        View Program
-                        <ArrowRight class="w-4 h-4" />
-                      </span>
-                    </template>
-                  </BaseButtonUpdated>
-                </template>
-              </NuxtLink>
-            </div>
-          </div>
-        </div>
+          :program="prog"
+        />
       </div>
     </div>
   </div>
