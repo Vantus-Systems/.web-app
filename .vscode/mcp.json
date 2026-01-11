@@ -1,19 +1,4 @@
 {
 	"servers": {
-		"Worksapce-Serena": {
-			"type": "stdio",
-			"command": "uvx",
-			"args": [
-				"--from",
-				"git+https://github.com/oraios/serena",
-				"serena",
-				"start-mcp-server",
-				"serena==latest",
-				"--context",
-				"ide",
-				"--project",
-				"${workspaceFolder}"
-					]
-		}
-    }
+		    }
 }
