@@ -6,23 +6,26 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=frappe
-Group=frappe
-WorkingDirectory=/home/frappe/med
+User=meb
+Group=meb
+WorkingDirectory=/home/meb/med
 Environment=NODE_ENV=production
-Environment=PATH=/usr/bin:/usr/local/bin:/bin:/usr/sbin:/sbin
-EnvironmentFile=-/etc/default/meb
+# Updated PATH to include the node bin directory (not the executable itself)
+Environment=PATH=/home/meb/.nvm/versions/node/v22.21.1/bin:/usr/bin:/usr/local/bin:/bin:/usr/sbin:/sbin
+EnvironmentFile=/etc/default/meb
 
 # Allow ample time for `npm install` / `npm run build` during startup
 TimeoutStartSec=1200
 TimeoutStopSec=30
 
 # Build steps (run as the service user)
-ExecStartPre=/bin/sh -c 'npm install'
-ExecStartPre=/bin/sh -c 'npm run build'
+# Using absolute path to npm
+ExecStartPre=/home/meb/.nvm/versions/node/v22.21.1/bin/npm install
+ExecStartPre=/home/meb/.nvm/versions/node/v22.21.1/bin/npm run build
 
 # Start the server
-ExecStart=/bin/sh -c 'npm run start:server'
+# Using absolute path to npm
+ExecStart=/home/meb/.nvm/versions/node/v22.21.1/bin/npm run start:server
 
 # Keep the service running and restart on failure
 Restart=on-failure
