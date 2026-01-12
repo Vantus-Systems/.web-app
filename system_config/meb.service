@@ -8,11 +8,11 @@ Wants=network-online.target
 Type=simple
 User=meb
 Group=meb
-WorkingDirectory=/home/meb/med
+WorkingDirectory=/home/staging/med
 Environment=NODE_ENV=production
 # Updated PATH to include the node bin directory (not the executable itself)
-Environment=PATH=/home/meb/.nvm/versions/node/v22.21.1/bin:/usr/bin:/usr/local/bin:/bin:/usr/sbin:/sbin
-EnvironmentFile=/etc/default/meb
+Environment=PATH=/home/staging/.nvm/versions/node/v22.21.1/bin:/usr/bin:/usr/local/bin:/bin:/usr/sbin:/sbin
+EnvironmentFile=/etc/default/staging
 
 # Allow ample time for `npm install` / `npm run build` during startup
 TimeoutStartSec=1200
@@ -20,12 +20,12 @@ TimeoutStopSec=30
 
 # Build steps (run as the service user)
 # Using absolute path to npm
-ExecStartPre=/home/meb/.nvm/versions/node/v22.21.1/bin/npm install
-ExecStartPre=/home/meb/.nvm/versions/node/v22.21.1/bin/npm run build
+ExecStartPre=/home/staging/.nvm/versions/node/v22.21.1/bin/npm install
+ExecStartPre=/home/staging/.nvm/versions/node/v22.21.1/bin/npm run build
 
 # Start the server
 # Using absolute path to npm
-ExecStart=/home/meb/.nvm/versions/node/v22.21.1/bin/npm run start:server
+ExecStart=/home/staging/.nvm/versions/node/v22.21.1/bin/npm run start:server
 
 # Keep the service running and restart on failure
 Restart=on-failure
